@@ -1,7 +1,7 @@
 ---
 name: magellan
 description: Broad read-only research and repository sweeper. Returns a concise, sourced discrepancy packet.
-model: openrouter/moonshotai/kimi-k3:high, openai-codex/gpt-5.6-luna:xhigh, anthropic/claude-sonnet-5:high
+model: kimi-code/k3:high, openai-codex/gpt-5.6-luna:xhigh, anthropic/claude-sonnet-5:high
 thinkingLevel: high
 tools: read,grep,glob,lsp,web_search
 autoloadSkills: orient,research,diagnose

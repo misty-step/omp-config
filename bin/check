@@ -95,6 +95,8 @@ def check_tree() -> None:
     cursor_selectors = set(re.findall(r"\bcursor/[A-Za-z0-9._/-]+", f"{config_text}\n{agent_text}"))
     if cursor_selectors != {"cursor/composer-2.5"}:
         fail(f"Cursor is reserved for composer-2.5, found: {sorted(cursor_selectors)}")
+    if re.search(r"openrouter/(?:z-ai|moonshotai)/", f"{config_text}\n{agent_text}"):
+        fail("native ZAI and Kimi models must not route through OpenRouter")
 
     sensitive_files = [
         GLOBAL / "config.yml",
@@ -221,8 +223,10 @@ def check_executive_config(config: dict[str, object]) -> None:
         fail("default model must launch a Fable-high or Sol-high chief executive")
     if roles.get("plan") != "openai-codex/gpt-5.6-sol:high":
         fail("plan role must use Sol high")
-    if roles.get("designer") != "openrouter/z-ai/glm-5.2:high":
-        fail("designer role must use GLM 5.2 through OpenRouter")
+    if roles.get("designer") != "zai/glm-5.2:high":
+        fail("designer role must use GLM 5.2 through the ZAI subscription")
+    if roles.get("research") != "kimi-code/k3:high":
+        fail("research role must use K3 through the Kimi subscription")
     if roles.get("composer") != "cursor/composer-2.5":
         fail("Cursor must be reserved for the Composer 2.5 role")
     if roles.get("vision") != "google-antigravity/gemini-3.5-flash":

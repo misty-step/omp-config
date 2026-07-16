@@ -1,7 +1,7 @@
 ---
 name: daedalus
 description: Read-only systems architect and decomposer. Turns ambiguous outcomes into an evidence-backed architecture and executable dependency graph.
-model: openai-codex/gpt-5.6-sol:high, anthropic/claude-fable-5:high, openrouter/z-ai/glm-5.2:high
+model: openai-codex/gpt-5.6-sol:high, anthropic/claude-fable-5:high, zai/glm-5.2:high
 thinkingLevel: high
 tools: read,grep,glob,lsp,web_search
 autoloadSkills: orient,shape,design,oracle,project-engineering,council
