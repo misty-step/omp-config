@@ -38,6 +38,13 @@ ALLOWED_AGENT_FIELDS = {
     "output",
     "prewalk",
 }
+REQUIRED_AGENTS = {"daedalus", "hephaestus", "magellan", "cerberus", "scully", "solomon"}
+BUNDLED_AGENTS = {"task", "scout", "reviewer", "librarian", "designer", "sonic"}
+THINKING_LEVELS = {"minimal", "low", "medium", "high", "xhigh", "max"}
+EXECUTIVE_MODELS = {
+    "anthropic/claude-fable-5:high",
+    "openai-codex/gpt-5.6-sol:high",
+}
 SECRET_PATTERNS = {
     "Firecrawl token": re.compile(r"fc-[A-Za-z0-9_-]{16,}"),
     "OpenAI-style key": re.compile(r"\bsk-[A-Za-z0-9_-]{20,}"),
@@ -97,6 +104,7 @@ def check_tree() -> None:
                 fail(f"{label} found in {path.relative_to(ROOT)}")
 
     agent_names: set[str] = set()
+    agent_fields: dict[str, dict[str, str]] = {}
     skill_names = {path.name for path in (GLOBAL / "skills").iterdir() if path.is_dir()}
     for path in sorted((GLOBAL / "agents").glob("*.md")):
         fields, body = frontmatter(path)
@@ -111,10 +119,31 @@ def check_tree() -> None:
         if name in agent_names:
             fail(f"duplicate agent name {name}")
         agent_names.add(name)
+        agent_fields[name] = fields
+        models = [part.strip() for part in fields.get("model", "").split(",") if part.strip()]
+        if not models:
+            fail(f"agent {name} requires an explicit model binding")
+        for selector in models:
+            if "/" not in selector or any(character.isspace() for character in selector):
+                fail(f"agent {name} has invalid model selector {selector!r}")
+        thinking = fields.get("thinkingLevel")
+        if thinking not in THINKING_LEVELS:
+            fail(f"agent {name} requires an explicit supported thinkingLevel")
+        if not fields.get("tools"):
+            fail(f"agent {name} requires an explicit tool envelope")
         autoload = fields.get("autoloadSkills", "")
         for skill in filter(None, (part.strip() for part in autoload.split(","))):
             if skill not in skill_names:
                 fail(f"agent {name} autoloads missing skill {skill}")
+
+    missing_agents = REQUIRED_AGENTS - agent_names
+    if missing_agents:
+        fail(f"missing executive role agents: {sorted(missing_agents)}")
+    allowed_spawns = agent_names | BUNDLED_AGENTS
+    for name, fields in agent_fields.items():
+        for spawn in filter(None, (part.strip() for part in fields.get("spawns", "").split(","))):
+            if spawn != "*" and spawn not in allowed_spawns:
+                fail(f"agent {name} spawns unknown agent {spawn}")
 
     declared_skills: set[str] = set()
     for directory in sorted(path for path in (GLOBAL / "skills").iterdir() if path.is_dir()):
@@ -147,7 +176,7 @@ def check_install() -> None:
         if target.resolve() != source.resolve():
             fail(f"declarative OMP link drift: {target} -> {target.resolve()}")
 
-def check_omp_schema() -> None:
+def check_omp_schema() -> dict[str, object]:
     with tempfile.TemporaryDirectory(prefix="omp-config-check-") as temp:
         temp_agent = Path(temp) / "agent"
         temp_agent.mkdir()
@@ -159,18 +188,58 @@ def check_omp_schema() -> None:
             cwd=ROOT,
             env=env,
             text=True,
-            stdout=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             timeout=30,
         )
         if result.returncode:
             fail(f"OMP rejected global/config.yml: {result.stderr.strip()}")
+        try:
+            return json.loads(result.stdout)
+        except json.JSONDecodeError as error:
+            fail(f"OMP returned invalid config JSON: {error}")
+
+
+def config_value(config: dict[str, object], key: str) -> object:
+    entry = config.get(key)
+    if not isinstance(entry, dict) or "value" not in entry:
+        fail(f"OMP config omitted {key}")
+    return entry["value"]
+
+
+def check_executive_config(config: dict[str, object]) -> None:
+    roles = config_value(config, "modelRoles")
+    if not isinstance(roles, dict):
+        fail("modelRoles must be a mapping")
+    if roles.get("default") not in EXECUTIVE_MODELS:
+        fail("default model must launch a Fable-high or Sol-high chief executive")
+    if roles.get("plan") != "openai-codex/gpt-5.6-sol:high":
+        fail("plan role must use Sol high")
+    if roles.get("designer") != "cursor/glm-5.2-high":
+        fail("designer role must use the authenticated GLM 5.2 binding")
+    expected = {
+        "task.eager": {"preferred", "always"},
+        "task.batch": {True},
+        "task.enableLsp": {True},
+        "async.enabled": {True},
+    }
+    for key, allowed in expected.items():
+        value = config_value(config, key)
+        if value not in allowed:
+            fail(f"{key} must be one of {sorted(map(str, allowed))}")
+    concurrency = config_value(config, "task.maxConcurrency")
+    if not isinstance(concurrency, (int, float)) or concurrency < 2:
+        fail("task.maxConcurrency must permit a real team")
+    recursion = config_value(config, "task.maxRecursionDepth")
+    if not isinstance(recursion, (int, float)) or recursion < 1:
+        fail("task.maxRecursionDepth must permit supervised subteams")
 
 
 if len(sys.argv) > 2 or (len(sys.argv) == 2 and sys.argv[1] != "--installed"):
     fail("usage: bin/check [--installed]")
 check_tree()
-check_omp_schema()
+config = check_omp_schema()
+check_executive_config(config)
 if len(sys.argv) == 2:
     check_install()
 print("OMP configuration OK")

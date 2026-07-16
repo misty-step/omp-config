@@ -1,7 +1,7 @@
 ---
 name: scully
 description: Independent live-behavior verifier. Reproduces a completion claim and returns PASS/WARN/FAIL/SKIP findings with evidence.
-model: openai-codex/gpt-5.6-luna
+model: anthropic/claude-sonnet-5:high, openai-codex/gpt-5.6-luna:high
 thinkingLevel: high
 tools: read,grep,glob,lsp,bash,web_search
 autoloadSkills: orient,qa,ci,diagnose

@@ -1,8 +1,8 @@
 ---
 name: cerberus
 description: Fresh-context adversarial code reviewer. Finds high-conviction production risks in a change without fixing it.
-model: openai-codex/gpt-5.6-luna
-thinkingLevel: xhigh
+model: xai-oauth/grok-4.5:high, openai-codex/gpt-5.6-sol:high
+thinkingLevel: high
 tools: read,grep,glob,lsp,bash,web_search
 autoloadSkills: orient,code-review,ci,diagnose
 spawns: ''

@@ -3,10 +3,10 @@ modelRoles:
   smol: openai-codex/gpt-5.6-luna
   vision: google-antigravity/gemini-3.5-flash
   commit: openai-codex/gpt-5.4-mini
-  designer: openrouter/z-ai/glm-5.2:high
+  designer: cursor/glm-5.2-high
   task: anthropic/claude-sonnet-5:high
   slow: anthropic/claude-fable-5:xhigh
-  plan: anthropic/claude-fable-5:high
+  plan: openai-codex/gpt-5.6-sol:high
   advisor: xai-oauth/grok-4.5:high
   tiny: google-antigravity/gemini-3.1-flash-lite
 disabledProviders: 
@@ -24,23 +24,23 @@ retry:
     default: 
       - openai-codex/gpt-5.6-sol:high
       - xai-oauth/grok-4.5:high
-      - openrouter/z-ai/glm-5.2:high
+      - cursor/glm-5.2-high
     plan: 
-      - openai-codex/gpt-5.6-sol:high
+      - anthropic/claude-fable-5:high
       - xai-oauth/grok-4.5:high
-      - openrouter/z-ai/glm-5.2:high
+      - cursor/glm-5.2-high
     slow: 
-      - openai-codex/gpt-5.6-sol:high
+      - openai-codex/gpt-5.6-sol:max
+      - anthropic/claude-fable-5:high
       - xai-oauth/grok-4.5:high
-      - openrouter/z-ai/glm-5.2:high
     advisor: 
-      - openai-codex/gpt-5.6-luna
-      - openrouter/z-ai/glm-5.2:medium
-      - openrouter/minimax/minimax-m3
+      - openai-codex/gpt-5.6-luna:high
+      - cursor/glm-5.2-high
+      - anthropic/claude-sonnet-5:medium
     task: 
+      - openai-codex/gpt-5.6-luna:xhigh
       - xai-oauth/grok-4.5:high
-      - openrouter/moonshotai/kimi-k3:high
-      - openrouter/minimax/minimax-m3:high
+      - cursor/glm-5.2-high
     smol: 
       - google-antigravity/gemini-3.5-flash
       - openrouter/deepseek/deepseek-v4-flash
@@ -62,6 +62,30 @@ retry:
       - openai-codex/gpt-5.4-nano
       - openrouter/deepseek/deepseek-v4-flash
       - google-antigravity/gemini-2.5-flash-lite
+    openai-codex/gpt-5.6-sol:
+      - anthropic/claude-fable-5:high
+      - xai-oauth/grok-4.5:high
+      - cursor/glm-5.2-high
+    openai-codex/gpt-5.6-luna:
+      - anthropic/claude-sonnet-5:high
+      - cursor/glm-5.2-high
+      - xai-oauth/grok-4.5:high
+    anthropic/claude-fable-5:
+      - openai-codex/gpt-5.6-sol:high
+      - xai-oauth/grok-4.5:high
+    anthropic/claude-sonnet-5:
+      - openai-codex/gpt-5.6-luna:high
+      - cursor/glm-5.2-high
+    xai-oauth/grok-4.5:
+      - anthropic/claude-fable-5:high
+      - openai-codex/gpt-5.6-sol:high
+    cursor/glm-5.2-high:
+      - anthropic/claude-sonnet-5:high
+      - google-antigravity/gemini-3.1-pro:high
+    openrouter/z-ai/glm-5.2:
+      - cursor/glm-5.2-high
+      - anthropic/claude-sonnet-5:high
+      - openai-codex/gpt-5.6-sol:high
     xai-oauth/grok-4.3: 
       - xai-oauth/grok-4.5
       - anthropic/claude-sonnet-5:high
@@ -127,8 +151,10 @@ statusLine:
   sessionAccent: true
   compactThinkingLevel: false
   showHookStatus: true
-  leftSegments: []
-  rightSegments: []
+  leftSegments: 
+    []
+  rightSegments: 
+    []
   segmentOptions: 
     model: 
       showThinkingLevel: true
@@ -152,7 +178,12 @@ tui:
   textSizing: false
 grep: 
   enabled: true
+async:
+  enabled: true
 task: 
+  eager: preferred
+  batch: true
+  enableLsp: true
   maxConcurrency: 12
   maxRuntimeMs: 2700000
   maxRecursionDepth: 2
