@@ -1,0 +1,1014 @@
+#!/bin/bash -p
+# shellcheck shell=bash
+# sprite-lane — prepare one credential-free public checkout on a dedicated Sprite.
+
+# Disable inherited tracing before any environment value is expanded. Re-exec
+# once under an allowlisted environment so exported shell functions and startup
+# options cannot intercept provider commands.
+set +x
+inherited_path="${PATH-}"
+inherited_lang="${LANG-}"
+PATH=/usr/bin:/bin
+LANG=C
+export PATH LANG
+clean_start=1
+[ "${SPRITE_LANE_CLEAN_START-}" = v1 ] || clean_start=0
+[ "$inherited_path" = /usr/bin:/bin ] || clean_start=0
+[ "$inherited_lang" = C ] || clean_start=0
+[ -z "$(builtin compgen -A function)" ] || clean_start=0
+[[ $- != *x* ]] || clean_start=0
+while IFS= read -r exported_name; do
+	case "$exported_name" in
+	HOME|PATH|LANG|PWD|SHLVL|SPRITE_LANE_CLEAN_START|XDG_CONFIG_HOME|SPRITE_LANE_RECEIPTS|SPRITE_LANE_OWNERS) ;;
+	*) clean_start=0 ;;
+	esac
+done < <(builtin compgen -e)
+if [ "$clean_start" != 1 ]; then
+	clean_environment=(
+		"HOME=${HOME:?HOME is required}"
+		"PATH=/usr/bin:/bin"
+		"LANG=C"
+		"SPRITE_LANE_CLEAN_START=v1"
+	)
+	[ -z "${XDG_CONFIG_HOME-}" ] \
+		|| clean_environment+=("XDG_CONFIG_HOME=$XDG_CONFIG_HOME")
+	[ -z "${SPRITE_LANE_RECEIPTS-}" ] \
+		|| clean_environment+=("SPRITE_LANE_RECEIPTS=$SPRITE_LANE_RECEIPTS")
+	[ -z "${SPRITE_LANE_OWNERS-}" ] \
+		|| clean_environment+=("SPRITE_LANE_OWNERS=$SPRITE_LANE_OWNERS")
+	exec /usr/bin/env -i "${clean_environment[@]}" /bin/bash --noprofile --norc "$0" "$@"
+fi
+unset SPRITE_LANE_CLEAN_START clean_environment clean_start exported_name inherited_path inherited_lang
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+STAGE_CARD_HELPER="$SCRIPT_DIR/stage_card.py"
+PINNED_PROVIDER=""
+PYTHON_BIN=""
+for candidate in /usr/bin/python3 /opt/homebrew/bin/python3 /usr/local/bin/python3; do
+	if [ -x "$candidate" ]; then PYTHON_BIN="$candidate"; break; fi
+done
+[ -n "$PYTHON_BIN" ] || { echo "sprite-lane: Python 3 is required" >&2; exit 1; }
+
+RECEIPTS_DIR="${SPRITE_LANE_RECEIPTS:-$HOME/.roster/receipts/sprite-lane}"
+OWNERS_DIR="${SPRITE_LANE_OWNERS:-$HOME/.roster/state/sprite-lane}"
+BAKE_VERSION="3"
+
+REMOTE_FS_HELPER="$(/bin/cat <<'PY'
+# Credential roots corresponding to $HOME/.config/git and $HOME/.omp are
+# rejected and removed only through descriptors held beneath the /home/sprite/ root.
+import errno
+import os
+import stat
+import subprocess
+import sys
+
+NOFOLLOW = getattr(os, "O_NOFOLLOW", 0)
+CLOEXEC = getattr(os, "O_CLOEXEC", 0)
+DIRECTORY = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0) | NOFOLLOW | CLOEXEC
+CREATE = os.O_WRONLY | os.O_CREAT | os.O_EXCL | NOFOLLOW | CLOEXEC
+MAX_CARD = 1024 * 1024
+HOME_ROOT = "/home/sprite"
+
+
+def fail(message):
+    raise RuntimeError(message)
+
+
+def plain(name):
+    if not name or name in (".", "..") or "/" in name or "\x00" in name:
+        fail("unsafe remote leaf")
+
+
+def open_root():
+    root = HOME_ROOT
+    if sys.platform == "darwin":
+        for alias, target in (("/tmp", "/private/tmp"), ("/var", "/private/var")):
+            if root == alias or root.startswith(alias + "/"):
+                root = target + root[len(alias):]
+                break
+    descriptor = os.open("/", DIRECTORY)
+    try:
+        for component in (part for part in root.split("/") if part):
+            child = os.open(component, DIRECTORY, dir_fd=descriptor)
+            os.close(descriptor)
+            descriptor = child
+        return descriptor
+    except BaseException:
+        os.close(descriptor)
+        raise
+
+
+def metadata(parent, name):
+    try:
+        return os.stat(name, dir_fd=parent, follow_symlinks=False)
+    except FileNotFoundError:
+        return None
+
+
+def reject_link(parent, name):
+    value = metadata(parent, name)
+    if value is not None and stat.S_ISLNK(value.st_mode):
+        fail("refusing remote symlink: " + name)
+    return value
+
+
+def open_directory(parent, name):
+    plain(name)
+    return os.open(name, DIRECTORY, dir_fd=parent)
+
+
+def create_directory(parent, name):
+    plain(name)
+    os.mkdir(name, 0o700, dir_fd=parent)
+    descriptor = open_directory(parent, name)
+    os.fchmod(descriptor, 0o700)
+    return descriptor
+
+
+def remove_tree(parent, name):
+    plain(name)
+    value = metadata(parent, name)
+    if value is None:
+        return
+    if stat.S_ISLNK(value.st_mode):
+        fail("refusing to traverse or remove remote symlink: " + name)
+    if not stat.S_ISDIR(value.st_mode):
+        os.unlink(name, dir_fd=parent)
+        return
+    child = open_directory(parent, name)
+    try:
+        for entry in os.listdir(child):
+            remove_tree(child, entry)
+        os.fsync(child)
+    finally:
+        os.close(child)
+    os.rmdir(name, dir_fd=parent)
+
+
+def write_exclusive(parent, name, data, mode=0o600):
+    plain(name)
+    descriptor = os.open(name, CREATE, mode, dir_fd=parent)
+    try:
+        view = memoryview(data)
+        while view:
+            count = os.write(descriptor, view)
+            if count == 0:
+                raise OSError(errno.EIO, "short remote write")
+            view = view[count:]
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+    os.fsync(parent)
+
+
+def read_regular(parent, name, limit=4096):
+    plain(name)
+    descriptor = os.open(name, os.O_RDONLY | NOFOLLOW | CLOEXEC, dir_fd=parent)
+    try:
+        value = os.fstat(descriptor)
+        if not stat.S_ISREG(value.st_mode):
+            fail("remote leaf is not regular: " + name)
+        data = os.read(descriptor, limit + 1)
+        if len(data) > limit:
+            fail("remote leaf exceeds limit: " + name)
+        return data
+    finally:
+        os.close(descriptor)
+
+
+def clean_bake(marker):
+    if not marker.startswith("v3 ") or any(character.isspace() for character in marker[3:]):
+        fail("invalid golden marker")
+    home = open_root()
+    config = None
+    try:
+        for leaf in (
+            ".codex", ".claude", ".omp", ".ssh", "lanes", ".gitconfig",
+            ".git-credentials", ".netrc", ".sprite-lane-golden", ".config",
+        ):
+            reject_link(home, leaf)
+        config_value = metadata(home, ".config")
+        if config_value is None:
+            config = create_directory(home, ".config")
+        elif stat.S_ISDIR(config_value.st_mode):
+            config = open_directory(home, ".config")
+        else:
+            fail("remote .config is not a directory")
+        for leaf in ("gh", "git"):
+            reject_link(config, leaf)
+        for leaf in (".codex", ".claude", ".omp", ".ssh", "lanes"):
+            remove_tree(home, leaf)
+        for leaf in (".gitconfig", ".git-credentials", ".netrc", ".sprite-lane-golden"):
+            remove_tree(home, leaf)
+        for leaf in ("gh", "git"):
+            remove_tree(config, leaf)
+        lanes = create_directory(home, "lanes")
+        os.close(lanes)
+        write_exclusive(
+            home,
+            ".gitconfig",
+            b"[user]\n  name = sprite-lane\n  email = sprite-lane@users.noreply.github.com\n",
+        )
+        write_exclusive(home, ".sprite-lane-golden", (marker + "\n").encode("ascii"))
+        os.fsync(config)
+        os.fsync(home)
+    finally:
+        if config is not None:
+            os.close(config)
+        os.close(home)
+
+
+def verify_bake():
+    home = open_root()
+    try:
+        lanes = open_directory(home, "lanes")
+        os.close(lanes)
+        for leaf in (".codex", ".claude", ".omp", ".git-credentials", ".netrc", ".ssh"):
+            if metadata(home, leaf) is not None:
+                fail("forbidden remote bake state: " + leaf)
+        config = open_directory(home, ".config")
+        try:
+            for leaf in ("gh", "git"):
+                if metadata(config, leaf) is not None:
+                    fail("forbidden remote Git state: " + leaf)
+        finally:
+            os.close(config)
+        expected = b"[user]\n  name = sprite-lane\n  email = sprite-lane@users.noreply.github.com\n"
+        if read_regular(home, ".gitconfig") != expected:
+            fail("neutral Git configuration mismatch")
+        marker = read_regular(home, ".sprite-lane-golden").decode("ascii").rstrip("\n")
+        if not marker.startswith("v3 ") or any(character.isspace() for character in marker[3:]):
+            fail("invalid golden marker")
+        sys.stdout.write(marker + "\n")
+    finally:
+        os.close(home)
+
+
+def read_marker():
+    home = open_root()
+    try:
+        marker = read_regular(home, ".sprite-lane-golden").decode("ascii").rstrip("\n")
+        if not marker.startswith("v3 ") or any(character.isspace() for character in marker[3:]):
+            fail("invalid golden marker")
+        sys.stdout.write(marker + "\n")
+    finally:
+        os.close(home)
+
+
+def remove_marker():
+    home = open_root()
+    try:
+        reject_link(home, ".sprite-lane-golden")
+        remove_tree(home, ".sprite-lane-golden")
+        os.fsync(home)
+    finally:
+        os.close(home)
+
+
+def prepare(lane, repository, branch):
+    plain(lane)
+    card = sys.stdin.buffer.read(MAX_CARD + 1)
+    if len(card) > MAX_CARD:
+        fail("lane card exceeds size limit")
+    home = open_root()
+    lanes = lane_fd = work = None
+    old_cwd = os.open(".", DIRECTORY)
+    try:
+        lanes = open_directory(home, "lanes")
+        if metadata(lanes, lane) is not None:
+            fail("lane already exists")
+        lane_fd = create_directory(lanes, lane)
+        write_exclusive(lane_fd, "card.md", card)
+        work = create_directory(lane_fd, "work")
+        os.fchdir(work)
+        command = [
+            "git", "-c", "credential.helper=", "-c", "core.askPass=/bin/false",
+            "clone", "-q",
+        ]
+        if branch:
+            command.extend(("--branch", branch))
+        command.extend(("--", repository, "."))
+        environment = {
+            "HOME": "/home/sprite",
+            "PATH": "/usr/local/bin:/usr/bin:/bin",
+            "LANG": "C.UTF-8",
+            "GIT_CONFIG_NOSYSTEM": "1",
+            "GIT_CONFIG_GLOBAL": "/dev/null",
+            "GIT_TERMINAL_PROMPT": "0",
+            "GIT_ASKPASS": "/bin/false",
+            "SSH_ASKPASS": "/bin/false",
+        }
+        result = subprocess.run(command, env=environment, check=False)
+        if result.returncode != 0:
+            raise SystemExit(result.returncode)
+        os.fsync(work)
+        os.fsync(lane_fd)
+        os.fsync(lanes)
+    finally:
+        os.fchdir(old_cwd)
+        os.close(old_cwd)
+        for descriptor in (work, lane_fd, lanes, home):
+            if descriptor is not None:
+                os.close(descriptor)
+
+
+def list_lanes():
+    home = open_root()
+    lanes = None
+    try:
+        lanes = open_directory(home, "lanes")
+        for leaf in sorted(os.listdir(lanes)):
+            value = metadata(lanes, leaf)
+            if value is not None and stat.S_ISDIR(value.st_mode):
+                sys.stdout.write(leaf + "\n")
+    finally:
+        if lanes is not None:
+            os.close(lanes)
+        os.close(home)
+
+
+try:
+    operation = sys.argv[1]
+    if operation == "bake" and len(sys.argv) == 3:
+        clean_bake(sys.argv[2])
+    elif operation == "verify" and len(sys.argv) == 2:
+        verify_bake()
+    elif operation == "read-marker" and len(sys.argv) == 2:
+        read_marker()
+    elif operation == "remove-marker" and len(sys.argv) == 2:
+        remove_marker()
+    elif operation == "prepare" and len(sys.argv) == 5:
+        prepare(sys.argv[2], sys.argv[3], sys.argv[4])
+    elif operation == "list" and len(sys.argv) == 2:
+        list_lanes()
+    else:
+        fail("invalid remote helper operation")
+except RuntimeError as error:
+    sys.stderr.write("sprite-lane remote helper: " + str(error) + "\n")
+    raise SystemExit(1)
+PY
+)"
+
+usage() {
+	cat <<'EOF'
+Usage:
+  sprite-lane [--provider-cli <absolute-path>] <command> ...
+  sprite-lane bake <sprite>                     Cut a dedicated clean checkpoint.
+  sprite-lane prepare <sprite> --repo <owner/name> --card <file>
+                    [--branch <branch>]          Prepare a public checkout and handoff.
+  sprite-lane status <sprite>                   Show owned bake state and handoff dirs.
+  sprite-lane reset <sprite>                    Restore the owned clean checkpoint.
+
+This public helper never launches a Harness or handles a model/Git credential.
+An external infrastructure owner must consume the prepared handoff, inject any
+short-lived launch authority, supervise the process, and record its outcome.
+EOF
+	exit 1
+}
+
+die() {
+	echo "sprite-lane: $*" >&2
+	exit 1
+}
+
+cleanup_provider() {
+	local snapshot="${PINNED_PROVIDER:-}"
+	[ -z "$snapshot" ] && return 0
+	if local_fs broker-discard "$snapshot"; then
+		PINNED_PROVIDER=""
+		return 0
+	fi
+	echo "sprite-lane: provider snapshot retained for recovery at ${snapshot%%|*}" >&2
+	return 1
+}
+
+cleanup_provider_at_exit() {
+	local exit_code=$?
+	trap - EXIT
+	if ! cleanup_provider; then
+		echo "sprite-lane: provider snapshot cleanup failed" >&2
+		[ "$exit_code" -ne 0 ] || exit_code=1
+	fi
+	exit "$exit_code"
+}
+
+local_fs() {
+	env -i HOME="$HOME" PATH="$PATH" LANG=C \
+		XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}" \
+		"$PYTHON_BIN" "$STAGE_CARD_HELPER" "$@"
+}
+
+sprite_cli() {
+	# Keep provider authentication in its HOME-owned store while preventing
+	# unrelated workstation values from reaching the local Sprite client.
+	local_fs broker-exec "$PINNED_PROVIDER" - -- "$@"
+}
+
+sprite_cli_input() { # sprite_cli_input <snapshot-handle> <arguments...>
+	local input_handle="$1"
+	shift
+	local_fs broker-exec "$PINNED_PROVIDER" "$input_handle" -- "$@"
+}
+
+remote_fs() { # remote_fs <sprite> <operation> [arguments]
+	local sprite="$1"
+	shift
+	sprite_cli exec -s "$sprite" -- \
+		env -i HOME=/home/sprite PATH=/usr/local/bin:/usr/bin:/bin \
+		LANG=C.UTF-8 BASH_ENV= python3 -c "$REMOTE_FS_HELPER" "$@"
+}
+
+remote_fs_input() { # remote_fs_input <snapshot-handle> <sprite> <operation> [arguments]
+	local input_handle="$1" sprite="$2"
+	shift 2
+	sprite_cli_input "$input_handle" exec -s "$sprite" -- \
+		env -i HOME=/home/sprite PATH=/usr/local/bin:/usr/bin:/bin \
+		LANG=C.UTF-8 BASH_ENV= python3 -c "$REMOTE_FS_HELPER" "$@"
+}
+
+json_quote() {
+	local value="${1-}"
+	value="${value//\\/\\\\}"
+	value="${value//\"/\\\"}"
+	value="${value//$'\n'/\\n}"
+	value="${value//$'\r'/\\r}"
+	value="${value//$'\t'/\\t}"
+	printf '"%s"' "$value"
+}
+
+validate_sprite_name() {
+	local name="$1"
+	[[ "$name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] \
+		|| die "sprite name contains unsupported characters"
+}
+
+validate_repo_segment() {
+	local segment="$1"
+	[[ "$segment" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] \
+		&& [ "$segment" != . ] && [ "$segment" != .. ] \
+		|| die "repo owner/name contains an unsafe segment"
+}
+
+parse_repo() {
+	local input="$1" path owner repo
+	case "$input" in
+	https://github.com/*)
+		[[ "$input" != *"@"* && "$input" != *"?"* && "$input" != *"#"* ]] \
+			|| die "credential-bearing or parameterized repo URL is not allowed"
+		path="${input#https://github.com/}"
+		;;
+	*/*) path="$input" ;;
+	*) die "repo must be a public GitHub owner/name slug or HTTPS URL" ;;
+	esac
+	[[ "$path" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9][A-Za-z0-9._-]*(\.git)?$ ]] \
+		|| die "repo must identify one public GitHub owner/repo"
+	owner="${path%%/*}"
+	repo="${path#*/}"
+	repo="${repo%.git}"
+	validate_repo_segment "$owner"
+	validate_repo_segment "$repo"
+	CLONE_REPO="https://github.com/$owner/$repo.git"
+	SOURCE_ID="github.com/$owner/$repo"
+	REPO_NAME="$repo"
+}
+
+validate_branch() {
+	local branch="$1"
+	[ -z "$branch" ] && return
+	env -i HOME="$HOME" PATH="$PATH" git check-ref-format --branch "$branch" \
+		>/dev/null 2>&1 || die "branch is not a valid Git branch name"
+}
+
+resolve_sprite_cli() {
+	local requested="${1:-}" candidate pinned
+	local -a candidates
+	[ -f "$STAGE_CARD_HELPER" ] && [ ! -L "$STAGE_CARD_HELPER" ] \
+		|| die "descriptor-safe local staging helper is unavailable"
+	if [ -n "$requested" ]; then
+		case "$requested" in /*) ;; *) die "provider CLI path must be absolute" ;; esac
+		candidates=("$requested")
+	else
+		candidates=(
+			/opt/homebrew/bin/sprite
+			/usr/local/bin/sprite
+			/usr/bin/sprite
+			"$HOME/.local/bin/sprite"
+		)
+	fi
+	for candidate in "${candidates[@]}"; do
+		pinned="$(local_fs broker-start provider "$candidate" 2>/dev/null)" \
+			|| continue
+		PINNED_PROVIDER="$pinned"
+		return
+	done
+	die "could not resolve a regular, no-symlink Sprite provider CLI"
+}
+
+stage_card() {
+	local source="$1" staged
+	[[ ! "$source" =~ [[:cntrl:]] ]] || die "card path contains control characters"
+	[ -f "$STAGE_CARD_HELPER" ] && [ ! -L "$STAGE_CARD_HELPER" ] \
+		|| die "descriptor-safe card staging helper is unavailable"
+	staged="$(local_fs broker-start card "$source")" \
+		|| die "could not stage lane card"
+	STAGED_CARD="$staged"
+}
+
+cleanup_staged_card() {
+	local snapshot="${STAGED_CARD:-}"
+	[ -z "$snapshot" ] && return 0
+	if local_fs broker-discard "$snapshot"; then
+		STAGED_CARD=""
+		return 0
+	fi
+	echo "sprite-lane: card snapshot retained for recovery at ${snapshot%%|*}" >&2
+	return 1
+}
+
+ensure_sprite() {
+	local sprite="$1" inventory rc
+	SPRITE_CREATED="${SPRITE_CREATED:-0}"
+	if inventory="$(sprite_cli list 2>/dev/null)"; then
+		:
+	else
+		rc=$?
+		return "$rc"
+	fi
+	if printf '%s\n' "$inventory" | grep -Fqx -- "$sprite"; then
+		return
+	fi
+	echo "==> creating dedicated sprite $sprite"
+	sprite_cli create --skip-console "$sprite"
+	SPRITE_CREATED=1
+}
+
+checkpoint_inventory() {
+	local sprite="$1"
+	sprite_cli checkpoint list -s "$sprite"
+}
+
+read_owned_marker() {
+	local sprite="$1" marker
+	marker="$(remote_fs "$sprite" read-marker 2>/dev/null)" \
+		|| return 1
+	[[ "$marker" =~ ^v${BAKE_VERSION}[[:space:]][A-Za-z0-9._-]+$ ]] || return 1
+	printf '%s\n' "$marker"
+}
+
+checkpoint_id_for_marker() {
+	local sprite="$1" marker="$2" nonce comment inventory matches count prefix
+	prefix="v$BAKE_VERSION "
+	nonce="${marker#"$prefix"}"
+	comment="sprite-lane golden v$BAKE_VERSION $nonce"
+	inventory="$(checkpoint_inventory "$sprite" 2>/dev/null)" || return 1
+	matches="$(printf '%s\n' "$inventory" | awk -v comment="$comment" \
+		'index($0, comment) == length($0) - length(comment) + 1 {print $1}')"
+	count="$(printf '%s\n' "$matches" | awk 'NF {count++} END {print count+0}')"
+	[ "$count" = 1 ] || return 1
+	[[ "$matches" =~ ^[A-Za-z0-9._-]+$ ]] || return 1
+	printf '%s\n' "$matches"
+}
+
+read_local_owner() {
+	local sprite="$1" marker
+	marker="$(local_fs read "$OWNERS_DIR" "$sprite.owner")" || return 1
+	[[ "$marker" =~ ^v${BAKE_VERSION}[[:space:]][A-Za-z0-9._-]+$ ]] || return 1
+	printf '%s\n' "$marker"
+}
+
+persist_local_owner() {
+	local sprite="$1" marker="$2"
+	printf '%s\n' "$marker" | local_fs install "$OWNERS_DIR" "$sprite.owner"
+}
+
+remove_local_owner() {
+	local sprite="$1"
+	local_fs remove "$OWNERS_DIR" "$sprite.owner"
+}
+
+golden_checkpoint_id() {
+	local sprite="$1" marker local_marker
+	local_marker="$(read_local_owner "$sprite")" || return 1
+	marker="$(read_owned_marker "$sprite")" || return 1
+	[ "$marker" = "$local_marker" ] || return 1
+	checkpoint_id_for_marker "$sprite" "$marker"
+}
+
+clean_filesystem_ok() {
+	local sprite="$1"
+	remote_fs "$sprite" verify >/dev/null 2>&1
+}
+
+golden_filesystem_ok() {
+	local sprite="$1"
+	read_owned_marker "$sprite" >/dev/null 2>&1 \
+		&& clean_filesystem_ok "$sprite"
+}
+
+golden_ok() {
+	local sprite="$1"
+	golden_checkpoint_id "$sprite" >/dev/null 2>&1 \
+		&& golden_filesystem_ok "$sprite"
+}
+
+rollback_bake() {
+	local sprite="$1" prior_id="$2" prior_marker="$3" candidate_id="${4:-}" failed=0
+	if [ -n "$prior_id" ]; then
+		if ! sprite_cli restore -s "$sprite" "$prior_id" >/dev/null 2>&1; then
+			echo "sprite-lane: rollback could not restore prior checkpoint $prior_id" >&2
+			failed=1
+		fi
+	else
+		if ! remote_fs "$sprite" remove-marker >/dev/null 2>&1; then
+			echo "sprite-lane: rollback could not remove the uncommitted marker" >&2
+			failed=1
+		fi
+	fi
+	if [ "$failed" = 0 ] && [ -n "$candidate_id" ] && [ "$candidate_id" != "$prior_id" ]; then
+		if ! sprite_cli checkpoint delete -s "$sprite" "$candidate_id" >/dev/null 2>&1; then
+			echo "sprite-lane: rollback restored the prior state but could not retire candidate $candidate_id" >&2
+			failed=1
+		fi
+	elif [ "$failed" != 0 ] && [ -n "$candidate_id" ]; then
+		echo "sprite-lane: retaining candidate $candidate_id for recovery evidence" >&2
+	fi
+	if [ -n "$prior_marker" ]; then
+		if ! persist_local_owner "$sprite" "$prior_marker" >/dev/null; then
+			echo "sprite-lane: rollback could not restore the prior local witness" >&2
+			failed=1
+		fi
+	else
+		if ! remove_local_owner "$sprite" >/dev/null; then
+			echo "sprite-lane: rollback could not clear the uncommitted local witness" >&2
+			failed=1
+		fi
+	fi
+	[ "$failed" = 0 ] || {
+		echo "sprite-lane: rollback incomplete; ownership now fails closed and requires operator recovery" >&2
+		return 1
+	}
+}
+
+attempt_rollback() {
+	if rollback_bake "$@"; then
+		return 0
+	fi
+	echo "sprite-lane: preserving the primary bake failure after rollback failure" >&2
+	return 1
+}
+
+abort_active_bake() {
+	local candidate="${BAKE_CANDIDATE_ID:-}"
+	[ "${BAKE_ACTIVE:-0}" = 1 ] || return 0
+	if [ -z "$candidate" ] && [ -n "${BAKE_MARKER:-}" ]; then
+		candidate="$(checkpoint_id_for_marker "$BAKE_SPRITE" "$BAKE_MARKER" 2>/dev/null || true)"
+	fi
+	if attempt_rollback "$BAKE_SPRITE" "$BAKE_PRIOR_ID" \
+		"$BAKE_PRIOR_MARKER" "$candidate"; then
+		:
+	fi
+	BAKE_ACTIVE=0
+}
+
+cleanup_direct_bake() {
+	local exit_code=$?
+	trap - EXIT
+	trap '' HUP INT TERM
+	abort_active_bake
+	if ! cleanup_provider; then
+		echo "sprite-lane: provider snapshot cleanup failed" >&2
+		[ "$exit_code" -ne 0 ] || exit_code=1
+	fi
+	exit "$exit_code"
+}
+
+interrupt_direct_bake() {
+	if [ "${BAKE_COMMITTED:-0}" = 1 ]; then
+		echo "sprite-lane: signal arrived after bake commit; completing committed cleanup" >&2
+		return 0
+	fi
+	exit "$1"
+}
+
+run_direct_bake() {
+	BAKE_ACTIVE=0
+	BAKE_COMMITTED=0
+	trap cleanup_direct_bake EXIT
+	trap 'interrupt_direct_bake 129' HUP
+	trap 'interrupt_direct_bake 130' INT
+	trap 'interrupt_direct_bake 143' TERM
+	cmd_bake "$@"
+	BAKE_ACTIVE=0
+	trap cleanup_provider_at_exit EXIT
+	trap - HUP INT TERM
+}
+
+cmd_bake() {
+	local sprite="${1:?sprite name required}" prior_id="" prior_marker="" \
+		nonce marker comment new_id committed_id rc owner_commit=durable
+	[ $# -eq 1 ] || die "bake accepts exactly one sprite name"
+	BAKE_COMMITTED=0
+	ensure_sprite "$sprite"
+	if [ "$SPRITE_CREATED" != 1 ]; then
+		prior_marker="$(read_local_owner "$sprite")" \
+			|| die "refusing to bake a sprite without an exact local ownership witness"
+		prior_id="$(golden_checkpoint_id "$sprite")" \
+			|| die "refusing to bake a legacy, arbitrary, or ambiguously owned sprite; use a new name or recreate it"
+		echo "==> restoring owned baseline $prior_id"
+		if sprite_cli restore -s "$sprite" "$prior_id"; then :; else return $?; fi
+		golden_filesystem_ok "$sprite" \
+			|| die "owned checkpoint restored an unsafe filesystem"
+	fi
+	BAKE_SPRITE="$sprite"
+	BAKE_PRIOR_ID="$prior_id"
+	BAKE_PRIOR_MARKER="$prior_marker"
+	BAKE_CANDIDATE_ID=""
+	BAKE_MARKER=""
+	BAKE_ACTIVE=1
+
+	nonce="$(date -u +%Y%m%dT%H%M%SZ)-$$-$RANDOM"
+	marker="v$BAKE_VERSION $nonce"
+	BAKE_MARKER="$marker"
+	comment="sprite-lane golden v$BAKE_VERSION $nonce"
+	echo "==> baking dedicated sprite $sprite (v$BAKE_VERSION)"
+	if remote_fs "$sprite" bake "$marker"; then
+		:
+	else
+		return $?
+	fi
+	clean_filesystem_ok "$sprite" || die "clean bake verification failed"
+	echo "==> cutting replacement checkpoint before retiring the prior one"
+	if sprite_cli checkpoint create -s "$sprite" --comment "$comment" >/dev/null; then
+		:
+	else
+		rc=$?
+		abort_active_bake
+		return "$rc"
+	fi
+	if new_id="$(checkpoint_id_for_marker "$sprite" "$marker")"; then
+		:
+	else
+		abort_active_bake
+		return 1
+	fi
+	BAKE_CANDIDATE_ID="$new_id"
+	if [ "$(read_owned_marker "$sprite" 2>/dev/null || true)" != "$marker" ] \
+		|| [ "$(checkpoint_id_for_marker "$sprite" "$marker" 2>/dev/null || true)" != "$new_id" ] \
+		|| ! golden_filesystem_ok "$sprite"; then
+		abort_active_bake
+		return 1
+	fi
+	if persist_local_owner "$sprite" "$marker"; then :; else
+		rc=$?
+		case "$rc" in
+		20) owner_commit=durability-unknown ;;
+		21) owner_commit=cleanup-debt ;;
+		*) abort_active_bake; return "$rc" ;;
+		esac
+	fi
+	if committed_id="$(golden_checkpoint_id "$sprite")" \
+		&& [ "$committed_id" = "$new_id" ] \
+		&& golden_filesystem_ok "$sprite"; then
+		:
+	else
+		abort_active_bake
+		return 1
+	fi
+	BAKE_COMMITTED=1
+	BAKE_ACTIVE=0
+
+	if [ -n "$prior_id" ] && [ "$prior_id" != "$new_id" ]; then
+		if ! sprite_cli checkpoint delete -s "$sprite" "$prior_id"; then
+			echo "sprite-lane: warning: replacement committed; prior checkpoint cleanup failed" >&2
+		fi
+	fi
+	if [ "$owner_commit" != durable ]; then
+		echo "sprite-lane: replacement committed with local owner $owner_commit" >&2
+		return 1
+	fi
+	echo "==> $sprite baked"
+}
+
+cmd_reset() {
+	local sprite="${1:?sprite name required}" checkpoint_id rc
+	[ $# -eq 1 ] || die "reset accepts exactly one sprite name"
+	checkpoint_id="$(golden_checkpoint_id "$sprite")" \
+		|| die "no exactly owned clean checkpoint on $sprite"
+	echo "==> restoring $sprite to owned checkpoint $checkpoint_id"
+	if sprite_cli restore -s "$sprite" "$checkpoint_id"; then :; else rc=$?; return "$rc"; fi
+	golden_ok "$sprite" || die "restored checkpoint failed verification"
+}
+
+persist_receipt() {
+	local receipt="$RECEIPTS_DIR/$LANE_ID.json" rc
+	if printf '{\n  "schema_version": "sprite-lane.receipt.v1",\n  "lane_id": %s,\n  "sprite": %s,\n  "source": %s,\n  "branch": %s,\n  "card": %s,\n  "state": %s,\n  "started": %s,\n  "finished": %s,\n  "exit_code": %s,\n  "harness": null,\n  "launch_owner": "external",\n  "work_dir": %s,\n  "card_path": %s,\n  "remote_log": null\n}\n' \
+		"$(json_quote "$LANE_ID")" \
+		"$(json_quote "$SPRITE_NAME")" \
+		"$(json_quote "$SOURCE_ID")" \
+		"$(json_quote "${BRANCH:-default}")" \
+		"$(json_quote "$CARD_LABEL")" \
+		"$(json_quote "$STATE")" \
+		"$(json_quote "$STARTED")" \
+		"$FINISHED_JSON" \
+		"$EXIT_CODE_JSON" \
+		"$(json_quote "$WORK_DIR")" \
+		"$(json_quote "$REMOTE_CARD")" \
+		| local_fs install "$RECEIPTS_DIR" "$LANE_ID.json"; then
+		rc=0
+	else
+		rc=$?
+	fi
+	[ "$rc" -eq 0 ] || return "$rc"
+	echo "==> receipt: $receipt"
+}
+
+finish_receipt() {
+	local state="$1" exit_code="$2"
+	STATE="$state"
+	[ "$FINISHED_JSON" != null ] \
+		|| FINISHED_JSON="$(json_quote "$(date -u +%FT%TZ)")"
+	EXIT_CODE_JSON="$exit_code"
+	local rc
+	if persist_receipt; then
+		RECEIPT_ACTIVE=0
+		return 0
+	else
+		rc=$?
+	fi
+	case "$rc" in
+	20|21) RECEIPT_ACTIVE=0 ;;
+	esac
+	return "$rc"
+}
+
+finalize_result() {
+	local state="$1" primary="$2" rc
+	TERMINAL_STATE="$state"
+	TERMINAL_EXIT="$primary"
+	if finish_receipt "$state" "$primary"; then
+		return "$primary"
+	else
+		rc=$?
+	fi
+	case "$rc" in
+	20) echo "sprite-lane: terminal receipt committed; durability unknown" >&2 ;;
+	21) echo "sprite-lane: terminal receipt committed with retained cleanup debt" >&2 ;;
+	*) echo "sprite-lane: final receipt write failed" >&2 ;;
+	esac
+	[ "$primary" -ne 0 ] && return "$primary"
+	return 1
+}
+
+cleanup_run() {
+	local exit_code=$? state=setup_failed terminal_exit cleanup_failed=0 receipt_rc
+	trap - EXIT
+	trap '' HUP INT TERM
+	abort_active_bake
+	if ! cleanup_staged_card; then
+		echo "sprite-lane: staged card cleanup failed" >&2
+		cleanup_failed=1
+	fi
+	if [ "${RECEIPT_ACTIVE:-0}" = 1 ]; then
+		terminal_exit="$exit_code"
+		if [ -n "${TERMINAL_STATE:-}" ]; then
+			state="$TERMINAL_STATE"
+			terminal_exit="$TERMINAL_EXIT"
+		elif [ "${INTERRUPTED:-0}" != 0 ]; then
+			state=interrupted
+		else
+			[ "$terminal_exit" -ne 0 ] || terminal_exit=1
+		fi
+		if finish_receipt "$state" "$terminal_exit" >/dev/null; then
+			exit_code="$terminal_exit"
+		else
+			receipt_rc=$?
+			echo "sprite-lane: terminal receipt retry failed; lane $LANE_ID remains active for recovery" >&2
+			case "$receipt_rc" in
+			20|21) [ "$exit_code" -ne 0 ] || exit_code=1 ;;
+			esac
+		fi
+	fi
+	if ! cleanup_provider; then
+		echo "sprite-lane: provider snapshot cleanup failed" >&2
+		cleanup_failed=1
+	fi
+	[ "$cleanup_failed" = 0 ] || [ "$exit_code" -ne 0 ] || exit_code=1
+	exit "$exit_code"
+}
+
+interrupt_run() {
+	local code="$1"
+	if [ "${PREPARE_COMMITTED:-0}" = 1 ]; then
+		echo "sprite-lane: signal arrived after remote prepare commit; completing terminal receipt" >&2
+		return 0
+	fi
+	INTERRUPTED=1
+	exit "$code"
+}
+
+cmd_prepare() {
+	local sprite="${1:?sprite name required}"
+	shift
+	local repo="" card="" branch="" rc
+	while [ $# -gt 0 ]; do
+		case "$1" in
+		--repo) [ $# -ge 2 ] || die "--repo requires a value"; repo="$2"; shift 2 ;;
+		--card) [ $# -ge 2 ] || die "--card requires a value"; card="$2"; shift 2 ;;
+		--branch) [ $# -ge 2 ] || die "--branch requires a value"; branch="$2"; shift 2 ;;
+		*) die "unknown flag: $1" ;;
+		esac
+	done
+	[ -n "$repo" ] && [ -n "$card" ] || usage
+
+	STAGED_CARD=""
+	RECEIPT_ACTIVE=0
+	INTERRUPTED=0
+	PREPARE_COMMITTED=0
+	TERMINAL_STATE=""
+	TERMINAL_EXIT=""
+	trap cleanup_run EXIT
+	trap 'interrupt_run 129' HUP
+	trap 'interrupt_run 130' INT
+	trap 'interrupt_run 143' TERM
+	validate_branch "$branch"
+	parse_repo "$repo"
+	stage_card "$card"
+
+	SPRITE_NAME="$sprite"
+	BRANCH="$branch"
+	CARD_LABEL="${card##*/}"
+	[[ ! "$CARD_LABEL" =~ [[:cntrl:]] ]] || die "card name contains control characters"
+	LANE_ID="$(date -u +%Y%m%dT%H%M%SZ)-$REPO_NAME-$$"
+	LANE_DIR="/home/sprite/lanes/$LANE_ID"
+	WORK_DIR="$LANE_DIR/work"
+	REMOTE_CARD="$LANE_DIR/card.md"
+	STARTED="$(date -u +%FT%TZ)"
+	STATE=preparing
+	FINISHED_JSON=null
+	EXIT_CODE_JSON=null
+	RECEIPT_ACTIVE=1
+	if persist_receipt; then :; else
+		rc=$?
+		case "$rc" in
+		20) echo "sprite-lane: preparing receipt committed; durability unknown" >&2 ;;
+		21) echo "sprite-lane: preparing receipt committed with retained cleanup debt" >&2 ;;
+		*) return "$rc" ;;
+		esac
+	fi
+
+	ensure_sprite "$sprite"
+	if [ "$SPRITE_CREATED" = 1 ]; then
+		cmd_bake "$sprite"
+	else
+		cmd_reset "$sprite"
+	fi
+
+	if remote_fs_input "$STAGED_CARD" "$sprite" prepare "$LANE_ID" "$CLONE_REPO" "$branch"; then
+		PREPARE_COMMITTED=1
+		TERMINAL_STATE=prepared
+		TERMINAL_EXIT=0
+	else
+		rc=$?
+		finalize_result setup_failed "$rc" || rc=$?
+		return "$rc"
+	fi
+
+	finalize_result prepared 0 || rc=$?
+	return "${rc:-0}"
+}
+
+cmd_status() {
+	local sprite="${1:?sprite name required}"
+	[ $# -eq 1 ] || die "status accepts exactly one sprite name"
+	echo "sprite: $sprite"
+	if golden_ok "$sprite"; then echo "bake: owned clean v$BAKE_VERSION"; else echo "bake: NOT OWNED/VALID"; fi
+	echo "handoffs:"
+	remote_fs "$sprite" list 2>/dev/null \
+		|| echo "  (none)"
+}
+
+provider_cli=""
+if [ "${1:-}" = --provider-cli ]; then
+	[ $# -ge 2 ] || die "--provider-cli requires an absolute path"
+	provider_cli="$2"
+	shift 2
+fi
+command_name="${1:-}"
+[ -n "$command_name" ] || usage
+shift
+trap cleanup_provider_at_exit EXIT
+resolve_sprite_cli "$provider_cli"
+case "$command_name" in
+bake|prepare|reset|status)
+	[ $# -gt 0 ] || usage
+	validate_sprite_name "$1"
+	;;
+esac
+case "$command_name" in
+bake) run_direct_bake "$@" ;;
+prepare) cmd_prepare "$@" ;;
+reset) cmd_reset "$@" ;;
+status) cmd_status "$@" ;;
+*) usage ;;
+esac

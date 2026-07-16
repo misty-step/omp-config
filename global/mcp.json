@@ -1,0 +1,103 @@
+{
+  "$schema": "https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/config/mcp-schema.json",
+  "mcpServers": {
+    "canary": {
+      "type": "http",
+      "url": "http://127.0.0.1:8101/mcp"
+    },
+    "overmind": {
+      "type": "http",
+      "url": "http://127.0.0.1:8102/mcp"
+    },
+    "qmd": {
+      "type": "http",
+      "url": "http://127.0.0.1:8103/mcp"
+    },
+    "crucible": {
+      "type": "http",
+      "url": "http://127.0.0.1:8104/mcp"
+    },
+    "powder": {
+      "type": "http",
+      "url": "http://127.0.0.1:8105/mcp"
+    },
+    "monologue": {
+      "type": "http",
+      "url": "http://127.0.0.1:8106/mcp"
+    },
+    "firecrawl": {
+      "type": "http",
+      "url": "https://mcp.firecrawl.dev/${FIRECRAWL_MCP_TOKEN}/v2/mcp"
+    },
+    "parallel-search": {
+      "type": "http",
+      "url": "https://search.parallel.ai/mcp"
+    },
+    "exa": {
+      "type": "http",
+      "url": "http://mint.tail5f5eb4.ts.net:4949/proxy/https/mcp.exa.ai/mcp",
+      "headers": {
+        "x-api-key": "__mint.exa.default__"
+      }
+    },
+    "openaiDeveloperDocs": {
+      "type": "http",
+      "url": "https://developers.openai.com/mcp"
+    },
+    "node_repl": {
+      "type": "stdio",
+      "command": "${CHATGPT_NODE_REPL_BIN:-/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node_repl}",
+      "args": [],
+      "env": {
+        "NODE_REPL_NATIVE_PIPE_CONNECT_TIMEOUT_MS": "1000",
+        "NODE_REPL_NODE_MODULE_DIRS": "${CHATGPT_NODE_MODULE_DIRS:-/Applications/ChatGPT.app/Contents/Resources/cua_node/lib/node_modules}",
+        "NODE_REPL_NODE_PATH": "${CHATGPT_NODE_BIN:-/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node}",
+        "NODE_REPL_TRUSTED_CODE_PATHS": "${CODEX_HOME:-/Users/phaedrus/.codex}",
+        "CODEX_HOME": "${CODEX_HOME:-/Users/phaedrus/.codex}",
+        "BROWSER_USE_AVAILABLE_BACKENDS": "chrome,iab",
+        "NODE_REPL_INSTRUCTIONS_USE_CASE_BROWSER": "Control the in-app browser in conjunction with the Browser Plugin.",
+        "NODE_REPL_INSTRUCTIONS_USE_CASE_CHROME": "Control Chrome with the Chrome Plugin.",
+        "NODE_REPL_INSTRUCTIONS_USE_CASE_COMPUTER_USE": "Control desktop apps on macOS through Computer Use."
+      }
+    },
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--no-performance-crux",
+        "--redact-network-headers"
+      ],
+      "env": {
+        "CHROME_DEVTOOLS_MCP_NO_USAGE_STATISTICS": "1"
+      }
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest"
+      ]
+    },
+    "habitat": {
+      "type": "stdio",
+      "command": "${HABITAT_NODE_BIN:-/Users/phaedrus/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node}",
+      "args": [
+        "${HABITAT_MCP_SERVER:-/Users/phaedrus/.local/share/habitat/mcp/server.mjs}"
+      ],
+      "env": {
+        "HABITAT_API_KEY": "__mint.habitat.default__",
+        "HABITAT_API_URL": "http://mint.tail5f5eb4.ts.net:4949/proxy/https/habitat-r90tools.vercel.app"
+      }
+    }
+  },
+  "disabledServers": [
+    "cairn",
+    "computer-use",
+    "openrouter",
+    "pencil",
+    "todoist"
+  ]
+}

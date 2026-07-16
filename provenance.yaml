@@ -1,0 +1,28 @@
+schema_version: omp-config.provenance.v1
+migrated_at: 2026-07-16
+source:
+  repository: /Users/phaedrus/Development/roster
+  revision: 24a57a32a491891dffa747a1deb82c6cae0364f6
+  skill_catalog: primitives/skills/skills-index.yaml
+native_surfaces:
+  settings: global/config.yml
+  context: global/AGENTS.md
+  sticky_rules: global/RULES.md
+  mcp: global/mcp.json
+  agents: global/agents
+  skills: global/skills
+migration:
+  agents: rewritten for OMP task-agent frontmatter and prompt bodies
+  skills: copied from the Roster catalog with source directories flattened by canonical skill name
+  mcp: Firecrawl credential moved to local OMP .env; machine paths expressed as environment-expandable values
+excluded_runtime_state:
+  - agent.db
+  - models.db
+  - history.db
+  - sessions
+  - cache
+  - blobs
+  - memories
+  - terminal-sessions
+  - managed-skills
+  - generated third-party extensions

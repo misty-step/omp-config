@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import json
+import os
+import re
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+GLOBAL = ROOT / "global"
+AGENT_DIR = Path(os.environ.get("PI_CODING_AGENT_DIR", Path.home() / ".omp" / "agent"))
+EXPECTED = ("config.yml", "AGENTS.md", "RULES.md", "mcp.json", "agents", "skills")
+STATE_PATHS = (
+    "agent.db",
+    "models.db",
+    "history.db",
+    "sessions",
+    "cache",
+    "blobs",
+    "memories",
+    "terminal-sessions",
+    "managed-skills",
+    "extensions",
+)
+ALLOWED_AGENT_FIELDS = {
+    "name",
+    "description",
+    "model",
+    "thinkingLevel",
+    "tools",
+    "spawns",
+    "autoloadSkills",
+    "readSummarize",
+    "blocking",
+    "output",
+    "prewalk",
+}
+SECRET_PATTERNS = {
+    "Firecrawl token": re.compile(r"fc-[A-Za-z0-9_-]{16,}"),
+    "OpenAI-style key": re.compile(r"\bsk-[A-Za-z0-9_-]{20,}"),
+    "GitHub token": re.compile(r"\b(?:ghp|github_pat)_[A-Za-z0-9_]{20,}"),
+}
+
+
+def fail(message: str) -> None:
+    print(f"FAIL: {message}", file=sys.stderr)
+    raise SystemExit(1)
+
+
+def frontmatter(path: Path) -> tuple[dict[str, str], str]:
+    text = path.read_text()
+    if not text.startswith("---\n"):
+        fail(f"{path.relative_to(ROOT)} has no YAML frontmatter")
+    try:
+        raw, body = text[4:].split("\n---\n", 1)
+    except ValueError:
+        fail(f"{path.relative_to(ROOT)} has unterminated frontmatter")
+    fields: dict[str, str] = {}
+    for line in raw.splitlines():
+        if not line or line[0].isspace() or line.startswith("#"):
+            continue
+        if ":" not in line:
+            fail(f"{path.relative_to(ROOT)} has malformed frontmatter line: {line}")
+        key, value = line.split(":", 1)
+        fields[key.strip()] = value.strip().strip("'\"")
+    return fields, body.strip()
+
+
+def check_tree() -> None:
+    for name in EXPECTED:
+        if not (GLOBAL / name).exists():
+            fail(f"missing global/{name}")
+
+    mcp_text = (GLOBAL / "mcp.json").read_text()
+    mcp = json.loads(mcp_text)
+    servers = mcp.get("mcpServers")
+    if not isinstance(servers, dict) or not servers:
+        fail("global/mcp.json has no mcpServers")
+    firecrawl = servers.get("firecrawl", {})
+    if "${FIRECRAWL_MCP_TOKEN}" not in str(firecrawl.get("url", "")):
+        fail("Firecrawl MCP URL must use FIRECRAWL_MCP_TOKEN")
+
+    sensitive_files = [
+        GLOBAL / "config.yml",
+        GLOBAL / "mcp.json",
+        GLOBAL / "AGENTS.md",
+        GLOBAL / "RULES.md",
+        *sorted((GLOBAL / "agents").glob("*.md")),
+    ]
+    for path in sensitive_files:
+        text = path.read_text()
+        for label, pattern in SECRET_PATTERNS.items():
+            if pattern.search(text):
+                fail(f"{label} found in {path.relative_to(ROOT)}")
+
+    agent_names: set[str] = set()
+    skill_names = {path.name for path in (GLOBAL / "skills").iterdir() if path.is_dir()}
+    for path in sorted((GLOBAL / "agents").glob("*.md")):
+        fields, body = frontmatter(path)
+        unknown = set(fields) - ALLOWED_AGENT_FIELDS
+        if unknown:
+            fail(f"{path.relative_to(ROOT)} has unsupported fields: {sorted(unknown)}")
+        name = fields.get("name")
+        if not name or not fields.get("description") or not body:
+            fail(f"{path.relative_to(ROOT)} requires name, description, and a prompt body")
+        if name != path.stem:
+            fail(f"agent {path.name} declares name {name!r}")
+        if name in agent_names:
+            fail(f"duplicate agent name {name}")
+        agent_names.add(name)
+        autoload = fields.get("autoloadSkills", "")
+        for skill in filter(None, (part.strip() for part in autoload.split(","))):
+            if skill not in skill_names:
+                fail(f"agent {name} autoloads missing skill {skill}")
+
+    declared_skills: set[str] = set()
+    for directory in sorted(path for path in (GLOBAL / "skills").iterdir() if path.is_dir()):
+        skill_file = directory / "SKILL.md"
+        if not skill_file.is_file():
+            fail(f"skill directory {directory.name} has no SKILL.md")
+        fields, _ = frontmatter(skill_file)
+        name = fields.get("name", directory.name)
+        if name != directory.name:
+            fail(f"skill directory {directory.name} declares name {name!r}")
+        if not fields.get("description"):
+            fail(f"skill {name} has no description")
+        if name in declared_skills:
+            fail(f"duplicate skill name {name}")
+        declared_skills.add(name)
+
+    for state_path in STATE_PATHS:
+        target = AGENT_DIR / state_path
+        if target.is_symlink():
+            fail(f"mutable OMP state must not be symlinked: {target}")
+
+
+
+def check_install() -> None:
+    for name in EXPECTED:
+        source = GLOBAL / name
+        target = AGENT_DIR / name
+        if not target.is_symlink():
+            fail(f"declarative OMP path is not linked: {target}")
+        if target.resolve() != source.resolve():
+            fail(f"declarative OMP link drift: {target} -> {target.resolve()}")
+
+def check_omp_schema() -> None:
+    with tempfile.TemporaryDirectory(prefix="omp-config-check-") as temp:
+        temp_agent = Path(temp) / "agent"
+        temp_agent.mkdir()
+        (temp_agent / "config.yml").symlink_to(GLOBAL / "config.yml")
+        env = os.environ.copy()
+        env["PI_CODING_AGENT_DIR"] = str(temp_agent)
+        result = subprocess.run(
+            ["omp", "config", "list", "--json"],
+            cwd=ROOT,
+            env=env,
+            text=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+            timeout=30,
+        )
+        if result.returncode:
+            fail(f"OMP rejected global/config.yml: {result.stderr.strip()}")
+
+
+if len(sys.argv) > 2 or (len(sys.argv) == 2 and sys.argv[1] != "--installed"):
+    fail("usage: bin/check [--installed]")
+check_tree()
+check_omp_schema()
+if len(sys.argv) == 2:
+    check_install()
+print("OMP configuration OK")

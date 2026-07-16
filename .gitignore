@@ -1,0 +1,21 @@
+# Mutable OMP runtime state never belongs in this repository.
+.env
+.env.*
+local/
+state/
+*.db
+*.db-shm
+*.db-wal
+sessions/
+history/
+cache/
+blobs/
+memories/
+terminal-sessions/
+managed-skills/
+
+# Generated validation artifacts.
+.tmp/
+.DS_Store
+__pycache__/
+*.pyc
