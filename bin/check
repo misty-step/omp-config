@@ -90,6 +90,12 @@ def check_tree() -> None:
     if "${FIRECRAWL_MCP_TOKEN}" not in str(firecrawl.get("url", "")):
         fail("Firecrawl MCP URL must use FIRECRAWL_MCP_TOKEN")
 
+    agent_text = "\n".join(path.read_text() for path in sorted((GLOBAL / "agents").glob("*.md")))
+    config_text = (GLOBAL / "config.yml").read_text()
+    cursor_selectors = set(re.findall(r"\bcursor/[A-Za-z0-9._/-]+", f"{config_text}\n{agent_text}"))
+    if cursor_selectors != {"cursor/composer-2.5"}:
+        fail(f"Cursor is reserved for composer-2.5, found: {sorted(cursor_selectors)}")
+
     sensitive_files = [
         GLOBAL / "config.yml",
         GLOBAL / "mcp.json",
@@ -215,8 +221,12 @@ def check_executive_config(config: dict[str, object]) -> None:
         fail("default model must launch a Fable-high or Sol-high chief executive")
     if roles.get("plan") != "openai-codex/gpt-5.6-sol:high":
         fail("plan role must use Sol high")
-    if roles.get("designer") != "cursor/glm-5.2-high":
-        fail("designer role must use the authenticated GLM 5.2 binding")
+    if roles.get("designer") != "openrouter/z-ai/glm-5.2:high":
+        fail("designer role must use GLM 5.2 through OpenRouter")
+    if roles.get("composer") != "cursor/composer-2.5":
+        fail("Cursor must be reserved for the Composer 2.5 role")
+    if roles.get("vision") != "google-antigravity/gemini-3.5-flash":
+        fail("vision role must use Gemini 3.5 Flash through Google Antigravity")
     expected = {
         "task.eager": {"preferred", "always"},
         "task.batch": {True},

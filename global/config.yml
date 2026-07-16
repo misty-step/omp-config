@@ -3,7 +3,8 @@ modelRoles:
   smol: openai-codex/gpt-5.6-luna
   vision: google-antigravity/gemini-3.5-flash
   commit: openai-codex/gpt-5.4-mini
-  designer: cursor/glm-5.2-high
+  designer: openrouter/z-ai/glm-5.2:high
+  composer: cursor/composer-2.5
   task: anthropic/claude-sonnet-5:high
   slow: anthropic/claude-fable-5:xhigh
   plan: openai-codex/gpt-5.6-sol:high
@@ -24,23 +25,23 @@ retry:
     default: 
       - openai-codex/gpt-5.6-sol:high
       - xai-oauth/grok-4.5:high
-      - cursor/glm-5.2-high
+      - openrouter/z-ai/glm-5.2:high
     plan: 
       - anthropic/claude-fable-5:high
       - xai-oauth/grok-4.5:high
-      - cursor/glm-5.2-high
+      - openrouter/z-ai/glm-5.2:high
     slow: 
       - openai-codex/gpt-5.6-sol:max
       - anthropic/claude-fable-5:high
       - xai-oauth/grok-4.5:high
     advisor: 
       - openai-codex/gpt-5.6-luna:high
-      - cursor/glm-5.2-high
+      - openrouter/z-ai/glm-5.2:high
       - anthropic/claude-sonnet-5:medium
     task: 
       - openai-codex/gpt-5.6-luna:xhigh
       - xai-oauth/grok-4.5:high
-      - cursor/glm-5.2-high
+      - openrouter/z-ai/glm-5.2:high
     smol: 
       - google-antigravity/gemini-3.5-flash
       - openrouter/deepseek/deepseek-v4-flash
@@ -65,25 +66,22 @@ retry:
     openai-codex/gpt-5.6-sol:
       - anthropic/claude-fable-5:high
       - xai-oauth/grok-4.5:high
-      - cursor/glm-5.2-high
+      - openrouter/z-ai/glm-5.2:high
     openai-codex/gpt-5.6-luna:
       - anthropic/claude-sonnet-5:high
-      - cursor/glm-5.2-high
+      - openrouter/z-ai/glm-5.2:high
       - xai-oauth/grok-4.5:high
     anthropic/claude-fable-5:
       - openai-codex/gpt-5.6-sol:high
       - xai-oauth/grok-4.5:high
     anthropic/claude-sonnet-5:
       - openai-codex/gpt-5.6-luna:high
-      - cursor/glm-5.2-high
+      - openrouter/z-ai/glm-5.2:high
     xai-oauth/grok-4.5:
       - anthropic/claude-fable-5:high
       - openai-codex/gpt-5.6-sol:high
-    cursor/glm-5.2-high:
-      - anthropic/claude-sonnet-5:high
-      - google-antigravity/gemini-3.1-pro:high
     openrouter/z-ai/glm-5.2:
-      - cursor/glm-5.2-high
+      - xai-oauth/grok-4.5:high
       - anthropic/claude-sonnet-5:high
       - openai-codex/gpt-5.6-sol:high
     xai-oauth/grok-4.3: 

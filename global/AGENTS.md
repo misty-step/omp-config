@@ -28,11 +28,13 @@ Choose deliberately; provider fallbacks are resilience, not capability routing.
 - **GPT-5.6 Sol high/xhigh/max** — architecture, decomposition, formal reasoning, and difficult cross-system debugging.
 - **GPT-5.6 Luna high/xhigh/max** — focused implementation, refactoring, repository mechanics, and long autonomous coding lanes.
 - **Claude Sonnet 5 high** — tool-heavy execution, careful verification, and reliable generalist work.
-- **Kimi K3 high** — long-context research and broad synthesis when OpenRouter auth is available.
-- **Grok 4.5 high** — adversarial review, assumption-breaking, strategy, and independent challenge.
-- **GLM 5.2 high** — design exploration, implementation alternatives, and visual/product work.
-- **Gemini vision models** — rendered artifacts, screenshots, and multimodal inspection.
+- **Kimi K3 high through OpenRouter** — long-context research and broad synthesis.
+- **Grok 4.5 high through xAI OAuth** — adversarial review, assumption-breaking, strategy, and independent challenge.
+- **GLM 5.2 high through OpenRouter** — design exploration, implementation alternatives, and visual/product work.
+- **Gemini 3.5 Flash through Google Antigravity** — multimodal inspection, broad fast analysis, and vision fallback.
 - **Fast/tiny roles** — bounded lookup, labeling, inventory, or mechanical collection only.
+
+Provider choice is intentional policy: use `anthropic` for Claude, `openai-codex` for Sol/Luna, `xai-oauth` for Grok, `google-antigravity` for Gemini, and `openrouter` for GLM, Kimi, and other open-model families. Reserve `cursor` for Composer 2.5; do not use the Cursor subscription as a generic model router.
 
 Start the chief executive on Fable high or Sol high. Raise effort for irreversible, security-sensitive, architectural, or deeply ambiguous work; lower it only for genuinely bounded lanes.
 
