@@ -64,8 +64,11 @@ For a cheap zero-build holistic system lab, use six blind philosophies and
 require three proposals from each before dedupe. This is an exploration floor,
 not permission to keep weak work.
 
-The philosophies (vendored under `primitives/skills/.external/`; licences and
-boundaries in `references/external-design-references.md`):
+The philosophies (vendored under `primitives/skills/.external/` in the Roster
+checkout — resolve as `~/Development/roster/primitives/skills/.external/<alias>/SKILL.md`,
+or fetch the pinned repo from `primitives/skills/.external/registry.yaml` if no
+local checkout is available; licences and boundaries in
+`references/external-design-references.md`):
 
 | Lane | Brings |
 |---|---|
@@ -80,10 +83,16 @@ boundaries in `references/external-design-references.md`):
 | `leon-redesign-skill` | keep-the-stack redesign; a11y/SEO omissions checklist |
 | `nutlope-hallmark` | macrostructure-first genres, 20-theme rotation, 58-gate slop test |
 | `impeccable-impeccable` | 23 discipline lenses (typeset, colorize, distill, harden, …); brand-vs-product register |
+| `zeke-swiss-design` | Swiss International Style: grid discipline, opacity-based hierarchy, one accent, no decoration |
+| `dammyjay-interface-design` | dense operator UI craft — dashboards, admin panels, SaaS consoles; not for marketing |
+| `danilaa-compact-landing` | small dev-tool/product landing pages; anti-reskin "design fingerprint" mutated per run |
 
 Pick the spread against the fence, not a fixed roster: a dense operational
-surface benches density-honest philosophies; a landing page benches hallmark's
-genres against the soft and brutalist poles. Gesture-driven, sheet, spring,
+surface (a console, a dashboard, an admin panel) benches `dammyjay-interface-design`
+alongside `leon-taste-skill`'s dials, never a marketing-first lane; a landing
+page benches hallmark's genres against the soft and brutalist poles, plus
+`zeke-swiss-design` for grid-discipline restraint and `danilaa-compact-landing`
+for a small dev-tool/product-demo canvas. Gesture-driven, sheet, spring,
 drag/swipe, or spatial-motion surfaces bench `emil-apple-design`; static visual
 work usually does not. `references/aesthetic-library.md` holds six
 operator-endorsed directions lanes can seed from.
