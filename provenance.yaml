@@ -1,28 +1,83 @@
-schema_version: omp-config.provenance.v1
-migrated_at: 2026-07-16
-source:
-  repository: /Users/phaedrus/Development/roster
-  revision: 24a57a32a491891dffa747a1deb82c6cae0364f6
-  skill_catalog: primitives/skills/skills-index.yaml
-native_surfaces:
-  settings: global/config.yml
-  context: global/AGENTS.md
-  sticky_rules: global/RULES.md
-  mcp: global/mcp.json
-  agents: global/agents
-  skills: global/skills
-migration:
-  agents: rewritten for OMP task-agent frontmatter and prompt bodies
-  skills: copied from the Roster catalog with source directories flattened by canonical skill name
-  mcp: Firecrawl credential moved to local OMP .env; machine paths expressed as environment-expandable values
-excluded_runtime_state:
-  - agent.db
-  - models.db
-  - history.db
-  - sessions
-  - cache
-  - blobs
-  - memories
-  - terminal-sessions
-  - managed-skills
-  - generated third-party extensions
+{
+  "schema_version": "omp-config.provenance.v2",
+  "authority": {
+    "repository": ".",
+    "source_root": "global",
+    "surfaces": {
+      "settings": {
+        "source": "global/config.yml",
+        "target": "config.yml",
+        "kind": "file",
+        "origin": "local"
+      },
+      "context": {
+        "source": "global/AGENTS.md",
+        "target": "AGENTS.md",
+        "kind": "file",
+        "origin": "local"
+      },
+      "sticky_rules": {
+        "source": "global/RULES.md",
+        "target": "RULES.md",
+        "kind": "file",
+        "origin": "local"
+      },
+      "mcp": {
+        "source": "global/mcp.json",
+        "target": "mcp.json",
+        "kind": "file",
+        "origin": "migrated"
+      },
+      "agents": {
+        "source": "global/agents",
+        "target": "agents",
+        "kind": "directory",
+        "origin": "rewritten"
+      },
+      "skills": {
+        "source": "global/skills",
+        "target": "skills",
+        "kind": "directory",
+        "origin": "copied"
+      }
+    }
+  },
+  "projection": {
+    "environment": "PI_CODING_AGENT_DIR",
+    "default": "~/.omp/agent",
+    "mode": "symlink"
+  },
+  "upstream": {
+    "repository": "/Users/phaedrus/Development/roster",
+    "revision": "24a57a32a491891dffa747a1deb82c6cae0364f6",
+    "skill_catalog": "primitives/skills/skills-index.yaml",
+    "migrated_at": "2026-07-16"
+  },
+  "runtime_dependencies": {
+    "bundled_agents": [
+      "task",
+      "scout",
+      "reviewer",
+      "librarian",
+      "designer",
+      "sonic"
+    ]
+  },
+  "excluded_runtime_state": [
+    "agent.db",
+    "models.db",
+    "history.db",
+    "sessions",
+    "cache",
+    "blobs",
+    "memories",
+    "terminal-sessions",
+    "managed-skills",
+    "extensions"
+  ],
+  "migration": {
+    "agents": "rewritten for OMP task-agent frontmatter and prompt bodies",
+    "skills": "copied from the Roster catalog and flattened by canonical skill name",
+    "mcp": "credential moved to local OMP .env; machine paths made environment-expandable"
+  }
+}

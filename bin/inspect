@@ -1,0 +1,227 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+from config_contract import (
+    Contract,
+    ContractError,
+    config_value,
+    effective_config,
+    frontmatter,
+    load_contract,
+    projection_receipts,
+    split_selector,
+)
+
+ROOT = Path(__file__).resolve().parent.parent
+REPORT_SCHEMA = "omp-config.inspect.v1"
+
+
+def split_csv(value: str) -> list[str]:
+    return [part.strip() for part in value.split(",") if part.strip()]
+
+
+def relative(contract: Contract, path: Path) -> str:
+    return path.relative_to(contract.root).as_posix()
+
+
+def fallback_chain(
+    chains: dict[str, object],
+    roles: dict[str, str],
+    selector: str,
+) -> tuple[str | None, list[str]]:
+    model, _ = split_selector(selector)
+    provider, model_id = model.split("/", 1)
+
+    for key, value in chains.items():
+        if "/" not in key or key.endswith("/*"):
+            continue
+        key_model, _ = split_selector(key)
+        if key_model == model and isinstance(value, list) and all(isinstance(item, str) for item in value):
+            return key, value
+
+    wildcard_match: tuple[int, str, list[str]] | None = None
+    for key, value in chains.items():
+        if not key.endswith("/*") or not isinstance(value, list) or not all(
+            isinstance(item, str) for item in value
+        ):
+            continue
+        wildcard = key[:-2]
+        wildcard_provider, separator, id_prefix = wildcard.partition("/")
+        if wildcard_provider != provider:
+            continue
+        if separator and not model_id.startswith(f"{id_prefix}/"):
+            continue
+        prefix_length = len(id_prefix) if separator else 0
+        if wildcard_match is None or prefix_length > wildcard_match[0]:
+            wildcard_match = (prefix_length, key, value)
+    if wildcard_match:
+        return wildcard_match[1], wildcard_match[2]
+
+    for key, value in chains.items():
+        role_selector = roles.get(key)
+        if role_selector is None or not isinstance(value, list) or not all(
+            isinstance(item, str) for item in value
+        ):
+            continue
+        role_model, _ = split_selector(role_selector)
+        if role_model == model:
+            return key, value
+    return None, []
+
+
+def build_report(contract: Contract) -> dict[str, object]:
+    config = effective_config(contract)
+    roles = config_value(config, "modelRoles")
+    chains = config_value(config, "retry.fallbackChains")
+    default_effort = config_value(config, "defaultThinkingLevel")
+    if not isinstance(roles, dict) or not all(
+        isinstance(name, str) and isinstance(selector, str) for name, selector in roles.items()
+    ):
+        raise ContractError("effective modelRoles must be a string mapping")
+    if not isinstance(chains, dict):
+        raise ContractError("effective retry.fallbackChains must be a mapping")
+    if not isinstance(default_effort, str):
+        raise ContractError("effective defaultThinkingLevel must be a string")
+
+    settings = contract.surface("settings")
+    role_rows: list[dict[str, object]] = []
+    for name, selector in sorted(roles.items()):
+        model, effort = split_selector(selector, default_effort)
+        fallback_key, fallbacks = fallback_chain(chains, roles, selector)
+        role_rows.append(
+            {
+                "name": name,
+                "selector": selector,
+                "model": model,
+                "effort": effort,
+                "fallbacks": fallbacks,
+                "fallback_source": f"retry.fallbackChains.{fallback_key}" if fallback_key else None,
+                "source": settings.source_rel.as_posix(),
+                "provenance_surface": settings.name,
+                "provenance_origin": settings.origin,
+            }
+        )
+
+    agent_surface = contract.surface("agents")
+    skill_surface = contract.surface("skills")
+    agent_rows: list[dict[str, object]] = []
+    for path in sorted(agent_surface.source.glob("*.md")):
+        fields, _ = frontmatter(path)
+        selectors = split_csv(fields.get("model", ""))
+        if not selectors:
+            raise ContractError(f"agent {path.stem} has no model selector")
+        primary_model, selector_effort = split_selector(selectors[0], fields.get("thinkingLevel", "auto"))
+        skills = split_csv(fields.get("autoloadSkills", ""))
+        agent_rows.append(
+            {
+                "name": fields.get("name", path.stem),
+                "selector": selectors[0],
+                "model": primary_model,
+                "effort": fields.get("thinkingLevel", selector_effort),
+                "fallbacks": selectors[1:],
+                "tools": split_csv(fields.get("tools", "")),
+                "spawns": split_csv(fields.get("spawns", "")),
+                "skills": [
+                    {
+                        "name": skill,
+                        "source": (skill_surface.source_rel / skill / "SKILL.md").as_posix(),
+                        "provenance_surface": skill_surface.name,
+                        "provenance_origin": skill_surface.origin,
+                    }
+                    for skill in skills
+                ],
+                "source": relative(contract, path),
+                "provenance_surface": agent_surface.name,
+                "provenance_origin": agent_surface.origin,
+                "upstream_revision": contract.upstream.get("revision"),
+            }
+        )
+
+    receipts = projection_receipts(contract)
+    projection_ok = all(receipt["status"] == "ok" for receipt in receipts)
+    return {
+        "schema_version": REPORT_SCHEMA,
+        "authority": {
+            "repository": str(contract.root),
+            "source_root": str(contract.source_root),
+            "provenance": relative(contract, contract.provenance),
+            "upstream": contract.upstream,
+        },
+        "projection": {
+            "root": str(contract.projection_root),
+            "mode": contract.install_mode,
+            "status": "ok" if projection_ok else "drift",
+        },
+        "advisor": {
+            "enabled": config_value(config, "advisor.enabled"),
+            "subagents": config_value(config, "advisor.subagents"),
+        },
+        "roles": role_rows,
+        "agents": agent_rows,
+        "surfaces": receipts,
+    }
+
+
+def render(report: dict[str, object]) -> str:
+    authority = report["authority"]
+    projection = report["projection"]
+    advisor = report["advisor"]
+    assert isinstance(authority, dict)
+    assert isinstance(projection, dict)
+    assert isinstance(advisor, dict)
+    lines = [
+        f"authority  {authority['source_root']} ({authority['provenance']})",
+        f"projection {projection['root']} [{projection['mode']}:{projection['status']}]",
+        f"advisor    enabled={str(advisor['enabled']).lower()} subagents={str(advisor['subagents']).lower()}",
+        "roles",
+    ]
+    for role in report["roles"]:
+        assert isinstance(role, dict)
+        fallbacks = " -> ".join(role["fallbacks"]) if role["fallbacks"] else "-"
+        lines.append(
+            f"  {role['name']} -> {role['model']} [{role['effort']}] -> {fallbacks} "
+            f"({role['source']})"
+        )
+    lines.append("agents")
+    for agent in report["agents"]:
+        assert isinstance(agent, dict)
+        fallbacks = " -> ".join(agent["fallbacks"]) if agent["fallbacks"] else "-"
+        skill_names = [skill["name"] for skill in agent["skills"]]
+        skills = ",".join(skill_names) if skill_names else "-"
+        lines.append(
+            f"  {agent['name']} -> {agent['model']} [{agent['effort']}] -> {fallbacks}; "
+            f"skills={skills} ({agent['source']}@{agent['provenance_origin']})"
+        )
+    lines.append("surfaces")
+    for surface in report["surfaces"]:
+        assert isinstance(surface, dict)
+        digest = str(surface["source_sha256"])
+        lines.append(
+            f"  {surface['name']} {surface['status']} {digest[:19]} "
+            f"{surface['source']} -> {surface['target']}"
+        )
+    return "\n".join(lines)
+
+
+def main(argv: list[str]) -> int:
+    if len(argv) > 1 or (argv and argv[0] != "--json"):
+        print("usage: bin/inspect [--json]", file=sys.stderr)
+        return 1
+    try:
+        report = build_report(load_contract(ROOT))
+    except ContractError as error:
+        print(f"FAIL: {error}", file=sys.stderr)
+        return 1
+    if argv:
+        print(json.dumps(report, indent=2, sort_keys=True))
+    else:
+        print(render(report))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

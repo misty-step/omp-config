@@ -7,22 +7,9 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from config_contract import ContractError, load_contract, require_projection
+
 ROOT = Path(__file__).resolve().parent.parent
-GLOBAL = ROOT / "global"
-AGENT_DIR = Path(os.environ.get("PI_CODING_AGENT_DIR", Path.home() / ".omp" / "agent"))
-ASSETS = ("config.yml", "AGENTS.md", "RULES.md", "mcp.json", "agents", "skills")
-FORBIDDEN = {
-    "agent.db",
-    "models.db",
-    "history.db",
-    "sessions",
-    "cache",
-    "blobs",
-    "memories",
-    "terminal-sessions",
-    "managed-skills",
-    "extensions",
-}
 
 
 def die(message: str) -> None:
@@ -30,37 +17,52 @@ def die(message: str) -> None:
     raise SystemExit(1)
 
 
-AGENT_DIR.mkdir(parents=True, exist_ok=True)
-if any(name in ASSETS for name in FORBIDDEN):
-    die("internal boundary error: mutable state selected for linking")
+def main() -> int:
+    try:
+        contract = load_contract(ROOT)
+    except ContractError as error:
+        die(str(error))
+    agent_dir = contract.projection_root
+    agent_dir.mkdir(parents=True, exist_ok=True)
 
-stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-backup = AGENT_DIR / "backups" / f"omp-config-{stamp}"
-backed_up = False
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    backup = agent_dir / "backups" / f"omp-config-{stamp}"
+    backed_up = False
 
-for name in ASSETS:
-    source = GLOBAL / name
-    target = AGENT_DIR / name
-    if not source.exists():
-        die(f"missing source {source}")
-    if target.is_symlink() and target.resolve() == source.resolve():
-        print(f"keep {target} -> {source}")
-        continue
-    if target.exists() or target.is_symlink():
-        backup.mkdir(parents=True, exist_ok=True)
-        destination = backup / name
-        if destination.exists() or destination.is_symlink():
-            die(f"backup collision at {destination}")
-        shutil.move(str(target), str(destination))
-        backed_up = True
-        print(f"backup {target} -> {destination}")
-    target.symlink_to(source, target_is_directory=source.is_dir())
-    print(f"link {target} -> {source}")
+    for surface in contract.surfaces:
+        source = surface.source
+        target = surface.target
+        if target.is_symlink() and target.resolve(strict=False) == source.resolve():
+            print(f"keep {target} -> {source}")
+            continue
+        if target.exists() or target.is_symlink():
+            destination = backup / surface.target_rel
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            if destination.exists() or destination.is_symlink():
+                die(f"backup collision at {destination}")
+            shutil.move(str(target), str(destination))
+            backed_up = True
+            print(f"backup {target} -> {destination}")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.symlink_to(source, target_is_directory=surface.kind == "directory")
+        print(f"link {target} -> {source}")
 
-local_env = AGENT_DIR / ".env"
-if local_env.exists():
-    os.chmod(local_env, 0o600)
+    local_env = agent_dir / ".env"
+    if local_env.exists():
+        os.chmod(local_env, 0o600)
 
-if backed_up:
-    print(f"backup root: {backup}")
-print("OMP declarative configuration installed; mutable runtime state untouched")
+    try:
+        receipts = require_projection(contract)
+    except ContractError as error:
+        die(f"projection verification failed: {error}")
+    if backed_up:
+        print(f"backup root: {backup}")
+    print(
+        "OMP declarative configuration installed; "
+        f"{len(receipts)} symlinks and digests verified; mutable runtime state untouched"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

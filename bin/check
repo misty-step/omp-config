@@ -2,49 +2,21 @@
 from __future__ import annotations
 
 import json
-import os
 import re
-import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-GLOBAL = ROOT / "global"
-AGENT_DIR = Path(os.environ.get("PI_CODING_AGENT_DIR", Path.home() / ".omp" / "agent"))
-EXPECTED = ("config.yml", "AGENTS.md", "RULES.md", "mcp.json", "agents", "skills")
-STATE_PATHS = (
-    "agent.db",
-    "models.db",
-    "history.db",
-    "sessions",
-    "cache",
-    "blobs",
-    "memories",
-    "terminal-sessions",
-    "managed-skills",
-    "extensions",
+from config_contract import (
+    Contract,
+    ContractError,
+    THINKING_LEVELS,
+    effective_config,
+    frontmatter,
+    load_contract,
+    require_projection,
 )
-ALLOWED_AGENT_FIELDS = {
-    "name",
-    "description",
-    "model",
-    "thinkingLevel",
-    "tools",
-    "spawns",
-    "autoloadSkills",
-    "readSummarize",
-    "blocking",
-    "output",
-    "prewalk",
-}
-REQUIRED_AGENTS = {"daedalus", "hephaestus", "magellan", "cerberus", "scully", "solomon"}
-BUNDLED_AGENTS = {"task", "scout", "reviewer", "librarian", "designer", "sonic"}
-THINKING_LEVELS = {"minimal", "low", "medium", "high", "xhigh", "max"}
-EXECUTIVE_MODELS = {
-    "anthropic/claude-fable-5:high",
-    "openai-codex/gpt-5.6-sol:high",
-}
+
+ROOT = Path(__file__).resolve().parent.parent
 SECRET_PATTERNS = {
     "Firecrawl token": re.compile(r"fc-[A-Za-z0-9_-]{16,}"),
     "OpenAI-style key": re.compile(r"\bsk-[A-Za-z0-9_-]{20,}"),
@@ -57,71 +29,53 @@ def fail(message: str) -> None:
     raise SystemExit(1)
 
 
-def frontmatter(path: Path) -> tuple[dict[str, str], str]:
-    text = path.read_text()
-    if not text.startswith("---\n"):
-        fail(f"{path.relative_to(ROOT)} has no YAML frontmatter")
+def relative(path: Path) -> Path:
     try:
-        raw, body = text[4:].split("\n---\n", 1)
+        return path.relative_to(ROOT)
     except ValueError:
-        fail(f"{path.relative_to(ROOT)} has unterminated frontmatter")
-    fields: dict[str, str] = {}
-    for line in raw.splitlines():
-        if not line or line[0].isspace() or line.startswith("#"):
-            continue
-        if ":" not in line:
-            fail(f"{path.relative_to(ROOT)} has malformed frontmatter line: {line}")
-        key, value = line.split(":", 1)
-        fields[key.strip()] = value.strip().strip("'\"")
-    return fields, body.strip()
+        return path
 
 
-def check_tree() -> None:
-    for name in EXPECTED:
-        if not (GLOBAL / name).exists():
-            fail(f"missing global/{name}")
+def check_tree(contract: Contract) -> None:
+    settings = contract.surface("settings").source
+    context = contract.surface("context").source
+    sticky_rules = contract.surface("sticky_rules").source
+    mcp_path = contract.surface("mcp").source
+    agent_dir = contract.surface("agents").source
+    skill_dir = contract.surface("skills").source
 
-    mcp_text = (GLOBAL / "mcp.json").read_text()
-    mcp = json.loads(mcp_text)
+    try:
+        mcp = json.loads(mcp_path.read_text())
+    except json.JSONDecodeError as error:
+        fail(f"{relative(mcp_path)} is invalid JSON: {error}")
     servers = mcp.get("mcpServers")
     if not isinstance(servers, dict) or not servers:
-        fail("global/mcp.json has no mcpServers")
-    firecrawl = servers.get("firecrawl", {})
-    if "${FIRECRAWL_MCP_TOKEN}" not in str(firecrawl.get("url", "")):
-        fail("Firecrawl MCP URL must use FIRECRAWL_MCP_TOKEN")
-
-    agent_text = "\n".join(path.read_text() for path in sorted((GLOBAL / "agents").glob("*.md")))
-    config_text = (GLOBAL / "config.yml").read_text()
-    cursor_selectors = set(re.findall(r"\bcursor/[A-Za-z0-9._/-]+", f"{config_text}\n{agent_text}"))
-    if cursor_selectors != {"cursor/composer-2.5"}:
-        fail(f"Cursor is reserved for composer-2.5, found: {sorted(cursor_selectors)}")
-    if re.search(r"openrouter/(?:z-ai|moonshotai)/", f"{config_text}\n{agent_text}"):
-        fail("native ZAI and Kimi models must not route through OpenRouter")
+        fail(f"{relative(mcp_path)} has no mcpServers")
 
     sensitive_files = [
-        GLOBAL / "config.yml",
-        GLOBAL / "mcp.json",
-        GLOBAL / "AGENTS.md",
-        GLOBAL / "RULES.md",
-        *sorted((GLOBAL / "agents").glob("*.md")),
+        settings,
+        mcp_path,
+        context,
+        sticky_rules,
+        *sorted(agent_dir.glob("*.md")),
     ]
     for path in sensitive_files:
         text = path.read_text()
         for label, pattern in SECRET_PATTERNS.items():
             if pattern.search(text):
-                fail(f"{label} found in {path.relative_to(ROOT)}")
+                fail(f"{label} found in {relative(path)}")
 
+    skill_names = {path.name for path in skill_dir.iterdir() if path.is_dir()}
     agent_names: set[str] = set()
     agent_fields: dict[str, dict[str, str]] = {}
-    skill_names = {path.name for path in (GLOBAL / "skills").iterdir() if path.is_dir()}
-    for path in sorted((GLOBAL / "agents").glob("*.md")):
-        fields, body = frontmatter(path)
-        unknown = set(fields) - ALLOWED_AGENT_FIELDS
-        if unknown:
-            fail(f"{path.relative_to(ROOT)} has unsupported fields: {sorted(unknown)}")
+    for path in sorted(agent_dir.glob("*.md")):
+        try:
+            fields, body = frontmatter(path)
+        except ContractError as error:
+            fail(str(error))
         name = fields.get("name")
         if not name or not fields.get("description") or not body:
-            fail(f"{path.relative_to(ROOT)} requires name, description, and a prompt body")
+            fail(f"{relative(path)} requires name, description, and a prompt body")
         if name != path.stem:
             fail(f"agent {path.name} declares name {name!r}")
         if name in agent_names:
@@ -139,26 +93,25 @@ def check_tree() -> None:
             fail(f"agent {name} requires an explicit supported thinkingLevel")
         if not fields.get("tools"):
             fail(f"agent {name} requires an explicit tool envelope")
-        autoload = fields.get("autoloadSkills", "")
-        for skill in filter(None, (part.strip() for part in autoload.split(","))):
+        for skill in split_csv(fields.get("autoloadSkills", "")):
             if skill not in skill_names:
                 fail(f"agent {name} autoloads missing skill {skill}")
 
-    missing_agents = REQUIRED_AGENTS - agent_names
-    if missing_agents:
-        fail(f"missing executive role agents: {sorted(missing_agents)}")
-    allowed_spawns = agent_names | BUNDLED_AGENTS
+    allowed_spawns = agent_names | contract.bundled_agents
     for name, fields in agent_fields.items():
-        for spawn in filter(None, (part.strip() for part in fields.get("spawns", "").split(","))):
+        for spawn in split_csv(fields.get("spawns", "")):
             if spawn != "*" and spawn not in allowed_spawns:
                 fail(f"agent {name} spawns unknown agent {spawn}")
 
     declared_skills: set[str] = set()
-    for directory in sorted(path for path in (GLOBAL / "skills").iterdir() if path.is_dir()):
+    for directory in sorted(path for path in skill_dir.iterdir() if path.is_dir()):
         skill_file = directory / "SKILL.md"
         if not skill_file.is_file():
             fail(f"skill directory {directory.name} has no SKILL.md")
-        fields, _ = frontmatter(skill_file)
+        try:
+            fields, _ = frontmatter(skill_file)
+        except ContractError as error:
+            fail(str(error))
         name = fields.get("name", directory.name)
         if name != directory.name:
             fail(f"skill directory {directory.name} declares name {name!r}")
@@ -168,92 +121,33 @@ def check_tree() -> None:
             fail(f"duplicate skill name {name}")
         declared_skills.add(name)
 
-    for state_path in STATE_PATHS:
-        target = AGENT_DIR / state_path
-        if target.is_symlink():
-            fail(f"mutable OMP state must not be symlinked: {target}")
+
+def split_csv(value: str) -> list[str]:
+    return [part.strip() for part in value.split(",") if part.strip()]
 
 
-
-def check_install() -> None:
-    for name in EXPECTED:
-        source = GLOBAL / name
-        target = AGENT_DIR / name
-        if not target.is_symlink():
-            fail(f"declarative OMP path is not linked: {target}")
-        if target.resolve() != source.resolve():
-            fail(f"declarative OMP link drift: {target} -> {target.resolve()}")
-
-def check_omp_schema() -> dict[str, object]:
-    with tempfile.TemporaryDirectory(prefix="omp-config-check-") as temp:
-        temp_agent = Path(temp) / "agent"
-        temp_agent.mkdir()
-        (temp_agent / "config.yml").symlink_to(GLOBAL / "config.yml")
-        env = os.environ.copy()
-        env["PI_CODING_AGENT_DIR"] = str(temp_agent)
-        result = subprocess.run(
-            ["omp", "config", "list", "--json"],
-            cwd=ROOT,
-            env=env,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            timeout=30,
-        )
-        if result.returncode:
-            fail(f"OMP rejected global/config.yml: {result.stderr.strip()}")
+def main(argv: list[str]) -> int:
+    if len(argv) > 1 or (argv and argv[0] != "--installed"):
+        fail("usage: bin/check [--installed]")
+    try:
+        contract = load_contract(ROOT)
+    except ContractError as error:
+        fail(str(error))
+    check_tree(contract)
+    try:
+        effective_config(contract)
+    except ContractError as error:
+        fail(str(error))
+    if argv:
         try:
-            return json.loads(result.stdout)
-        except json.JSONDecodeError as error:
-            fail(f"OMP returned invalid config JSON: {error}")
+            receipts = require_projection(contract)
+        except ContractError as error:
+            fail(str(error))
+        print(f"OMP source/projection configuration OK ({len(receipts)} symlinks and digests verified)")
+    else:
+        print("OMP source configuration OK")
+    return 0
 
 
-def config_value(config: dict[str, object], key: str) -> object:
-    entry = config.get(key)
-    if not isinstance(entry, dict) or "value" not in entry:
-        fail(f"OMP config omitted {key}")
-    return entry["value"]
-
-
-def check_executive_config(config: dict[str, object]) -> None:
-    roles = config_value(config, "modelRoles")
-    if not isinstance(roles, dict):
-        fail("modelRoles must be a mapping")
-    if roles.get("default") not in EXECUTIVE_MODELS:
-        fail("default model must launch a Fable-high or Sol-high chief executive")
-    if roles.get("plan") != "openai-codex/gpt-5.6-sol:high":
-        fail("plan role must use Sol high")
-    if roles.get("designer") != "zai/glm-5.2:high":
-        fail("designer role must use GLM 5.2 through the ZAI subscription")
-    if roles.get("research") != "kimi-code/k3:high":
-        fail("research role must use K3 through the Kimi subscription")
-    if roles.get("composer") != "cursor/composer-2.5":
-        fail("Cursor must be reserved for the Composer 2.5 role")
-    if roles.get("vision") != "google-antigravity/gemini-3.5-flash":
-        fail("vision role must use Gemini 3.5 Flash through Google Antigravity")
-    expected = {
-        "task.eager": {"preferred", "always"},
-        "task.batch": {True},
-        "task.enableLsp": {True},
-        "async.enabled": {True},
-    }
-    for key, allowed in expected.items():
-        value = config_value(config, key)
-        if value not in allowed:
-            fail(f"{key} must be one of {sorted(map(str, allowed))}")
-    concurrency = config_value(config, "task.maxConcurrency")
-    if not isinstance(concurrency, (int, float)) or concurrency < 2:
-        fail("task.maxConcurrency must permit a real team")
-    recursion = config_value(config, "task.maxRecursionDepth")
-    if not isinstance(recursion, (int, float)) or recursion < 1:
-        fail("task.maxRecursionDepth must permit supervised subteams")
-
-
-if len(sys.argv) > 2 or (len(sys.argv) == 2 and sys.argv[1] != "--installed"):
-    fail("usage: bin/check [--installed]")
-check_tree()
-config = check_omp_schema()
-check_executive_config(config)
-if len(sys.argv) == 2:
-    check_install()
-print("OMP configuration OK")
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))
