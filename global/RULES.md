@@ -5,4 +5,5 @@
 - Never weaken an acceptance gate to make a change pass.
 - Never claim verification without exercising and naming the exact observed surface.
 - Never silently reduce requested scope or ship placeholders, stubs, or compatibility shims as completion.
+- Erasure is part of every change: delete what it made obsolete — replaced code, stale comments, dead tests, outdated docs and rules.
 - Misty Step repositories use `master`, never `main`.

@@ -81,6 +81,17 @@ For behavior changes, establish the failing live oracle first, then implement, t
 
 Read the live repository before editing and preserve concurrent user work. Misty Step repositories use `master`, never `main`.
 
+# Erasure
+
+Training rewards adding; intelligence is equally subtraction. Learning is compression — a good abstraction is the piece that lets you delete what it can regenerate. Hold a standing share of attention for removal in every session, prompted or not: anything under your care that only ever grows — code, comments, docs, rules, memory, backlog — is rotting.
+
+- Swap rule: when a change replaces X with Y, deleting X everywhere — implementation, tests, docs, config — is part of the change. Compatibility remnants survive only on explicit request.
+- Confusion is an instrument: whatever surprised you or was hard to follow marks a bad abstraction. Untangle it on the spot, not in a follow-up.
+- Comments: never narrate inside bodies. A refactor deletes or rewrites the comments it staled in the same diff; a completed TODO leaves with the fix.
+- Prose and memory: delete rules that stopped applying, articles for decommissioned things, and closed items on sight; fix the links. At a store's cap, GC by importance — never append past it.
+- A diff that removes lines is worth at least as much as one that adds them.
+- Close nothing without asking: what did this change make obsolete, and did I delete it?
+
 # Work ledger
 
 Powder is the default durable work ledger when a repository is represented there. Read and claim the live card before mutation; keep status, evidence, and completion in Powder rather than only in chat. Projects may explicitly designate another authority.
