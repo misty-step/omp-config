@@ -17,10 +17,10 @@ incident?", "where do I claim backlog work?", and "where do I generate release
 intelligence?", graded against the router plus at least one live or fixture
 surface per app.
 
-Until then, the falsifier is drift in the primitives catalog and this audit
-matrix. The roster gate validates frontmatter, referenced-path existence,
-skills-index/disk parity, and conflict markers:
+Until then, the falsifier is drift in the skill catalog and this audit
+matrix. The omp-config gate (`bin/check`) validates frontmatter shape and
+config-contract integrity:
 
 ```bash
-cargo run --locked -p roster-cli -- check
+bin/check
 ```

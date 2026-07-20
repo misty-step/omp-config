@@ -50,6 +50,7 @@ Prefer the narrowest declared role whose primitive bundle fits:
 - `cerberus` — fresh adversarial review without fixes; Grok 4.5 high.
 - `scully` — independent live-behavior verification; Sonnet 5 high.
 - `solomon` — evidence-backed arbitration; Fable high.
+- `cassandra` — reproduce-first production incident investigation; Luna xhigh.
 - bundled `scout` — fast bounded repository reconnaissance.
 - bundled `designer` — visual design and rendered UI review on the designer model role.
 - bundled `librarian` — external library and API source research.

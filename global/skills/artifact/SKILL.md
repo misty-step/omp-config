@@ -91,8 +91,8 @@ after the rename commit point is reported explicitly as
 
 `scripts/artifact_serve.py` is a portable local static server for
 `~/artifacts/public`. The operator owns any external exposure, persistence, and
-service manager. Roster does not install, converge, publish, or bridge that
-service.
+service manager. This skill does not install, converge, publish, or bridge
+that service.
 
 ## Extending
 
