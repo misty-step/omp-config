@@ -1,3 +1,5 @@
+# Brokered through production mint (tailnet): apiKey is a PLACEHOLDER, the
+# real key never touches this machine. Wiring + how to extend: global/MINT.md.
 providers:
   openrouter:
     baseUrl: "http://100.108.0.89:4949/proxy/https/openrouter.ai/api/v1"
