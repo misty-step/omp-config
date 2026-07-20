@@ -3,9 +3,9 @@
 Use this when designing, auditing, or repairing CI across local machines,
 GitHub Actions, Azure Pipelines, self-hosted runners, or future hosts.
 
-Roster remains a focused agent primitive catalog. Do not build a CI
-framework here. The `/ci` skill teaches agents how to shape repo-local CI; the
-implementation belongs in the consumer repo.
+The `/ci` skill teaches agents how to shape repo-local CI; the
+implementation belongs in the consumer repo. Do not build a CI framework
+in the skill itself.
 
 ## North Star
 

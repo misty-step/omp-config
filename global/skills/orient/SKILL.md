@@ -39,7 +39,6 @@ already settled. Beyond the obvious (`git status`, branch, recent commits):
 
 - scoped then repo `AGENTS.md`; `VISION.md`/`project.md` for focus (`README.md` only if still unclear)
 - active work from the registry-routed board of record: Powder for ordinary Misty Step repositories; Habitat for Adminifi and r90. Start with repository-level stats, then enumerate the repository before status slices. An empty filtered result proves only that the filter matched nothing. Treat a local backlog tree only as an explicit migration source named by the routing profile, never as a parallel ledger
-- roster probe (`roster list` / roster MCP) — only when the next move is a delegation
 
 ## Picking up a dead session
 
@@ -92,10 +91,10 @@ spin up provider lanes unless scope is broad, stale, or contested. Scoped
 
 ## Verification
 
-Editing this skill in the roster source repo:
+Editing this skill in the omp-config source repo:
 
 ```sh
-cargo run --locked -p roster-cli -- check
+bin/check
 ```
 
 Invoked in another repo, that command isn't required — acceptance is the

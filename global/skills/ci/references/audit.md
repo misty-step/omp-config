@@ -5,13 +5,8 @@ agent-legible enough to trust. For host-agnostic CI design, load
 `host-agnostic-ci.md` first.
 
 For consumer repos, first identify the repo-owned gate from root instructions,
-package manifests, CI workflows, hooks, and shipped scripts. Do not assume
-roster's Rust gate runs there. Apply this rubric to the repo's actual gate.
-
-For roster itself, the source-repo maintenance gate is `cargo fmt`, `cargo
-clippy -D warnings`, `cargo test --workspace`, plus the `roster check` verb
-(`crates/roster-cli/src/check.rs`) gating the `primitives/` catalog. That
-Rust gate is roster plumbing, not a general CI framework.
+package manifests, CI workflows, hooks, and shipped scripts. Apply this
+rubric to the repo's actual gate.
 
 ## Required Checks
 
@@ -53,25 +48,6 @@ Rust gate is roster plumbing, not a general CI framework.
   invariant.
 - Track or report gate duration, critical path, and cache behavior when the
   substrate exposes them.
-
-## Roster Source Repo
-
-Only when auditing roster itself:
-
-- `.github/workflows/ci.yml` runs `cargo fmt --all -- --check`, `cargo clippy
-  --workspace --all-targets -- -D warnings`, `cargo test --workspace`, and
-  `cargo llvm-cov` with the repo's coverage floor.
-- `roster check` (`crates/roster-cli/src/check.rs`) covers frontmatter shape,
-  referenced-path existence, `skills-index.yaml`/disk parity, and conflict
-  markers over `primitives/` — deterministic-consumer checks only; premise
-  soundness and other semantic judgment stay model work, not linted here.
-- `skills-index.yaml` is current after skill/primitive changes (`roster check`
-  surfaces drift; fixing it is a manual edit, not an auto-fix).
-- Active skill prose does not point operators at the retired predecessor's
-  gate as Roster's source-repo gate.
-
-Do not add consumer-repo CI framework code to roster to satisfy this rubric.
-Update skill guidance, templates, or repo-local consumer gates.
 
 ## Audit Findings
 

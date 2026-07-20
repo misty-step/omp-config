@@ -71,11 +71,7 @@ test -f VISION.md
 rg -n "VISION\\.md" AGENTS.md .agents .codex .claude .pi .antigravitycli skills 2>/dev/null
 ```
 
-Then run the repo's named gate. In roster itself, that is:
-
-```sh
-cargo run --locked -q -p roster-cli -- check
-```
+Then run the repo's named gate.
 
 ## Gotchas
 

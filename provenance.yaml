@@ -10,6 +10,12 @@
         "kind": "file",
         "origin": "local"
       },
+      "provider_models": {
+        "source": "global/models.yml",
+        "target": "models.yml",
+        "kind": "file",
+        "origin": "local"
+      },
       "context": {
         "source": "global/AGENTS.md",
         "target": "AGENTS.md",

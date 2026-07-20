@@ -28,17 +28,17 @@ This pattern generates **one to three focused skills**, not a harness: no
 manifest, killswitch, lint hook, or state machine. A lead
 agent reads a repo, exercises judgment about what's worth generating, writes
 it, proves it once with a cold-agent smoke. If a repo needs more than a
-handful of bespoke skills, that is a signal to declare a focused Roster
-identity with a curated `role.yaml` skill list instead of hand-generating
-a pile — identities subset the existing catalog; this pattern authors net-new
-repo-specific content that has no catalog equivalent.
+handful of bespoke skills, that is a signal to declare a focused OMP agent
+with a curated `autoloadSkills` list instead of hand-generating a pile —
+declared agents subset the existing skill catalog; this pattern authors
+net-new repo-specific content that has no catalog equivalent.
 
 ## Read the repo before writing anything
 
 In priority order, because later sources correct earlier ones when they
 disagree:
 
-1. `AGENTS.md` / `CLAUDE.md` — the repo's own stated contract: gate command,
+1. `AGENTS.md` — the repo's own stated contract: gate command,
    base branch, red lines, known-debt map.
 2. `.github/workflows/*.yml` (or equivalent CI config) — what actually runs
    on a PR, which may differ from what `AGENTS.md` claims. A repo with no CI
@@ -62,7 +62,7 @@ Rank candidate domains by whether a cold agent can run something real and
 observe pass/fail, not by topic importance:
 
 - **Verification/QA** is almost always the strongest first domain — every
-  repo has a shape and a real command to exercise it (`primitives/skills/qa/SKILL.md`'s
+  repo has a shape and a real command to exercise it (`global/skills/qa/SKILL.md`'s
   shape table: browser app, API/service, CLI, library, MCP, hybrid).
 - **Deploy/release runbooks** are the second-strongest — a real deploy
   command, a real rollback/DR path, usually already written down in
@@ -80,19 +80,17 @@ against role-scoped bundles instead.
 
 - Path: `<target-repo>/.agents/skills/<repo>-<domain>/SKILL.md` — e.g.
   `canary-qa`, `powder-qa`, `canary-deploy`. The repo prefix is load-bearing:
-  it keeps the generated skill from shadowing a first-party Roster skill
+  it keeps the generated skill from shadowing a first-party omp-config skill
   name (`qa`, `deploy`) and makes provenance legible from the directory name
   alone.
-- Never write into Roster's own tree, and never write directly into a
-  harness-specific bridge directory (`.claude/skills/`, `.codex/skills/`,
-  `.pi/skills/`) in the target repo — those are sync/bootstrap output in
-  repos that project Roster primitives, not source. `.agents/skills/`
-  is the portable root a harness projects from.
+- Never write into omp-config's own tree. `.agents/skills/` in the target
+  repo is the portable root; write there directly — there is no separate
+  per-harness bridge directory to sync from it.
 - Copy `templates/repo-local-skill/SKILL.md.tmpl` as the starting shape:
   frontmatter (`name`, `description` with explicit `Use when:`/`Trigger:`
   phrasing, `argument-hint`), the provenance comment block, a surfaces/routes
   table, exact commands, gotchas, and a report contract — same shape as
-  `primitives/skills/qa/SKILL.md` and the `canary-qa` exemplar, scaled to what this
+  `global/skills/qa/SKILL.md` and the `canary-qa` exemplar, scaled to what this
   repo actually has.
 
 ## Provenance header
@@ -102,10 +100,10 @@ frontmatter closing `---`, before the first heading:
 
 ```markdown
 <!--
-Generated via Roster's repo-local skill generation pattern
-(primitives/skills/harness-engineering/references/repo-local-skill-generation.md).
+Generated via omp-config's repo-local skill generation pattern
+(global/skills/harness-engineering/references/repo-local-skill-generation.md).
 Source repo: <owner/repo> @ <sha>. Generated: <YYYY-MM-DD>.
-Generator ref: roster@<sha used to generate this>.
+Generator ref: omp-config@<sha used to generate this>.
 Facts below are repo-derived at generation time, not invented. Re-verify
 commands against the live repo before trusting this if it has aged — a
 generated skill is a snapshot, not a live view.
@@ -123,7 +121,7 @@ generated content from hand-authored content and judge staleness.
 Copy `templates/repo-local-skill/evals/eval-stub.md.tmpl` to
 `<target-repo>/.agents/skills/<repo>-<domain>/evals/<repo>-<domain>-eval.md`.
 It is a deliberately smaller instrument than
-`primitives/skills/skill-eval/templates/eval-spec.md` (Roster's first-party
+`global/skills/skill-eval/templates/eval-spec.md` (omp-config's first-party
 template): one falsifiable claim, one to two fixtures built around a cold-
 agent run (not a multi-arm A/B judge panel — the claim being tested is "does
 a cold agent execute the real command from this skill alone," not "does this
@@ -154,7 +152,7 @@ committed (next section), so real evidence should already exist.
 
 - No manifest, no A/B eval infrastructure, no rollback, no lint-enforced skill
   cap — see the boundary section above.
-- No shadowing a first-party Roster skill name.
+- No shadowing a first-party omp-config skill name.
 - No touching the target repo's root `SKILL.md` (the product skill, if one
   exists) or its `AGENTS.md`/gate contract — this pattern adds a skill, it
   does not rewrite the repo's own doctrine.

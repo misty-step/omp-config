@@ -24,16 +24,17 @@ Prose is the burner label. Hooks are the redesigned stove.
 
 ## Local CI
 
-For Roster itself, run the Rust-owned local gate:
+For omp-config itself, run the Python-owned local gate:
 
 ```sh
-cargo run --locked -p roster-cli -- check
+bin/check
+bin/check --installed   # also verifies the ~/.omp/agent projection
 ```
 
-When adding gate coverage, keep deterministic catalog checks inside
-`roster check`; semantic quality belongs to evals and fresh critics.
-Do not make Dagger, Docker, GitHub Actions YAML, or provider CLIs the default
-inner-loop gate for Roster.
+When adding gate coverage, keep deterministic config-contract checks inside
+`bin/check`; semantic quality belongs to evals and fresh critics. Do not make
+Dagger, Docker, GitHub Actions YAML, or provider CLIs the default inner-loop
+gate for omp-config.
 
 ## Consumer repo gate velocity
 
@@ -61,12 +62,13 @@ unfinished.
 
 ## Hooks are the highest-leverage investment
 
-Hooks run on every tool use. CLAUDE.md is read once. A hook that blocks
-`rm -rf` is infinitely more reliable than a CLAUDE.md line saying
+Hooks run on every tool use. `AGENTS.md` is read once. A hook that blocks
+`rm -rf` is infinitely more reliable than an `AGENTS.md` line saying
 "don't delete files." Invest in hooks over prose.
 
-Harness-native hooks stay in the owning harness or consumer repository. Roster
-v0.2 composes session primitives; it does not install or manage hook surfaces.
+Harness-native hooks stay in the owning harness or consumer repository.
+omp-config composes session primitives (skills, agents, config, MCP); it does
+not install or manage per-repo hook surfaces.
 
 ## AGENTS.md is a map, not a manual
 
@@ -102,7 +104,7 @@ When multiple skills touch the same delivery lane, enforce strict layering:
 - **Composer skills orchestrate leaves around one bounded objective.**
   Example: `/deliver`.
 - **Outer-loop / event workflows are Mode B** (bitterblossom), not new
-  skills here — see `meta/CONTRACTS.md`.
+  skills here — see `../../shared/references/loop-readiness.md`.
 - **Aliases are vocabulary, not new domains.** Do not add a skill when a
   trigger alias on an existing one covers the request.
 

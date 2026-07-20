@@ -3,8 +3,8 @@ name: ci
 description: |
   Audit, design, and run repo-owned CI gates, host-agnostic by default — one
   repo-owned contract that local, GitHub Actions, Azure, or any runner calls.
-  Roster's own gate is fmt/clippy/test plus `cargo run --locked -p roster-cli
-  -- check`; consumer repos keep their native gate. Use when: "run ci",
+  The harness source repo (omp-config) gates with `bin/check`; consumer
+  repos keep their native gate. Use when: "run ci",
   "fix ci", "ci is red", "is ci passing", "audit/design/strengthen CI", "host-agnostic CI",
   "Dagger", "gates are slow". Trigger: /ci, /gates.
 argument-hint: "[--audit-only|--run-only]"
@@ -15,24 +15,15 @@ argument-hint: "[--audit-only|--run-only]"
 Confidence in correctness without turning local work into a provider or Docker
 tax.
 
-Roster's own source-repo gate:
+The harness source repo (`~/Development/omp-config`) gates with `bin/check`
+(config-contract validation over `global/`); run it, then `bin/install`, after
+changing harness primitives. This is harness plumbing, not a framework to
+project into consumer repos.
 
-```sh
-cargo fmt --all -- --check
-cargo clippy --workspace --all-targets -- -D warnings
-cargo test --workspace
-cargo run --locked -p roster-cli -- check
-```
-
-The Rust checks run in `.github/workflows/ci.yml`; `roster check` (deterministic
-frontmatter/path/index/conflict-marker gate over `primitives/`) lives at
-`crates/roster-cli/src/check.rs`. This is roster's own plumbing, not a framework
-to project into every consumer repo.
-
-In a consumer repo, do not assume roster's Rust gate is installed. Read that
-repo's root instructions, manifests, CI workflows, hook config, and shipped
-scripts, then strengthen the repo-owned gate. Roster supplies CI *judgment*; the
-consumer repo owns the implementation. What to gate on follows the standing
+In a consumer repo, read that repo's root instructions, manifests, CI
+workflows, hook config, and shipped scripts, then strengthen the repo-owned
+gate. This skill supplies CI *judgment*; the consumer repo owns the
+implementation. What to gate on follows the standing
 quality floor in `primitives/shared/references/quality-gates.md`; CI
 architecture and Dagger tradeoffs live in `references/host-agnostic-ci.md`.
 
@@ -102,10 +93,8 @@ preservation, and the lead owns synthesis.
 
 Check the live gate surface:
 
-- Roster: the root contract names the four commands above;
-  `.github/workflows/ci.yml` runs the Rust checks; `check.rs` holds the `roster
-  check` lane list; `skills-index.yaml` is current after skill/primitive changes.
-- Consumer repos: substitute that repo's gate contract, then apply the same
+- omp-config: `bin/check` passes and `bin/install` has been run.
+- Consumer repos: identify that repo's gate contract, then apply the same
   security floor. Confirm local hooks run the fast gate (not the full ship
   gate), the full gate stays required at merge/deploy, an explicit command runs
   the full gate locally before marking a PR ready, CI cancels stale PR runs but

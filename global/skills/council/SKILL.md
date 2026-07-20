@@ -22,8 +22,8 @@ orchestrator can't produce alone.
 This is the **generative** sibling of `/peer-harnesses`. Its adversarial bench
 reviews an artifact to find the bug (one lens each, artifact-only). A council
 *generates*: options, framings, first-principles takes, the non-obvious move,
-the real disagreement. Reuse roster's dispatch mechanics and model index; this
-skill owns composition + synthesis.
+the real disagreement. Dispatch lanes through the peer harness CLIs and model index from
+`/peer-harnesses`; this skill owns composition + synthesis.
 
 ## When to convene (and when not)
 
@@ -100,7 +100,7 @@ Reading the lanes is the work — don't just paste them.
   goal, and what "good" looks like into the task — a member missing context
   invents it.
 - **Stale slugs.** A lane failing instantly is usually a dead/renamed slug or an
-  auth lapse, not a verdict — re-check live (roster index / OpenRouter MCP) and
+  auth lapse, not a verdict — re-check live (the `/peer-harnesses` model index / OpenRouter MCP) and
   re-run that lane.
 - **Brainstorm ≠ converge in one shot.** Use the council to widen; then you (or
   a focused follow-up) narrow. Don't ask the bench to also pick the winner —

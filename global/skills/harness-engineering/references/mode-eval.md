@@ -43,7 +43,7 @@ from the workers'.
   (harness-native invocation logs plus Powder receipts.)
 - HarnessX-style trace evolution is review-only here: a Mode B/eval lane may
   propose typed harness edits from sanitized traces, but no source edit ships
-  without held-out tasks, the full Roster gate, fresh critic review, and
+  without held-out tasks, the full omp-config gate, fresh critic review, and
   human approval. Candidate patches are artifacts, not self-merging workers.
 - Serious, repeated eval work (benchmarking agent compositions, model
   selection for a recurring workflow) belongs in Daedalus's arena loop, not

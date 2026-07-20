@@ -4,24 +4,25 @@ Measure what the catalog actually earns, then recommend lifecycle actions.
 
 ## Data
 
-Read `~/.claude/skill-invocations.jsonl` (written by the Claude
-`skill-invocation-tracker` PostToolUse hook), then cross-check durable lane
-evidence on the relevant Powder cards. Roster intentionally does not carry a
-semantic telemetry engine; analyze the JSONL directly or with a bounded
-one-off query and preserve only the resulting judgment.
-
-**Codex has no invocation hook.** Its usage signal comes from session-log
-mining — count distinct sessions that actually read a skill file:
+OMP does not ship a semantic skill-invocation telemetry engine or a
+PostToolUse hook by default. Usage signal comes from mining local session
+logs directly — count distinct sessions that actually read a skill via
+`skill://<name>`:
 
 ```sh
-cd ~/.codex/sessions && find . -name '*.jsonl' -mtime -60 -print0 \
-  | xargs -0 grep -EHo '(cat|view|sed -n) [^"]*skills/[a-z-]+/SKILL.md' \
-  | awk -F: '{match($0,/skills\/[a-z-]+\/SKILL/); print $1" "substr($0,RSTART+7,RLENGTH-13)}' \
+cd ~/.omp/agent/sessions && find . -name '*.jsonl' -mtime -60 -print0 \
+  | xargs -0 grep -EHo '"skill://[a-z-]+' \
+  | awk -F: '{n=split($0,a,"skill://"); print $1" "a[2]}' \
   | sort -u | awk '{print $2}' | sort | uniq -c | sort -rn
 ```
 
+Cross-check durable lane evidence on the relevant Powder cards. Analyze the
+JSONL directly or with a bounded one-off query and preserve only the
+resulting judgment.
+
 Raw occurrence counts without the per-session `sort -u` are catalog noise,
-not usage — the skill list rides in every prompt.
+not usage — the skill list rides in every prompt and a single session can
+re-read a skill's sub-references many times.
 
 ## Judgment
 

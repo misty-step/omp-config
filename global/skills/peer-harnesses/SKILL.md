@@ -58,12 +58,11 @@ row is the headless form; add the prompt as the argument or via stdin.
 | `hermes` | Hermes agent | `hermes -z "<task>"` (`-m <model>`) |
 | `oracle` | Oracle browser consult | `npx -y @steipete/oracle --engine browser --model gpt-5.5-pro -p "<task>" --file <paths>` |
 Current model ids, pricing, context windows, and freshness dates:
-`primitives/skills/peer-harnesses/references/model-provider-harness-index.md`.
+`references/model-provider-harness-index.md`.
 Model and harness facts rot in days, and the ranking of favorites is itself
 perishable — a drop like Grok 4.5 (2026-07-08: Opus-class at $2/$6) can
-reorder the bench overnight. `roster check` warns when the index is past its
-review-due date; a WARN, a new frontier release, or a composition decision
-the index can't settle each trigger a refresh (/research or
+reorder the bench overnight. A past-due review date on the index, a new frontier release, or a composition
+decision the index can't settle each trigger a refresh (/research or
 /harness-engineering models) before dispatching on remembered facts.
 
 ## Adversarial bench
@@ -100,9 +99,9 @@ not the full bench.
   it, and own the result.
 - A failed or rambling lane is a result too — report it, don't re-roll
   silently.
-- Oracle is browser-mode only in Roster. Use it for high-context consults
-  through a signed-in ChatGPT session; do not use Oracle API mode or multi-model
-  API panels from the Roster default.
+- Oracle is browser-mode only. Use it for high-context consults through a
+  signed-in ChatGPT session; do not use Oracle API mode or multi-model API
+  panels by default.
 - For a bounded lane whose evidence should outlive the session, write the
   receipt to Powder — a run, comment, or link on the card the lane's work
   feeds. Optional for quick second opinions; useful when the lane's verdict

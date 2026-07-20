@@ -64,11 +64,10 @@ For a cheap zero-build holistic system lab, use six blind philosophies and
 require three proposals from each before dedupe. This is an exploration floor,
 not permission to keep weak work.
 
-The philosophies (vendored under `primitives/skills/.external/` in the Roster
-checkout — resolve as `~/Development/roster/primitives/skills/.external/<alias>/SKILL.md`,
-or fetch the pinned repo from `primitives/skills/.external/registry.yaml` if no
-local checkout is available; licences and boundaries in
-`references/external-design-references.md`):
+The philosophies (vendored under `references/external/` in this skill —
+resolve as `references/external/<alias>/SKILL.md`, or fetch the pinned repo
+from `references/external/registry.yaml` if a vendored copy is missing;
+licences and boundaries in `references/external-design-references.md`):
 
 | Lane | Brings |
 |---|---|

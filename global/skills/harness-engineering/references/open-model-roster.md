@@ -7,7 +7,7 @@ roster_review_due: 2026-08-05
 Last researched: 2026-07-08 (OpenRouter catalog re-pulled; harness notes from
 2026-06-19 substrate report unless dated otherwise).
 
-Use this when choosing open-model defaults and variants for Roster
+Use this when choosing open-model defaults and variants for OMP peer
 lanes. Treat this as a one-day operating snapshot. Re-check OpenRouter and run
 live local smokes before each default change.
 
@@ -24,13 +24,13 @@ OpenRouter snapshot unless a later live probe is cited.
 | Goose | `openrouter/moonshotai/kimi-k2.7-code` | MCP-heavy workflows that span code plus trackers, docs, browsers, chat, or internal tools. |
 
 Claude, Antigravity, Cursor, and Grok remain useful conditional tools. They are
-not the default composition bias for Roster peer lanes when a
+not the default composition bias for OMP peer lanes when a
 smoke-tested open-model lane can answer the same question. Conditional does
 not mean static: Grok Build's default moved to grok-4.5 on 2026-07-08
 (Opus-class at `$2/$6`, with `--best-of-n` and `--check` self-verification) —
 when a proprietary lane's price/capability crosses into open-model territory,
 re-run the comparison instead of citing the old verdict (facts:
-`primitives/skills/peer-harnesses/references/model-provider-harness-index.md`).
+`global/skills/peer-harnesses/references/model-provider-harness-index.md`).
 
 ## Local Smoke Evidence
 
@@ -112,11 +112,11 @@ promotion.
 
 ### Pi
 
-Pi stays the smallest open-model peer lane because Roster already has
-dispatch receipts and model override support for it. Roster dispatch uses
-`--no-extensions` so optional personal Pi extensions cannot make a successful
-model response exit nonzero. Pi also supports custom OpenAI-compatible
-providers/models through `~/.pi/agent/models.json`.
+Pi stays the smallest open-model peer lane: the receipts above already cover
+dispatch and model-override behavior for it, invoked with `--no-extensions`
+so optional personal Pi extensions cannot make a successful model response
+exit nonzero. Pi also supports custom OpenAI-compatible providers/models
+through `~/.pi/agent/models.json`.
 
 Source: https://pi.dev/docs/latest/models.
 
@@ -151,8 +151,8 @@ Source: https://openrouter.ai/docs/cookbook/coding-agents/opencode-integration.
   decorrelated peer critiques. The model family may be the same; the harness
   behavior is not.
 - Promote a default only with: live OpenRouter catalog evidence, local binary
-  probe, and at least one real Roster smoke receipt.
-- Keep model facts in `primitives/skills/peer-harnesses/references/model-provider-harness-index.md`.
+  probe, and at least one real local smoke receipt (record it in the table above).
+- Keep model facts in `global/skills/peer-harnesses/references/model-provider-harness-index.md`.
   Keep role-fit policy here and in shared doctrine.
 - Do not add a new provider wrapper if Pi/Goose/OpenCode plus model variants
   cover the failure mode.

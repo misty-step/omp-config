@@ -90,10 +90,10 @@ separating agent-owned action from user-owned external action.
 
 ## Verification
 
-When editing this skill in the roster source repo:
+When editing this skill in the omp-config source repo:
 
 ```sh
-cargo run --locked -p roster-cli -- check
+bin/check
 ```
 
 Semantic acceptance: a useful `/next` answer names current state, one best next

@@ -4,17 +4,16 @@ Apply when `/harness-engineering` is improving first-party skills, creating a
 new skill, or auditing the catalog after external skill-system research.
 
 Source prompt: Anthropic's "Lessons from building Claude Code: How we use
-skills" (2026-06-03), adapted to Roster's cross-harness filesystem-first
-contract.
+skills" (2026-06-03), adapted to omp-config's filesystem-first contract.
 
 ## Translate External Principles
 
-| Principle | Roster rule |
+| Principle | omp-config rule |
 |---|---|
 | Skill is a folder | Prefer `references/`, `scripts/`, `examples/`, `assets/`, `templates/`, and `evals/` over long inline prose. |
 | Clean category | Each skill owns one workflow category; multi-category skills compose other skills or split. |
 | Verification skills matter | Verification behavior gets a real system: driver, grader, evidence packet, and cadence before extra prose. |
-| Do not state the obvious | Delete generic SWE advice unless it names a Roster-specific failure mode. |
+| Do not state the obvious | Delete generic SWE advice unless it names an omp-config-specific failure mode. |
 | Gotchas carry signal | Add gotchas from observed failures, receipts, audits, or failing gates; avoid speculative warnings. |
 | Progressive disclosure | `SKILL.md` routes; references hold depth; scripts and assets hold repeatable mechanics. |
 | Avoid railroading | Give constraints, choices, and oracles; do not force one procedure when repo evidence should choose. |
@@ -48,10 +47,9 @@ Loop already demands.
   exhaustive); split the sequence only when the rush is actually observed.
 - **Invocation cost accounting.** Every model-facing description pays
   context load every session — the description tax. A skill only ever fired
-  by hand can drop its model-facing description in harness projections that
-  support it (e.g. Claude Code `disable-model-invocation`); telemetry
-  (`/groom audit`) names the candidates. Cross-harness caveat: this is a
-  per-harness projection decision, never a source-skill deletion.
+  by hand can drop its model-facing description with
+  `disable-model-invocation: true` (or `hide: true`); telemetry
+  (`/groom audit`) names the candidates.
 
 ## Upgrade Loop
 
@@ -64,27 +62,26 @@ Loop already demands.
 6. Convert any repeated gotcha into a script, hook, eval, or gate when feasible.
    Use `../../../shared/references/verification-system-first.md` for
    eval, benchmark, QA, or smoke-path design.
-7. Run `cargo run --locked -p roster-cli -- check`
-   and the full repo gate before shipment.
+7. Run `bin/check` and the full repo gate before shipment.
 
 ## New Skill: Eval Scaffold Is Not Optional
 
 Every new first-party skill ships with eval coverage or an explicit waiver in
-the first commit, not as a follow-up. `roster check` verifies referenced paths;
+the first commit, not as a follow-up. `bin/check` verifies referenced paths;
 the eval's behavioral claim is reviewed and run through `/skill-eval`, not
 reduced to a structural string-matching gate.
 
 When scaffolding a new skill:
 
 1. Copy `../../skill-eval/templates/eval-spec.md` to
-   `primitives/skills/<name>/evals/<name>-eval.md` and fill in the one claim the skill
+   `global/skills/<name>/evals/<name>-eval.md` and fill in the one claim the skill
    must earn, 2–3 fixtures, objective checks, and a pass condition — even if
-   the run itself hasn't happened yet (see `primitives/skills/orient/evals/orient-eval.md`
+   the run itself hasn't happened yet (see `global/skills/orient/evals/orient-eval.md`
    for a seeded-but-unrun example).
 2. If the skill's claim genuinely can't be evaled yet (external live
    dependency, taste-heavy rubric needing a human anchor, no fixture budget
-   yet), write `primitives/skills/<name>/evals/WAIVER.md` instead: a reason plus an
-   `expires: YYYY-MM-DD` line. See any file under `primitives/skills/*/evals/WAIVER.md`
+   yet), write `global/skills/<name>/evals/WAIVER.md` instead: a reason plus an
+   `expires: YYYY-MM-DD` line. See any file under `global/skills/*/evals/WAIVER.md`
    for the expected shape. A waiver is a time-boxed deferral, not a permanent
    opt-out — an expired waiver fails the gate exactly like a missing eval.
 3. Never satisfy the gate with an empty or placeholder eval file just to pass
@@ -99,7 +96,7 @@ Start with machine-checkable hygiene before subjective rewrites:
 - no trigger collisions;
 - no stale local references in routes or examples;
 - no skill over 500 lines without progressive disclosure;
-- no substantial workflow skill without the shared roster floor pointer;
+- no substantial workflow skill without the shared operating-spine floor pointer;
 - no generated docs/index drift after a skill change.
 
 Only then spend attention on taste: category fit, gotcha quality, excess prose,

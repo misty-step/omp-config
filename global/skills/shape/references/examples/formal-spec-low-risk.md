@@ -6,7 +6,7 @@ Correct the misspelled setup command label in the docs copy.
 
 ## Oracle (Definition of Done)
 
-- [ ] `cargo run --locked -p roster-cli -- check` exits 0.
+- [ ] The repo's named gate exits 0.
 
 ## Risk Notes
 

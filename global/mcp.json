@@ -25,10 +25,6 @@
       "type": "http",
       "url": "http://127.0.0.1:8106/mcp"
     },
-    "firecrawl": {
-      "type": "http",
-      "url": "https://mcp.firecrawl.dev/${FIRECRAWL_MCP_TOKEN}/v2/mcp"
-    },
     "parallel-search": {
       "type": "http",
       "url": "https://search.parallel.ai/mcp"
@@ -80,17 +76,6 @@
         "-y",
         "@playwright/mcp@latest"
       ]
-    },
-    "habitat": {
-      "type": "stdio",
-      "command": "${HABITAT_NODE_BIN:-/Users/phaedrus/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node}",
-      "args": [
-        "${HABITAT_MCP_SERVER:-/Users/phaedrus/.local/share/habitat/mcp/server.mjs}"
-      ],
-      "env": {
-        "HABITAT_API_KEY": "__mint.habitat.default__",
-        "HABITAT_API_URL": "http://mint.tail5f5eb4.ts.net:4949/proxy/https/habitat-r90tools.vercel.app"
-      }
     }
   },
   "disabledServers": [

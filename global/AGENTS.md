@@ -30,13 +30,13 @@ Choose deliberately; provider fallbacks are resilience, not capability routing.
 - **Claude Sonnet 5 high** — tool-heavy execution, careful verification, and reliable generalist work.
 - **Kimi K3 high through the Kimi subscription (`kimi-code`)** — long-context research and broad synthesis.
 - **Grok 4.5 high through xAI OAuth (`xai-oauth`)** — adversarial review, assumption-breaking, strategy, and independent challenge.
-- **GLM 5.2 high through the Z.AI subscription (`zai`)** — design exploration, implementation alternatives, and visual/product work.
+- **GLM 5.2 high through OpenRouter via Mint (`openrouter/z-ai/glm-5.2`)** — design exploration, implementation alternatives, and visual/product work without an agent-readable Z.AI key.
 - **Gemini 3.5 Flash through Google Antigravity (`google-antigravity`)** — multimodal inspection, broad fast analysis, and vision fallback.
 - **Fast/tiny roles** — bounded lookup, labeling, inventory, or mechanical collection only.
 
-Use the native subscription provider whenever it exposes the requested model family. OpenRouter remains for model families without a native authenticated provider; it is not the default path for GLM or Kimi models.
+Use a native subscription provider when it offers provider-native OAuth. API-key-only providers route through a Mint-compatible brokered provider; GLM uses OpenRouter via Mint, while Kimi retains native OAuth.
 
-Provider choice is intentional policy: use `anthropic` for Claude, `openai-codex` for Sol/Luna, `xai-oauth` for Grok, `google-antigravity` for Gemini, `zai` for GLM, `kimi-code` for Kimi, and `openrouter` only for families with no native subscription. Reserve `cursor` for Composer 2.5; do not use the Cursor subscription as a generic model router.
+Provider choice is intentional policy: use `anthropic` for Claude, `openai-codex` for Sol/Luna, `xai-oauth` for Grok, `google-antigravity` for Gemini, `openrouter/z-ai` for GLM, and `kimi-code` for Kimi. Reserve `cursor` for Composer 2.5; do not use the Cursor subscription as a generic model router.
 
 Start the chief executive on Fable high or Sol high. Raise effort for irreversible, security-sensitive, architectural, or deeply ambiguous work; lower it only for genuinely bounded lanes.
 
@@ -94,7 +94,17 @@ Training rewards adding; intelligence is equally subtraction. Learning is compre
 
 # Work ledger
 
-Powder is the default durable work ledger when a repository is represented there. Read and claim the live card before mutation; keep status, evidence, and completion in Powder rather than only in chat. Projects may explicitly designate another authority.
+Powder is the default durable work ledger when a repository is represented
+there. Read and claim the live card before mutation; keep status, evidence,
+and completion in Powder rather than only in chat.
+
+A repository's own `AGENTS.md` can designate another authority; that
+designation always wins over this default. Before the first ledger mutation
+in a session, check the current repo's `AGENTS.md` for that designation —
+do not assume Powder from habit. R90 repositories (`~/Development/r90/**`)
+are the concrete standing exception: they use the Habitat MCP exclusively.
+Never call `mcp__powder_*` tools there, including for comments, evidence, or
+status notes on a Habitat-tracked item.
 
 Dogfood findings belong on the owning board only when they expose an actionable gap. Deduplicate by outcome, affected surface, and completion oracle. Otherwise keep the evidence in the current work log.
 

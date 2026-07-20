@@ -1,11 +1,11 @@
 # /harness-engineering create
 
-Create a new Roster source skill or agent from scratch.
+Create a new omp-config source skill or agent from scratch.
 
 For a project-local skill in a consumer repo (bespoke QA drivers, persona
 probes), write it directly into the repo's `.agents/skills/<name>/` with the
 repo's real routes and commands — same craft, local facts. This mode is for
-first-party catalog primitives under `primitives/skills/`.
+first-party catalog primitives under `global/skills/`.
 
 ## The description field is everything
 
@@ -47,14 +47,14 @@ If you're writing "1. Read the file 2. Find the function 3. Edit it" —
 that's not a skill, that's a task description.
 
 **In-repo exemplars worth reading before drafting:**
-- `primitives/skills/sprites/SKILL.md` — one primitive, a routing table, gotchas.
+- `global/skills/sprites/SKILL.md` — one primitive, a routing table, gotchas.
   No daemon, no ceremony.
-- `primitives/skills/diagnose/SKILL.md` — judgment encoded as a routing table plus
+- `global/skills/diagnose/SKILL.md` — judgment encoded as a routing table plus
   phase protocol with concrete stop conditions.
-- `primitives/skills/next/SKILL.md` — tiny reusable trigger where app-visible discovery
+- `global/skills/next/SKILL.md` — tiny reusable trigger where app-visible discovery
   earns the primitive.
 
-**External exemplars (installed under `primitives/skills/.external/`):**
+**External exemplars (installed under `global/skills/design/references/external/`):**
 - `anthropic-skill-creator` — the "theory of mind" framing:
   explain the *why* before the *how* so the model can handle
   edge cases the rules don't enumerate.
@@ -81,7 +81,7 @@ entry file and into the skill folder.
 Model instructions are not essays.
 
 - Prefer fragments over paragraphs when the meaning survives.
-- Use imperative verbs: "Probe roster", "Write receipt", "Run gate".
+- Use imperative verbs: "Probe the repo", "Write receipt", "Run gate".
 - Name the failure mode directly.
 - Delete throat-clearing: "it is important to", "you should consider".
 - Keep examples shorter than the rule they explain.
@@ -109,21 +109,15 @@ Useful source patterns:
 name: my-skill
 description: |
   What it does. When to use it. Trigger phrases.
-argument-hint: "[arg1] [arg2]"      # shown in autocomplete
-context: fork                        # run in isolated subagent (optional)
-agent: Explore                       # which subagent type (optional)
-disable-model-invocation: true       # user-only invocation (optional)
-allowed-tools: Read, Grep, Glob     # restrict tool access (optional)
-hooks:                               # skill-scoped lifecycle hooks (optional)
-  PostToolUse:
-    - matcher: "Edit|Write"
-      hooks: [{type: command, command: "bash scripts/validate.sh"}]
+argument-hint: "[arg1] [arg2]"      # shown in autocomplete; unknown keys are preserved as metadata
+globs: ["src/**/*.ts"]              # optional: auto-apply scope (rule-file style)
+alwaysApply: false                  # optional: force-load without model selection
+disable-model-invocation: true      # optional: user-only invocation (hand-only skill)
+hide: true                          # optional: loaded and reachable via skill://, omitted from the model-facing list
 ---
 ```
 
-## Dynamic context injection
-
-Skills support shell injection: wrap a command in backticks prefixed with `!`
-and the output replaces the placeholder at skill load time. For example, a
-skill can inject the current git branch or recent commits so the model sees
-live data, not the command. See the Claude Code skills docs for syntax.
+`name` and `description` are required for native `.omp` discovery
+(`requireDescription: true`); `name` defaults to the directory name if
+omitted. Additional frontmatter keys are preserved as unknown metadata, so
+skill-specific fields (like `argument-hint`) are safe to keep.

@@ -179,13 +179,9 @@ Kimi K2.7 Code sentinel dispatch receipts on 2026-06-14:
 
 ## Focused Lane Harness Projection
 
-Roster composes a narrow lane from one additive include language rather than a
-second manifest format. Inspect a declared composition with `roster show
-<agent>`, then launch it with `roster dispatch <agent>`. When no declared role
-fits one lane, use the explicit `--using` / `--as` / `--purpose` / `--include`
-selector; its include list is the complete ephemeral role, not an augmentation.
-Promote recurring compositions to a role and atomic binding in the applicable
-Roster config.
+Compose a narrow lane as an OMP agent definition (`.omp/agents/<name>.md`,
+project or user scope) or an explicit `agent(prompt, agent=..., model=...)`
+call; promote recurring compositions to a declared agent in omp-config.
 
 The selected Harness owns execution. Roster owns declarations and ephemeral
 projection only; Powder owns durable work evidence and Roster writes a bounded
@@ -490,10 +486,9 @@ or a user asks for current model/provider/harness choices.
 3. Query live provider catalogs/docs for exact model ids, context windows,
    max output, pricing, tool support, release dates, and deprecation notes.
 4. Update this file with hard facts only.
-5. Update `primitives/providers.yaml` and harness settings only when changing a
-   runnable default or variant.
-6. Run `cargo run --locked -p roster-cli -- check` and the affected provider's
-   direct smoke probe.
+5. Update omp-config model settings only when changing a runnable default or
+   variant.
+6. Run omp-config `bin/check` and the affected provider's direct smoke probe.
 
 Do not add subjective labels such as role fit, taste, or task suitability to
 this file. Put task-specific composition rationale in the run's receipts,

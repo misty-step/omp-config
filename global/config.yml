@@ -1,24 +1,25 @@
 modelRoles: 
-  default: anthropic/claude-fable-5:high
-  smol: openai-codex/gpt-5.6-luna
+  smol: openai-codex/gpt-5.6-luna:xhigh
   vision: google-antigravity/gemini-3.5-flash
   commit: openai-codex/gpt-5.4-mini
-  designer: zai/glm-5.2:high
-  composer: cursor/composer-2.5
-  research: kimi-code/k3:high
-  task: anthropic/claude-sonnet-5:high
-  slow: anthropic/claude-fable-5:xhigh
-  plan: openai-codex/gpt-5.6-sol:high
-  advisor: zai/glm-5.2:high
+  task: anthropic/claude-sonnet-5:xhigh
+  slow: anthropic/claude-fable-5:high
+  plan: anthropic/claude-fable-5:high
+  advisor: google-antigravity/gemini-3.5-flash:high
   tiny: google-antigravity/gemini-3.1-flash-lite
+  default: anthropic/claude-fable-5:medium
+  designer: kimi-code/k3:high
 disabledProviders: 
   - ollama
   - llama.cpp
   - lm-studio
   - claude-plugins
+  - claude
+  - codex
+  - gemini
+  - opencode
 modelProviderOrder: 
   - xai-oauth
-  - zai
   - kimi-code
 retry: 
   enabled: true
@@ -26,30 +27,27 @@ retry:
   fallbackRevertPolicy: cooldown-expiry
   fallbackChains: 
     default: 
-      - openai-codex/gpt-5.6-sol:high
-      - xai-oauth/grok-4.5:high
-      - zai/glm-5.2:high
+      - openai-codex/gpt-5.6-sol
+      - kimi-code/k3
+      - xai-oauth/grok-4.5
+      - openrouter/z-ai/glm-5.2
     plan: 
-      - anthropic/claude-fable-5:high
+      - openai-codex/gpt-5.6-sol
       - xai-oauth/grok-4.5:high
-      - zai/glm-5.2:high
+      - openrouter/z-ai/glm-5.2:high
+      - kimi-code/k3
     slow: 
-      - openai-codex/gpt-5.6-sol:max
-      - anthropic/claude-fable-5:high
-      - xai-oauth/grok-4.5:high
-    advisor: 
-      - openrouter/deepseek/deepseek-v4-flash
-      - openrouter/minimax/minimax-m3
-      - openrouter/qwen/qwen3.7-plus
+      - openai-codex/gpt-5.6-sol
+      - kimi-code/k3
+      - openrouter/deepseek/deepseek-v4-pro
     task: 
       - openai-codex/gpt-5.6-luna:xhigh
       - xai-oauth/grok-4.5:high
-      - zai/glm-5.2:high
+      - openrouter/z-ai/glm-5.2:high
     smol: 
-      - google-antigravity/gemini-3.5-flash
-      - openrouter/deepseek/deepseek-v4-flash
-      - openrouter/minimax/minimax-m3
+      - google-antigravity/gemini-3.1-flash-lite
       - anthropic/claude-haiku-4-5
+      - openrouter/deepseek/deepseek-v4-flash
     vision: 
       - anthropic/claude-sonnet-5
       - openrouter/meta/muse-spark-1.1
@@ -58,29 +56,25 @@ retry:
       - openai-codex/gpt-5.6-luna
       - google-antigravity/gemini-3.5-flash
       - openrouter/deepseek/deepseek-v4-flash
-    designer: 
-      - google-antigravity/gemini-3.1-pro:high
-      - anthropic/claude-sonnet-5:high
-      - openrouter/meta/muse-spark-1.1
     tiny: 
       - openai-codex/gpt-5.4-nano
       - openrouter/deepseek/deepseek-v4-flash
       - google-antigravity/gemini-2.5-flash-lite
-    openai-codex/gpt-5.6-sol:
+    openai-codex/gpt-5.6-sol: 
       - anthropic/claude-fable-5:high
       - xai-oauth/grok-4.5:high
-      - zai/glm-5.2:high
-    openai-codex/gpt-5.6-luna:
+      - openrouter/z-ai/glm-5.2:high
+    openai-codex/gpt-5.6-luna: 
       - anthropic/claude-sonnet-5:high
-      - zai/glm-5.2:high
+      - openrouter/z-ai/glm-5.2:high
       - xai-oauth/grok-4.5:high
-    anthropic/claude-fable-5:
+    anthropic/claude-fable-5: 
       - openai-codex/gpt-5.6-sol:high
       - xai-oauth/grok-4.5:high
-    anthropic/claude-sonnet-5:
+    anthropic/claude-sonnet-5: 
       - openai-codex/gpt-5.6-luna:high
-      - zai/glm-5.2:high
-    xai-oauth/grok-4.5:
+      - openrouter/z-ai/glm-5.2:high
+    xai-oauth/grok-4.5: 
       - anthropic/claude-fable-5:high
       - openai-codex/gpt-5.6-sol:high
     xai-oauth/grok-4.3: 
@@ -97,12 +91,12 @@ retry:
     xai-oauth/grok-4.20-multi-agent-0309: 
       - xai-oauth/grok-4.5:high
       - anthropic/claude-sonnet-5:high
-    kimi-code/k3:
-      - zai/glm-5.2:high
+    kimi-code/k3: 
+      - openrouter/z-ai/glm-5.2:high
       - openrouter/deepseek/deepseek-v4-pro
       - xai-oauth/grok-4.5:high
     openrouter/deepseek/deepseek-v4-pro: 
-      - zai/glm-5.2:high
+      - openrouter/z-ai/glm-5.2:high
       - openrouter/qwen/qwen3.7-max
       - anthropic/claude-sonnet-5:high
     openrouter/deepseek/deepseek-v4-flash: 
@@ -111,15 +105,26 @@ retry:
       - openai-codex/gpt-5.6-luna
     openrouter/minimax/minimax-m3: 
       - openrouter/deepseek/deepseek-v4-pro
-      - zai/glm-5.2:high
+      - openrouter/z-ai/glm-5.2:high
       - xai-oauth/grok-4.5:high
     openrouter/meta/muse-spark-1.1: 
       - google-antigravity/gemini-3.5-flash
       - anthropic/claude-sonnet-5
       - openrouter/qwen/qwen3.7-plus
     openrouter/qwen/qwen3.7-max: 
-      - zai/glm-5.2:high
+      - openrouter/z-ai/glm-5.2:high
       - openrouter/deepseek/deepseek-v4-pro
+    designer: 
+      - anthropic/claude-fable-5
+      - openai-codex/gpt-5.6-sol
+      - openrouter/moonshotai/kimi-k3
+      - openrouter/z-ai/glm-5.2
+      - google-antigravity/gemini-3.5-flash
+    advisor: 
+      - anthropic/claude-sonnet-5
+      - openai-codex/gpt-5.6-terra
+      - xai-oauth/grok-4.5
+      - openrouter/z-ai/glm-5.2
 defaultThinkingLevel: auto
 advisor: 
   enabled: true
@@ -175,7 +180,7 @@ tui:
   textSizing: false
 grep: 
   enabled: true
-async:
+async: 
   enabled: true
 task: 
   eager: preferred

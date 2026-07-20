@@ -10,7 +10,7 @@ Self-referential: this is the meta-skill used to build and audit the skill catal
 
 Not exempt from the eval-coverage contract — this waiver is a time-boxed
 deferral, not a permanent opt-out. When it expires, either an eval spec lands
-at `primitives/skills/harness-engineering/evals/harness-engineering-eval.md` (see `primitives/skills/skill-eval/templates/eval-spec.md`)
+at `global/skills/harness-engineering/evals/harness-engineering-eval.md` (see `global/skills/skill-eval/templates/eval-spec.md`)
 or this waiver is renewed with a fresh reason and date. A stale, silently
 renewed waiver with no new reasoning is itself a finding for `/harness-engineering`'s
 next skill-health audit.
