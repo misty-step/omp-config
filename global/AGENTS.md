@@ -47,7 +47,7 @@ Choose deliberately; provider fallbacks are resilience, not capability routing.
 - **Kimi K3 high through the Kimi subscription (`kimi-code`)** — long-context research and broad synthesis.
 - **Grok 4.5 high through xAI OAuth (`xai-oauth`)** — adversarial review, assumption-breaking, strategy, and independent challenge.
 - **GLM 5.2 high through OpenRouter via Mint (`openrouter/z-ai/glm-5.2`)** — design exploration, implementation alternatives, and visual/product work without an agent-readable Z.AI key.
-- **Gemini 3.6 Flash through Google Antigravity (`google-antigravity`)** — multimodal inspection, broad fast analysis, and vision fallback. Gemini 3.5 Flash-Lite is not yet resolvable on this native provider; where its cheaper agentic tier is needed, route through OpenRouter via Mint (`openrouter/google/gemini-3.5-flash-lite`) instead.
+- **Gemini 3.6 Flash through Google Antigravity (`google-antigravity`)** — multimodal inspection, broad fast analysis, and vision fallback. Antigravity's flash-lite line tops out at `gemini-3.1-flash-lite`; it does not carry `gemini-3.5-flash-lite` (confirmed against the live catalog, not a stale-cache gap). Where SOTA-in-class flash-lite is needed, `openrouter/google/gemini-3.5-flash-lite` via Mint is primary, with the native `gemini-3.1-flash-lite` as a subscription-covered fallback — sub-as-primary only holds when the sub actually carries the SOTA model in that class.
 - **Fast/tiny roles** — bounded lookup, labeling, inventory, or mechanical collection only.
 
 Use a native subscription provider when it offers provider-native OAuth. API-key-only providers route through a Mint-compatible brokered provider; GLM uses OpenRouter via Mint, while Kimi retains native OAuth.
