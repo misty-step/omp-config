@@ -59,7 +59,7 @@
 		"muted": "lotusGray2",
 		"dim": "lotusGray",
 		"text": "lotusInk2",
-		"thinkingText": "lotusInk1",
+		"thinkingText": "lotusGray2",
 		"selectedBg": "selectedBg",
 		"userMessageBg": "userMsgBg",
 		"userMessageText": "lotusInk2",
