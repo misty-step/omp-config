@@ -59,24 +59,14 @@
     },
     "chrome-devtools": {
       "type": "stdio",
-      "command": "npx",
+      "command": "/Users/phaedrus/.bun/bin/chrome-devtools-mcp",
       "args": [
-        "-y",
-        "chrome-devtools-mcp@latest",
         "--no-performance-crux",
         "--redact-network-headers"
       ],
       "env": {
         "CHROME_DEVTOOLS_MCP_NO_USAGE_STATISTICS": "1"
       }
-    },
-    "playwright": {
-      "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "@playwright/mcp@latest"
-      ]
     }
   },
   "disabledServers": [
