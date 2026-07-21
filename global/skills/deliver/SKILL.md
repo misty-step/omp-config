@@ -21,8 +21,8 @@ the specialist skills own shaping, verification, review, CI, and closeout.
   surface. The card's goal, acceptance oracle, relations, and status outrank
   remembered thread state.
 - Name the observable outcome and falsifier before editing. No executable
-  oracle means write the small one or route to `/shape`; no oracle means no
-  delivery.
+  oracle means stop and return the work to `curator` for a board-level
+  `/groom`; no oracle means no delivery.
 - Reuse the repository's existing seam. If the target is too tangled to change
   safely, make the smallest behavior-preserving pre-factor as a separate
   reviewable unit.
@@ -34,11 +34,11 @@ the specialist skills own shaping, verification, review, CI, and closeout.
 
 | Signal | Route |
 |---|---|
-| Goal, acceptance, or tradeoff is unresolved | `/shape` |
-| External facts would change the design | `/research` |
-| Product identity or long-lived direction is unsettled | `/vision` |
-| Running behavior needs proof | `/qa` |
-| Non-trivial diff needs fresh-context judgment | `/code-review` |
+| Goal, acceptance, or tradeoff is unresolved | `curator` with `/groom` |
+| External facts would change the design | `magellan` with `/research` |
+| Product identity or long-lived direction is unsettled | `curator` with `/vision` |
+| Running behavior needs proof | `scully` |
+| Non-trivial diff needs fresh-context judgment | `argus` |
 | The repository gate is absent, weak, or red | `/ci` |
 | Independent heavy lanes materially shorten the critical path | `/sprites` |
 | Delivery exposed a reusable repo-technical lesson | `/compound` after proof |
@@ -63,16 +63,16 @@ Do not invoke a specialist as ceremony. Invoke it when its oracle is needed.
    belong in this delivery.
 
 For disputed proof loops, load
-`primitives/shared/references/verification-system-first.md`. For public API,
+`global/references/verification-system-first.md`. For public API,
 CLI, UI, performance, compatibility, migration, or operator-workflow changes,
-load `primitives/shared/references/works-critique.md` before pre-ship review.
+load `global/references/works-critique.md` before pre-ship review.
 
 ## Prove and land
 
-- Run `/qa` against the live shape and retain reviewable evidence where the
-  repository keeps receipts.
-- Run `/code-review` with the diff and oracle, not the author's reasoning
-  trail. Resolve every blocking finding, then re-prove affected behavior.
+- Dispatch `scully` against the live surface and retain reviewable evidence
+  where the repository keeps receipts.
+- Dispatch `argus` with the diff and oracle, not the author's reasoning trail.
+  Resolve every blocking finding, then re-prove affected behavior.
 - Run the repository gate. Strengthen it only when the likely regression is
   in scope and the existing gate would miss it.
 - Commit by concern using the repository's convention and push when the

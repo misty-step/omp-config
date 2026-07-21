@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: ci
 description: |
   Audit, design, and run repo-owned CI gates, host-agnostic by default — one
@@ -24,7 +25,7 @@ In a consumer repo, read that repo's root instructions, manifests, CI
 workflows, hook config, and shipped scripts, then strengthen the repo-owned
 gate. This skill supplies CI *judgment*; the consumer repo owns the
 implementation. What to gate on follows the standing
-quality floor in `primitives/shared/references/quality-gates.md`; CI
+quality floor in `global/references/quality-gates.md`; CI
 architecture and Dagger tradeoffs live in `references/host-agnostic-ci.md`.
 
 Consumer repos want a two-tier gate unless live evidence proves one loop is both

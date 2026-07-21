@@ -88,16 +88,16 @@ deterministic-scaffold failure mode.
 
 ## Boundaries (what this is not)
 
-- **Not the agent's context substrate.** `/orient` owns ephemeral, live-evidence
-  session grounding. Agents read source, not a possibly-stale wiki *about*
-  source. These docs are for humans.
+- **Not the agent's context substrate.** The owning lane reads live source and
+  uses `/dispatch` for independent grounding. These docs are for humans, not a
+  possibly stale substitute for source.
 - **Not marketing/demo.** `/showcase` owns external proof and launch copy. This
   is technical reference.
 - **Not external-repo lookup.** The vendored `deepwiki` skill queries
   third-party OSS wikis. This documents *your* repo.
 - **Auto-refresh-on-push is Mode B → bitterblossom.** This skill is on-demand
   (Mode A). The freshness script is the trigger contract for that future loop;
-  see `primitives/shared/references/loop-readiness.md`.
+  see `global/references/loop-readiness.md`.
 
 ## Delegation Judgment
 

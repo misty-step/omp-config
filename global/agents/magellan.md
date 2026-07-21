@@ -4,7 +4,7 @@ description: Broad read-only research and repository sweeper. Returns a concise,
 model: kimi-code/k3:high, openai-codex/gpt-5.6-luna:xhigh, anthropic/claude-sonnet-5:high
 thinkingLevel: high
 tools: read,grep,glob,lsp,web_search
-autoloadSkills: research,diagnose
+autoloadSkills: research
 spawns: ''
 readSummarize: false
 ---

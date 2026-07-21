@@ -23,7 +23,7 @@ The backlog diff is the artifact; prose exists to justify it. Groom is a
 conversation at the seams where the operator's judgment is the scarce input. At
 intake, interrogate the operator on ambition, vision deltas, and hidden priors
 so the sweep aims true — the `grill-me`-style posture in
-`primitives/shared/references/interrogate-first.md` is the default here, not a
+`global/references/interrogate-first.md` is the default here, not a
 fallback gated on arriving with a backlog item. The investigation sweep stays
 autonomous: explore the codebase for what it can answer, and reserve
 interrogation for the operator's judgment, not facts you can read.
@@ -52,7 +52,7 @@ first-class groom emission rather than waiting on a separate `/vision` pass.
   advance, de-risk, simplify, or deliberately reject.
 - A vision or moonshot artifact can carry a one-glance system map when
   relationships or sequencing are too complex for prose alone:
-  `primitives/shared/references/image-generation.md`.
+  `global/references/image-generation.md`.
 
 ## Tidy (mandatory)
 
@@ -147,7 +147,7 @@ decorrelate judgment, not to fill a roster.
   its deployed surfaces? A CI gate that would catch the likely failure?
   A meaningful, enforced quality floor that gates the diff and ratchets legacy
   debt, or only advisory, arbitrary gates
-  (`primitives/shared/references/quality-gates.md`)? Security gates that catch
+  (`global/references/quality-gates.md`)? Security gates that catch
   secret leaks in files and Git/PR metadata before publication? Stale
   AGENTS/CLAUDE prose? Product context a cold agent would need? Each gap is a
   ticket like any other.
@@ -162,6 +162,41 @@ decorrelate judgment, not to fill a roster.
   `grill-me` way — walk the decision tree (sequencing, deletions, the next
   pickup) one branch at a time, recommending each — instead of dropping the
   full plan for a rubber-stamp.
+
+## Shape the board, not one ticket
+
+Shaping is part of the groom. Do not run a separate one-ticket shaping
+workflow. A request about one card still requires its board, dependencies,
+competing priorities, and project vision. The groom can conclude that one card
+is the only necessary change, but it must earn that conclusion from the wider
+system.
+
+Before promoting an epic or its children:
+
+- **Challenge the premise.** Name the user or operator outcome. Treat the
+  requested mechanism as one candidate.
+- **Anchor it in live evidence.** Cite the owning code, tests, contracts,
+  previous decisions, and one repository convention.
+- **Choose a direction.** Compare credible alternatives that fail differently.
+  Reject the losers and name one decision.
+- **Fence the scope.** State the outcome, non-goals, and invariants that must
+  survive.
+- **Make the oracle executable.** Name exact commands, routes, rendered
+  behavior, or reviewer actions plus a falsifier.
+- **Make execution cold-start safe.** Give each child enough repo anchors,
+  dependencies, acceptance, and stop conditions for a focused lane.
+- **Keep the premise durable.** Cite a digest, card, source path, or explicit
+  waiver with residual risk.
+
+Use `references/prd-ticket-quality.md` for M+ work,
+`references/executable-oracles.md` when proof is disputed, and
+`references/cli-design.md` for command-line surfaces. For a voice-derived
+premise, use `references/voice-transcript-metadata.md`.
+
+The groom output is a board-level decision packet: vision, themes, chosen and
+rejected directions, ordered epics, dependencies, executable oracles, risks,
+and the first pickup. Do not create an isolated context packet that hides
+nearby work or conflicts.
 
 ## Ticket Format
 

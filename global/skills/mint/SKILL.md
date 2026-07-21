@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: mint
 description: |
   Use when an agent needs to make an outbound HTTP call to a vendor API

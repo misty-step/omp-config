@@ -26,7 +26,7 @@ Set an explicit active goal — not "refactor until happy," a goal with:
   must keep passing after each significant step. When the fitness test is not
   already a credible proof loop, define claim, falsifier, driver, grader,
   evidence packet, and cadence per
-  `primitives/shared/references/verification-system-first.md`.
+  `global/references/verification-system-first.md`.
 - **Stop rule:** what evidence means the architecture is good enough.
 
 Good shape:
@@ -43,7 +43,7 @@ architecture concern, and no broader behavior change is needed.
 Create `/tmp/refactor-{project}.md` immediately and keep it current — it is the
 handoff if the session dies. Track the goal/scope/fitness/stop rule, the current
 architecture read (modules, smells, constraints), the quality system
-(`primitives/shared/references/quality-system.md`), milestones (planned/active/
+(`global/references/quality-system.md`), milestones (planned/active/
 done), live-test receipts, and review findings, commits, and residual risk. No
 secrets or private customer data in `/tmp`.
 
@@ -55,21 +55,21 @@ secrets or private customer data in `/tmp`.
    behavior-preservation loop is a rewrite in disguise.
 2. **Choose one architectural pressure.** Split ownership, shallow wrapper,
    dependency direction, duplicated data shape, feature logic hiding in UI glue.
-   See `primitives/shared/references/delete-first.md` (Ponytail:
+   See `global/references/delete-first.md` (Ponytail:
    `global/skills/design/references/external/dietrich-ponytail/SKILL.md`). Do not tidy
    everything.
 3. **Make one significant step** — a moved boundary, deleted abstraction,
    renamed public concept, data-flow simplification, or large-file split.
    Mechanical formatting is not a milestone, and a step you cannot test and
    commit independently is too large.
-4. **Live-test immediately.** Use the repo's verification path, `/qa`, or the
-   surface-specific route. Refactors break integration seams; unit tests alone
-   do not close a milestone.
+4. **Live-test immediately.** Use the repo's verification path, dispatch
+   `scully`, or use the surface-specific route. Refactors break integration
+   seams; unit tests alone do not close a milestone.
 5. **Autoreview the milestone** with fresh-context critique when substantive.
    Critics get the artifact and the oracle only — never the author's reasoning
    trail (Shared Operating Spine: Prove); here that's the
    diff + architecture goal + fitness tests. Scale critic topology with
-   `primitives/shared/references/quality-system.md`; a risky boundary change
+   `global/references/quality-system.md`; a risky boundary change
    earns more than one lens. Fix blockers before continuing.
 6. **Commit green milestones.** One concern per commit.
 7. **Reassess the stop rule.** Continue only while another high-leverage
@@ -108,7 +108,7 @@ Stop and report instead of improvising when:
 - **Unfenced win.** A god-file split or corrected dependency direction with no
   gate to stop it regrowing comes back. Ratchet the structural win into a
   standing gate — a fitness function, a god-file baseline — per
-  `primitives/shared/references/quality-gates.md`.
+  `global/references/quality-gates.md`.
 
 ## Completion Gate
 

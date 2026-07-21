@@ -61,7 +61,7 @@ contract that future loop consumes: a push that makes pages stale is the event;
 running `/document` (incremental) is the action.
 
 Before proposing that loop, load
-`primitives/shared/references/loop-readiness.md` and name the three hard stops.
+`global/references/loop-readiness.md` and name the three hard stops.
 Do not build the push-triggered automation inside this skill — ship the Mode A
 generator and the detectable-staleness signal; hand the refresh loop to the
 event plane.

@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: code-review
 description: |
   Dispatch-shaped code review: fan the diff out to fresh-context reviewers
@@ -25,7 +26,7 @@ never ships on its own review — that is the one hard rule.
    `followed|violated <learning title> <file:line> <why>`; no file:line means
    the verdict is not anchored.
 3. **Choose the risk tier.** Use
-   `primitives/shared/references/quality-system.md` to decide whether the diff
+   `global/references/quality-system.md` to decide whether the diff
    needs a tiny, substantive, high-stakes, or Mode B review topology. Scale to
    the failure cost, not to habit.
 4. **Fan out in parallel, decorrelated.** Native subagents for focused
@@ -53,17 +54,17 @@ never ships on its own review — that is the one hard rule.
    where the plan bent is where plausible-but-wrong concentrates — but never
    the author's justifications for them.
    Hand a reviewer the matching lens:
-   - `primitives/shared/references/works-critique.md` — public API, CLI, UI,
+   - `global/references/works-critique.md` — public API, CLI, UI,
      performance, compatibility, migration, or operator-workflow change.
    - the synced Thermo-Nuclear skill
      (`global/skills/design/references/external/cursor-thermo-nuclear-code-quality-review/SKILL.md`)
      — any meaningful structural change, large files, new wrappers, or spaghetti
      branching risk; the default harsh maintainability lens, not a last resort.
-   - `primitives/shared/references/delete-first.md` — added abstraction,
+   - `global/references/delete-first.md` — added abstraction,
      automation, dependencies, modes, or optimization; pair with the Ponytail
      skill (`global/skills/design/references/external/dietrich-ponytail/SKILL.md`) when the
      main risk is bloat or speculative engineering.
-   - `primitives/shared/references/verification-system-first.md` — the proof
+   - `global/references/verification-system-first.md` — the proof
      story is missing, weak, eval/benchmark-shaped, or leans on manual judgment.
 5. **Aim reviewers at production embarrassment, not nitpicks.** Tell each
    one what to ignore (style, naming, speculative "consider…") as

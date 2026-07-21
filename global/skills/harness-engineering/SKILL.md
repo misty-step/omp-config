@@ -37,6 +37,7 @@ build/codegen/sync step.
 | engineer doctrine/gates/hooks | `references/mode-engineer.md` |
 | measure skill usage/health/staleness | `references/mode-audit.md` |
 | current model/provider/harness facts | `global/skills/peer-harnesses/references/model-provider-harness-index.md` |
+| task-specific model, agent, and primitive routing | `../dispatch/SKILL.md` |
 | open-model defaults | `references/open-model-roster.md` |
 | preferred stack / infrastructure defaults | `references/preferred-stack.md` |
 | adopt or audit a repo engineering fitness function | `../project-engineering/SKILL.md` |
@@ -92,8 +93,8 @@ test below — most patterns are prompts, not skills.
   (`global/skills/peer-harnesses/references/model-provider-harness-index.md`).
   Keep that file factual: model ids, context, price, latency/smoke evidence,
   tool support, benchmark sources, deprecations, and freshness. Do not encode
-  role-fit policy there; the lead agent composes task-specific teams from
-  current evidence.
+  role-fit policy there. The `dispatch` skill owns task-specific composition
+  policy.
 - omp-config's own skills live in `global/skills/`; repo-local
   `.agents/skills/` in a consumer repo is bespoke, project-specific content,
   not a projection of the global catalog.

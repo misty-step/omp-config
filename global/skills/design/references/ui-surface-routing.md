@@ -17,10 +17,10 @@ For visual diffs, compose:
 - `/design` for hierarchy, taste, visual intent, rendered artifact review,
   and accessibility (WCAG, keyboard, labels, focus) when the artifact is
   interactive or web-rendered.
-- `/qa` for running-surface behavior, viewports, console/network checks, and
-  screenshot or before/after evidence capture.
-- `/code-review` for code quality and architecture, with UI findings grounded
-  in evidence rather than style preference.
+- `scully` for running-surface behavior, viewports, console/network checks,
+  and screenshot or before/after evidence capture.
+- `argus` for code quality and architecture, with UI findings grounded in
+  evidence rather than style preference.
 
 For non-visual diffs, do not force the design path. The detector should keep
 workflow cost proportional to the change.

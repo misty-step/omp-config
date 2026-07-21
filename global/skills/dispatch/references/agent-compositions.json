@@ -1,0 +1,77 @@
+{
+  "schema_version": "omp.dispatch.agent-compositions.v1",
+  "agents": {
+    "cassandra": {
+      "when_to_use": "One live production failure, incident response, digital forensics, or root-cause analysis.",
+      "model": ["openai-codex/gpt-5.6-luna:xhigh", "anthropic/claude-sonnet-5:high"],
+      "thinkingLevel": "xhigh",
+      "tools": "*",
+      "autoloadSkills": ["diagnose", "factory-apps", "estate-infrastructure", "mint"],
+      "spawns": ["scout"]
+    },
+    "argus": {
+      "when_to_use": "A full code-review program across model families, including Cursor Thermo-Nuclear review and live verification.",
+      "model": ["anthropic/claude-fable-5:high", "openai-codex/gpt-5.6-sol:high"],
+      "thinkingLevel": "high",
+      "tools": "*",
+      "autoloadSkills": ["code-review", "peer-harnesses", "ci", "diagnose"],
+      "spawns": ["scout", "cerberus", "scully", "reviewer"]
+    },
+    "cerberus": {
+      "when_to_use": "One fresh-context adversarial read-only review lane.",
+      "model": ["xai-oauth/grok-4.5:high", "openai-codex/gpt-5.6-sol:high"],
+      "thinkingLevel": "high",
+      "tools": "read,grep,glob,lsp,bash,web_search",
+      "autoloadSkills": [],
+      "spawns": []
+    },
+    "curator": {
+      "when_to_use": "A full-board or full-backlog groom, vision refresh, prioritization, consolidation, or ambitious work sweep.",
+      "model": ["anthropic/claude-fable-5:high", "openai-codex/gpt-5.6-sol:high"],
+      "thinkingLevel": "high",
+      "tools": "*",
+      "autoloadSkills": ["groom", "research", "vision", "grilling", "powder"],
+      "spawns": ["scout", "magellan", "daedalus", "cerberus", "scully"]
+    },
+    "daedalus": {
+      "when_to_use": "Read-only systems architecture, boundary design, or dependency decomposition before execution.",
+      "model": ["openai-codex/gpt-5.6-sol:high", "anthropic/claude-fable-5:high", "openrouter/z-ai/glm-5.2:high"],
+      "thinkingLevel": "high",
+      "tools": "read,grep,glob,lsp,web_search",
+      "autoloadSkills": ["project-engineering"],
+      "spawns": []
+    },
+    "hephaestus": {
+      "when_to_use": "One accepted implementation change with a live oracle and authoring authority.",
+      "model": ["openai-codex/gpt-5.6-luna:xhigh", "anthropic/claude-sonnet-5:high"],
+      "thinkingLevel": "xhigh",
+      "tools": "*",
+      "autoloadSkills": ["deliver", "ci", "diagnose"],
+      "spawns": ["scout", "argus", "cerberus", "scully"]
+    },
+    "magellan": {
+      "when_to_use": "Broad read-only research, repository sweeps, and sourced discrepancy packets.",
+      "model": ["kimi-code/k3:high", "openai-codex/gpt-5.6-luna:xhigh", "anthropic/claude-sonnet-5:high"],
+      "thinkingLevel": "high",
+      "tools": "read,grep,glob,lsp,web_search",
+      "autoloadSkills": ["research"],
+      "spawns": []
+    },
+    "scully": {
+      "when_to_use": "Independent live verification through a browser, API, CLI, library consumer, MCP call, or job transition.",
+      "model": ["anthropic/claude-sonnet-5:high", "openai-codex/gpt-5.6-luna:high"],
+      "thinkingLevel": "high",
+      "tools": "read,grep,glob,lsp,bash,web_search",
+      "autoloadSkills": ["ci", "diagnose"],
+      "spawns": []
+    },
+    "solomon": {
+      "when_to_use": "A contested decision that needs one evidence-backed ruling and reversal conditions.",
+      "model": ["anthropic/claude-fable-5:high", "openai-codex/gpt-5.6-sol:high"],
+      "thinkingLevel": "high",
+      "tools": "read,grep,glob,lsp,web_search",
+      "autoloadSkills": [],
+      "spawns": []
+    }
+  }
+}

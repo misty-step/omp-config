@@ -2,7 +2,7 @@
 
 "Comprehensive, well-organized, high-quality" is vibes until it is falsifiers.
 Four oracles turn each adjective into a system that can fail for the real error.
-Shape follows `primitives/shared/references/verification-system-first.md`:
+Shape follows `global/references/verification-system-first.md`:
 claim → falsifier → driver → grader → evidence → cadence.
 
 The accuracy oracle is the wedge. Auto-wiki products optimize coverage and

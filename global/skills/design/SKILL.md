@@ -12,7 +12,7 @@ description: |
   this", "polish the UI", "is this accessible", "scaffold DESIGN.md", or any
   product-facing visual artifact — docs layout, dashboards, charts, diagrams.
   Do not use when: a mechanical style fix with no design decision (just make
-  the edit), or behavior verification (/qa). Trigger: /design, /prototype.
+  the edit), or behavior verification (dispatch `scully`). Trigger: /design, /prototype.
 argument-hint: "<artifact-or-surface> [intent]"
 ---
 
@@ -37,8 +37,8 @@ floor) and which axes vary — `references/divergence.md` owns the per-mode axes
 and fan-width calibration. Set VARIANCE / MOTION / DENSITY targets
 (`references/anti-slop.md`). When the operator supplies reference sites or
 screenshots, the DNA-not-dress protocol in
-`references/external-design-references.md` binds every lane. Route to `/shape`
-first when the product direction itself is unsettled.
+`references/external-design-references.md` binds every lane. Route to
+`curator` for `/groom` when product direction itself is unsettled.
 
 When motion intent arrives as a vague effect without a name, load
 `emil-animation-vocabulary` before fencing it. The glossary sharpens the brief;
@@ -151,8 +151,8 @@ synthesized — not concatenated. Presumptive blockers the author must justify:
 - a catalog below the Law, or cross-lane "options" that are reskins of one layout.
 
 After visible changes, verify desktop and mobile render and report the
-evidence. Use `/qa` for behavior verification and evidence capture. Delegate
-per the Shared Operating Spine (Act).
+evidence. Dispatch `scully` for behavior verification and evidence capture.
+Delegate per the Shared Operating Spine (Act).
 
 ## Completion Gate
 
@@ -205,6 +205,6 @@ design-specific fields:
 - `references/interface-polish.md` — micro-polish and accessibility checks.
 - `references/critique-shape.md` — the finding shape lanes use when annotating
   options.
-- `references/ui-surface-routing.md` — composing `/design` + `/qa` +
-  `/code-review` on visual diffs.
+- `references/ui-surface-routing.md` — composing `/design`, `scully`, and
+  `argus` on visual diffs.
 - `evals/bench-eval.md` — this skill's verification system.

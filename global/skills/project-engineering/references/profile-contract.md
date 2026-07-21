@@ -65,7 +65,7 @@ or changed interface size—but no proxy or composite score proves depth.
 ### Tests and live proof
 
 Declare unit, integration, and end-to-end applicability separately. Each
-applicable tier points to its driver and evidence. `/qa` and
+applicable tier points to its driver and evidence. `scully` and
 `verification-system-first.md` own the proof design.
 
 Internal collaborators run for real. Replace only external boundaries:

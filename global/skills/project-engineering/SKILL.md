@@ -45,12 +45,12 @@ Use the existing owner for method; keep this skill at the composition layer.
 
 | Concern | Owner |
 |---|---|
-| Fast/full gates, coverage, mutation, supply chain | `global/skills/ci/SKILL.md` and `primitives/shared/references/quality-gates.md` |
-| Runtime and user-boundary proof | `primitives/shared/references/verification-system-first.md` (the `/qa` skill was cut 2026-07-21 — null-case sweep; verify against the live surface directly) |
+| Fast/full gates, coverage, mutation, supply chain | `global/skills/ci/SKILL.md` and `global/references/quality-gates.md` |
+| Runtime and user-boundary proof | `global/references/verification-system-first.md`; dispatch `scully` for independent live verification |
 | Model or agent capability | `global/skills/eval-design/SKILL.md` |
 | Canary, Powder, Landmark | `global/skills/factory-apps/SKILL.md` |
 | Module depth, seams, dependency direction | `global/skills/design/references/external/mattpocock-codebase-design/SKILL.md` |
-| Application-only obligations and waivers | `primitives/shared/references/application-floor.md` |
+| Application-only obligations and waivers | `global/references/application-floor.md` |
 
 Return the populated profile plus a gap report grouped by proof class. Route
 leaf implementation to the owning skill; do not expand this audit into every

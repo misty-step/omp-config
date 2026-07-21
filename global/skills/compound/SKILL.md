@@ -17,7 +17,7 @@ Capture the learning, not the whole story.
 
 - One solved problem -> one learning.
 - Corpus: `docs/solutions/<category>/<slug>.md`; schema:
-  `primitives/shared/references/learnings.md`.
+  `global/references/learnings.md`.
 - Overlap first:
   `rg -n --glob '*.md' '^(title|tags|applies_when):|<module>|<failure-mode>' docs/solutions`.
 - If an existing learning covers it, update that file only when the fresh

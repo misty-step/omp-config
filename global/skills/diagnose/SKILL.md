@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: diagnose
 description: |
   Investigate, audit, triage, and fix. Systematic debugging, incident lifecycle,
@@ -22,7 +23,7 @@ You are the executive orchestrator: keep hypothesis ranking, root-cause
 proof, and fix selection on the lead model; delegate bounded evidence
 gathering and implementation to focused subagents. For design-quality root
 causes, dispatch an ad-hoc **lens** critic
-(`primitives/shared/references/lenses.md`) returning `finding · evidence
+(`global/references/lenses.md`) returning `finding · evidence
 file:line · impact` — name the lens, no static agent file.
 
 ## Delegation
@@ -70,7 +71,7 @@ NO FIXES WITHOUT A FEEDBACK LOOP AND ROOT CAUSE FIRST
 
 Build the smallest believable pass/fail loop before hypothesizing deeply — the
 general verification contract lives in
-`primitives/shared/references/verification-system-first.md`; diagnose's own
+`global/references/verification-system-first.md`; diagnose's own
 loop menu, loop-quality checklist, correct-seam rule, and the instrumented
 human-reproduction protocol live in `references/feedback-loops.md`. If no
 loop is possible with current access, stop and ask for a captured artifact,

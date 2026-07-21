@@ -1,8 +1,8 @@
 # Voice And Raw-Transcript Premise Metadata
 
-Use this shape only when a `/shape` premise source is voice-derived or a raw
-transcript excerpt. It preserves provenance and uncertainty without storing
-raw audio or pretending transcript text is an ordinary hand-written note.
+Use this reference only when a `/groom` premise source is voice-derived or a
+raw transcript excerpt. It preserves provenance and uncertainty without
+storing raw audio or treating transcript text as ordinary hand-written input.
 
 Place the block inside `## Premise Source`, after the `Premise Source:` line:
 

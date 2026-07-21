@@ -316,9 +316,9 @@ sources:
   # the first-N "slop" ideas. Ships a references/ subtree (method catalog,
   # anti-slop rules, full prompt library, 22 method files) — vendored whole.
   #
-  # FIT NOTE: creative / open-ended generation, distinct from /groom's backlog
-  # brainstorm and /shape's product framing. Optional creative lane; revisit if
-  # it over-triggers against grooming.
+  # FIT NOTE: creative / open-ended generation, distinct from /groom's
+  # board-level product framing. Optional creative lane; revisit if it
+  # over-triggers against grooming.
   #
   # LICENSE: MIT — repo and skill frontmatter both declare MIT; the upstream
   # LICENSE is carried alongside the vendored skill.

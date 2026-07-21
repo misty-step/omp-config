@@ -1,7 +1,7 @@
 # PRD Ticket Quality
 
-Use this reference when shaping M+ backlog items or any ticket that will feed
-`/deliver`. A world-class ticket is a compact PRD plus technical design. It is
+Use this reference when grooming M+ backlog items or any epic that will feed
+`/deliver`. A world-class card is a compact PRD plus technical design. It is
 not a diary, a brainstorm dump, or an implementation transcript.
 
 ## Required Top Blocks

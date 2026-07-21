@@ -79,7 +79,7 @@ write-path gap — no overlap).
 - **Discover slugs live**: `pi --provider openrouter --list-models
   <family>`. Slugs rot in days; substitute when a family isn't listed.
 - **One distinct lens per critic** (correctness/data-loss, durability,
-  security, perf, API-shape — `primitives/shared/references/lenses.md`).
+  security, perf, API-shape — `global/references/lenses.md`).
   Optionally load that lens or a domain skill into the critic: `pi --skill
   <path>`.
 - **Cold, bounded, artifact-only**: inline diff + oracle + context, run `pi
@@ -120,7 +120,7 @@ not the full bench.
 ## Prompting frontier lanes
 
 For Fable and GPT-5.6 Luna lanes (and the lead's own operation), load
-`primitives/shared/references/prompting-frontier.md`: goal-not-steps briefs
+`global/references/prompting-frontier.md`: goal-not-steps briefs
 fenced by house rules, executable bars (delegate metric-invention when the
 bar is fuzzy), builder-never-grades verification against the REAL output,
 loop-until-the-bar with a live status artifact, prior traces as fuel, and

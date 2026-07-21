@@ -51,8 +51,8 @@ that's not a skill, that's a task description.
   No daemon, no ceremony.
 - `global/skills/diagnose/SKILL.md` — judgment encoded as a routing table plus
   phase protocol with concrete stop conditions.
-- `global/skills/next/SKILL.md` — tiny reusable trigger where app-visible discovery
-  earns the primitive.
+- `global/skills/dispatch/SKILL.md` — visible chief router with a falsifiable
+  composition contract.
 
 **External exemplars (installed under `global/skills/design/references/external/`):**
 - `anthropic-skill-creator` — the "theory of mind" framing:

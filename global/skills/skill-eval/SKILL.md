@@ -129,7 +129,7 @@ A full pass is ~15–18 runs (paid, slow). Do not gate every edit on it.
 | drive the A/B (smoke + serious) | `references/run-recipe.md` |
 | eval protocol contract | `global/skills/harness-engineering/references/mode-eval.md` |
 | canonical worked eval | `examples/routing-eval.md` |
-| first instance | `global/skills/shape/evals/shape-eval.md` |
+| current first instance | `global/skills/dispatch/evals/dispatch-eval.md` |
 
 ## Verification
 

@@ -295,6 +295,40 @@ def check_tree(contract: Contract) -> None:
             if skill not in skill_names:
                 fail(f"agent {name} autoloads missing skill {skill}")
 
+    catalog_path = skill_dir / "dispatch" / "references" / "agent-compositions.json"
+    try:
+        dispatch_catalog = json.loads(catalog_path.read_text())
+    except (OSError, json.JSONDecodeError) as error:
+        fail(f"{relative(catalog_path)} is invalid: {error}")
+    if not isinstance(dispatch_catalog, dict):
+        fail(f"{relative(catalog_path)} must be a JSON object")
+    if dispatch_catalog.get("schema_version") != "omp.dispatch.agent-compositions.v1":
+        fail(f"{relative(catalog_path)} has an unsupported schema_version")
+    catalog_agents = dispatch_catalog.get("agents")
+    if not isinstance(catalog_agents, dict):
+        fail(f"{relative(catalog_path)} has no agents object")
+    if set(catalog_agents) != agent_names:
+        missing = sorted(agent_names - set(catalog_agents))
+        extra = sorted(set(catalog_agents) - agent_names)
+        fail(f"dispatch agent catalog drift: missing={missing}, extra={extra}")
+    for name, fields in agent_fields.items():
+        expected = catalog_agents[name]
+        actual = {
+            "model": split_csv(fields.get("model", "")),
+            "thinkingLevel": fields.get("thinkingLevel"),
+            "tools": fields.get("tools"),
+            "autoloadSkills": split_csv(fields.get("autoloadSkills", "")),
+            "spawns": split_csv(fields.get("spawns", "")),
+        }
+        for key, value in actual.items():
+            if expected.get(key) != value:
+                fail(
+                    f"dispatch agent catalog drift for {name}.{key}: "
+                    f"catalog={expected.get(key)!r}, frontmatter={value!r}"
+                )
+        if not expected.get("when_to_use"):
+            fail(f"dispatch agent catalog has no when_to_use for {name}")
+
     allowed_spawns = agent_names | contract.bundled_agents
     for name, fields in agent_fields.items():
         for spawn in split_csv(fields.get("spawns", "")):
@@ -304,6 +338,7 @@ def check_tree(contract: Contract) -> None:
     check_themes(contract)
     check_presets(contract)
 
+    visible_skills: set[str] = set()
     declared_skills: set[str] = set()
     for directory in sorted(path for path in skill_dir.iterdir() if path.is_dir()):
         skill_file = directory / "SKILL.md"
@@ -318,9 +353,51 @@ def check_tree(contract: Contract) -> None:
             fail(f"skill directory {directory.name} declares name {name!r}")
         if not fields.get("description"):
             fail(f"skill {name} has no description")
+        if fields.get("hide") != "true" and fields.get("disable-model-invocation") != "true":
+            visible_skills.add(name)
         if name in declared_skills:
             fail(f"duplicate skill name {name}")
         declared_skills.add(name)
+    expected_visible_skills = {"dispatch", "research"}
+    if visible_skills != expected_visible_skills:
+        fail(
+            "global visible skill core drift: "
+            f"expected={sorted(expected_visible_skills)}, actual={sorted(visible_skills)}"
+        )
+
+    routing_path = skill_dir / "dispatch" / "references" / "primitive-routing.md"
+    routing_text = routing_path.read_text()
+    skill_route_start = "## Skill routes\n"
+    skill_route_end = "\n## MCP and tool routes"
+    if skill_route_start not in routing_text or skill_route_end not in routing_text:
+        fail(f"{relative(routing_path)} has no bounded skill routes table")
+    skill_routes = routing_text.split(skill_route_start, 1)[1].split(skill_route_end, 1)[0]
+    routed_skills: set[str] = set()
+    for line in skill_routes.splitlines():
+        if not line.startswith("|") or line.startswith("|---"):
+            continue
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if len(cells) < 3 or cells[0] == "Outcome":
+            continue
+        routed_skills.update(re.findall(r"`([a-z0-9][a-z0-9-]*)`", cells[1]))
+    expected_routed_skills = declared_skills - {"dispatch"}
+    if routed_skills != expected_routed_skills:
+        fail(
+            "dispatch skill route drift: "
+            f"missing={sorted(expected_routed_skills - routed_skills)}, "
+            f"unknown={sorted(routed_skills - expected_routed_skills)}"
+        )
+
+    shared_reference_pattern = re.compile(
+        r"`(global/references/[A-Za-z0-9._/-]+\.md)`"
+    )
+    for markdown_path in skill_dir.rglob("*.md"):
+        for reference in shared_reference_pattern.findall(markdown_path.read_text()):
+            if not (ROOT / reference).is_file():
+                fail(
+                    f"{relative(markdown_path)} points to missing shared reference "
+                    f"{reference}"
+                )
 
 
 def split_csv(value: str) -> list[str]:

@@ -23,7 +23,7 @@ Conversational first. Artifact always.
 
 - Ask the operator what the deal is unless the request already contains enough
   project intent. Batch open questions; use the interrogate-first lens
-  (`primitives/shared/references/interrogate-first.md`) when hidden decisions matter.
+  (`global/references/interrogate-first.md`) when hidden decisions matter.
 - Read the live repo before drafting: existing `VISION.md`, `AGENTS.md`,
   `README*`, positioning/product docs, roadmap/backlog, manifests, examples,
   demos, tests, screenshots, and repo-local skills or prompts that encode

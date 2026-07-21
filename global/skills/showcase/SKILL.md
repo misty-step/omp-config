@@ -36,10 +36,11 @@ the operator look credible.
 | Draft a demo video script | `templates/demo-script.md` |
 | Draft a case study | `templates/case-study.md` |
 
-Use `/shape` when product direction is unsettled. Use `/design` for visible
-artifact critique or implementation polish. Use `/qa` for live surface
-verification. Use `/deliver` to build the shaped slice. This skill decides what
-showcase work is worth doing and what proof must exist before it is public.
+Use `curator` with `/groom` when product direction is unsettled. Use `/design`
+for visible artifact critique or implementation polish. Dispatch `scully` for
+live surface verification. Dispatch `hephaestus` to build the groomed slice.
+This skill decides what showcase work is worth doing and what proof must exist
+before it is public.
 
 ## Contract
 
