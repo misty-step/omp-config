@@ -1,11 +1,11 @@
 modelRoles: 
   smol: openai-codex/gpt-5.6-luna:xhigh
-  vision: google-antigravity/gemini-3.5-flash
+  vision: google-antigravity/gemini-3.6-flash
   commit: openai-codex/gpt-5.4-mini
   task: anthropic/claude-sonnet-5:xhigh
   slow: anthropic/claude-fable-5:high
   plan: anthropic/claude-fable-5:high
-  advisor: google-antigravity/gemini-3.5-flash:high
+  advisor: google-antigravity/gemini-3.6-flash:high
   tiny: google-antigravity/gemini-3.1-flash-lite
   default: anthropic/claude-fable-5:medium
   designer: kimi-code/k3:high
@@ -54,12 +54,12 @@ retry:
       - openrouter/qwen/qwen3.7-plus
     commit: 
       - openai-codex/gpt-5.6-luna
-      - google-antigravity/gemini-3.5-flash
+      - google-antigravity/gemini-3.6-flash
       - openrouter/deepseek/deepseek-v4-flash
     tiny: 
       - openai-codex/gpt-5.4-nano
       - openrouter/deepseek/deepseek-v4-flash
-      - google-antigravity/gemini-2.5-flash-lite
+      - openrouter/google/gemini-3.5-flash-lite
     openai-codex/gpt-5.6-sol: 
       - anthropic/claude-fable-5:high
       - xai-oauth/grok-4.5:high
@@ -101,14 +101,14 @@ retry:
       - anthropic/claude-sonnet-5:high
     openrouter/deepseek/deepseek-v4-flash: 
       - openrouter/minimax/minimax-m3
-      - google-antigravity/gemini-3.5-flash
+      - google-antigravity/gemini-3.6-flash
       - openai-codex/gpt-5.6-luna
     openrouter/minimax/minimax-m3: 
       - openrouter/deepseek/deepseek-v4-pro
       - openrouter/z-ai/glm-5.2:high
       - xai-oauth/grok-4.5:high
     openrouter/meta/muse-spark-1.1: 
-      - google-antigravity/gemini-3.5-flash
+      - google-antigravity/gemini-3.6-flash
       - anthropic/claude-sonnet-5
       - openrouter/qwen/qwen3.7-plus
     openrouter/qwen/qwen3.7-max: 
@@ -119,7 +119,7 @@ retry:
       - openai-codex/gpt-5.6-sol
       - openrouter/moonshotai/kimi-k3
       - openrouter/z-ai/glm-5.2
-      - google-antigravity/gemini-3.5-flash
+      - google-antigravity/gemini-3.6-flash
     advisor: 
       - anthropic/claude-sonnet-5
       - openai-codex/gpt-5.6-terra
