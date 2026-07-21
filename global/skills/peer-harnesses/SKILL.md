@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: peer-harnesses
 description: |
   Enumerates the peer AI agent CLIs installed on this machine (codex, pi,

@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: oracle
 description: |
   Browser-mode-only Oracle consults: bundle a prompt plus selected files and ask

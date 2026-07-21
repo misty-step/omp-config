@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: deliver
 description: |
   Deliver one routed ticket end to end: make the contract executable, build

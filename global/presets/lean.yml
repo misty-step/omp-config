@@ -1,10 +1,12 @@
-# Purpose: Use a small core for orientation, diagnosis, quality, and gates.
+# Purpose: Tier-1 core only — routing, diagnosis, gates, credentials. Drops managed and project skills.
 # Launch: omp --config ~/.omp/agent/presets/lean.yml
-# Filter: allowlist. Deliberately drops managed and project skills.
+# Filter: allowlist. Since 2026-07-21 the main library is tiered; this preset equals the visible core.
 skills:
   includeSkills:
-    - orient
     - next
+    - research
+    - code-review
+    - shape
     - diagnose
-    - qa
     - ci
+    - mint

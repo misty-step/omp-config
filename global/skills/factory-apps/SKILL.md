@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: factory-apps
 description: |
   Route Misty Step factory application capabilities. Use when choosing,

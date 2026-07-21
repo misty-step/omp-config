@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: groom
 description: |
   Backlog grooming as one always-on loop: tidy the board, then sweep —

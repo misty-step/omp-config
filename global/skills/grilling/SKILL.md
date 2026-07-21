@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: grilling
 description: |
   Grill the operator relentlessly about a plan, decision, or idea by batching

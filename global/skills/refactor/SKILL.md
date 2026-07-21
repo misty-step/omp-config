@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: refactor
 description: |
   Architecture refactor mode: set a concrete improvement goal, refactor until

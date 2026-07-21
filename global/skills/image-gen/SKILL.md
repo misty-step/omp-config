@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: image-gen
 description: >
   Generate images from an agent loop — UI/UX mockups and redesign concepts,

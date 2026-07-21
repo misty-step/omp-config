@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: vision
 description: |
   Create or update root VISION.md as a first-class project north-star artifact:

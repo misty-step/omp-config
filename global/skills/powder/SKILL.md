@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: powder
 description: |
   Use when an agent needs to inspect, claim, update, request input for, or

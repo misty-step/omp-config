@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: document
 description: |
   Generate world-class, source-verified reference documentation for a codebase:

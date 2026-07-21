@@ -4,7 +4,7 @@ description: Evidence-backed decision arbiter. Weighs competing options against 
 model: anthropic/claude-fable-5:high, openai-codex/gpt-5.6-sol:high
 thinkingLevel: high
 tools: read,grep,glob,lsp,web_search
-autoloadSkills: orient,council
+autoloadSkills: council
 spawns: ''
 readSummarize: false
 ---

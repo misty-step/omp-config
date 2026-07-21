@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: subagent-dispatch-routing
 description: |
   Capability matrix for the OMP model palette (Fable 5, Sol, Luna, Sonnet 5,

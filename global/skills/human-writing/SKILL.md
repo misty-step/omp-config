@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: human-writing
 description: |
   Edit, audit, or rewrite prose so it sounds like a specific human wrote it,

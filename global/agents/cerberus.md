@@ -4,7 +4,7 @@ description: Fresh-context adversarial code reviewer. Finds high-conviction prod
 model: xai-oauth/grok-4.5:high, openai-codex/gpt-5.6-sol:high
 thinkingLevel: high
 tools: read,grep,glob,lsp,bash,web_search
-autoloadSkills: orient,code-review,ci,diagnose
+autoloadSkills: code-review,ci,diagnose
 spawns: ''
 readSummarize: false
 ---

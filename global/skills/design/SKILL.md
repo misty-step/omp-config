@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: design
 description: |
   Interface and design-system design by parallel bench: every /design

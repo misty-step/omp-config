@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: showcase
 description: |
   Turn a working repo into credible external-facing proof: demoability audit,

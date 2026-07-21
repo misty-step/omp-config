@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: council
 description: |
   Convene a council of DISTINCT OpenRouter model families (via opencode/pi),

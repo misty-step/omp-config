@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: mcp-design
 description: |
   Design or review MCP server tool surfaces for agent usability: tool catalog shape, schemas/descriptions, response payloads, server instructions, token budget, and eval gates. Use when building an MCP server, auditing MCP tools, reducing tool schema/output context, deciding list/read/write split, consolidating CRUD tools, persona-splitting toolsets, or debugging agents choosing MCP tools poorly. Trigger: /mcp-design, /mcp-tools, /mcp-review.

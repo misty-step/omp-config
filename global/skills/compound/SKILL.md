@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: compound
 description: |
   Capture one compounding repo-technical learning while a solved problem is

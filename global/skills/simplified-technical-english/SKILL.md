@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: simplified-technical-english
 description: |
   Write operator-facing prose in ASD-STE100 Simplified Technical English.

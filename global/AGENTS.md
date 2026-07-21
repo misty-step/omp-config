@@ -36,6 +36,19 @@ OMP does not structurally vary tools or autoloaded skills per spawn. Do not pret
 
 Use the task tool for a role's declared model binding. When a lane needs another model or effort, use eval `agent(prompt, agent="<role>", model="<provider>/<model>:<effort>")`. The explicit `:effort` suffix controls that run. Record the selected role, model, effort, and primitive loadout in every substantive delegation brief.
 
+## Skill tiers and picking
+
+The skill library is tiered (2026-07-21). Tier 1 is the only set with always-visible descriptions: `next`, `research`, `code-review`, `shape`, `diagnose`, `ci`, `mint`. Every other skill is hidden (`disable-model-invocation: true`): zero context cost, fully loaded, reachable only by explicit pointer — `skill://<name>`, a `/<name>` slash command, or an agent's `autoloadSkills`.
+
+Picking is load-bearing: a dispatch brief MUST name the hidden skills its lane must read (`Read skill://qa first`), and a declared agent MUST autoload its bundle. A lane cannot discover hidden skills on its own. The hidden index, by domain:
+
+- Delivery: `deliver`, `refactor`, `groom`, `compound`, `project-engineering`
+- Design/UI: `design`, `improve-ui`, `baseline-ui`, `fixing-accessibility`, `fixing-motion-performance`, `image-gen`, `artifact`, `showcase`
+- Research/judgment: `oracle`, `council`, `peer-harnesses`, `grilling`, `vision`, `document`, `human-writing`, `simplified-technical-english`
+- Evals/harness: `skill-eval`, `eval-design`, `mcp-design`, `harness-engineering`, `writing-great-skills`, `subagent-dispatch-routing`
+- Infra/ops: `estate-infrastructure`, `factory-apps`, `powder`, `todoist`, `sprites`
+
+
 # Model palette
 
 Choose deliberately; provider fallbacks are resilience, not capability routing.

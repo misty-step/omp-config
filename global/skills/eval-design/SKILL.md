@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: eval-design
 description: |
   Design an LLM/agentic eval that can change a decision — a task + a model or

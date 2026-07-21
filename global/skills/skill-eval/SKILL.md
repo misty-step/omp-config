@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: skill-eval
 description: |
   Prove a harness skill beats no-skill with a falsifiable A/B eval, or retire

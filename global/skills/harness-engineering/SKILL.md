@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: harness-engineering
 description: |
   Engineer OMP harness primitives: skills, agents, models, MCP config in the

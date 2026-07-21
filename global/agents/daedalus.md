@@ -4,7 +4,7 @@ description: Read-only systems architect and decomposer. Turns ambiguous outcome
 model: openai-codex/gpt-5.6-sol:high, anthropic/claude-fable-5:high, openrouter/z-ai/glm-5.2:high
 thinkingLevel: high
 tools: read,grep,glob,lsp,web_search
-autoloadSkills: orient,shape,design,oracle,project-engineering,council
+autoloadSkills: shape,design,oracle,project-engineering,council
 spawns: ''
 readSummarize: false
 ---

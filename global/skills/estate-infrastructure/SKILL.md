@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: estate-infrastructure
 description: |
   Use when Misty Step infrastructure work needs current Estate standards,

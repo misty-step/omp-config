@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: todoist
 description: |
   Manage the operator's Todoist as the system of record for tasks, reminders,

@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: artifact
 description: |
   Produce a consistently-styled, self-contained HTML report served from a local

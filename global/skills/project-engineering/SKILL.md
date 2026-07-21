@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: project-engineering
 description: |
   Adopt or audit a repository's project-engineering fitness function: map

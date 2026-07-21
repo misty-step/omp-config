@@ -1,4 +1,5 @@
 ---
+disable-model-invocation: true
 name: sprites
 description: |
   Prepare credential-free public repository handoffs on dedicated Fly Sprites:
