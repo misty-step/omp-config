@@ -110,6 +110,22 @@ Training rewards adding; intelligence is equally subtraction. Learning is compre
 - A diff that removes lines is worth at least as much as one that adds them.
 - Close nothing without asking: what did this change make obsolete, and did I delete it?
 
+# Credentials (mint)
+
+This machine holds zero vendor credential bytes. Every credentialed API call
+routes through the production mint broker over the tailnet; caller identity is
+this device's tailnet address (actor `phrazzld@github`), and agent-visible
+config carries only `__mint.<service>.<name>__` placeholders that the broker
+resolves host-side. Wiring, extension recipe, and audit commands:
+`~/Development/omp-config/global/MINT.md`; agent call path: `skill://mint`.
+
+- Need a vendor API? Send the request to `$MINT_BASE_URL/proxy/{scheme}/{host}/{path}`
+  with the placeholder in the auth header. 403 means read the reason, not retry.
+- A route you need isn't declared? Declare alias + policy rule on the broker
+  host (see MINT.md) — never a raw key in env, config, or code, even briefly.
+- A real credential appearing in agent context is a mint-bypass bug: stop and
+  flag it. The macOS local root broker is retired; do not resurrect it here.
+
 # Work ledger
 
 Powder is the default durable work ledger when a repository is represented
