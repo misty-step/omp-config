@@ -57,7 +57,7 @@ retry:
       - google-antigravity/gemini-3.6-flash
       - openrouter/deepseek/deepseek-v4-flash
     tiny: 
-      - google-antigravity/gemini-3.1-flash-lite
+      - openrouter/google/gemini-3.1-flash-lite
       - openai-codex/gpt-5.4-nano
       - openrouter/deepseek/deepseek-v4-flash
     openai-codex/gpt-5.6-sol: 

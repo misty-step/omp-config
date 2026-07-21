@@ -62,8 +62,8 @@ Rank candidate domains by whether a cold agent can run something real and
 observe pass/fail, not by topic importance:
 
 - **Verification/QA** is almost always the strongest first domain — every
-  repo has a shape and a real command to exercise it (`global/skills/qa/SKILL.md`'s
-  shape table: browser app, API/service, CLI, library, MCP, hybrid).
+  repo has a shape and a real command to exercise it (shape taxonomy: browser
+  app, API/service, CLI, library, MCP, hybrid).
 - **Deploy/release runbooks** are the second-strongest — a real deploy
   command, a real rollback/DR path, usually already written down in
   `docs/*.md` and just needs collecting into agent-executable form.
@@ -89,9 +89,8 @@ against role-scoped bundles instead.
 - Copy `templates/repo-local-skill/SKILL.md.tmpl` as the starting shape:
   frontmatter (`name`, `description` with explicit `Use when:`/`Trigger:`
   phrasing, `argument-hint`), the provenance comment block, a surfaces/routes
-  table, exact commands, gotchas, and a report contract — same shape as
-  `global/skills/qa/SKILL.md` and the `canary-qa` exemplar, scaled to what this
-  repo actually has.
+  table, exact commands, gotchas, and a report contract — same shape as the
+  `canary-qa` exemplar, scaled to what this repo actually has.
 
 ## Provenance header
 

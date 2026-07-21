@@ -76,8 +76,8 @@ When scaffolding a new skill:
 1. Copy `../../skill-eval/templates/eval-spec.md` to
    `global/skills/<name>/evals/<name>-eval.md` and fill in the one claim the skill
    must earn, 2–3 fixtures, objective checks, and a pass condition — even if
-   the run itself hasn't happened yet (see `global/skills/orient/evals/orient-eval.md`
-   for a seeded-but-unrun example).
+   the run itself hasn't happened yet (see `global/skills/shape/evals/shape-eval.md`
+   for the first-instance shape).
 2. If the skill's claim genuinely can't be evaled yet (external live
    dependency, taste-heavy rubric needing a human anchor, no fixture budget
    yet), write `global/skills/<name>/evals/WAIVER.md` instead: a reason plus an

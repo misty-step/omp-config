@@ -4,7 +4,7 @@ expires: 2026-08-01
 
 ## Reason
 
-Shares its routing-decision shape with `/orient` (both recommend one next move from live state). Planned as a follow-on eval that reuses `/orient`'s fixture harness (`global/skills/orient/evals/orient-eval.md`) once that first run lands, rather than duplicating fixture design from scratch.
+First proof exists but is not yet a committed eval spec: the 2026-07-21 skill null-case sweep A/B-tested `/next` (skill-on vs bare prompt, blind rubric grading) and it won 2 of 3 fixtures — verdict keep. Evidence: `~/Development/crucible/runs/local/skill-null-sweep/report.md`. The original plan to reuse `/orient`'s fixture harness is void: that same sweep cut `/orient`. Remaining work is porting the sweep fixtures into a durable spec here.
 
 ## Disposition
 
