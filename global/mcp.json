@@ -6,8 +6,9 @@
       "url": "http://127.0.0.1:8101/mcp"
     },
     "overmind": {
-      "type": "http",
-      "url": "http://127.0.0.1:8102/mcp"
+      "type": "stdio",
+      "command": "/Users/phaedrus/.local/libexec/overmind/current/overmind",
+      "args": ["mcp", "--api-base", "http://127.0.0.1:4177"]
     },
     "qmd": {
       "type": "http",
