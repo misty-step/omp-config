@@ -14,8 +14,8 @@ same claim would duplicate the probe without adding decorrelated evidence.
 ## Disposition
 
 Time-boxed deferral, not a permanent opt-out. When it expires, either an eval
-spec lands at `primitives/skills/misty-mint/evals/mint-eval.md` (template:
-`primitives/skills/skill-eval/templates/eval-spec.md`) proving the *skill* (not
+spec lands at `global/skills/mint/evals/mint-eval.md` (template:
+`global/skills/skill-eval/templates/eval-spec.md`) proving the *skill* (not
 the probe) changes agent behavior — e.g. that the skill-on arm routes through
 mint where the raw arm inlines a key — or this waiver is renewed with a fresh
 reason and date. A silently renewed waiver is itself a finding for

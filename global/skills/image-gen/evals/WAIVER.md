@@ -14,8 +14,8 @@ model-capability facts that rot in weeks.
 ## Disposition
 
 Time-boxed deferral, not a permanent opt-out. When it expires, either an eval
-spec lands at `primitives/skills/image-gen/evals/image-gen-eval.md` (template:
-`primitives/skills/skill-eval/templates/eval-spec.md`) — a cheap first cut can
+spec lands at `global/skills/image-gen/evals/image-gen-eval.md` (template:
+`global/skills/skill-eval/templates/eval-spec.md`) — a cheap first cut can
 be the routing decision alone (skill-on vs raw same-model on prompts that should
 route to HTML), graded objectively without an image judge — or this waiver is
 renewed with a fresh reason and date. A silently renewed waiver is itself a

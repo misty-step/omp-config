@@ -10,8 +10,8 @@ argument-hint: "[observe-plan|bounded-reversible|exact-plan-mutation]"
 # /estate-infrastructure
 
 Estate is Misty Step's infrastructure intent and sole mutation authority.
-Roster projects how an agent finds that authority; it does not copy provider
-policy or turn an agent declaration into approval.
+The agent's projected home shows how an agent finds that authority; it does not
+copy provider policy or turn an agent declaration into approval.
 
 ## Read the binding source
 
@@ -26,7 +26,7 @@ Read the live Estate revision selected by the workspace or control plane:
 
 The canonical repository paths begin at
 `https://github.com/misty-step/estate/tree/master/`. Current vendor choices
-stay there; do not restate them as durable Roster policy or infer them from an
+stay there; do not restate them as durable local policy or infer them from an
 agent or role name.
 
 If a standard's `review_date` has passed, an exception is expired, or required
@@ -34,7 +34,7 @@ evidence is recorded as a gap, report that exact condition and do not use it to
 select a vendor or justify a mutation. Keep work read-only unless a separately
 valid Estate authorization covers that exact action. Refresh the Estate
 evidence or obtain an Estate-declared exception; neither a remembered
-preference nor a Roster declaration fills the gap.
+preference nor an agent-home declaration fills the gap.
 
 ## Requested action classes
 
@@ -52,7 +52,7 @@ preference nor a Roster declaration fills the gap.
 
 The matching public pack is declaration vocabulary for the requested scope.
 Pack inclusion, a role name, Powder state, conversational approval, and a
-generic Roster authority-provider result without the verified Estate artifact
+generic agent-home authority-provider result without the verified Estate artifact
 and runtime proof are not runtime identity or Estate approval. An executor acts
 only on an Estate-approved typed artifact; it never derives a provider command
 or credential from this skill. Bind standing capabilities only to a durable

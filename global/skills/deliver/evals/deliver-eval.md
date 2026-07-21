@@ -10,7 +10,7 @@ This is a `mode-eval` A/B run, not a directory shape. Arms: A = `/deliver`
 installed and invoked; B = raw same-model ("implement this ticket end to end
 and make it mergeable", no skill); C = n/a (no credible alternative primitive
 covers the full arc). Grade blind, objective checks first, judge a different
-model family than the workers. Protocol: `primitives/skills/skill-eval/references/run-recipe.md`.
+model family than the workers. Protocol: `global/skills/skill-eval/references/run-recipe.md`.
 
 ## Fixtures
 
@@ -75,7 +75,7 @@ agent grader here once run. **PENDING — no run yet.**
 
 ## Run log
 
-**No run yet.** Live proof is tracked by Powder `workbench-003`;
+**No run yet.** Origin Roster-era backlog (retired 2026-07-16); no card tracker survives it.
 `/deliver` is the highest-usage first-party skill (36 recorded invocations per
 the 2026-07-01 groom telemetry read) and had no eval coverage before this. A
 run that didn't fire both arms + a falsifiable grader is not a result — this

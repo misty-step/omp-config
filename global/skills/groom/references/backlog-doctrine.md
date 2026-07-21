@@ -22,17 +22,17 @@ Ideas move through board states during `/groom`:
 The board is the current plan, not storage for every thought. It stays ordered,
 transparent, and actively maintained so the next decisions are obvious.
 
-## Roster Product Lens
+## omp-config Product Lens
 
-Roster is the agent declaration and primitive source for other repositories. Its own repo is where
-patterns get validated before they spread.
+omp-config is the agent declaration and primitive source projected into the live agent home
+(`~/.omp/agent`). Its own repo is where patterns get validated before they spread.
 
-When shaping Roster cards, prefer work that is one of:
+When shaping omp-config cards on the Powder board, prefer work that is one of:
 - a reusable primitive, scaffold, reference, or policy other repos can adopt
 - a proving-ground validation of a pattern meant to transfer outward
 - debt removal that materially blocks downstream adoption or trust
 
-If an item only improves Roster's own repo and has no clear transfer value, demote it,
+If an item only improves omp-config's own repo and has no clear transfer value, demote it,
 merge it into a broader reusable effort, or rewrite it until the downstream payoff is explicit.
 
 ## Core rules
@@ -51,7 +51,7 @@ merge it into a broader reusable effort, or rewrite it until the downstream payo
 - Prefer one canonical item per outcome.
 - Split discovery from delivery.
 - Order work by user value, risk reduction, learning, and enablement.
-- For Roster itself, optimize for downstream leverage first and local convenience second.
+- For omp-config itself, optimize for downstream leverage first and local convenience second.
 - Keep active work narrow. High WIP destroys prioritization.
 - Ideas that are not execution-ready remain backlog cards with an explicit reason.
 
@@ -101,7 +101,7 @@ Move items down when they:
 - duplicate a broader surviving issue
 - depend on undefined architecture
 - represent “maybe someday” ideas with no current owner
-- only improve Roster's own repo without reusable payoff
+- only improve omp-config's own repo without reusable payoff
 
 ## Cadence
 
@@ -131,7 +131,7 @@ Before an issue is execution-ready, verify:
 - dependencies are visible
 - scope boundaries are present
 - verification is executable
-- downstream leverage or proving-ground rationale is explicit for Roster cards
+- downstream leverage or proving-ground rationale is explicit for omp-config cards
 - the issue can be completed in one coherent pass or should be split
 
 ## AI-agent adaptation

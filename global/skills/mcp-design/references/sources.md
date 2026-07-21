@@ -64,7 +64,7 @@ Accessed: 2026-07-08.
   imports, and generic implementation checklists that dilute design judgment.
 - `eduardoremedios/mcp-builder-skill`, fetched 2026-07-08. Took: public demand
   for a production MCP builder skill. Rejected: very large monolithic guide and
-  SDK-specific examples; this roster skill stays design-first and stack-neutral.
+  SDK-specific examples; this skill stays design-first and stack-neutral.
 - `mcp-use/skills` `mcp-builder`, fetched 2026-07-08. Took: framework-specific
   quick-start and inspector-test emphasis as useful when already using mcp-use.
   Rejected: framework coupling and widget/app details outside this skill's job.

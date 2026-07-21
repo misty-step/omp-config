@@ -23,7 +23,7 @@ trees were deleted as theater in the 2026-06 consolidation; do not rebuild
 them. The exemplar to copy is
 `examples/routing-eval.md` (retired from `/design`, run log intact): an answer key, an objective grader, a
 pass bar a no-op revision fails, a run log. The protocol contract is
-`primitives/skills/harness-engineering/references/mode-eval.md`.
+`global/skills/harness-engineering/references/mode-eval.md`.
 
 ## The loop
 
@@ -81,7 +81,7 @@ pass bar a no-op revision fails, a run log. The protocol contract is
 
 A full pass is ~15–18 runs (paid, slow). Do not gate every edit on it.
 
-- **Every `primitives/skills/<skill>/**` edit** → cheap objective checks + a 1-fixture
+- **Every `global/skills/<skill>/**` edit** → cheap objective checks + a 1-fixture
   native-subagent smoke. Catches gross regressions for free.
 - **Contract-level change** (the skill's claim or output shape moved) → full
   A/B, decorrelated, all fixtures. The skill changed; re-earn the claim.
@@ -111,7 +111,7 @@ A full pass is ~15–18 runs (paid, slow). Do not gate every edit on it.
   claim's distinct failure modes.
 - **Eval bloat.** This skill stays minimal. Serious, repeated arena work
   (composition sweeps, model selection) graduates to Daedalus; it does not
-  expand Roster into a benchmark platform.
+  expand this repo into a benchmark platform.
 - **Grading prose, not outcomes.** "The packet reads well" is not the claim. "A
   cold lane built the feature from the packet" is. Grade the outcome the skill
   promises.
@@ -126,20 +126,20 @@ A full pass is ~15–18 runs (paid, slow). Do not gate every edit on it.
 | generate a new skill's eval | `templates/eval-spec.md` |
 | blind grader prompt | `templates/grader-prompt.md` |
 | drive the A/B (smoke + serious) | `references/run-recipe.md` |
-| eval protocol contract | `primitives/skills/harness-engineering/references/mode-eval.md` |
+| eval protocol contract | `global/skills/harness-engineering/references/mode-eval.md` |
 | canonical worked eval | `examples/routing-eval.md` |
-| first instance | `primitives/skills/shape/evals/shape-eval.md` |
+| first instance | `global/skills/shape/evals/shape-eval.md` |
 
 ## Verification
 
-The eval spec lands at `primitives/skills/<skill>/evals/<skill>-eval.md` (mirrors the design
+The eval spec lands at `global/skills/<skill>/evals/<skill>-eval.md` (mirrors the design
 exemplar). Run evidence lands at `.evidence/harness-evals/<skill>/<date>/` —
 sanitized artifacts + scored receipts only, never raw transcripts with secrets.
 A run is real only when it produced both arms and a grader verdict that *could*
 have gone the other way.
 
 Every first-party skill carries either an eval spec or a live, unexpired
-`primitives/skills/<skill>/evals/WAIVER.md` — a waiver is a time-boxed deferral,
+`global/skills/<skill>/evals/WAIVER.md` — a waiver is a time-boxed deferral,
 not a permanent opt-out. The exact new-skill scaffolding steps live in
-`primitives/skills/harness-engineering/references/skill-design-principles.md`
+`global/skills/harness-engineering/references/skill-design-principles.md`
 ("New Skill: Eval Scaffold Is Not Optional").

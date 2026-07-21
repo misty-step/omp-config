@@ -53,7 +53,7 @@ curl -s https://api.exa.ai/search \
 
 ### Legacy Research API
 
-Do not build new Roster work on Exa's legacy `/research/v1` API. Treat it
+Do not build new work on Exa's legacy `/research/v1` API. Treat it
 as deprecated for new integration design; prefer the Agent API for async
 multi-step research, or Exa Search with `type: "deep"` / `"deep-reasoning"` for
 search-shaped fallback work.
@@ -66,7 +66,7 @@ or comparisons across many sources. It is async, costed, and not zero-data-
 retention; do not send private repo/customer context unless the operator has
 explicitly allowed it for the run.
 
-Roster routes Agent output into `response.agentic`, never into the flat
+This skill routes Agent output into `response.agentic`, never into the flat
 `results[]` list.
 
 ```bash

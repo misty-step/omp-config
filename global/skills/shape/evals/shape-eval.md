@@ -10,25 +10,25 @@ This is a `mode-eval` A/B run, not a directory shape. Arms: A = `/shape`
 installed and invoked; B = raw same-model ("flesh out this spec into something
 buildable", no skill); C = n/a for now (Ponytail is a candidate alternative for
 the simplicity-pressure dimension once A>B is established). Grade blind,
-objective checks first, judge a different model family than the workers. Live
-proof is tracked by Powder `workbench-003` and driven per
-`primitives/skills/skill-eval/references/run-recipe.md`.
+objective checks first, judge a different model family than the workers. No
+automated run yet; origin Roster-era backlog (retired 2026-07-16); driven per
+`global/skills/skill-eval/references/run-recipe.md` when scheduled.
 
 ## Fixtures
 
 Each fixture is spec-only: the arm outputs a context packet and makes no source
-changes. Use live Roster state for fixtures 1–2 and a seeded service for 3.
+changes. Use live omp-config state for fixtures 1–2 and a seeded service for 3.
 
 | # | Prompt | Repo/card evidence | Forbidden edits | What it stresses |
 |---|---|---|---|---|
-| 1 | "Shape a dynamic model/provider catalog for Roster dispatch." | Roster + Powder `roster-model-catalog` | source edits | premise challenge, repo anchors, executable rollout oracle |
-| 2 | "Shape one cross-harness tool-grievance surface without adding another standalone CLI." | Roster + Powder `roster-cross-harness-grievance` | source edits | alternatives that fail differently, boundary placement, attribution invariants |
+| 1 | "Shape a dynamic model/provider catalog for omp-config dispatch." | omp-config + Powder `roster-model-catalog` | source edits | premise challenge, repo anchors, executable rollout oracle |
+| 2 | "Shape one cross-harness tool-grievance surface without adding another standalone CLI." | omp-config + Powder `roster-cross-harness-grievance` | source edits | alternatives that fail differently, boundary placement, attribution invariants |
 | 3 | "Shape enforcing a refund threshold: refunds above $X require a second approver." | seeded Python billing service | source edits | high-risk money/auth, failure/rollback, premise challenge |
 
 At least two fixtures must show A>B; the set spans product infrastructure,
 cross-harness architecture, and high-risk behavior.
 
-## Objective checks (scriptable, pass/fail, ~free — run on every `primitives/skills/shape/**` edit)
+## Objective checks (scriptable, pass/fail, ~free — run on every `global/skills/shape/**` edit)
 
 Each can fail on a real artifact; a no-op "shape" that echoes the prompt fails
 here without a judge.
@@ -72,7 +72,7 @@ Source, and the HTML plan — the objective checks alone separate them. If A doe
 
 ## Cadence
 
-- Edit-time: 1-fixture native-subagent smoke (fixture 1) on any `primitives/skills/shape/**`
+- Edit-time: 1-fixture native-subagent smoke (fixture 1) on any `global/skills/shape/**`
   change — free, catches gross regressions.
 - Contract change (packet skeleton or a Contract gate moves): full A/B, all 3
   fixtures, decorrelated families.

@@ -114,7 +114,7 @@ agent-browser -p browserbase open https://example.com
 
 Do not put a Browserbase key in a command, hosted-MCP URL, repository, or
 Harness config. The hosted Browserbase MCP authenticates through URL query
-state, which does not fit Roster's secret-reference contract. The self-hosted
+state, which does not fit this repo's secret-reference contract. The self-hosted
 `@browserbasehq/mcp` server is allowed only behind a broker wrapper that injects
 `BROWSERBASE_API_KEY`, `BROWSERBASE_PROJECT_ID`, and the Stagehand model
 credential required by the selected model (for the default, `GEMINI_API_KEY`)

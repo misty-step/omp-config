@@ -31,7 +31,7 @@ Two of three (1–2) must show A catching the seeded defect as blocking for a
 pass; fixture 3 is a control — an arm that invents findings on a clean diff
 fails it regardless of fixtures 1–2.
 
-## Objective checks (scriptable, pass/fail, ~free — run on every `primitives/skills/code-review/**` edit)
+## Objective checks (scriptable, pass/fail, ~free — run on every `global/skills/code-review/**` edit)
 
 - [ ] Fixture 1: review output names the swallowed-error path specifically
       (file:line or function) as a finding, not a vague "add error handling."
@@ -72,7 +72,7 @@ Record the verdict and match/mismatch here once run. **PENDING — no run yet.**
 ## Cadence
 
 - Edit-time: 1-fixture native-subagent smoke (fixture 1) on any
-  `primitives/skills/code-review/**` change.
+  `global/skills/code-review/**` change.
 - Contract change (the fan-out topology, severity ranking, or the
   never-ship-on-own-review rule moves): full A/B, all 3 fixtures, decorrelated
   families, and re-check the false-positive control specifically.
@@ -82,7 +82,7 @@ Record the verdict and match/mismatch here once run. **PENDING — no run yet.**
 
 ## Run log
 
-**No run yet.** Live proof is tracked by Powder `workbench-002`;
+**No run yet.** Origin Roster-era backlog (retired 2026-07-16); no card tracker survives it.
 `/code-review` is the second-highest-usage first-party skill (33 recorded
 invocations per the 2026-07-01 groom telemetry read) and had no eval coverage
 before this. A run that didn't fire both arms + a falsifiable grader is not a

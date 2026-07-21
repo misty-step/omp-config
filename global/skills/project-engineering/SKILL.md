@@ -44,11 +44,11 @@ Use the existing owner for method; keep this skill at the composition layer.
 
 | Concern | Owner |
 |---|---|
-| Fast/full gates, coverage, mutation, supply chain | `primitives/skills/ci/SKILL.md` and `primitives/shared/references/quality-gates.md` |
-| Runtime and user-boundary proof | `primitives/skills/qa/SKILL.md` and `primitives/shared/references/verification-system-first.md` |
-| Model or agent capability | `primitives/skills/eval-design/SKILL.md` |
-| Canary, Powder, Landmark | `primitives/skills/factory-apps/SKILL.md` |
-| Module depth, seams, dependency direction | `primitives/skills/.external/mattpocock-codebase-design/SKILL.md` |
+| Fast/full gates, coverage, mutation, supply chain | `global/skills/ci/SKILL.md` and `primitives/shared/references/quality-gates.md` |
+| Runtime and user-boundary proof | `global/skills/qa/SKILL.md` and `primitives/shared/references/verification-system-first.md` |
+| Model or agent capability | `global/skills/eval-design/SKILL.md` |
+| Canary, Powder, Landmark | `global/skills/factory-apps/SKILL.md` |
+| Module depth, seams, dependency direction | `global/skills/design/references/external/mattpocock-codebase-design/SKILL.md` |
 | Application-only obligations and waivers | `primitives/shared/references/application-floor.md` |
 
 Return the populated profile plus a gap report grouped by proof class. Route

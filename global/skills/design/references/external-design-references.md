@@ -8,7 +8,7 @@ facts. When a reference informs `DESIGN.md`, record the fact in
 ## Reference Inventory
 
 Rows marked **installed** are vendored via `registry.yaml` into
-`primitives/skills/.external/` and loadable by alias; run them, do not
+`global/skills/design/references/external/` and loadable by alias; run them, do not
 paraphrase them.
 
 | Reference | Use For | Boundary |

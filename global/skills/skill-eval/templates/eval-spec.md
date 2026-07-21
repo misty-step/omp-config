@@ -1,8 +1,8 @@
 # /<skill> eval
 
-> Template. Copy to `primitives/skills/<skill>/evals/<skill>-eval.md` and fill. Delete this
+> Template. Copy to `global/skills/<skill>/evals/<skill>-eval.md` and fill. Delete this
 > line and the bracketed guidance. Keep it a run-with-a-grader, not a directory
-> shape (`primitives/skills/skill-eval/examples/routing-eval.md` is the worked exemplar).
+> shape (`global/skills/skill-eval/examples/routing-eval.md` is the worked exemplar).
 
 The one claim `<skill>` must earn: **[one falsifiable sentence — the thing the
 skill makes true that raw prompting does not]**.

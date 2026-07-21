@@ -27,7 +27,7 @@ whether fresh output is produced against a task.
 Two of three must show A>B for a pass; fixtures 1–2 are the demarcation catch,
 fixture 3 is the false-positive control (rejecting a real eval fails it).
 
-## Objective checks (scriptable, pass/fail, ~free — run on every `primitives/skills/eval-design/**` edit)
+## Objective checks (scriptable, pass/fail, ~free — run on every `global/skills/eval-design/**` edit)
 
 - [ ] Fixture 1: output explicitly names the request as instrumentation / a lint
       (not a capability eval) and either reshapes it or says stop.
@@ -63,7 +63,7 @@ match/mismatch here once run. **PENDING — no run yet.**
 ## Cadence
 
 - Edit-time: 1-fixture native-subagent smoke (fixture 1) on any
-  `primitives/skills/eval-design/**` change.
+  `global/skills/eval-design/**` change.
 - Contract change (the demarcation test or design sequence moves): full A/B, all
   3 fixtures, decorrelated families.
 - Major model release: re-audit — a stronger bare model may already refuse to

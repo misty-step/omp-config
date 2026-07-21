@@ -59,7 +59,7 @@ content; lanes contribute propositions, not substitute galleries.
 
 ## What Belongs In A Repo Design System
 
-Keep the design system local to the consuming repo. Roster provides the
+Keep the design system local to the consuming repo. This skill provides the
 process and checks; the product owns the visual language.
 
 The reusable system includes:

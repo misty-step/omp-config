@@ -239,8 +239,8 @@ Grounded in `config.yml` `task`: `maxConcurrency: 12`, `maxRuntimeMs: 2700000`
 - **Unknown risk is a floor, not a ceiling.** Step 4 only ever adds a verifier
   and pins a more conservative model; it never removes a verifier a known
   high-risk signal would have required.
-- **This skill owns the matrix; Powder and Roster do not.** Powder cards carry
-  only the signal (`estimate`, `risk`); Roster resolves and launches without
+- **This skill owns the matrix; Powder and the harness do not.** Powder cards carry
+  only the signal (`estimate`, `risk`); the harness resolves and launches without
   choosing a model. Do not copy this decision table into either.
 - **`designer`/`task` have a `config.yml` override; `scout`/`librarian`/`sonic`
   do not.** Do not invent a model string for the latter three — using the

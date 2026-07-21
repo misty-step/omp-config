@@ -32,7 +32,7 @@ state correctly is the failure mode), the tangled case (where guessing
 past missing evidence is the failure mode), and the pickup case (where
 ignoring the predecessor's black box is the failure mode).
 
-## Objective checks (scriptable, pass/fail, ~free — run on every `primitives/skills/orient/**` edit)
+## Objective checks (scriptable, pass/fail, ~free — run on every `global/skills/orient/**` edit)
 
 - [ ] No file under the repo is modified, staged, or committed by the arm —
       orient is read-only by contract.
@@ -83,7 +83,7 @@ match/mismatch here once run. **PENDING — no run yet.**
 ## Cadence
 
 - Edit-time: 1-fixture native-subagent smoke (fixture 1) on any
-  `primitives/skills/orient/**` change — cheap, and fixture 1's brevity check catches
+  `global/skills/orient/**` change — cheap, and fixture 1's brevity check catches
   prose bloat immediately.
 - Contract change (the routing table, the read-only boundary, the
   punchy-beats-complete rule, or the black-box pickup contract moves): full
@@ -93,7 +93,7 @@ match/mismatch here once run. **PENDING — no run yet.**
 
 ## Run log
 
-**No run yet.** Live proof is tracked by Powder `workbench-003`;
+**No run yet.** Origin Roster-era backlog (retired 2026-07-16); no card tracker survives it.
 `/orient` was named in the epic's designated hot-5 set and had no eval
 coverage before this. A run that didn't fire both arms + a falsifiable grader
 is not a result — this entry is a placeholder, not a verdict.

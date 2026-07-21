@@ -24,5 +24,5 @@ epic.
 
 Before moving M+ work to ready, apply `/shape`'s
 `references/prd-ticket-quality.md`. If the card still lacks a bounded outcome,
-executable acceptance, or proof path, keep it in backlog. When grooming Roster,
+executable acceptance, or proof path, keep it in backlog. When grooming this repo,
 also apply `references/backlog-doctrine.md`.

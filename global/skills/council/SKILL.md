@@ -46,7 +46,7 @@ Two axes, both must vary — decorrelation comes from family × lens:
    frontier closed model on its own CLI (`codex`, `grok`, `agy`) for extra
    family spread.
    - **Slugs rot in days — never hardcode them.** Pull current top models live:
-     `primitives/skills/peer-harnesses/references/model-provider-harness-index.md`, or the
+     `global/skills/peer-harnesses/references/model-provider-harness-index.md`, or the
      **OpenRouter MCP** (`models-list`, `benchmarks`, `model-endpoints` for
      current quality + pricing). `pi --provider openrouter --list-models
      <family>` lists live slugs.

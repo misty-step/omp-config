@@ -27,7 +27,7 @@ Two of three must show A>B for a pass; the fixtures span a pure external
 lookup, a discourse/social scan, and a repo-grounded question that should
 start with local evidence per the skill's own contract.
 
-## Objective checks (scriptable, pass/fail, ~free — run on every `primitives/skills/research/**` edit)
+## Objective checks (scriptable, pass/fail, ~free — run on every `global/skills/research/**` edit)
 
 - [ ] Every load-bearing factual claim carries a citation (URL, file path, or
       command output) — no bare assertion.
@@ -71,7 +71,7 @@ verdict and match/mismatch here once run. **PENDING — no run yet.**
 ## Cadence
 
 - Edit-time: 1-fixture native-subagent smoke (fixture 1) on any
-  `primitives/skills/research/**` change.
+  `global/skills/research/**` change.
 - Contract change (the source-ordering rule, the fan-out defaults, or the
   residual-uncertainty requirement moves): full A/B, all 3 fixtures,
   decorrelated families.
@@ -80,7 +80,7 @@ verdict and match/mismatch here once run. **PENDING — no run yet.**
 
 ## Run log
 
-**No run yet.** Live proof is tracked by Powder `workbench-003`;
+**No run yet.** Origin Roster-era backlog (retired 2026-07-16); no card tracker survives it.
 `/research` is the third-highest-usage first-party skill (27 recorded
 invocations per the 2026-07-01 groom telemetry read) and had no eval coverage
 before this. A run that didn't fire both arms + a falsifiable grader is not a

@@ -36,7 +36,7 @@ never ships on its own review — that is the one hard rule.
    families per substantive diff — e.g. `z-ai/glm-5.2` (primary),
    `moonshotai/kimi-k2.7-code` (second family), `minimax/minimax-m3` or a
    DeepSeek V4 tier (budget sweep), `x-ai/grok-4.5` (high-stakes
-   escalation). Verify slugs and prices against the roster model index at
+   escalation). Verify slugs and prices against the open-model roster index at
    dispatch time — favorites are perishable. Codex and other peer CLIs
    (`/peer-harnesses`) are alternates when their surface answers a distinct
    question, not the default; when any lane quota-dies, reroute to the next
@@ -56,12 +56,12 @@ never ships on its own review — that is the one hard rule.
    - `primitives/shared/references/works-critique.md` — public API, CLI, UI,
      performance, compatibility, migration, or operator-workflow change.
    - the synced Thermo-Nuclear skill
-     (`primitives/skills/.external/cursor-thermo-nuclear-code-quality-review/SKILL.md`)
+     (`global/skills/design/references/external/cursor-thermo-nuclear-code-quality-review/SKILL.md`)
      — any meaningful structural change, large files, new wrappers, or spaghetti
      branching risk; the default harsh maintainability lens, not a last resort.
    - `primitives/shared/references/delete-first.md` — added abstraction,
      automation, dependencies, modes, or optimization; pair with the Ponytail
-     skill (`primitives/skills/.external/dietrich-ponytail/SKILL.md`) when the
+     skill (`global/skills/design/references/external/dietrich-ponytail/SKILL.md`) when the
      main risk is bloat or speculative engineering.
    - `primitives/shared/references/verification-system-first.md` — the proof
      story is missing, weak, eval/benchmark-shaped, or leans on manual judgment.

@@ -175,7 +175,7 @@ the harness's skill/prompt usage signal (hook logs where present) and staleness
 vs last edit. Judge it — low usage with high value-when-used is fine, say so;
 low usage with no story is a deletion candidate. Order findings by severity; do
 not auto-fix. Read harness-native skill-invocation logs and session evidence;
-Roster deliberately has no semantic telemetry engine.
+This repo deliberately has no semantic telemetry engine.
 
 ## Refuse
 

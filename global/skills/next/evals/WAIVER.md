@@ -4,15 +4,15 @@ expires: 2026-08-01
 
 ## Reason
 
-Shares its routing-decision shape with `/orient` (both recommend one next move from live state). Planned as a follow-on eval that reuses `/orient`'s fixture harness (`primitives/skills/orient/evals/orient-eval.md`) once that first run lands, rather than duplicating fixture design from scratch.
+Shares its routing-decision shape with `/orient` (both recommend one next move from live state). Planned as a follow-on eval that reuses `/orient`'s fixture harness (`global/skills/orient/evals/orient-eval.md`) once that first run lands, rather than duplicating fixture design from scratch.
 
 ## Disposition
 
 Not exempt from the eval-coverage contract — this waiver is a time-boxed
 deferral, not a permanent opt-out. When it expires, either an eval spec lands
-at `primitives/skills/next/evals/next-eval.md` (see `primitives/skills/skill-eval/templates/eval-spec.md`)
+at `global/skills/next/evals/next-eval.md` (see `global/skills/skill-eval/templates/eval-spec.md`)
 or this waiver is renewed with a fresh reason and date. A stale, silently
 renewed waiver with no new reasoning is itself a finding for `/harness-engineering`'s
 next skill-health audit.
 
-Tracked by Powder `workbench-003`; per-skill proof runs through `/skill-eval`.
+No automated eval; origin Roster-era backlog (retired 2026-07-16); revisit when this skill changes. Per-skill proof runs through `/skill-eval`.

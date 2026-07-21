@@ -126,7 +126,7 @@ response = client.responses.create(
 The Vercel xAI provider and xAI native SDK examples are intentionally omitted:
 the versions evaluated for this integration do not expose the base-URL seam
 required to force every request through Mint. Use the OpenAI-compatible client
-or Roster's built-in provider above.
+or the built-in provider above.
 
 ## Citations
 
@@ -139,6 +139,6 @@ Responses include `response.citations` with source URLs. Always cite them.
 - `enable_video_understanding` is X Search only
 - `allowed_domains` / `excluded_domains` cannot be combined in one request
 - `allowed_x_handles` / `excluded_x_handles` cannot be combined in one request
-- In the Roster runtime, xAI is a retrieval/discourse provider when
+- In this harness's runtime, xAI is a retrieval/discourse provider when
   `XAI_BASE_URL` is set. It is routed before Exa for social/discourse queries
   and after Exa for recency corroboration.

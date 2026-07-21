@@ -31,7 +31,7 @@ grader run on *different model families* than each other.
 - Write each arm's full task to one file — lanes are cold; inline the fixture,
   repo context, forbidden edits, and what "done" means.
 - `members.tsv` = one line per arm/grader: `label  cli  model  persona`.
-- `primitives/skills/council/scripts/council.sh --task /tmp/<arm>.txt --members
+- `global/skills/council/scripts/council.sh --task /tmp/<arm>.txt --members
   /tmp/members.tsv --outdir .evidence/harness-evals/<skill>/<date>/<arm>`
 - Pull live slugs (roster index / OpenRouter MCP) — never hardcode; a lane
   failing instantly is usually a dead slug or auth lapse, not a verdict.

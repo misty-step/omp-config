@@ -11,7 +11,7 @@ objective first, judge a different model family than the workers.
 
 Seeded 2026-07-09 with the always-bench rewrite (Powder `design-always-bench`);
 supersedes `routing-eval.md`, which tested the retired routing claim (preserved
-with its run log at `primitives/skills/skill-eval/examples/routing-eval.md`).
+with its run log at `global/skills/skill-eval/examples/routing-eval.md`).
 
 ## Fixtures
 

@@ -50,7 +50,7 @@ is the easiest place for plausible but harmful corpus growth.
 
 ## Cadence
 
-Edit-time smoke on any `primitives/skills/compound/**` or
+Edit-time smoke on any `global/skills/compound/**` or
 `primitives/shared/references/learnings.md` change. Full 3-fixture A/B when
 the frontmatter schema or duplicate policy changes. Re-audit after major
 model releases.

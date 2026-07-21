@@ -105,7 +105,7 @@ Check the live gate surface:
 
 ## Run
 
-Run the repo-owned gate — the four commands above for roster, or the contract
+Run the repo-owned gate — the four commands above for omp-config, or the contract
 discovered in the audit for a consumer repo. If a consumer repo has none, that
 is a `high` finding: design the smallest native gate before claiming CI is
 meaningful. If red: fix deterministic generated drift, run focused tests for the

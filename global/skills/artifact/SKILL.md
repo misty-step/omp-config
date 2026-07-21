@@ -65,7 +65,7 @@ metadata, not a deployment hook.
 ## Do it
 
 ```bash
-S="$ROSTER_ROOT/primitives/skills/artifact/scripts"
+S="skill://artifact/scripts"
 # quick: markdown in, styled page out
 python3 $S/artifact_create.py --title "Weekly Ops" --slug weekly-ops \
   --tag "Field Memo" --summary "..." --body-file report.md

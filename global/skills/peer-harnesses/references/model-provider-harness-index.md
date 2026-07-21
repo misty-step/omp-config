@@ -63,7 +63,7 @@ Source: `primitives/providers.yaml`, with command discovery rechecked on
 
 Local probe status proves only command discovery. It does not prove task
 quality, current billing, tool-call reliability, or benchmark performance.
-Oracle status proves only the browser-mode dry-run path; Roster forbids
+Oracle status proves only the browser-mode dry-run path; omp-config forbids
 Oracle API mode in its skill and roster defaults.
 
 ## Realtime And Speech Substrate Snapshot
@@ -183,8 +183,8 @@ Compose a narrow lane as an OMP agent definition (`.omp/agents/<name>.md`,
 project or user scope) or an explicit `agent(prompt, agent=..., model=...)`
 call; promote recurring compositions to a declared agent in omp-config.
 
-The selected Harness owns execution. Roster owns declarations and ephemeral
-projection only; Powder owns durable work evidence and Roster writes a bounded
+The selected Harness owns execution. omp-config owns declarations and ephemeral
+projection only; Powder owns durable work evidence and omp-config writes a bounded
 local dispatch receipt. A failed provider returns evidence to the lead, which
 decides whether to replace the lane.
 

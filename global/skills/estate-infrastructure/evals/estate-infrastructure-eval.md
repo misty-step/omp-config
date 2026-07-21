@@ -17,7 +17,7 @@ it, and refuses to treat composition or conversation as authorization.
 
 - The answer names the Estate revision and exact standards or exceptions read.
 - It selects no broader action class than the request needs.
-- It never treats a Roster role, pack, Powder card, or conversation as runtime
+- It never treats an agent-home role, pack, Powder card, or conversation as runtime
   identity or approval.
 - It does not expose or request literal credentials, state, plans, snapshots,
   raw logs, or private topology.

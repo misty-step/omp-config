@@ -15,7 +15,7 @@ argument-hint: "[canary|powder|landmark|aesthetic|bitterblossom|mint|audit]"
 
 Use the owned factory app before inventing local state, bespoke glue, or a
 generic third-party workflow. Product repos own the concrete skills and MCP
-servers; Roster imports those skills under `misty-*` aliases and manages MCP
+servers; omp-config imports those skills under `misty-*` aliases and manages MCP
 registration in `primitives/mcps/registry.yaml`.
 
 ## Router
@@ -27,7 +27,7 @@ registration in `primitives/mcps/registry.yaml`.
 | release intelligence, versions, changelogs, release notes, release kit, fleet adoption | Landmark | `misty-landmark` and `landmark describe --json` / dry-run CLI/action paths | `docs/agent-integration.md`, `docs/fleet-integration-playbook.md` |
 | UI/UX, Misty Step design law, tokens, static design registry, rendered design gate | Aesthetic | `misty-aesthetic`, `@misty-step/aesthetic` package, static API, law gate | `docs/ADOPTING.md`, `DESIGN.md` |
 | event-triggered agents, reflex loops, durable runs | Bitterblossom | `misty-bitterblossom`, `bb` CLI/API | product plane config; MCP source exists but is not registered in interactive harnesses |
-| outbound API call needing a credential (API key, token, secret) | mint | `primitives/skills/misty-mint/SKILL.md` — egress proxy contract (`X-Mint-Capability` header + `__mint.<service>.<name>__` placeholders) | `mint policy check`/`mint audit tail`/`mint alias list` CLI (operator-only) |
+| outbound API call needing a credential (API key, token, secret) | mint | `global/skills/mint/SKILL.md` — egress proxy contract (`X-Mint-Capability` header + `__mint.<service>.<name>__` placeholders) | `mint policy check`/`mint audit tail`/`mint alias list` CLI (operator-only) |
 
 ## Operating Rule
 
@@ -46,7 +46,7 @@ Use the owned app first (per the router); the non-obvious constraints:
 - **mint** — an agent never holds credential bytes; it carries a capability
   token plus placeholders and lets mint resolve the secret at the proxy
   boundary. Not in `.external/` yet (no vendorable `SKILL.md`) — read
-  `primitives/skills/misty-mint/SKILL.md` directly.
+  `global/skills/mint/SKILL.md` directly.
 
 ## Current Audit
 
