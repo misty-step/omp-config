@@ -1,0 +1,27 @@
+# Purpose: Keep design and delivery skills while dropping operations, research, and harness meta skills.
+# Launch: omp --config ~/.omp/agent/presets/design.yml
+# Filter: denylist. Keep the design/UI suite and focused delivery tools without managed operations or research.
+skills:
+  ignoredSkills:
+    - estate-infrastructure
+    - factory-apps
+    - mint
+    - sprites
+    - powder
+    - todoist
+    - research
+    - council
+    - oracle
+    - peer-harnesses
+    - grilling
+    - harness-engineering
+    - mcp-design
+    - skill-eval
+    - eval-design
+    - project-engineering
+    - showcase
+    - vision
+    - groom
+    - document
+    - compound
+    - writing-great-skills

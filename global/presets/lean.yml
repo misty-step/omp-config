@@ -1,0 +1,10 @@
+# Purpose: Use a small core for orientation, diagnosis, quality, and gates.
+# Launch: omp --config ~/.omp/agent/presets/lean.yml
+# Filter: allowlist. Deliberately drops managed and project skills.
+skills:
+  includeSkills:
+    - orient
+    - next
+    - diagnose
+    - qa
+    - ci

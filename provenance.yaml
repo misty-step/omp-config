@@ -1,5 +1,5 @@
 {
-  "schema_version": "omp-config.provenance.v2",
+  "schema_version": "omp-config.provenance.v3",
   "authority": {
     "repository": ".",
     "source_root": "global",
@@ -45,6 +45,30 @@
         "target": "skills",
         "kind": "directory",
         "origin": "copied"
+      },
+      "extension_agent_hub": {
+        "source": "global/extensions/agent-hub.ts",
+        "target": "extensions/agent-hub.ts",
+        "kind": "file",
+        "origin": "migrated"
+      },
+      "extension_promptspace": {
+        "source": "global/extensions/promptspace.ts",
+        "target": "extensions/promptspace.ts",
+        "kind": "file",
+        "origin": "migrated"
+      },
+      "themes": {
+        "source": "global/themes",
+        "target": "themes",
+        "kind": "directory",
+        "origin": "migrated"
+      },
+      "presets": {
+        "source": "global/presets",
+        "target": "presets",
+        "kind": "directory",
+        "origin": "local"
       }
     }
   },
@@ -54,10 +78,11 @@
     "mode": "symlink"
   },
   "upstream": {
-    "repository": "/Users/phaedrus/Development/roster",
+    "repository": "/Users/phaedrus/Development/_retired/roster",
     "revision": "24a57a32a491891dffa747a1deb82c6cae0364f6",
     "skill_catalog": "primitives/skills/skills-index.yaml",
-    "migrated_at": "2026-07-16"
+    "migrated_at": "2026-07-16",
+    "status": "retired"
   },
   "runtime_dependencies": {
     "bundled_agents": [
@@ -69,6 +94,12 @@
       "sonic"
     ]
   },
+  "runtime_cotenants": [
+    {
+      "path": "extensions/herdr-omp-agent-state.ts",
+      "owner": "herdr"
+    }
+  ],
   "excluded_runtime_state": [
     "agent.db",
     "models.db",
@@ -84,6 +115,9 @@
   "migration": {
     "agents": "rewritten for OMP task-agent frontmatter and prompt bodies",
     "skills": "copied from the Roster catalog and flattened by canonical skill name",
-    "mcp": "credential moved to local OMP .env; machine paths made environment-expandable"
+    "mcp": "credential moved to local OMP .env; machine paths made environment-expandable",
+    "extensions": "copied from omp-aesthetic; herdr-omp-agent-state.ts remains herdr-managed runtime state",
+    "themes": "copied from omp-aesthetic",
+    "presets": "local launch overlays"
   }
 }

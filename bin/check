@@ -2,8 +2,11 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 from config_contract import (
@@ -34,6 +37,201 @@ def relative(path: Path) -> Path:
         return path.relative_to(ROOT)
     except ValueError:
         return path
+
+
+def _yaml_value(raw: str) -> object:
+    value = raw.strip()
+    if not value:
+        return None
+    if value == "[]":
+        return []
+    if (len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}):
+        return value[1:-1]
+    if value == "true":
+        return True
+    if value == "false":
+        return False
+    return value
+
+
+def yaml_setting(path: Path, dotted: str) -> object:
+    wanted = dotted.split(".")
+    stack: list[tuple[int, str]] = []
+    lines = path.read_text().splitlines()
+    for index, line in enumerate(lines):
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        indent = len(line) - len(line.lstrip(" "))
+        stripped = line.strip()
+        if ":" not in stripped:
+            continue
+        key, raw = stripped.split(":", 1)
+        if not key or any(character.isspace() for character in key):
+            continue
+        while stack and indent <= stack[-1][0]:
+            stack.pop()
+        current = [entry[1] for entry in stack] + [key]
+        if current == wanted:
+            parsed = _yaml_value(raw)
+            if parsed is not None:
+                return parsed
+            for following in lines[index + 1 :]:
+                if not following.strip() or following.lstrip().startswith("#"):
+                    continue
+                following_indent = len(following) - len(following.lstrip(" "))
+                if following_indent <= indent:
+                    break
+                return _yaml_value(following.strip())
+            return None
+        if not raw.strip():
+            stack.append((indent, key))
+    raise ContractError(f"{relative(path)} omits required setting {dotted}")
+
+
+def check_promptspace_config(contract: Contract, effective: dict[str, object]) -> None:
+    settings = contract.surface("settings").source
+    expected = {
+        "tui.chrome": "plain",
+        "statusLine.preset": "custom",
+        "statusLine.leftSegments": [],
+        "statusLine.rightSegments": [],
+        "theme.dark": "kanagawa",
+        "theme.light": "kanagawa-lotus",
+    }
+    for key, wanted in expected.items():
+        actual = yaml_setting(settings, key)
+        if actual != wanted:
+            fail(f"{relative(settings)} requires {key}={wanted!r}; found {actual!r}")
+        entry = effective.get(key)
+        if not isinstance(entry, dict) or "value" not in entry:
+            if key != "tui.chrome":
+                fail(f"OMP effective config omitted required {key}")
+            continue
+        if entry["value"] != wanted:
+            fail(f"OMP effective config changed {key}: expected {wanted!r}, found {entry['value']!r}")
+    theme_dir = contract.surface("themes").source
+    for key in ("theme.dark", "theme.light"):
+        theme_name = expected[key]
+        if not (theme_dir / f"{theme_name}.json").is_file():
+            fail(f"{relative(theme_dir)} omits active theme {theme_name!r}")
+
+
+def check_themes(contract: Contract) -> None:
+    theme_dir = contract.surface("themes").source
+    for path in sorted(theme_dir.glob("*.json")):
+        try:
+            parsed = json.loads(path.read_text())
+        except json.JSONDecodeError as error:
+            fail(f"{relative(path)} is invalid JSON: {error}")
+        if not isinstance(parsed, dict) or parsed.get("name") != path.stem:
+            fail(f"{relative(path)} must have name matching {path.stem!r}")
+
+
+def parse_preset_filters(path: Path) -> dict[str, list[str]]:
+    entries: dict[str, list[str]] = {}
+    in_skills = False
+    current: str | None = None
+    for line_number, line in enumerate(path.read_text().splitlines(), 1):
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        indent = len(line) - len(line.lstrip(" "))
+        stripped = line.strip()
+        if indent == 0 and stripped == "skills:":
+            in_skills = True
+            current = None
+            continue
+        if not in_skills:
+            fail(f"{relative(path)} has unsupported YAML at line {line_number}")
+        if indent == 2 and stripped.endswith(":"):
+            key = stripped[:-1]
+            if key not in {"includeSkills", "ignoredSkills"}:
+                fail(f"{relative(path)} has unsupported skill filter {key!r}")
+            entries[key] = []
+            current = key
+            continue
+        if indent >= 4 and stripped.startswith("- ") and current is not None:
+            value = stripped[2:].strip()
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+                value = value[1:-1]
+            if not value:
+                fail(f"{relative(path)} has an empty skill filter entry at line {line_number}")
+            entries[current].append(value)
+            continue
+        fail(f"{relative(path)} has unsupported YAML at line {line_number}")
+    if not entries:
+        fail(f"{relative(path)} has no skills.includeSkills or skills.ignoredSkills list")
+    return entries
+
+
+def check_presets(contract: Contract) -> None:
+    preset_dir = contract.surface("presets").source
+    skill_names = {path.name for path in contract.surface("skills").source.iterdir() if path.is_dir()}
+    for path in sorted(preset_dir.glob("*.yml")):
+        entries = parse_preset_filters(path)
+        env = os.environ.copy()
+        env.pop("PI_CONFIG_FILES", None)
+        env["PI_CONFIG_FILES"] = str(path.resolve())
+        with tempfile.TemporaryDirectory(prefix="omp-config-preset-") as temp:
+            temp_root = Path(temp)
+            for surface in contract.surfaces:
+                target = temp_root / surface.target_rel
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.symlink_to(surface.source, target_is_directory=surface.kind == "directory")
+            env[contract.projection_env] = str(temp_root)
+            try:
+                result = subprocess.run(
+                    ["omp", "config", "list", "--json"],
+                    cwd=ROOT,
+                    env=env,
+                    text=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    timeout=30,
+                )
+            except FileNotFoundError:
+                fail("OMP executable is not available on PATH")
+            except subprocess.TimeoutExpired:
+                fail(f"preset {relative(path)} OMP validation timed out")
+        if result.returncode:
+            detail = result.stderr.strip() or result.stdout.strip()
+            fail(f"preset {relative(path)} rejected by OMP: {detail}")
+        try:
+            parsed = json.loads(result.stdout)
+        except json.JSONDecodeError as error:
+            fail(f"OMP returned invalid config JSON for {relative(path)}: {error}")
+        for key, expected in entries.items():
+            setting = parsed.get(f"skills.{key}")
+            if not isinstance(setting, dict) or setting.get("value") != expected:
+                found = setting.get("value") if isinstance(setting, dict) else None
+                fail(f"preset {relative(path)} overlay changed skills.{key}: expected {expected!r}, found {found!r}")
+            for skill in expected:
+                if any(character in skill for character in "*?["):
+                    continue
+                if skill not in skill_names:
+                    fail(f"preset {relative(path)} names missing skill {skill}")
+
+
+def check_extension_cotenancy(contract: Contract) -> None:
+    extension_dir = contract.projection_root / "extensions"
+    if not extension_dir.is_dir() or extension_dir.is_symlink():
+        fail(f"foreign-writer audit: extensions must be a real directory: {extension_dir}")
+    declared = {
+        surface.target_rel
+        for surface in contract.surfaces
+        if surface.kind == "file" and surface.target_rel.parts[:1] == ("extensions",)
+    }
+    cotenants = {tenant.path_rel for tenant in contract.runtime_cotenants}
+    for entry in sorted(extension_dir.iterdir()):
+        relative_entry = Path("extensions") / entry.name
+        if relative_entry in declared:
+            if not entry.is_symlink():
+                fail(f"foreign-writer audit: declared extension is not a symlink: {entry}")
+            continue
+        if relative_entry in cotenants:
+            if not entry.is_file() or entry.is_symlink():
+                fail(f"foreign-writer audit: cotenant must be a real file: {entry}")
+            continue
+        fail(f"foreign-writer audit: unexpected extension entry: {entry}")
 
 
 def check_tree(contract: Contract) -> None:
@@ -103,6 +301,9 @@ def check_tree(contract: Contract) -> None:
             if spawn != "*" and spawn not in allowed_spawns:
                 fail(f"agent {name} spawns unknown agent {spawn}")
 
+    check_themes(contract)
+    check_presets(contract)
+
     declared_skills: set[str] = set()
     for directory in sorted(path for path in skill_dir.iterdir() if path.is_dir()):
         skill_file = directory / "SKILL.md"
@@ -135,7 +336,8 @@ def main(argv: list[str]) -> int:
         fail(str(error))
     check_tree(contract)
     try:
-        effective_config(contract)
+        effective = effective_config(contract)
+        check_promptspace_config(contract, effective)
     except ContractError as error:
         fail(str(error))
     if argv:
@@ -143,6 +345,7 @@ def main(argv: list[str]) -> int:
             receipts = require_projection(contract)
         except ContractError as error:
             fail(str(error))
+        check_extension_cotenancy(contract)
         print(f"OMP source/projection configuration OK ({len(receipts)} symlinks and digests verified)")
     else:
         print("OMP source configuration OK")

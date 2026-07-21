@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-PROVENANCE_SCHEMA = "omp-config.provenance.v2"
+PROVENANCE_SCHEMA = "omp-config.provenance.v3"
 THINKING_LEVELS = {"off", "minimal", "low", "medium", "high", "xhigh", "max", "auto"}
 
 
@@ -30,6 +30,12 @@ class Surface:
 
 
 @dataclass(frozen=True)
+class RuntimeCotenant:
+    path_rel: Path
+    owner: str
+
+
+@dataclass(frozen=True)
 class Contract:
     root: Path
     provenance: Path
@@ -40,6 +46,7 @@ class Contract:
     install_mode: str
     surfaces: tuple[Surface, ...]
     excluded_runtime_state: tuple[Path, ...]
+    runtime_cotenants: tuple[RuntimeCotenant, ...]
     bundled_agents: frozenset[str]
     upstream: dict[str, str]
 
@@ -63,12 +70,20 @@ def _string(mapping: dict[str, Any], key: str, label: str) -> str:
     return value
 
 
-def _relative_path(value: str, label: str, *, single_child: bool = False) -> Path:
+def _relative_path(
+    value: str,
+    label: str,
+    *,
+    single_child: bool = False,
+    max_parts: int | None = None,
+) -> Path:
     path = Path(value)
     if path.is_absolute() or ".." in path.parts or path == Path("."):
         raise ContractError(f"{label} must be a non-empty relative path")
     if single_child and len(path.parts) != 1:
         raise ContractError(f"{label} must be one direct child of the projection root")
+    if max_parts is not None and len(path.parts) > max_parts:
+        raise ContractError(f"{label} must have at most {max_parts} path segments")
     return path
 
 
@@ -123,17 +138,18 @@ def load_contract(root: Path, projection_root: Path | None = None) -> Contract:
         source = (root / source_rel).resolve(strict=False)
         if not source.is_relative_to(source_root):
             raise ContractError(f"authority surface {name!r} is outside authority.source_root")
+        kind = _string(declaration, "kind", f"authority.surfaces.{name}")
+        if kind not in {"file", "directory"}:
+            raise ContractError(f"authority surface {name!r} has unsupported kind {kind!r}")
         target_rel = _relative_path(
             _string(declaration, "target", f"authority.surfaces.{name}"),
             f"authority.surfaces.{name}.target",
-            single_child=True,
+            single_child=kind == "directory",
+            max_parts=2 if kind == "file" else None,
         )
         if target_rel in target_paths:
             raise ContractError(f"duplicate projection target {target_rel}")
         target_paths.add(target_rel)
-        kind = _string(declaration, "kind", f"authority.surfaces.{name}")
-        if kind not in {"file", "directory"}:
-            raise ContractError(f"authority surface {name!r} has unsupported kind {kind!r}")
         if not source.exists():
             raise ContractError(f"authority surface {name!r} is missing: {source_rel}")
         if kind == "file" and not source.is_file():
@@ -161,9 +177,56 @@ def load_contract(root: Path, projection_root: Path | None = None) -> Contract:
     )
     if len(excluded) != len(set(excluded)):
         raise ContractError("excluded_runtime_state contains duplicates")
-    overlap = sorted(str(path) for path in target_paths.intersection(excluded))
-    if overlap:
-        raise ContractError(f"mutable runtime state selected for projection: {overlap}")
+    for surface in surfaces:
+        if any(surface.target_rel == excluded_path for excluded_path in excluded):
+            raise ContractError(
+                f"mutable runtime state selected for projection: {surface.target_rel}"
+            )
+        nested = any(
+            len(surface.target_rel.parts) > len(excluded_path.parts)
+            and surface.target_rel.parts[: len(excluded_path.parts)] == excluded_path.parts
+            for excluded_path in excluded
+        )
+        if nested and surface.kind != "file":
+            raise ContractError(
+                f"only file surfaces may co-tenant excluded runtime state: {surface.target_rel}"
+            )
+        if surface.kind == "file" and len(surface.target_rel.parts) > 1 and not nested:
+            raise ContractError(
+                f"nested file surface must co-tenant excluded runtime state: {surface.target_rel}"
+            )
+
+    cotenants_raw = document.get("runtime_cotenants")
+    if not isinstance(cotenants_raw, list):
+        raise ContractError("runtime_cotenants must be a list")
+    cotenants: list[RuntimeCotenant] = []
+    cotenant_paths: set[Path] = set()
+    excluded_names = {path.name for path in excluded}
+    for index, value in enumerate(cotenants_raw):
+        tenant = _mapping(value, f"runtime_cotenants[{index}]")
+        path_rel = _relative_path(
+            _string(tenant, "path", f"runtime_cotenants[{index}]"),
+            f"runtime_cotenants[{index}].path",
+            max_parts=2,
+        )
+        if len(path_rel.parts) < 2 or path_rel.parts[0] not in excluded_names:
+            raise ContractError(
+                f"runtime_cotenants[{index}].path must be inside excluded runtime state"
+            )
+        if path_rel in cotenant_paths:
+            raise ContractError(f"duplicate runtime cotenant path {path_rel}")
+        if path_rel in target_paths:
+            raise ContractError(f"runtime cotenant overlaps authority surface {path_rel}")
+        owner = _string(tenant, "owner", f"runtime_cotenants[{index}]")
+        if not re.fullmatch(r"[a-z][a-z0-9_-]*", owner):
+            raise ContractError(f"runtime_cotenants[{index}].owner has invalid name {owner!r}")
+        cotenant_paths.add(path_rel)
+        cotenants.append(
+            RuntimeCotenant(
+                path_rel=path_rel,
+                owner=owner,
+            )
+        )
 
     dependencies = _mapping(document.get("runtime_dependencies"), "runtime_dependencies")
     bundled_raw = dependencies.get("bundled_agents")
@@ -194,6 +257,7 @@ def load_contract(root: Path, projection_root: Path | None = None) -> Contract:
         install_mode=install_mode,
         surfaces=tuple(surfaces),
         excluded_runtime_state=excluded,
+        runtime_cotenants=tuple(cotenants),
         bundled_agents=frozenset(bundled_raw),
         upstream=upstream,
     )
@@ -300,18 +364,25 @@ def effective_config(contract: Contract) -> dict[str, object]:
         temp_root = Path(temp)
         for surface in contract.surfaces:
             target = temp_root / surface.target_rel
+            target.parent.mkdir(parents=True, exist_ok=True)
             target.symlink_to(surface.source, target_is_directory=surface.kind == "directory")
         env = os.environ.copy()
+        env.pop("PI_CONFIG_FILES", None)
         env[contract.projection_env] = str(temp_root)
-        result = subprocess.run(
-            ["omp", "config", "list", "--json"],
-            cwd=contract.root,
-            env=env,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            timeout=30,
-        )
+        try:
+            result = subprocess.run(
+                ["omp", "config", "list", "--json"],
+                cwd=contract.root,
+                env=env,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                timeout=30,
+            )
+        except FileNotFoundError as error:
+            raise ContractError("OMP executable is not available on PATH") from error
+        except subprocess.TimeoutExpired as error:
+            raise ContractError("OMP config validation timed out") from error
         if result.returncode:
             detail = result.stderr.strip() or result.stdout.strip()
             raise ContractError(f"OMP rejected source configuration: {detail}")

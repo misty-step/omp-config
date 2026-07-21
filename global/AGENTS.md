@@ -70,6 +70,7 @@ Prefer the narrowest declared role whose primitive bundle fits:
 - bundled `scout` — fast bounded repository reconnaissance.
 - bundled `designer` — visual design and rendered UI review on the designer model role.
 - bundled `librarian` — external library and API source research.
+- bundled `reviewer` — code quality and security review on the session model.
 - bundled `sonic` — strictly mechanical collection.
 - bundled `task` — general execution only when no narrower primitive bundle fits.
 

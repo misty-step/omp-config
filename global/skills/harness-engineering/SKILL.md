@@ -18,9 +18,10 @@ When changing omp-config itself, read root `global/AGENTS.md` first — it is
 the chief-executive contract every OMP session runs under, and this skill
 extends it, never overrides it. `bin/check` validates the source tree
 (config-contract shape, agent/skill frontmatter, no leaked secrets);
-`bin/install` symlinks `global/` onto the live agent home
+`bin/install` projects the declared `global/` surfaces onto the live agent home
 (`$PI_CODING_AGENT_DIR`, default `~/.omp/agent`) and re-verifies the
-projection. There is no other build/codegen/sync step.
+projection. It keeps runtime-owned cotenants in place. There is no other
+build/codegen/sync step.
 
 ## Route
 
@@ -81,7 +82,8 @@ test below — most patterns are prompts, not skills.
 - Code outside a skill serves only omp-config's own repo maintenance
   (`bin/check`, `bin/install`, `bin/config_contract.py`, `provenance.yaml`)
   or harness configuration (`global/config.yml`, `global/mcp.json`,
-  `global/models.yml`). It is not a place for skill behavior.
+  `global/models.yml`, `global/extensions`, `global/themes`,
+  `global/presets`). It is not a place for skill behavior.
 - Treat a skill as a folder, not a markdown file. Use scripts, references,
   examples, templates, assets, evals, or append-only data when prose would
   make the agent reconstruct repeatable work.

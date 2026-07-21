@@ -1,0 +1,23 @@
+# Purpose: Keep research and decision skills while dropping visual design, operations, and delivery-heavy skills.
+# Launch: omp --config ~/.omp/agent/presets/research.yml
+# Filter: denylist. Keep research and light verification without design/UI, operations, or heavy delivery tools.
+skills:
+  ignoredSkills:
+    - design
+    - baseline-ui
+    - improve-ui
+    - fixing-accessibility
+    - fixing-motion-performance
+    - image-gen
+    - artifact
+    - showcase
+    - estate-infrastructure
+    - factory-apps
+    - mint
+    - sprites
+    - powder
+    - deliver
+    - refactor
+    - ci
+    - code-review
+    - writing-great-skills
