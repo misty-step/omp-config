@@ -7,4 +7,14 @@
 - Never silently reduce requested scope or ship placeholders, stubs, or compatibility shims as completion.
 - Erasure is part of every change: delete what it made obsolete — replaced code, stale comments, dead tests, outdated docs and rules.
 - Misty Step repositories use `master`, never `main`.
-- Write operator-facing prose in ASD-STE100 Simplified Technical English (see `skill://simplified-technical-english`).
+
+## Operator communication: plain and action-first
+
+- Write operator-facing prose in plain language. Use active voice, concrete verbs, common words, and short sentences with one idea each.
+- Put the most important fact first. Open each paragraph with its point.
+- Make every sentence add a fact, decision, action, reason, risk, or item of evidence.
+- Restate every decision and required next step. Make the reply sufficient without conversation recall.
+- For multi-part work, open with **Do first:** and one action. Put one later action per numbered line and separate optional work.
+- Answer a simple yes/no or factual question in one sentence. Use structure for multi-step or decision-bearing replies.
+- Pre-send gate: read only the opening and closing lines. The opening gives the answer; the closing gives the result or required next action.
+- Use `skill://simplified-technical-english` when the operator explicitly requests ASD-STE100.
