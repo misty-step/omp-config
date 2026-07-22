@@ -56,7 +56,7 @@ secrets or private customer data in `/tmp`.
 2. **Choose one architectural pressure.** Split ownership, shallow wrapper,
    dependency direction, duplicated data shape, feature logic hiding in UI glue.
    See `global/references/delete-first.md` (Ponytail:
-   `global/skills/design/references/external/dietrich-ponytail/SKILL.md`). Do not tidy
+   `global/external/dietrich-ponytail/SKILL.md`). Do not tidy
    everything.
 3. **Make one significant step** — a moved boundary, deleted abstraction,
    renamed public concept, data-flow simplification, or large-file split.
@@ -83,7 +83,7 @@ to attack the goal or a milestone diff, a QA lane to exercise the live surface
 when the lead cannot drive it cheaply.
 
 Default harsh critic: the synced `thermo-nuclear-code-quality-review` skill
-(`global/skills/design/references/external/cursor-thermo-nuclear-code-quality-review/SKILL.md`)
+(`global/external/cursor-thermo-nuclear-code-quality-review/SKILL.md`)
 for milestone diffs that add abstractions, split modules, cross file-size
 thresholds, or claim "cleaner architecture." julius-caveman for interim
 synthesis only; findings, code, commits, and final artifacts stay normal

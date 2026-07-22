@@ -49,7 +49,7 @@ Use the existing owner for method; keep this skill at the composition layer.
 | Runtime and user-boundary proof | `global/references/verification-system-first.md`; dispatch `scully` for independent live verification |
 | Model or agent capability | `global/skills/eval-design/SKILL.md` |
 | Canary, Powder, Landmark | `global/skills/factory-apps/SKILL.md` |
-| Module depth, seams, dependency direction | `global/skills/design/references/external/mattpocock-codebase-design/SKILL.md` |
+| Module depth, seams, dependency direction | `global/external/mattpocock-codebase-design/SKILL.md` |
 | Application-only obligations and waivers | `global/references/application-floor.md` |
 
 Return the populated profile plus a gap report grouped by proof class. Route

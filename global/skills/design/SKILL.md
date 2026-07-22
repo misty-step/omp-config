@@ -2,209 +2,85 @@
 disable-model-invocation: true
 name: design
 description: |
-  Interface and design-system design by parallel bench: every /design
-  invocation fans out blind
-  subagent lanes — each obeying one vendored design philosophy end to end —
-  and composes their rendered explorations into one clickable lab catalog the
-  operator browses and gives verdicts on. Needs a screenshot, URL, rendered
-  artifact, or file plus intent. Use when: "improve the design", "redesign
-  this", "critique this screen", "show me options", "prototype this", "deslop
-  this", "polish the UI", "is this accessible", "scaffold DESIGN.md", or any
-  product-facing visual artifact — docs layout, dashboards, charts, diagrams.
+  Design pass against rendered pixels: pin the brief, plan tokens with one
+  signature element, build, then render-screenshot-fix until the gates pass.
+  Needs a runnable screen or artifact plus intent. Use when: "improve the
+  design", "redesign this", "polish the UI", "prototype this", "critique this
+  screen", or any product-facing visual artifact. Options mode on request:
+  2-4 blind parallel directions, each rendered and screenshot-verified.
   Do not use when: a mechanical style fix with no design decision (just make
-  the edit), or behavior verification (dispatch `scully`). Trigger: /design, /prototype.
+  the edit), or behavior verification (dispatch `scully`). Trigger: /design.
 argument-hint: "<artifact-or-surface> [intent]"
 ---
 
 # /design
 
-One method, every invocation — no routes, verbs, modes, or preset menus. A
-design request never picks a specialist; it benches them:
+The unit of design work is a **rendered screen you have looked at**, never
+source text. Every claim about visual quality must be backed by a screenshot
+you took this session. If you cannot render it, say so and stop — do not
+grade or restyle CSS from source.
 
-**fence → bench → catalog → verdicts → converge**
+## 1. Pin the brief
 
-One context brainstorming N variants produces one taste wearing costumes. Real
-spread comes from blind parallel lanes, each obeying a different vendored
-philosophy end to end. The operator decides from rendered options, never from
-a menu of style names — and the pick is never delegated to the model.
+One sentence: who looks at this surface, and what must they be able to do or
+feel. Read `DESIGN.md` if present; state what is FIXED (repo tokens, brand,
+platform, accessibility floor) before touching anything.
 
-## Fence
+Then commit a compact plan **before writing code**:
 
-Name the artifact and its intent in one sentence. Read `DESIGN.md` when
-present; scaffold it for recurring product-facing work
-(`references/scaffold.md`). State what is FIXED (tokens, brand, platform, a11y
-floor) and which axes vary — `references/divergence.md` owns the per-mode axes
-and fan-width calibration. Set VARIANCE / MOTION / DENSITY targets
-(`references/anti-slop.md`). When the operator supplies reference sites or
-screenshots, the DNA-not-dress protocol in
-`references/external-design-references.md` binds every lane. Route to
-`curator` for `/groom` when product direction itself is unsettled.
+- **Palette**: 4-6 hex values, named against their roles.
+- **Type**: one pairing and a scale; body text 16px+ equivalent.
+- **Layout**: skeleton in one line (e.g. "fixed rail + single scroll column").
+- **Signature**: exactly one distinctive element this screen will be
+  remembered by. A screen with zero signatures is anonymous; one with three
+  is noise.
+- **Not-list**: name the nearest generic default (purple-gradient SaaS,
+  Inter-on-white card grid, cream+serif broadsheet, dark-mode glassmorphism)
+  and one concrete way this plan avoids it. Pick looks deliberately; never
+  arrive at one by default.
 
-When motion intent arrives as a vague effect without a name, load
-`emil-animation-vocabulary` before fencing it. The glossary sharpens the brief;
-it does not join the generative bench.
+## 2. The loop
 
-When the target is itself a design system or component library—or the request
-changes shared tokens, recurring components, or multi-surface grammar—classify
-it as a **holistic system lab** and read `references/design-system.md` before
-dispatch. A named primitive is the variable inside the system, not the whole
-option.
+Build, then iterate against pixels — at most three rounds:
 
-## Bench
+1. Render the real surface (dev server, built file, or artifact preview).
+2. Screenshot desktop (~1440w) and mobile (~390w).
+3. **Look at the screenshots.** Name defects in pixel terms: wrapped or
+   clipped controls, drifting alignment, contrast failures, dead whitespace,
+   overflowing text, broken rhythm, missing states.
+4. Fix only named defects. Re-render, re-shoot, re-look.
 
-Fan out 4–6 blind lanes in parallel (the harness's subagent capability;
-sequential fresh-context lanes where it has none — blindness is the
-requirement, parallelism the speed). Each lane card is three lines: the fence,
-the path to one philosophy's `SKILL.md` ("read it fully; obey it"), and the
-lane output contract (`references/lab-registry.md` § Lane modules). Each lane
-returns 1–3 structurally distinct options. Lanes get the fence and the
-contract only — never each other's output or your reasoning trail (shared
-AGENTS.md: Prove).
+Stop when a round finds no new defects, or after round three — then report
+honestly what remains. Never claim an improvement without before/after
+screenshots at both widths.
 
-For a cheap zero-build holistic system lab, use six blind philosophies and
-require three proposals from each before dedupe. This is an exploration floor,
-not permission to keep weak work.
+## 3. Gates (self-run before showing anyone)
 
-The philosophies (vendored under `references/external/` in this skill —
-resolve as `references/external/<alias>/SKILL.md`, or fetch the pinned repo
-from `references/external/registry.yaml` if a vendored copy is missing;
-licences and boundaries in `references/external-design-references.md`):
+- Contrast: body and control text meet WCAG AA against actual backgrounds.
+- No interactive control wraps, clips, or falls below ~44px touch target.
+- Every color/spacing/radius/type value comes from the repo's tokens; each
+  off-token value gets one written justification or gets removed.
+- Keyboard: every interactive control reachable and visibly focused.
+- No meta-copy: the UI never explains the agent's process.
 
-| Lane | Brings |
-|---|---|
-| `anthropic-frontend-design` | distinctive aesthetic thesis; calibration against the known AI default looks |
-| `emil-apple-design` | fluid physical interaction: direct manipulation, interruptibility, velocity, momentum, spatial continuity, and material depth |
-| `leon-taste-skill` | metric-based anti-default rules; the dials |
-| `leon-soft-skill` | glossy, luxe, agency-tier |
-| `leon-minimalist-skill` | flat editorial (Notion/Linear), no gradient or shadow |
-| `leon-brutalist-skill` | raw industrial-terminal, Swiss print × military terminal |
-| `leon-gpt-tasteskill` | GSAP scroll choreography, AIDA macrostructure |
-| `leon-images-taste-skill` | image-first: generate design images, build to match (image-gen runtime is live) |
-| `leon-redesign-skill` | keep-the-stack redesign; a11y/SEO omissions checklist |
-| `nutlope-hallmark` | macrostructure-first genres, 20-theme rotation, 58-gate slop test |
-| `impeccable-impeccable` | 23 discipline lenses (typeset, colorize, distill, harden, …); brand-vs-product register |
-| `zeke-swiss-design` | Swiss International Style: grid discipline, opacity-based hierarchy, one accent, no decoration |
-| `dammyjay-interface-design` | dense operator UI craft — dashboards, admin panels, SaaS consoles; not for marketing |
-| `danilaa-compact-landing` | small dev-tool/product landing pages; anti-reskin "design fingerprint" mutated per run |
+Report gate results as terse `file:line — verdict` lines in the completion
+message, with the screenshot paths.
 
-Pick the spread against the fence, not a fixed roster: a dense operational
-surface (a console, a dashboard, an admin panel) benches `dammyjay-interface-design`
-alongside `leon-taste-skill`'s dials, never a marketing-first lane; a landing
-page benches hallmark's genres against the soft and brutalist poles, plus
-`zeke-swiss-design` for grid-discipline restraint and `danilaa-compact-landing`
-for a small dev-tool/product-demo canvas. Gesture-driven, sheet, spring,
-drag/swipe, or spatial-motion surfaces bench `emil-apple-design`; static visual
-work usually does not. `references/aesthetic-library.md` holds six
-operator-endorsed directions lanes can seed from.
+## 4. Options mode (only when the operator asks for directions)
 
-## Catalog
+Fan out 2-4 blind parallel lanes, same brief, no shared output. Each lane
+returns ONE direction: a modified copy, rendered, screenshotted at both
+widths, plus its token plan. Present screenshots side by side; the operator
+picks from pixels, never from style names. Kill reskins: two lanes that
+produce the same layout with different paint count as one.
 
-Compose the lab-registry paged viewer (`references/lab-registry.md`): one
-full-viewport page per option, adjustable viewport, arrow-key nav. Dedupe
-cross-lane reskins, refill to the applicable target, include the current
-shipped state as the round-1 baseline, and badge every option with its originating
-philosophy — provenance is how verdicts feed back ("kill everything from that
-lane") and how each vendored skill earns its keep.
+## 5. Routing
 
-**The Design Labs Law (stated here only; everything else points here):** the
-candidate catalog holds **6–20 structurally distinct propositions**, scaled to
-render cost. The round-1 baseline is shown separately and never satisfies the
-count. Six is the floor for expensive options, not the default stopping point;
-cheap zero-build and holistic system labs retain **12–20** candidates after
-dedupe. Palette/font swaps of one layout count as one option. The pick is the
-operator's.
+- Systematic UI audit of an existing app → `improve-ui`.
+- Baseline hygiene rules for new UI → `baseline-ui`.
+- WCAG/ARIA/keyboard deep pass → `fixing-accessibility`.
+- Animation jank or scroll performance → `fixing-motion-performance`.
+- Behavior verification and evidence capture → dispatch `scully`.
 
-In a holistic system lab, one option means one reusable system proposition
-rendered through the same complete gallery contract. A standalone application
-screen is a supplemental stress test, not an option.
-
-## Verdicts
-
-Rounds per the registry contract: the operator kills, mutates, locks; sections
-refill toward the Law. Mutations return to the originating lane's philosophy;
-`nous-creative-ideation` methods (SCAMPER, lateral provocations) drive
-within-lane mutation and round reseeding. Anything the operator phrases as a
-definite fix ships immediately, outside the lab.
-
-## Converge
-
-Build the locked winner in the real stack; update `DESIGN.md` when a durable
-fact changed; the lab is a sketch — never ship its files. Convergence gates:
-
-| Gate | Source |
-|---|---|
-| slop | `references/anti-slop.md` quick gate + `npx impeccable detect` (exit 2 on findings) |
-| micro-polish | `jakub-make-interfaces-feel-better` — exact radii, optical alignment, hit areas |
-| motion | `emil-emil-design-eng` to author, `emil-review-animations` to review |
-| a11y / guidelines | `vercel-web-design-guidelines`; WCAG AA contrast, keyboard reach; checklist in `references/interface-polish.md` |
-| React architecture | `vercel-composition-patterns`, `vercel-react-view-transitions` |
-
-For substantive or external-facing changes, approval is earned, default-deny:
-one fresh-context design-director read plus the deterministic scan,
-synthesized — not concatenated. Presumptive blockers the author must justify:
-
-- an off-system value (color / spacing / radius / type) not in the repo's tokens;
-- a surviving slop tell from `references/anti-slop.md`;
-- contrast below WCAG AA, or an interactive control unreachable by keyboard;
-- no distinctive decision — the surface is template-clean but anonymous;
-- meta-copy: UI that explains the agent's process instead of naming the thing;
-- a catalog below the Law, or cross-lane "options" that are reskins of one layout.
-
-After visible changes, verify desktop and mobile render and report the
-evidence. Dispatch `scully` for behavior verification and evidence capture.
-Delegate per the Shared Operating Spine (Act).
-
-## Completion Gate
-
-See `primitives/shared/AGENTS.md` (Prove) for the shared core;
-design-specific fields:
-
-```markdown
-**Completion Gate**
-- Fence: artifact, intent, fixed vs varying, dial targets.
-- Lanes: philosophies fanned, options returned per lane.
-- Catalog: lab path, option count vs the Law, round number, baseline present.
-- Verdict state: locked winner (option id) or awaiting operator verdicts.
-- Converge evidence: desktop+mobile render evidence; `npx impeccable detect` result.
-- DESIGN.md: read, created, updated, or waived one-off.
-- Residual risk: remaining design, a11y, or QA risk.
-```
-
-## Gotchas
-
-- A lane that skims its philosophy emits house-style output — the philosophy
-  IS the decorrelation. Spot-check each lane's options against its source
-  skill's signature moves before composing.
-- Two lanes can converge on the same obvious layout; dedupe counts them once.
-- Critique and audit asks get the catalog too: findings render as fixed
-  options in the viewer, not as a prose report.
-- Aesthetic preference is not blocking unless it hurts comprehension, trust,
-  conversion, accessibility, or domain fit.
-- Never hide UI defects behind feature explanations. Point to the visible
-  artifact and the concrete change.
-- Meta-copy in UI is a design defect: real product policy, privacy,
-  draft-state, or compliance copy is fine when the user is meant to see it;
-  leaking the agent's caution is not.
-
-## References
-
-- `references/lab-registry.md` — the paged viewer and the lane output contract
-  (file layout, namespaced IDs, provenance badges, round mechanics).
-- `references/divergence.md` — per-mode variation axes, fence-naming,
-  fan-width calibration, converge handoff.
-- `references/anti-slop.md` — the single ban-core: slop tells, dials, quick gate.
-- `references/external-design-references.md` — vendored-skill inventory,
-  licences, DNA-not-dress reference work.
-- `references/aesthetic-library.md` — six operator-endorsed aesthetic
-  directions with runnable HTML examples.
-- `references/scaffold.md` — repo-owned `DESIGN.md` and `design-contract.md`
-  provenance.
-- `references/design-system.md` — token and component-system judgment.
-- `references/taste-layer.md` — direction menus and anti-generic critique
-  lenses for seeding lanes.
-- `references/interface-polish.md` — micro-polish and accessibility checks.
-- `references/critique-shape.md` — the finding shape lanes use when annotating
-  options.
-- `references/ui-surface-routing.md` — composing `/design`, `scully`, and
-  `argus` on visual diffs.
-- `evals/bench-eval.md` — this skill's verification system.
+Update `DESIGN.md` when a durable token or layout fact changed; the lab copy
+you iterated in is a sketch — ship the final diff, never the sketch files.

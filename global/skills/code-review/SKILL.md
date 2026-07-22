@@ -57,12 +57,12 @@ never ships on its own review — that is the one hard rule.
    - `global/references/works-critique.md` — public API, CLI, UI,
      performance, compatibility, migration, or operator-workflow change.
    - the synced Thermo-Nuclear skill
-     (`global/skills/design/references/external/cursor-thermo-nuclear-code-quality-review/SKILL.md`)
+     (`global/external/cursor-thermo-nuclear-code-quality-review/SKILL.md`)
      — any meaningful structural change, large files, new wrappers, or spaghetti
      branching risk; the default harsh maintainability lens, not a last resort.
    - `global/references/delete-first.md` — added abstraction,
      automation, dependencies, modes, or optimization; pair with the Ponytail
-     skill (`global/skills/design/references/external/dietrich-ponytail/SKILL.md`) when the
+     skill (`global/external/dietrich-ponytail/SKILL.md`) when the
      main risk is bloat or speculative engineering.
    - `global/references/verification-system-first.md` — the proof
      story is missing, weak, eval/benchmark-shaped, or leans on manual judgment.

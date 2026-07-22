@@ -54,14 +54,16 @@ that's not a skill, that's a task description.
 - `global/skills/dispatch/SKILL.md` — visible chief router with a falsifiable
   composition contract.
 
-**External exemplars (installed under `global/skills/design/references/external/`):**
-- `anthropic-skill-creator` — the "theory of mind" framing:
-  explain the *why* before the *how* so the model can handle
+**External exemplars:**
+- `skill-creator` (upstream `anthropics/skills`, not vendored) — the "theory
+  of mind" framing: explain the *why* before the *how* so the model can handle
   edge cases the rules don't enumerate.
-- `anthropic-claude-api` — stratified progressive disclosure across
-  SKILL.md body → language-specific reference folders → code examples.
-- `vercel-dogfood` — repro-first discipline: document immediately
-  before moving on, so findings survive session handoff.
+- `claude-api` (upstream `anthropics/skills`, not vendored) — stratified
+  progressive disclosure across SKILL.md body → language-specific reference
+  folders → code examples.
+- `vercel-dogfood` (installed under `global/external/`) — repro-first
+  discipline: document immediately before moving on, so findings survive
+  session handoff.
 
 ## Progressive disclosure
 
