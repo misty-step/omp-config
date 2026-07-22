@@ -17,14 +17,14 @@ A bare prompt should lose on at least two of three fixtures.
 ## Fixtures
 
 1. Medium-risk API implementation with an accepted contract, Powder card, and
-   a new error path. Correct route: `hephaestus` plus `deliver`, `ci`, and
-   `diagnose`; Powder MCP; independent `scully` verifier.
+   a new error path. Correct route: `hephaestus` plus `deliver` and `ci`;
+   Powder MCP; independent `scully` verifier.
 2. High-risk production latency incident with Canary evidence and an unknown
-   recent deploy. Correct route: `cassandra` plus `diagnose`, `factory-apps`,
+   recent deploy. Correct route: `cassandra` plus `factory-apps`,
    `estate-infrastructure`, and `mint`; Canary MCP; reproduce before repair.
 3. Meaningful structural diff that needs Cursor Thermo-Nuclear review and a
    release decision. Correct route: `argus` plus `code-review`,
-   `peer-harnesses`, `ci`, and `diagnose`; cross-family Cerberus and Cursor
+   `peer-harnesses`, and `ci`; cross-family Cerberus and Cursor
    lanes; Scully verifies live claims.
 
 ## Objective checks

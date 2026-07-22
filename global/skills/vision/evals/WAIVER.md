@@ -4,7 +4,7 @@ expires: 2026-09-15
 
 ## Reason
 
-Conversational, multi-turn interrogation to produce VISION.md; a single scripted fixture can't faithfully replay the back-and-forth. Needs a human-anchor design, same class as `council`/`human-writing`.
+Conversational, multi-turn interrogation to produce VISION.md; a single scripted fixture can't faithfully replay the back-and-forth. Needs a human-anchor design, same class as `council`.
 
 ## Disposition
 

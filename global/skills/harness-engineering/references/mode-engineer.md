@@ -100,7 +100,7 @@ recovering meaning from free-form agent prose, that is a strong smell.
 When multiple skills touch the same delivery lane, enforce strict layering:
 
 - **Leaf skills own one domain and are runnable standalone.** Examples:
-  `/ci`, `/diagnose`, `/human-writing`.
+  `/ci`, `/research`.
 - **Composer skills orchestrate leaves around one bounded objective.**
   Example: `/deliver`.
 - **Outer-loop / event workflows are Mode B** (bitterblossom), not new

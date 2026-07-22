@@ -49,8 +49,6 @@ that's not a skill, that's a task description.
 **In-repo exemplars worth reading before drafting:**
 - `global/skills/sprites/SKILL.md` — one primitive, a routing table, gotchas.
   No daemon, no ceremony.
-- `global/skills/diagnose/SKILL.md` — judgment encoded as a routing table plus
-  phase protocol with concrete stop conditions.
 - `global/skills/dispatch/SKILL.md` — visible chief router with a falsifiable
   composition contract.
 

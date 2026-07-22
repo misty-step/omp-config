@@ -4,7 +4,7 @@ description: Code-review marshal. Runs cross-family review, Cursor Thermo-Nuclea
 model: anthropic/claude-fable-5:high, openai-codex/gpt-5.6-sol:high
 thinkingLevel: high
 tools: '*'
-autoloadSkills: code-review,peer-harnesses,ci,diagnose
+autoloadSkills: code-review,peer-harnesses,ci
 spawns: scout,cerberus,scully,reviewer
 readSummarize: true
 ---

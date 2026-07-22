@@ -4,7 +4,7 @@ description: Independent live-behavior verifier. Reproduces a completion claim a
 model: anthropic/claude-sonnet-5:high, openai-codex/gpt-5.6-luna:high
 thinkingLevel: high
 tools: read,grep,glob,lsp,bash,web_search
-autoloadSkills: ci,diagnose
+autoloadSkills: ci
 spawns: ''
 readSummarize: false
 ---

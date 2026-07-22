@@ -5,7 +5,7 @@ model: openai-codex/gpt-5.6-luna:xhigh, anthropic/claude-sonnet-5:high
 thinkingLevel: xhigh
 tools: '*'
 spawns: scout
-autoloadSkills: diagnose,factory-apps,estate-infrastructure,mint
+autoloadSkills: factory-apps,estate-infrastructure,mint
 readSummarize: true
 ---
 

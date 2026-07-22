@@ -1,16 +1,12 @@
 ---
 disable-model-invocation: true
 name: simplified-technical-english
-description: |
-  Write operator-facing prose in ASD-STE100 Simplified Technical English.
-  Use for: all chat replies, reports, summaries, handoff notes, READMEs,
-  and site or UI copy when the operator asks for STE. Trigger: /ste.
+description: Apply ASD-STE100 writing rules to explicitly requested text.
 ---
 
 # Simplified Technical English (ASD-STE100)
 
-Write all operator-facing prose to this standard. The standard has two
-parts: writing rules and a controlled dictionary. Apply both.
+Apply these ASD-STE100 writing rules to the text named by the operator.
 
 ## Writing rules
 
