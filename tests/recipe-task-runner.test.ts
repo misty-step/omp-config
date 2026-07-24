@@ -150,6 +150,27 @@ describe("recipe task runner", () => {
 		expect(existsSync(dirname(String(nestedAgent)))).toBeFalse();
 	});
 
+	test("nested recipe_task does not inherit the parent's beforeStart hook", async () => {
+		let beforeStartCalls = 0;
+		const handle = await startRecipeTask({
+			...recipeOptions("alpha-bundle", "NEST beta-bundle inspect"),
+			async beforeStart(descriptor) {
+				beforeStartCalls += 1;
+				mkdirSync(join(descriptor.agentDir, "agents"));
+				writeFileSync(join(descriptor.agentDir, "agents", "hephaestus.md"), "hephaestus");
+			},
+		});
+		const result = await handle.wait();
+		const nested = result.text.match(/nested=\[(.*)\]$/)?.[1];
+		expect(nested).toBeDefined();
+		// beforeStart must fire exactly once, for the outer launch only — the
+		// nested `recipe_task` tool call passes `beforeStart: undefined` for its
+		// sibling runtime (global/lib/recipe-task-runner.ts's nested tool).
+		expect(beforeStartCalls).toBe(1);
+		expect(result.text).toContain("agents=hephaestus");
+		expect(nested).toContain("agents=;");
+	});
+
 	test("nested recipe_task stops before spawning past the depth cap", async () => {
 		const auditFile = join(scratch, "fixture-processes.jsonl");
 		rmSync(auditFile, { force: true });

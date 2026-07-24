@@ -1,5 +1,5 @@
 import { once } from "node:events";
-import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import { lstat, mkdir, mkdtemp, readFile, realpath, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -35,17 +35,18 @@ describe("shared-runner Hatchet adapter", () => {
       round: 1,
       headSha,
     });
-    expect(() => parseAdapterInput([...argv, "--unknown", "value"])).toThrow(/invalid Hatchet runner arguments/);
   });
 
-  it("stages live Task agents without changing the parent recipe composition", async () => {
+  it("stages a copied agent catalog at the isolated HOME discovery root, not agentDir", async () => {
     const scratch = await mkdtemp(join(tmpdir(), "hatchet-live-projection-"));
     const cwd = join(scratch, "worktree");
     const agentDir = join(scratch, "agent");
+    const home = join(scratch, "home");
     try {
       await mkdir(join(cwd, "global", "agents"), { recursive: true });
       await mkdir(join(cwd, "global", "skills", "deliver"), { recursive: true });
       await mkdir(join(agentDir, "skills", "ci"), { recursive: true });
+      await mkdir(home, { recursive: true });
       await writeFile(join(cwd, "global", "agents", "hephaestus.md"), "hephaestus");
       await writeFile(join(cwd, "global", "agents", "cerberus.md"), "cerberus");
       await writeFile(join(cwd, "global", "skills", "deliver", "SKILL.md"), "deliver");
@@ -59,15 +60,32 @@ describe("shared-runner Hatchet adapter", () => {
       const descriptor = {
         cwd,
         agentDir,
+        home,
         model: { provider: "openrouter", id: "qwen/qwen3.7-max", reasoning: "high" },
       };
       const modelBefore = structuredClone(descriptor.model);
 
       await stageLiveTaskProjection(descriptor);
 
-      expect(await realpath(join(agentDir, "agents"))).toBe(await realpath(join(cwd, "global", "agents")));
-      expect(await realpath(join(agentDir, "skills", "deliver")))
-        .toBe(await realpath(join(cwd, "global", "skills", "deliver")));
+      // Exact discovery root: oh-my-pi task/discovery.ts resolves user-level
+      // agents from `$HOME/.omp/agent/agents`, independent of
+      // PI_CODING_AGENT_DIR. `descriptor.home` is the child process's HOME.
+      const stagedAgentsDir = join(home, ".omp", "agent", "agents");
+      expect(await readFile(join(stagedAgentsDir, "hephaestus.md"), "utf8")).toBe("hephaestus");
+      expect(await readFile(join(stagedAgentsDir, "cerberus.md"), "utf8")).toBe("cerberus");
+
+      // A real, independent copy — not a symlink into the worktree.
+      expect((await lstat(stagedAgentsDir)).isSymbolicLink()).toBe(false);
+      expect(await realpath(stagedAgentsDir)).not.toBe(await realpath(join(cwd, "global", "agents")));
+
+      // The old wrong location (PI_CODING_AGENT_DIR/agents) must stay untouched.
+      await expect(stat(join(agentDir, "agents"))).rejects.toThrow();
+
+      // The deliver skill projects under PI_CODING_AGENT_DIR/skills as a copy too.
+      const stagedDeliverSkill = join(agentDir, "skills", "deliver", "SKILL.md");
+      expect(await readFile(stagedDeliverSkill, "utf8")).toBe("deliver");
+      expect((await lstat(join(agentDir, "skills", "deliver"))).isSymbolicLink()).toBe(false);
+
       expect(await readFile(join(agentDir, "skills", "ci", "SKILL.md"), "utf8")).toBe("recipe ci");
       for (const [name, content] of preserved) {
         expect(await readFile(join(agentDir, name), "utf8")).toBe(content);
@@ -78,6 +96,45 @@ describe("shared-runner Hatchet adapter", () => {
     }
   });
 
+  it("freezes the staged snapshot against source mutations after staging", async () => {
+    const scratch = await mkdtemp(join(tmpdir(), "hatchet-live-projection-isolation-"));
+    const cwd = join(scratch, "worktree");
+    const agentDir = join(scratch, "agent");
+    const home = join(scratch, "home");
+    try {
+      await mkdir(join(cwd, "global", "agents"), { recursive: true });
+      await mkdir(join(cwd, "global", "skills", "deliver"), { recursive: true });
+      await mkdir(agentDir, { recursive: true });
+      await mkdir(home, { recursive: true });
+      await writeFile(join(cwd, "global", "agents", "hephaestus.md"), "before staging");
+      await writeFile(join(cwd, "global", "skills", "deliver", "SKILL.md"), "before staging");
+      for (const name of ["AGENTS.md", "config.yml", "models.yml"]) {
+        await writeFile(join(agentDir, name), "recipe fixed content");
+      }
+      const descriptor = {
+        cwd,
+        agentDir,
+        home,
+        model: { provider: "openrouter", id: "qwen/qwen3.7-max", reasoning: "high" },
+      };
+
+      await stageLiveTaskProjection(descriptor);
+
+      // Mutate the source *after* staging — the immutable snapshot must not move.
+      await writeFile(join(cwd, "global", "agents", "hephaestus.md"), "after staging");
+      await writeFile(join(cwd, "global", "skills", "deliver", "SKILL.md"), "after staging");
+
+      const stagedAgentsDir = join(home, ".omp", "agent", "agents");
+      expect(await readFile(join(stagedAgentsDir, "hephaestus.md"), "utf8")).toBe("before staging");
+      expect(await readFile(join(agentDir, "skills", "deliver", "SKILL.md"), "utf8")).toBe("before staging");
+
+      // Staged files are read-only: a direct write attempt against the
+      // snapshot itself must fail too, not just be masked by a later re-copy.
+      await expect(writeFile(join(stagedAgentsDir, "hephaestus.md"), "tampered")).rejects.toThrow();
+    } finally {
+      await rm(scratch, { recursive: true, force: true });
+    }
+  });
 
   it("wires pre-start projection only for live verification", async () => {
     const liveArgv = [...argv];

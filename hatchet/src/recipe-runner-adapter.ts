@@ -1,5 +1,5 @@
-import { lstat, readFile, realpath, stat, symlink } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { chmod, cp, mkdir, readdir, readFile, realpath, rm, stat } from "node:fs/promises";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { runnerTerminalSchema, shaSchema, stageNameSchema, type RunnerTerminal } from "./contracts.js";
@@ -32,6 +32,7 @@ type RecipeTaskHandle = {
 type RecipeLaunchDescriptor = {
   cwd: string;
   agentDir: string;
+  home: string;
   model: {
     provider: string;
     id: string;
@@ -84,20 +85,30 @@ export function parseAdapterInput(argv: string[]): AdapterInput {
 }
 
 
-async function ensureDirectoryLink(source: string, target: string): Promise<void> {
+// Copies `source` into `target` as a frozen point-in-time snapshot: regular
+// files are chmod'd read-only so neither the staged child process nor a
+// later source mutation can alter what Task discovery sees. Directories keep
+// their write bit so `cleanupRuntimeRoot`'s recursive `rm` can still unlink
+// entries. `target`'s parent is created as needed since the runtime `home`
+// starts as an empty directory with no `.omp/agent` tree yet.
+async function copyImmutableSnapshot(source: string, target: string): Promise<void> {
   const resolvedSource = await realpath(source);
   if (!(await stat(resolvedSource)).isDirectory()) {
     throw new Error(`live Task projection source is not a directory: ${source}`);
   }
-  try {
-    const targetStat = await lstat(target);
-    if (!targetStat.isSymbolicLink() || await realpath(target) !== resolvedSource) {
-      throw new Error(`live Task projection target already exists: ${target}`);
-    }
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-    await symlink(resolvedSource, target, "dir");
-  }
+  await rm(target, { recursive: true, force: true });
+  await mkdir(dirname(target), { recursive: true });
+  await cp(resolvedSource, target, { recursive: true, dereference: true });
+  await freezeFiles(target);
+}
+
+async function freezeFiles(root: string): Promise<void> {
+  const entries = await readdir(root, { withFileTypes: true });
+  await Promise.all(entries.map(async entry => {
+    const entryPath = join(root, entry.name);
+    if (entry.isDirectory()) await freezeFiles(entryPath);
+    else if (entry.isFile()) await chmod(entryPath, 0o444);
+  }));
 }
 
 export async function stageLiveTaskProjection(descriptor: RecipeLaunchDescriptor): Promise<void> {
@@ -106,11 +117,20 @@ export async function stageLiveTaskProjection(descriptor: RecipeLaunchDescriptor
   const preservedContent = await Promise.all(preservedPaths.map(path => readFile(path)));
   const preservedModel = JSON.stringify(descriptor.model);
 
-  await ensureDirectoryLink(
+  // User-level agent discovery reads `$HOME/.omp/agent/agents` (see
+  // oh-my-pi task/discovery.ts `discoverAgents` + config.ts
+  // `USER_CONFIG_BASES`), independent of `PI_CODING_AGENT_DIR`. The isolated
+  // recipe HOME is `descriptor.home`, not `descriptor.agentDir` — staging the
+  // catalog under `agentDir/agents` (the old symlink target) never reaches
+  // Task's discovery root at all.
+  await copyImmutableSnapshot(
     join(descriptor.cwd, "global", "agents"),
-    join(descriptor.agentDir, "agents"),
+    join(descriptor.home, ".omp", "agent", "agents"),
   );
-  await ensureDirectoryLink(
+  // The `deliver` skill IS discovered under `PI_CODING_AGENT_DIR/skills`
+  // (oh-my-pi discovery/builtin.ts uses `getAgentDir()`, which honors
+  // `PI_CODING_AGENT_DIR`), so this target is unchanged from before.
+  await copyImmutableSnapshot(
     join(descriptor.cwd, "global", "skills", "deliver"),
     join(descriptor.agentDir, "skills", "deliver"),
   );
