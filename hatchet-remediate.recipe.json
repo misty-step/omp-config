@@ -8,7 +8,9 @@
   "skills": [
     { "name": "project-engineering", "path": "global/skills/project-engineering" },
     { "name": "refactor", "path": "global/skills/refactor" },
-    { "name": "ci", "path": "global/skills/ci" }
+    { "name": "ci", "path": "global/skills/ci" },
+    { "name": "review-tests", "path": "global/skills/review-tests" }
   ],
+  "taskSkills": [],
   "mcpServers": []
 }

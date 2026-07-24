@@ -43,26 +43,44 @@ describe("shared-runner Hatchet adapter", () => {
     const cwd = join(scratch, "worktree");
     const agentDir = join(scratch, "agent");
     const home = join(scratch, "home");
+    const bundle = join(scratch, "bundle");
     try {
       await mkdir(join(cwd, "global", "agents"), { recursive: true });
       await mkdir(join(cwd, "global", "skills", "deliver"), { recursive: true });
+      await mkdir(join(cwd, "global", "skills", "review-tests"), { recursive: true });
+      await mkdir(join(cwd, "global", "skills", "code-review"), { recursive: true });
       await mkdir(join(agentDir, "skills", "ci"), { recursive: true });
       await mkdir(home, { recursive: true });
+      await mkdir(bundle, { recursive: true });
       await writeFile(join(cwd, "global", "agents", "hephaestus.md"), "hephaestus");
       await writeFile(join(cwd, "global", "agents", "cerberus.md"), "cerberus");
       await writeFile(join(cwd, "global", "skills", "deliver", "SKILL.md"), "deliver");
+      await writeFile(join(cwd, "global", "skills", "review-tests", "SKILL.md"), "review-tests");
+      // Exists in the checkout but never declared on the recipe — must never
+      // reach the child's discovery root.
+      await writeFile(join(cwd, "global", "skills", "code-review", "SKILL.md"), "code-review, never declared");
       await writeFile(join(agentDir, "skills", "ci", "SKILL.md"), "recipe ci");
-      const preserved = new Map([
-        ["AGENTS.md", "recipe instructions"],
-        ["config.yml", "recipe config"],
-        ["models.yml", "recipe models"],
-      ]);
-      for (const [name, content] of preserved) await writeFile(join(agentDir, name), content);
+      const preserved: Record<string, string> = {
+        "AGENTS.md": "recipe instructions",
+        "config.yml": "recipe config",
+        "models.yml": "recipe models",
+      };
+      for (const [name, content] of Object.entries(preserved)) await writeFile(join(agentDir, name), content);
+      await writeFile(
+        join(bundle, "recipe.json"),
+        JSON.stringify({
+          taskSkills: [
+            { name: "deliver", path: "global/skills/deliver" },
+            { name: "review-tests", path: "global/skills/review-tests" },
+          ],
+        }),
+      );
       const descriptor = {
         cwd,
         agentDir,
         home,
         runtimeRoot: join(scratch, "runtime"),
+        bundle,
         model: { provider: "openrouter", id: "qwen/qwen3.7-max", reasoning: "high" },
       };
       const modelBefore = structuredClone(descriptor.model);
@@ -83,13 +101,25 @@ describe("shared-runner Hatchet adapter", () => {
       // The old wrong location (PI_CODING_AGENT_DIR/agents) must stay untouched.
       await expect(stat(join(agentDir, "agents"))).rejects.toThrow();
 
-      // The deliver skill projects under PI_CODING_AGENT_DIR/skills as a copy too.
-      const stagedDeliverSkill = join(agentDir, "skills", "deliver", "SKILL.md");
-      expect(await readFile(stagedDeliverSkill, "utf8")).toBe("deliver");
-      expect((await lstat(join(agentDir, "skills", "deliver"))).isSymbolicLink()).toBe(false);
+      // Every declared taskSkill projects under PI_CODING_AGENT_DIR/skills as a copy.
+      for (const [name, content] of [["deliver", "deliver"], ["review-tests", "review-tests"]] as const) {
+        const stagedSkill = join(agentDir, "skills", name, "SKILL.md");
+        expect(await readFile(stagedSkill, "utf8")).toBe(content);
+        expect((await lstat(join(agentDir, "skills", name))).isSymbolicLink()).toBe(false);
+      }
+
+      // Staged task skill files are read-only, same as the agent catalog.
+      await expect(
+        writeFile(join(agentDir, "skills", "deliver", "SKILL.md"), "tampered"),
+      ).rejects.toThrow();
+
+      // taskSkills is a bounded allowlist, not a mirror of global/skills: an
+      // undeclared skill that exists in the checkout must never appear under
+      // the child's discovery root.
+      await expect(stat(join(agentDir, "skills", "code-review"))).rejects.toThrow();
 
       expect(await readFile(join(agentDir, "skills", "ci", "SKILL.md"), "utf8")).toBe("recipe ci");
-      for (const [name, content] of preserved) {
+      for (const [name, content] of Object.entries(preserved)) {
         expect(await readFile(join(agentDir, name), "utf8")).toBe(content);
       }
       expect(descriptor.model).toEqual(modelBefore);
@@ -103,21 +133,28 @@ describe("shared-runner Hatchet adapter", () => {
     const cwd = join(scratch, "worktree");
     const agentDir = join(scratch, "agent");
     const home = join(scratch, "home");
+    const bundle = join(scratch, "bundle");
     try {
       await mkdir(join(cwd, "global", "agents"), { recursive: true });
       await mkdir(join(cwd, "global", "skills", "deliver"), { recursive: true });
       await mkdir(agentDir, { recursive: true });
       await mkdir(home, { recursive: true });
+      await mkdir(bundle, { recursive: true });
       await writeFile(join(cwd, "global", "agents", "hephaestus.md"), "before staging");
       await writeFile(join(cwd, "global", "skills", "deliver", "SKILL.md"), "before staging");
       for (const name of ["AGENTS.md", "config.yml", "models.yml"]) {
         await writeFile(join(agentDir, name), "recipe fixed content");
       }
+      await writeFile(
+        join(bundle, "recipe.json"),
+        JSON.stringify({ taskSkills: [{ name: "deliver", path: "global/skills/deliver" }] }),
+      );
       const descriptor = {
         cwd,
         agentDir,
         home,
         runtimeRoot: join(scratch, "runtime"),
+        bundle,
         model: { provider: "openrouter", id: "qwen/qwen3.7-max", reasoning: "high" },
       };
 
@@ -139,12 +176,78 @@ describe("shared-runner Hatchet adapter", () => {
     }
   });
 
-  it("wires pre-start projection only for live verification", async () => {
-    const liveArgv = [...argv];
-    liveArgv[liveArgv.indexOf("--stage") + 1] = "live_verify";
-    let beforeStart: unknown;
-    const result = await runRecipeAdapter(liveArgv, new AbortController().signal, async (options) => {
-      beforeStart = options.beforeStart;
+  it("still fails the tamper guard when the parent composition changes during projection", async () => {
+    const scratch = await mkdtemp(join(tmpdir(), "hatchet-live-projection-tamper-"));
+    const cwd = join(scratch, "worktree");
+    const agentDir = join(scratch, "agent");
+    const home = join(scratch, "home");
+    const bundle = join(scratch, "bundle");
+    try {
+      await mkdir(join(cwd, "global", "agents"), { recursive: true });
+      await mkdir(join(cwd, "global", "skills", "deliver"), { recursive: true });
+      await mkdir(agentDir, { recursive: true });
+      await mkdir(home, { recursive: true });
+      await mkdir(bundle, { recursive: true });
+      await writeFile(join(cwd, "global", "skills", "deliver", "SKILL.md"), "deliver");
+      for (const name of ["AGENTS.md", "config.yml", "models.yml"]) {
+        await writeFile(join(agentDir, name), "recipe fixed content");
+      }
+      await writeFile(
+        join(bundle, "recipe.json"),
+        JSON.stringify({ taskSkills: [{ name: "deliver", path: "global/skills/deliver" }] }),
+      );
+      // A model whose value changes on the guard's second read — the same
+      // shape any composition tamper (in-memory or on disk) must be caught
+      // by, per the preservedPaths/preservedModel assertion.
+      let modelReads = 0;
+      const descriptor = {
+        cwd,
+        agentDir,
+        home,
+        runtimeRoot: join(scratch, "runtime"),
+        bundle,
+        get model() {
+          modelReads += 1;
+          return { provider: "openrouter", id: "qwen/qwen3.7-max", reasoning: modelReads === 1 ? "high" : "xhigh" };
+        },
+      };
+
+      await expect(stageLiveTaskProjection(descriptor)).rejects.toThrow(
+        "live Task projection changed the parent recipe composition",
+      );
+    } finally {
+      await rm(scratch, { recursive: true, force: true });
+    }
+  });
+
+  it("wires pre-start projection for live verification and adversarial review, not remediate", async () => {
+    for (const stage of ["live_verify", "adversarial_review"] as const) {
+      const stageArgv = [...argv];
+      stageArgv[stageArgv.indexOf("--stage") + 1] = stage;
+      let beforeStart: unknown;
+      const result = await runRecipeAdapter(stageArgv, new AbortController().signal, async (options) => {
+        beforeStart = options.beforeStart;
+        return {
+          async wait() {
+            await options.hostTools[0]!.execute(terminal, hostContext);
+            return { text: "" };
+          },
+          async stop() {},
+        };
+      });
+      expect(beforeStart).toBe(stageLiveTaskProjection);
+      expect(result).toEqual(terminal);
+    }
+
+    // remediate's fixer reads a skill itself as the parent agent (via the
+    // compiled bundle's own `skills` list) — it spawns no Task child, so
+    // it must stay ungated even though it also needs a skill beyond
+    // `deliver`. This asymmetry (unlike adversarial_review) is the design.
+    const remediateArgv = [...argv];
+    remediateArgv[remediateArgv.indexOf("--stage") + 1] = "remediate";
+    let remediateBeforeStart: unknown;
+    await runRecipeAdapter(remediateArgv, new AbortController().signal, async (options) => {
+      remediateBeforeStart = options.beforeStart;
       return {
         async wait() {
           await options.hostTools[0]!.execute(terminal, hostContext);
@@ -153,8 +256,7 @@ describe("shared-runner Hatchet adapter", () => {
         async stop() {},
       };
     });
-    expect(beforeStart).toBe(stageLiveTaskProjection);
-    expect(result).toEqual(terminal);
+    expect(remediateBeforeStart).toBeUndefined();
   });
 
   it("writes only runtimeRoot to the receipt path when OMP_RECIPE_RUNTIME_RECEIPT is set", async () => {
@@ -172,6 +274,7 @@ describe("shared-runner Hatchet adapter", () => {
           agentDir: "/worktree/.agent",
           home: "/worktree/.home",
           runtimeRoot: "/tmp/omp-recipe-task-fake-uuid",
+          bundle: "/compiled/implement",
           model: { provider: "openrouter", id: "qwen/qwen3.7-max", reasoning: "high" },
         });
         return {

@@ -24,6 +24,18 @@ export const recipePathsSchema = z.object({
 });
 export type RecipePaths = z.infer<typeof recipePathsSchema>;
 
+// The card's own words. Hatchet's trigger was always card-driven; its payload
+// was not, so every stage replayed one static operator string. These are the
+// only card fields a stage prompt may consume - bounded so a large card body
+// cannot silently blow the runner's argv or output limits.
+export const cardFactsSchema = z.object({
+  title: z.string().min(1).max(512),
+  body: z.string().max(20_000).default(""),
+  criteria: z.array(z.string().min(1).max(2048)).max(64).default([]),
+  priority: z.string().min(1).max(32).optional(),
+}).strict();
+export type CardFacts = z.infer<typeof cardFactsSchema>;
+
 export const prWorkflowInputSchema = z.object({
   version: z.literal(1),
   cardId: z.string().min(1).max(256),
@@ -32,6 +44,7 @@ export const prWorkflowInputSchema = z.object({
   recipePaths: recipePathsSchema,
   cwd: z.string().min(1),
   task: z.string().min(1),
+  card: cardFactsSchema,
   idempotencyKey: z.string().min(1).max(512),
   triggerSource: triggerSourceSchema,
   requestedAt: z.string().datetime(),

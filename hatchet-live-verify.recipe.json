@@ -10,5 +10,8 @@
     { "name": "ci", "path": "global/skills/ci" },
     { "name": "harness-engineering", "path": "global/skills/harness-engineering" }
   ],
+  "taskSkills": [
+    { "name": "verify-live", "path": "global/skills/verify-live" }
+  ],
   "mcpServers": []
 }

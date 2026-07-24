@@ -16,6 +16,7 @@ const baseInput = {
   },
   cwd: "/repo",
   task: "task",
+  card: { title: "card title", body: "", criteria: [] },
   idempotencyKey: "key",
   triggerSource: "fixture" as const,
   requestedAt: "2026-07-23T00:00:00.000Z",

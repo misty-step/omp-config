@@ -1,13 +1,16 @@
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { readFile, realpath, rm, writeFile } from "node:fs/promises";
+import { chmod, cp, readFile, realpath, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { basename, dirname, join, resolve as pathResolve } from "node:path";
+import { basename, dirname, extname, join, resolve as pathResolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
+import type { CardFacts } from "./contracts.js";
 import { runnerTerminalSchema, type RunnerTerminal, type StageName } from "./contracts.js";
 import { DeterministicInputError, RunnerCancelledError, TransientRunnerError } from "./errors.js";
+import { renderRecipe } from "./recipe-template.js";
 
+const stderrTailLimit = 2 * 1024;
 const deterministicExitCodes: Record<number, true> = { 64: true, 65: true, 66: true, 78: true };
 const outputLimit = 1024 * 1024;
 const defaultRunnerPath = fileURLToPath(new URL("../scripts/recipe-runner", import.meta.url));
@@ -52,6 +55,7 @@ export type RunnerRequest = {
   stage: StageName;
   round: number;
   expectedHeadSha: string;
+  card: CardFacts;
 };
 
 export type RunnerAttempt = {
@@ -137,10 +141,66 @@ export async function invokeRunner(request: RunnerRequest, signal: AbortSignal):
   const receiptPath = join(tmpdir(), `omp-recipe-receipt-${randomUUID()}`);
   await writeFile(receiptPath, "", { mode: 0o600, flag: "wx" });
 
+  // request.recipePath is always a template, one way or another: a FILE is
+  // read and rendered directly; a DIRECTORY is an already-compiled
+  // omp.recipe.v1 bundle (skills/models/runtime baked in by
+  // bin/omp_recipe.py's compile_recipe) whose `instructions.md` is the
+  // actual stage prompt, so the whole bundle is copied to a fresh per-run
+  // path first and only the COPY's instructions.md gets rendered — the
+  // parent must never mutate a bundle another concurrent run may still be
+  // reading. Either way, the result is a fresh path under tmpdir(), same
+  // discipline as the receipt above (unique uuid name, exclusive create,
+  // removed in the shared `finally` below) so a rendered prompt or bundle
+  // copy can never leak across runs or survive a crash.
+  let recipeArgPath = request.recipePath;
+  let renderedRecipePath: string | undefined;
+  const recipeContext = {
+    card: request.card,
+    stage: request.stage,
+    round: request.round,
+    headSha: request.expectedHeadSha,
+    task: request.task,
+  };
+
   try {
+    const recipeStat = await stat(request.recipePath);
+    if (recipeStat.isDirectory()) {
+      renderedRecipePath = join(tmpdir(), `omp-recipe-bundle-${randomUUID()}`);
+      // `dereference: true` guarantees the copy can never contain a
+      // symlink even if the source somehow did — `load_recipe`/
+      // `_regular_file` reject a symlinked bundle root or member outright,
+      // and `.omp-recipe-owned` must stay a real file with exact content.
+      await cp(request.recipePath, renderedRecipePath, {
+        recursive: true,
+        dereference: true,
+        force: false,
+        errorOnExist: true,
+      });
+      const instructionsPath = join(renderedRecipePath, "instructions.md");
+      // The compiled bundle may ship its files read-only; preserve
+      // whatever mode the copy inherited from the source once the render
+      // is written back, rather than assuming a specific mode either way.
+      const originalMode = (await stat(instructionsPath)).mode & 0o777;
+      const template = await readFile(instructionsPath, "utf8");
+      const renderedInstructions = renderRecipe(template, recipeContext);
+      await chmod(instructionsPath, 0o600);
+      await writeFile(instructionsPath, renderedInstructions, "utf8");
+      await chmod(instructionsPath, originalMode);
+      recipeArgPath = renderedRecipePath;
+    } else {
+      renderedRecipePath = join(
+        tmpdir(),
+        `omp-recipe-rendered-${randomUUID()}${extname(request.recipePath)}`,
+      );
+      const template = await readFile(request.recipePath, "utf8");
+      const renderedRecipe = renderRecipe(template, recipeContext);
+      await writeFile(renderedRecipePath, renderedRecipe, { mode: 0o600, flag: "wx" });
+      recipeArgPath = renderedRecipePath;
+    }
+
     return await new Promise<RunnerTerminal>((resolve, reject) => {
       const child = spawn(executable, [
-        "--recipe", request.recipePath,
+        "--recipe", recipeArgPath,
       "--task", request.task,
       "--cwd", request.cwd,
       "--stage", request.stage,
@@ -152,8 +212,8 @@ export async function invokeRunner(request: RunnerRequest, signal: AbortSignal):
       env: { ...runnerEnvironment(), OMP_RECIPE_RUNTIME_RECEIPT: receiptPath },
       stdio: ["ignore", "pipe", "pipe"],
     });
-
     let stdout = Buffer.alloc(0);
+    let stderrTail = Buffer.alloc(0);
     let stderrBytes = 0;
     let outputExceeded = false;
     let forceKillTimer: NodeJS.Timeout | undefined;
@@ -169,6 +229,10 @@ export async function invokeRunner(request: RunnerRequest, signal: AbortSignal):
     });
     child.stderr.on("data", (chunk: Buffer) => {
       stderrBytes += chunk.length;
+      const combined = Buffer.concat([stderrTail, chunk]);
+      stderrTail = combined.length > stderrTailLimit
+        ? combined.subarray(combined.length - stderrTailLimit)
+        : combined;
       if (stderrBytes > outputLimit) {
         outputExceeded = true;
         killProcessGroup(child.pid!, "SIGTERM");
@@ -204,7 +268,11 @@ export async function invokeRunner(request: RunnerRequest, signal: AbortSignal):
         return;
       }
       if (code !== 0) {
-        const detail = `runner exited ${code ?? "without code"}; stderr bytes=${stderrBytes}`;
+        const detail = [
+          `runner exited ${code ?? "without code"}`,
+          `stderr bytes=${stderrBytes}`,
+          `stderr tail=${JSON.stringify(stderrTail.toString("utf8"))}`,
+        ].join("; ");
         reject(deterministicExitCodes[code ?? -1] === true
           ? new DeterministicInputError(detail)
           : new TransientRunnerError(detail));
@@ -219,6 +287,13 @@ export async function invokeRunner(request: RunnerRequest, signal: AbortSignal):
     });
   });
   } finally {
+    if (renderedRecipePath !== undefined) {
+      await rm(renderedRecipePath, { recursive: true, force: true }).catch((error) => {
+        process.stderr.write(
+          `hatchet-runner: rendered recipe cleanup failed: ${error instanceof Error ? error.message : String(error)}\n`,
+        );
+      });
+    }
     await reclaimRuntimeReceipt(receiptPath).catch((error) => {
       process.stderr.write(
         `hatchet-runner: runtime root receipt reclaim failed: ${error instanceof Error ? error.message : String(error)}\n`,

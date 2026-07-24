@@ -26,6 +26,7 @@ const config: OperatorConfig = {
   powder: {
     baseUrl: "https://powder.example.test",
     readyStatus: "ready",
+    mode: "single",
   },
 };
 

@@ -1,3 +1,6 @@
+import { execFile } from "node:child_process";
+import { mkdir, rm, symlink } from "node:fs/promises";
+import { promisify } from "node:util";
 import { describe, expect, it } from "vitest";
 import { prWorkflowInputSchema, type PrWorkflowInput } from "../src/contracts.js";
 import { currentHeadSha, requireCurrentHead } from "../src/git-head.js";
@@ -6,22 +9,38 @@ import { invokeRunner, invokeRunnerWithRetry } from "../src/runner.js";
 import { checkpointFinal, checkpointStage, loadWorkflowState } from "../src/state-store.js";
 import type { EvidencePacket, StageResult } from "../src/contracts.js";
 import { DeterministicInputError, RunnerCancelledError } from "../src/errors.js";
-
 const fixtureRoot = new URL("../fixtures/", import.meta.url);
 const runnerPath = new URL("recipe-runner.sh", fixtureRoot).pathname;
 process.env.OMP_RECIPE_RUNNER = runnerPath;
 
-function scenarioPath(name: string): string {
-  return new URL(`scenarios/${name}.sh`, fixtureRoot).pathname;
+// invokeRunner now stat()s request.recipePath and renders file-typed paths
+// (Lane C's renderRecipe is a benign passthrough on these bash fixtures —
+// they contain no {{ }} delimiters). The schema requires the five stage paths
+// to be distinct strings, but each scenario ships a single .sh file, and the
+// fixture dispatches on the --stage argv flag, not the path. So expose the one
+// scenario file under five distinct symlinks: distinct strings satisfy the
+// schema, real files satisfy stat(), and the same target keeps scenario
+// dispatch unchanged.
+const symlinkByStageKey: Record<string, string> = {};
+async function recipePathFor(scenario: string, stage: string): Promise<string> {
+  const cacheKey = `${scenario}:${stage}`;
+  const cached = symlinkByStageKey[cacheKey];
+  if (cached) return cached;
+  const target = new URL(`scenarios/${scenario}.sh`, fixtureRoot).pathname;
+  const dir = new URL("recipe-symlinks/", fixtureRoot).pathname;
+  await mkdir(dir, { recursive: true });
+  const link = `${dir}/${scenario}-${stage}.sh`;
+  await symlink(target, link, "file").catch((error: NodeJS.ErrnoException) => {
+    if (error.code !== "EEXIST") throw error;
+  });
+  symlinkByStageKey[cacheKey] = link;
+  return link;
 }
 
+const exec = promisify(execFile);
 async function gitInit(cwd: string, headSha?: string): Promise<string> {
-  const { rm, mkdir } = await import("node:fs/promises");
   await rm(cwd, { recursive: true, force: true });
   await mkdir(cwd, { recursive: true, mode: 0o700 });
-  const { execFile } = await import("node:child_process");
-  const { promisify } = await import("node:util");
-  const exec = promisify(execFile);
   await exec("git", ["-C", cwd, "init", "-q"]);
   await exec("git", ["-C", cwd, "config", "user.email", "fixture@omp.test"]);
   await exec("git", ["-C", cwd, "config", "user.name", "OMP Fixture"]);
@@ -29,21 +48,22 @@ async function gitInit(cwd: string, headSha?: string): Promise<string> {
   return headSha ?? await currentHeadSha(cwd);
 }
 
-function makeInput(cwd: string, headSha: string, scenario: string, key: string): PrWorkflowInput {
+async function makeInput(cwd: string, headSha: string, scenario: string, key: string): Promise<PrWorkflowInput> {
   return prWorkflowInputSchema.parse({
     version: 1,
     cardId: `card-${scenario}`,
     repository: `omp/fixture-${scenario}`,
     headSha,
     recipePaths: {
-      implement: `${scenarioPath(scenario)}::implement`,
-      adversarial_review: `${scenarioPath(scenario)}::adversarial_review`,
-      remediate: `${scenarioPath(scenario)}::remediate`,
-      live_verify: `${scenarioPath(scenario)}::live_verify`,
-      terminal_evidence: `${scenarioPath(scenario)}::terminal_evidence`,
+      implement: await recipePathFor(scenario, "implement"),
+      adversarial_review: await recipePathFor(scenario, "adversarial_review"),
+      remediate: await recipePathFor(scenario, "remediate"),
+      live_verify: await recipePathFor(scenario, "live_verify"),
+      terminal_evidence: await recipePathFor(scenario, "terminal_evidence"),
     },
     cwd,
     task: `run ${scenario} canary`,
+    card: { title: `card-${scenario} title`, body: "", criteria: [] },
     idempotencyKey: key,
     triggerSource: "fixture",
     requestedAt: new Date().toISOString(),
@@ -66,7 +86,7 @@ describe("pr-workflow fixture scenarios", () => {
     const cwd = `${fixtureRoot.pathname}runs/happy`;
     const headSha = await gitInit(cwd);
     const observedRecipes: string[] = [];
-    const input = makeInput(cwd, headSha, "happy", `happy-${headSha.slice(0, 8)}`);
+    const input = await makeInput(cwd, headSha, "happy", `happy-${headSha.slice(0, 8)}`);
     const packet = await runPrWorkflow(input, new AbortController().signal, fakeDependencies(cwd, observedRecipes));
     expect(packet.state).toBe("awaiting_operator_approval");
     expect(packet.fixRounds).toBe(0);
@@ -83,7 +103,7 @@ describe("pr-workflow fixture scenarios", () => {
   it("duplicate trigger reuses existing idempotent state", async () => {
     const cwd = `${fixtureRoot.pathname}runs/duplicate`;
     const headSha = await gitInit(cwd);
-    const input = makeInput(cwd, headSha, "happy", `duplicate-${headSha.slice(0, 8)}`);
+    const input = await makeInput(cwd, headSha, "happy", `duplicate-${headSha.slice(0, 8)}`);
     const first = await runPrWorkflow(input, new AbortController().signal, fakeDependencies(cwd));
     const second = await runPrWorkflow(input, new AbortController().signal, fakeDependencies(cwd));
     expect(second).toEqual(first);
@@ -92,7 +112,7 @@ describe("pr-workflow fixture scenarios", () => {
   it("transient runner failure retries then succeeds", async () => {
     const cwd = `${fixtureRoot.pathname}runs/transient`;
     const headSha = await gitInit(cwd);
-    const input = makeInput(cwd, headSha, "transient", `transient-${headSha.slice(0, 8)}`);
+    const input = await makeInput(cwd, headSha, "transient", `transient-${headSha.slice(0, 8)}`);
     const packet = await runPrWorkflow(input, new AbortController().signal, fakeDependencies(cwd));
     expect(packet.state).toBe("awaiting_operator_approval");
     const state = await loadWorkflowState(input);
@@ -103,7 +123,7 @@ describe("pr-workflow fixture scenarios", () => {
   it("cancellation aborts and leaves no orphan process", async () => {
     const cwd = `${fixtureRoot.pathname}runs/cancellation`;
     const headSha = await gitInit(cwd);
-    const input = makeInput(cwd, headSha, "cancellation", `cancellation-${headSha.slice(0, 8)}`);
+    const input = await makeInput(cwd, headSha, "cancellation", `cancellation-${headSha.slice(0, 8)}`);
     const controller = new AbortController();
     const run = runPrWorkflow(input, controller.signal, fakeDependencies(cwd));
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -114,7 +134,7 @@ describe("pr-workflow fixture scenarios", () => {
   it("blocked-twice terminates review_blocked after two fix rounds", async () => {
     const cwd = `${fixtureRoot.pathname}runs/blocked-twice`;
     const headSha = await gitInit(cwd);
-    const input = makeInput(cwd, headSha, "blocked-twice", `blocked-twice-${headSha.slice(0, 8)}`);
+    const input = await makeInput(cwd, headSha, "blocked-twice", `blocked-twice-${headSha.slice(0, 8)}`);
     const observedRecipes: string[] = [];
     const packet = await runPrWorkflow(input, new AbortController().signal, fakeDependencies(cwd, observedRecipes));
     expect(packet.state).toBe("review_blocked");

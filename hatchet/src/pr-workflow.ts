@@ -1,4 +1,4 @@
-import { prWorkflowInputSchema, type EvidencePacket, type PrWorkflowInput, type RunnerTerminal, type StageName, type StageResult, type TerminalState } from "./contracts.js";
+import { prWorkflowInputSchema, type CardFacts, type EvidencePacket, type PrWorkflowInput, type RunnerTerminal, type StageName, type StageResult, type TerminalState } from "./contracts.js";
 import { DeterministicInputError } from "./errors.js";
 import { currentHeadSha, requireCurrentHead } from "./git-head.js";
 import { invokeRunnerWithRetry, type RunnerAttempt } from "./runner.js";
@@ -13,6 +13,7 @@ type RunStage = (request: {
   stage: StageName;
   round: number;
   expectedHeadSha: string;
+  card: CardFacts;
 }, signal: globalThis.AbortSignal) => Promise<RunnerAttempt>;
 
 type WorkflowDependencies = {
@@ -82,6 +83,7 @@ export async function runPrWorkflow(
       stage,
       round,
       expectedHeadSha,
+      card: input.card,
     }, signal);
     requireOutcome(stage, attempt.terminal, allowedOutcomes);
     const actualHead = await dependencies.readHead(input.cwd);

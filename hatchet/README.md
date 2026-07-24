@@ -113,6 +113,53 @@ Runtime configuration stays under ignored `local/`:
   bytes. The operator config, token file, and
   `local/powder-webhook-secret` must be mode `0600`.
 
+## Factory intake: single-card vs ready-queue
+
+`scripts/reconcile` (`src/reconciler.ts`) supports two `powder.mode` values.
+See `FACTORY.md` for the end-to-end polling factory loop and what stays
+human-gated.
+
+- `"single"` (default, omit `powder.mode` for the existing behavior) polls
+  exactly the one card at `cardId`/`repository`, unchanged from the original
+  canary. `local/operator.json` and `local/operator-wildcard.json` are
+  single-card examples.
+- `"ready-queue"` lists cards via `GET /api/v1/cards?status=<readyStatus>`
+  instead of reading one fixed id. `cardId`/`repository` become optional at
+  the top level (they still supply the shared `cwd`/`task`/`recipePaths`
+  template and an optional fallback `repository` for cards that omit `repo`).
+  Each tick selects the first listed card whose status matches `readyStatus`
+  and, when `powder.repositoryAllowlist` is set, whose `repo` is in that
+  list, then attempts exactly one trigger — never more than one new run per
+  reconcile tick. Idempotency stays `cardId:headSha`; a duplicate selection
+  short-circuits inside the existing lock/mapping path exactly as it does in
+  single mode, it is simply not counted as newly `triggered`. A ready card
+  with no active/open run mapping is not otherwise distinguished from one
+  that already ran — reconciliation relies on that idempotency dedupe rather
+  than a separate open-run query.
+
+```json
+{
+  "version": 1,
+  "repository": "misty-step/fallback-repo",
+  "recipePaths": {
+    "implement": "/Users/phaedrus/Development/omp-config-buzz-omp/hatchet/local/recipes/implement",
+    "adversarial_review": "/Users/phaedrus/Development/omp-config-buzz-omp/hatchet/local/recipes/adversarial-review",
+    "remediate": "/Users/phaedrus/Development/omp-config-buzz-omp/hatchet/local/recipes/remediate",
+    "live_verify": "/Users/phaedrus/Development/omp-config-buzz-omp/hatchet/local/recipes/live-verify",
+    "terminal_evidence": "/Users/phaedrus/Development/omp-config-buzz-omp/hatchet/local/recipes/terminal-evidence"
+  },
+  "cwd": "/Users/phaedrus/Development/omp-config-buzz-omp/hatchet/local/factory-workspace",
+  "task": "Implement the claimed card's acceptance criteria.",
+  "powder": {
+    "baseUrl": "http://mint.tail5f5eb4.ts.net:4949/proxy/https/sanctum.tail5f5eb4.ts.net:10001",
+    "apiTokenFile": "/Users/phaedrus/Development/omp-config-buzz-omp/hatchet/local/powder-api-token",
+    "readyStatus": "ready",
+    "mode": "ready-queue",
+    "repositoryAllowlist": ["misty-step/omp-config", "misty-step/fallback-repo"]
+  }
+}
+```
+
 `powder subscription-*` is database-only. For a deployed Powder instance,
 `scripts/create-powder-subscription.mjs` uses the configured Mint proxy, creates
 exactly the `moved-to-ready` subscription, and writes the one-shot signing

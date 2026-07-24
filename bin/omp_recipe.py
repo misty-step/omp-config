@@ -123,7 +123,7 @@ def _validate_mcp(value: Any, label: str) -> None:
 
 def validate_recipe(raw: Any) -> dict[str, Any]:
     recipe = _obj(raw, "recipe")
-    required = {"schemaVersion", "instructions", "models", "skills", "mcpServers"}
+    required = {"schemaVersion", "instructions", "models", "skills", "taskSkills", "mcpServers"}
     if set(recipe) != required:
         raise RecipeError(f"recipe keys must be exactly {sorted(required)}")
     if recipe["schemaVersion"] != SCHEMA:
@@ -167,6 +167,24 @@ def validate_recipe(raw: Any) -> dict[str, Any]:
             raise RecipeError("duplicate skill source path")
         skill_names.add(name)
         skill_paths.add(path)
+
+    task_skills = recipe["taskSkills"]
+    if type(task_skills) is not list:
+        raise RecipeError("taskSkills must be a list")
+    task_skill_names: set[str] = set()
+    task_skill_paths: set[Path] = set()
+    for index, value in enumerate(task_skills):
+        skill = _obj(value, f"taskSkills[{index}]")
+        if set(skill) != {"name", "path"}:
+            raise RecipeError(f"taskSkills[{index}] keys invalid")
+        name = _name(skill["name"], f"taskSkills[{index}].name")
+        path = _relative(skill["path"], f"taskSkills[{index}].path")
+        if name in task_skill_names:
+            raise RecipeError(f"duplicate taskSkill entry at taskSkills[{index}]")
+        if path in task_skill_paths:
+            raise RecipeError(f"duplicate taskSkill source path at taskSkills[{index}]")
+        task_skill_names.add(name)
+        task_skill_paths.add(path)
 
     if type(recipe["mcpServers"]) is not list:
         raise RecipeError("mcpServers must be a list")
@@ -339,6 +357,14 @@ def compile_recipe(spec_path: Path, output: Path) -> dict[str, Any]:
         if not (source / "SKILL.md").is_file():
             raise RecipeError(f"skill {skill['name']} is missing SKILL.md")
         skill_sources.append((skill, source))
+    for skill in recipe["taskSkills"]:
+        source = _directory(
+            base,
+            _relative(skill["path"], "taskSkill.path"),
+            f"taskSkill {skill['name']}",
+        )
+        if not (source / "SKILL.md").is_file():
+            raise RecipeError(f"taskSkill {skill['name']} is missing SKILL.md")
 
     output.parent.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix=f".{output.name}.stage-", dir=output.parent))

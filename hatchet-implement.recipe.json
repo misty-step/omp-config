@@ -10,5 +10,6 @@
     { "name": "harness-engineering", "path": "global/skills/harness-engineering" },
     { "name": "refactor", "path": "global/skills/refactor" }
   ],
+  "taskSkills": [],
   "mcpServers": []
 }

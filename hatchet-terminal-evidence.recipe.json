@@ -8,5 +8,6 @@
   "skills": [
     { "name": "deliver", "path": "global/skills/deliver" }
   ],
+  "taskSkills": [],
   "mcpServers": []
 }

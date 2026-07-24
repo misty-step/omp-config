@@ -22,6 +22,7 @@ function inputFor(idempotencyKey: string): PrWorkflowInput {
     },
     cwd: "/repo",
     task: "task",
+    card: { title: "card title", body: "", criteria: [] },
     idempotencyKey,
     triggerSource: "fixture",
     requestedAt: "2026-07-23T00:00:00.000Z",

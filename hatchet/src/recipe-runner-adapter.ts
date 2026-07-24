@@ -2,7 +2,7 @@ import { chmod, cp, mkdir, readdir, readFile, realpath, rm, stat, writeFile } fr
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
-import { runnerTerminalSchema, shaSchema, stageNameSchema, type RunnerTerminal } from "./contracts.js";
+import { runnerTerminalSchema, shaSchema, stageNameSchema, type RunnerTerminal, type StageName } from "./contracts.js";
 
 const adapterInputSchema = z.object({
   recipe: z.string().min(1),
@@ -12,6 +12,13 @@ const adapterInputSchema = z.object({
   round: z.coerce.number().int().min(1),
   headSha: shaSchema,
 }).strict();
+
+const taskSkillSchema = z.object({ name: z.string().min(1), path: z.string().min(1) }).strict();
+// The compiled bundle's `recipe.json` (bin/omp_recipe.py's RECIPE_FILE) carries
+// fields this adapter never needs (instructions, models, the parent's own
+// `skills`, mcpServers); only `taskSkills` is read here, so every other
+// field passes through unchecked rather than being re-validated.
+const recipeManifestSchema = z.object({ taskSkills: z.array(taskSkillSchema) }).passthrough();
 
 type AdapterInput = z.infer<typeof adapterInputSchema>;
 type RecipeTaskHostTool = {
@@ -34,6 +41,11 @@ type RecipeLaunchDescriptor = {
   agentDir: string;
   home: string;
   runtimeRoot: string;
+  // Compiled recipe root (contains `recipe.json`). Carried on the real
+  // descriptor built by global/lib/recipe-task-runner.ts's parseDescriptor;
+  // declared here so stageLiveTaskProjection can read the recipe's
+  // declared `taskSkills` allowlist.
+  bundle: string;
   model: {
     provider: string;
     id: string;
@@ -59,6 +71,19 @@ type StartRecipeTask = (options: {
 // other transient stage failure, not a hang.
 const stageTimeoutMs = 8 * 60_000;
 const terminalToolParameters = z.toJSONSchema(runnerTerminalSchema) as Record<string, unknown>;
+
+// Live Task projection matters only for a stage whose OWN instructions spawn
+// Task children needing a skill beyond the parent's — a stage's own agent
+// already gets its declared `skills` baked into `agentDir` at compile time
+// (bin/omp_recipe.py's `_replace_runtime_agent`), no projection required.
+// `adversarial_review` spawns `code-critic` children with an injected lens;
+// `live_verify` already relied on this. Every other stage — including
+// `remediate`, whose fixer reads a skill itself as the parent agent via its
+// own `skills` declaration — spawns no Task child and stays ungated.
+const liveTaskProjectionStages: Partial<Record<StageName, true>> = {
+  live_verify: true,
+  adversarial_review: true,
+};
 
 const flagToField: Record<string, keyof AdapterInput> = {
   "--recipe": "recipe",
@@ -129,13 +154,24 @@ export async function stageLiveTaskProjection(descriptor: RecipeLaunchDescriptor
     join(descriptor.cwd, "global", "agents"),
     join(descriptor.home, ".omp", "agent", "agents"),
   );
-  // The `deliver` skill IS discovered under `PI_CODING_AGENT_DIR/skills`
-  // (oh-my-pi discovery/builtin.ts uses `getAgentDir()`, which honors
-  // `PI_CODING_AGENT_DIR`), so this target is unchanged from before.
-  await copyImmutableSnapshot(
-    join(descriptor.cwd, "global", "skills", "deliver"),
-    join(descriptor.agentDir, "skills", "deliver"),
+  // Child (task) skills are a SECOND explicit, bounded allowlist declared on
+  // the recipe as `taskSkills` — distinct from the parent's own `skills`,
+  // which `agentDir` already governs via the compiled bundle's existing
+  // strict allowlist. A spawned Task child (e.g. a code-critic lane) reads
+  // its lens skill under `PI_CODING_AGENT_DIR/skills` the same way the
+  // parent does (oh-my-pi discovery/builtin.ts uses `getAgentDir()`, which
+  // honors `PI_CODING_AGENT_DIR`). Project exactly the names this recipe
+  // declared — never widen the parent's own skill surface and never
+  // project all of `global/skills`.
+  const recipeManifest = recipeManifestSchema.parse(
+    JSON.parse(await readFile(join(descriptor.bundle, "recipe.json"), "utf8")),
   );
+  for (const taskSkill of recipeManifest.taskSkills) {
+    await copyImmutableSnapshot(
+      join(descriptor.cwd, taskSkill.path),
+      join(descriptor.agentDir, "skills", taskSkill.name),
+    );
+  }
 
   const currentContent = await Promise.all(preservedPaths.map(path => readFile(path)));
   if (currentContent.some((content, index) => !content.equals(preservedContent[index]!))
@@ -220,7 +256,7 @@ export async function runRecipeAdapter(
       ...(runtimeReceiptPath
         ? { onPrepared: (descriptor: RecipeLaunchDescriptor) => writeRuntimeReceipt(runtimeReceiptPath, descriptor.runtimeRoot) }
         : {}),
-      ...(input.stage === "live_verify" ? { beforeStart: stageLiveTaskProjection } : {}),
+      ...(liveTaskProjectionStages[input.stage] ? { beforeStart: stageLiveTaskProjection } : {}),
     });
     await Promise.race([handle.wait(), cancellation.promise]);
     if (terminalViolation) throw terminalViolation;

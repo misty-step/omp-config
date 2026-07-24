@@ -14,8 +14,8 @@ export const idempotencyRoot = resolve(localRoot, "idempotency");
 
 const operatorConfigSchema = z.object({
   version: z.literal(1),
-  cardId: z.string().min(1),
-  repository: z.string().min(1),
+  cardId: z.string().min(1).optional(),
+  repository: z.string().min(1).optional(),
   recipePaths: recipePathsSchema,
   cwd: z.string().min(1),
   task: z.string().min(1),
@@ -23,8 +23,19 @@ const operatorConfigSchema = z.object({
     baseUrl: z.string().url(),
     apiTokenFile: z.string().min(1).optional(),
     readyStatus: z.string().min(1).default("ready"),
+    mode: z.enum(["single", "ready-queue"]).default("single"),
+    repositoryAllowlist: z.array(z.string().min(1)).min(1).optional(),
   }).strict().optional(),
-}).strict();
+}).strict().superRefine((config, ctx) => {
+  const mode = config.powder?.mode ?? "single";
+  if (mode !== "single") return;
+  if (!config.cardId) {
+    ctx.addIssue({ code: "custom", path: ["cardId"], message: "cardId is required in single mode" });
+  }
+  if (!config.repository) {
+    ctx.addIssue({ code: "custom", path: ["repository"], message: "repository is required in single mode" });
+  }
+});
 export type OperatorConfig = z.infer<typeof operatorConfigSchema>;
 
 export async function readWorkerToken(): Promise<string> {
