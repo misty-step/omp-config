@@ -15,6 +15,7 @@
     "trigger": "tsx src/cli/trigger.ts",
     "status": "tsx src/cli/status.ts",
     "cancel": "tsx src/cli/cancel.ts",
+    "replay": "tsx src/cli/replay.ts",
     "webhook": "tsx src/webhook-server.ts",
     "reconcile": "tsx src/reconciler.ts"
   },
