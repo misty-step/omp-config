@@ -26,9 +26,21 @@ a human-approval-required terminal state.
 - The opaque runner receives a positive environment allowlist: locale/TLS
   process keys plus the explicit `OMP_RECIPE_*` launch selectors. Hatchet
   tokens and unrelated worker environment never cross the adapter boundary.
-- Cancelling a run kills the runner's whole process group. The adapter maps
-  process signals to the shared runner abort/stop path, which reaps OMP and
-  removes its fresh runtime/config/session root.
+- Cancelling a run kills the runner's whole process group; the adapter maps
+  process signals to the shared runner's own abort/stop path, which reaps OMP
+  and removes its fresh runtime/config/session root in the common case. That
+  in-process cleanup is not the durable guarantee: an adapter subprocess can
+  die (OS-delivered SIGTERM, SIGKILL, crash) before its own async cleanup
+  finishes. `invokeRunner` (`src/runner.ts`) additionally pre-creates a
+  private 0600 receipt file per launch, hands the child only its path via
+  `OMP_RECIPE_RUNTIME_RECEIPT`, and the adapter's `onPrepared` hook
+  (`global/lib/recipe-task-runner.ts`) writes the runtime root into it
+  immediately after prepare — well before any RpcClient/model work starts.
+  After the child is reaped, `invokeRunner` always re-reads that receipt,
+  validates the path is exactly `<realpath(tmpdir())>/omp-recipe-task-<uuid>`,
+  and removes it (then the receipt itself) regardless of how the child exited
+  or whether its own cleanup already ran — idempotent, and independent of the
+  adapter completing gracefully.
 
 ## Layout
 

@@ -1,5 +1,8 @@
 import { spawn } from "node:child_process";
-import { resolve as pathResolve } from "node:path";
+import { randomUUID } from "node:crypto";
+import { readFile, realpath, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { basename, dirname, join, resolve as pathResolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { runnerTerminalSchema, type RunnerTerminal, type StageName } from "./contracts.js";
@@ -25,6 +28,13 @@ const runnerEnvironmentKeys = [
   "OMP_RECIPE_CLI_PATH",
   "OMP_RECIPE_SHARED_RUNNER_MODULE",
 ] as const;
+// Written by recipe-runner-adapter.ts's `onPrepared` hook immediately after
+// `global/lib/recipe-task-runner.ts` mints the runtime root — always
+// `<realpath(tmpdir())>/omp-recipe-task-<uuid v4>`. `reclaimRuntimeRoot`
+// checks a candidate against this exact shape before ever calling `rm
+// --recursive`, so a corrupted or unexpected receipt can never widen the
+// blast radius of this parent-owned cleanup past that one directory pattern.
+const runtimeRootBasenamePattern = /^omp-recipe-task-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function runnerEnvironment(source: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
   const environment: NodeJS.ProcessEnv = {};
@@ -77,15 +87,60 @@ function signalProcess(pid: number, signal: NodeJS.Signals): void {
   }
 }
 
+// Parent-owned defense against the adapter subprocess dying (OS SIGTERM,
+// SIGKILL, crash) before its own async `cleanupRuntimeRoot` can run. This
+// process pre-creates a private receipt file and hands the child only its
+// path (see `invokeRunner`); the child writes its runtime root into it
+// immediately after prepare, well before any RpcClient/model work begins.
+// Once the spawned adapter is reaped — resolve or reject, it makes no
+// difference — `invokeRunner` always re-reads the receipt and reclaims
+// whatever it names, so a mid-flight kill can never leak a runtime root.
+// The adapter's own graceful cleanup still runs in the common case; this is
+// strictly additional and idempotent — a root the adapter already removed
+// just yields ENOENT here and is skipped, not treated as an error.
+async function reclaimRuntimeRoot(candidateRoot: string): Promise<void> {
+  let resolvedRoot: string;
+  let resolvedTmpdir: string;
+  try {
+    [resolvedRoot, resolvedTmpdir] = await Promise.all([realpath(candidateRoot), realpath(tmpdir())]);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
+    throw error;
+  }
+  if (dirname(resolvedRoot) !== resolvedTmpdir || !runtimeRootBasenamePattern.test(basename(resolvedRoot))) {
+    throw new Error(`refusing to reclaim runtime root receipt outside the expected shape: ${candidateRoot}`);
+  }
+  await rm(resolvedRoot, { recursive: true, force: true });
+}
+
+async function reclaimRuntimeReceipt(receiptPath: string): Promise<void> {
+  let content: string;
+  try {
+    content = (await readFile(receiptPath, "utf8")).trim();
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return;
+    throw error;
+  }
+  if (content.length > 0) await reclaimRuntimeRoot(content);
+  await rm(receiptPath, { force: true });
+}
+
 export async function invokeRunner(request: RunnerRequest, signal: AbortSignal): Promise<RunnerTerminal> {
   const executable = process.env.OMP_RECIPE_RUNNER ?? defaultRunnerPath;
   if (signal.aborted) {
     throw new RunnerCancelledError("runner cancelled before start");
   }
 
-  return await new Promise<RunnerTerminal>((resolve, reject) => {
-    const child = spawn(executable, [
-      "--recipe", request.recipePath,
+  // Created before the child ever spawns, mode 0600, exclusive create so a
+  // uuid collision fails loudly instead of silently reusing a stale receipt.
+  // Only its path crosses into the child's env — never its own contents.
+  const receiptPath = join(tmpdir(), `omp-recipe-receipt-${randomUUID()}`);
+  await writeFile(receiptPath, "", { mode: 0o600, flag: "wx" });
+
+  try {
+    return await new Promise<RunnerTerminal>((resolve, reject) => {
+      const child = spawn(executable, [
+        "--recipe", request.recipePath,
       "--task", request.task,
       "--cwd", request.cwd,
       "--stage", request.stage,
@@ -94,7 +149,7 @@ export async function invokeRunner(request: RunnerRequest, signal: AbortSignal):
     ], {
       cwd: request.cwd,
       detached: true,
-      env: runnerEnvironment(),
+      env: { ...runnerEnvironment(), OMP_RECIPE_RUNTIME_RECEIPT: receiptPath },
       stdio: ["ignore", "pipe", "pipe"],
     });
 
@@ -163,6 +218,13 @@ export async function invokeRunner(request: RunnerRequest, signal: AbortSignal):
       }
     });
   });
+  } finally {
+    await reclaimRuntimeReceipt(receiptPath).catch((error) => {
+      process.stderr.write(
+        `hatchet-runner: runtime root receipt reclaim failed: ${error instanceof Error ? error.message : String(error)}\n`,
+      );
+    });
+  }
 }
 
 export async function invokeRunnerWithRetry(

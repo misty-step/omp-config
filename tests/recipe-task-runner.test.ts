@@ -171,6 +171,36 @@ describe("recipe task runner", () => {
 		expect(nested).toContain("agents=;");
 	});
 
+	test("onPrepared fires immediately after prepare, before RpcClient start, and is not inherited by nested recipe_task", async () => {
+		let onPreparedCalls = 0;
+		let capturedRuntimeRoot: string | undefined;
+		let runtimeRootExistedAtCallTime = false;
+		let childPidFileExistedAtCallTime = true;
+		const handle = await startRecipeTask({
+			...recipeOptions("alpha-bundle", "NEST beta-bundle inspect"),
+			async onPrepared(descriptor) {
+				onPreparedCalls += 1;
+				capturedRuntimeRoot = descriptor.runtimeRoot;
+				runtimeRootExistedAtCallTime = existsSync(descriptor.runtimeRoot);
+				// The fake CLI writes agentDir/child.pid as its very first action
+				// after RpcClient spawns it — absent here means onPrepared truly
+				// ran before any RpcClient/child-process work began.
+				childPidFileExistedAtCallTime = existsSync(join(descriptor.agentDir, "child.pid"));
+			},
+		});
+		const result = await handle.wait();
+		const nested = result.text.match(/nested=\[(.*)\]$/)?.[1];
+		expect(nested).toBeDefined();
+		// onPrepared must fire exactly once, for the outer launch only — mirrors
+		// beforeStart's non-inheritance: the nested recipe_task tool call passes
+		// onPrepared: undefined for its sibling runtime, so a nested launch's
+		// shorter-lived runtime root can never overwrite the outer receipt.
+		expect(onPreparedCalls).toBe(1);
+		expect(capturedRuntimeRoot).toBe(handle.descriptor.runtimeRoot);
+		expect(runtimeRootExistedAtCallTime).toBeTrue();
+		expect(childPidFileExistedAtCallTime).toBeFalse();
+	});
+
 	test("nested recipe_task stops before spawning past the depth cap", async () => {
 		const auditFile = join(scratch, "fixture-processes.jsonl");
 		rmSync(auditFile, { force: true });

@@ -1,4 +1,4 @@
-import { chmod, cp, mkdir, readdir, readFile, realpath, rm, stat } from "node:fs/promises";
+import { chmod, cp, mkdir, readdir, readFile, realpath, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
@@ -33,6 +33,7 @@ type RecipeLaunchDescriptor = {
   cwd: string;
   agentDir: string;
   home: string;
+  runtimeRoot: string;
   model: {
     provider: string;
     id: string;
@@ -47,6 +48,7 @@ type StartRecipeTask = (options: {
   timeoutMs: number;
   hostTools: RecipeTaskHostTool[];
   beforeStart?: (descriptor: RecipeLaunchDescriptor) => Promise<void>;
+  onPrepared?: (descriptor: RecipeLaunchDescriptor) => Promise<void>;
 }) => Promise<RecipeTaskHandle>;
 
 // Bounds a single recipe-agent attempt so one hung or slow-to-converge model
@@ -142,6 +144,21 @@ export async function stageLiveTaskProjection(descriptor: RecipeLaunchDescriptor
   }
 }
 
+// Writes only `runtimeRoot` (nothing else from the descriptor — no env, no
+// model, no paths that could leak secrets) into the receipt file the parent
+// process (hatchet/src/runner.ts's invokeRunner) pre-creates and names via
+// OMP_RECIPE_RUNTIME_RECEIPT. This is the adapter's half of a parent-owned
+// defense: if this process is killed (e.g. OS SIGTERM) before its own async
+// `cleanupRuntimeRoot` can run, the parent reads this receipt after reaping
+// the child and reclaims the runtime root itself. `mode: 0o600` guards
+// against a parent that couldn't pre-create the file with restrictive
+// permissions for some reason; `chmod` after write makes the mode
+// unconditional regardless of umask or pre-existing file permissions.
+export async function writeRuntimeReceipt(receiptPath: string, runtimeRoot: string): Promise<void> {
+  await writeFile(receiptPath, runtimeRoot, { mode: 0o600 });
+  await chmod(receiptPath, 0o600);
+}
+
 async function loadStartRecipeTask(): Promise<StartRecipeTask> {
   // Tests select a process-level fake; production always falls back to the Bun-only shared runner.
   const moduleUrl = process.env.OMP_RECIPE_SHARED_RUNNER_MODULE
@@ -159,6 +176,7 @@ export async function runRecipeAdapter(
   startRecipeTask: StartRecipeTask | undefined = undefined,
 ): Promise<RunnerTerminal> {
   const input = parseAdapterInput(argv);
+  const runtimeReceiptPath = process.env.OMP_RECIPE_RUNTIME_RECEIPT;
   const start = startRecipeTask ?? await loadStartRecipeTask();
   let handle: RecipeTaskHandle | undefined;
   let terminal: RunnerTerminal | undefined;
@@ -199,6 +217,9 @@ export async function runRecipeAdapter(
       signal,
       timeoutMs: stageTimeoutMs,
       hostTools: [terminalTool],
+      ...(runtimeReceiptPath
+        ? { onPrepared: (descriptor: RecipeLaunchDescriptor) => writeRuntimeReceipt(runtimeReceiptPath, descriptor.runtimeRoot) }
+        : {}),
       ...(input.stage === "live_verify" ? { beforeStart: stageLiveTaskProjection } : {}),
     });
     await Promise.race([handle.wait(), cancellation.promise]);

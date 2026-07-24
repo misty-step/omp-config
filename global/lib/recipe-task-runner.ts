@@ -52,6 +52,16 @@ export interface StartRecipeTaskOptions {
 	timeoutMs?: number;
 	hostTools?: RecipeTaskHostTool[];
 	beforeStart?: (descriptor: RecipeLaunchDescriptor) => Promise<void>;
+	// Fires immediately after `prepareLaunch` resolves the descriptor, before
+	// any RpcClient/child-process work begins. Unlike `beforeStart`, this is
+	// meant for parent-process defense (e.g. writing a runtime-root receipt a
+	// grandparent can reclaim if this process is killed before its own async
+	// cleanup runs), not for composing the launch itself — it must not throw
+	// for ordinary staging reasons, and like `beforeStart` it is intentionally
+	// NOT propagated to a nested `recipe_task` launch (see below): inheriting
+	// it would let a nested call's shorter-lived runtime root overwrite the
+	// outer launch's receipt and erase the outer root's own protection.
+	onPrepared?: (descriptor: RecipeLaunchDescriptor) => Promise<void>;
 	compilerPath?: string;
 	pythonPath?: string;
 	ompSourceRoot?: string;
@@ -272,6 +282,7 @@ async function startRecipeTaskAtDepth(options: StartRecipeTaskOptions, depth: nu
 	let descriptor: RecipeLaunchDescriptor | undefined;
 	try {
 		descriptor = await prepareLaunch(bundle, cwd, runtimeRoot, compilerPath, pythonPath, options.signal);
+		await options.onPrepared?.(descriptor);
 		return await startPreparedRecipeTask(options, depth, descriptor, rpcClientModule, cliPath);
 	} catch (error) {
 		try {
@@ -318,6 +329,7 @@ async function startPreparedRecipeTask(
 					...options,
 					hostTools: undefined,
 					beforeStart: undefined,
+					onPrepared: undefined,
 					recipe,
 					task,
 					cwd: descriptor.cwd,

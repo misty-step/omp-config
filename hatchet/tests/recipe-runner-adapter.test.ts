@@ -7,6 +7,7 @@ import {
   parseAdapterInput,
   runRecipeAdapter,
   stageLiveTaskProjection,
+  writeRuntimeReceipt,
 } from "../src/recipe-runner-adapter.js";
 
 const headSha = "a".repeat(40);
@@ -61,6 +62,7 @@ describe("shared-runner Hatchet adapter", () => {
         cwd,
         agentDir,
         home,
+        runtimeRoot: join(scratch, "runtime"),
         model: { provider: "openrouter", id: "qwen/qwen3.7-max", reasoning: "high" },
       };
       const modelBefore = structuredClone(descriptor.model);
@@ -115,6 +117,7 @@ describe("shared-runner Hatchet adapter", () => {
         cwd,
         agentDir,
         home,
+        runtimeRoot: join(scratch, "runtime"),
         model: { provider: "openrouter", id: "qwen/qwen3.7-max", reasoning: "high" },
       };
 
@@ -152,6 +155,54 @@ describe("shared-runner Hatchet adapter", () => {
     });
     expect(beforeStart).toBe(stageLiveTaskProjection);
     expect(result).toEqual(terminal);
+  });
+
+  it("writes only runtimeRoot to the receipt path when OMP_RECIPE_RUNTIME_RECEIPT is set", async () => {
+    const scratch = await mkdtemp(join(tmpdir(), "hatchet-runtime-receipt-"));
+    const receiptPath = join(scratch, "receipt");
+    await writeFile(receiptPath, "", { mode: 0o600 });
+    const previousReceiptEnv = process.env.OMP_RECIPE_RUNTIME_RECEIPT;
+    process.env.OMP_RECIPE_RUNTIME_RECEIPT = receiptPath;
+    try {
+      let onPrepared: unknown;
+      const result = await runRecipeAdapter(argv, new AbortController().signal, async (options) => {
+        onPrepared = options.onPrepared;
+        await options.onPrepared?.({
+          cwd: "/worktree",
+          agentDir: "/worktree/.agent",
+          home: "/worktree/.home",
+          runtimeRoot: "/tmp/omp-recipe-task-fake-uuid",
+          model: { provider: "openrouter", id: "qwen/qwen3.7-max", reasoning: "high" },
+        });
+        return {
+          async wait() {
+            await options.hostTools[0]!.execute(terminal, hostContext);
+            return { text: "" };
+          },
+          async stop() {},
+        };
+      });
+      expect(onPrepared).toBeDefined();
+      expect(await readFile(receiptPath, "utf8")).toBe("/tmp/omp-recipe-task-fake-uuid");
+      expect((await stat(receiptPath)).mode & 0o777).toBe(0o600);
+      expect(result).toEqual(terminal);
+    } finally {
+      if (previousReceiptEnv === undefined) delete process.env.OMP_RECIPE_RUNTIME_RECEIPT;
+      else process.env.OMP_RECIPE_RUNTIME_RECEIPT = previousReceiptEnv;
+      await rm(scratch, { recursive: true, force: true });
+    }
+  });
+
+  it("writeRuntimeReceipt writes exactly the runtime root, nothing else", async () => {
+    const scratch = await mkdtemp(join(tmpdir(), "hatchet-runtime-receipt-direct-"));
+    const receiptPath = join(scratch, "receipt");
+    try {
+      await writeRuntimeReceipt(receiptPath, "/tmp/omp-recipe-task-abc");
+      expect(await readFile(receiptPath, "utf8")).toBe("/tmp/omp-recipe-task-abc");
+      expect((await stat(receiptPath)).mode & 0o777).toBe(0o600);
+    } finally {
+      await rm(scratch, { recursive: true, force: true });
+    }
   });
 
   it("captures one validated terminal through the explicit host tool", async () => {
