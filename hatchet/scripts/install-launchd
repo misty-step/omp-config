@@ -1,0 +1,56 @@
+#!/bin/sh
+set -eu
+
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+: "${HOME:?HOME is required}"
+node=$(command -v node)
+node_bin_dir=${node%/*}
+launch_agents="$HOME/Library/LaunchAgents"
+uid=$(id -u)
+
+case "$root$HOME$node_bin_dir" in
+  *'&'*|*'<'*|*'>'*|*'|'*)
+    printf '%s\n' "launchd paths contain an unsupported XML/template character" >&2
+    exit 2
+    ;;
+esac
+
+mkdir -p "$launch_agents" "$root/local/logs"
+chmod 0700 "$root/local" "$root/local/logs"
+
+for template in "$root"/launchd/*.plist.in; do
+  name=$(basename "$template" .in)
+  output="$launch_agents/$name"
+  sed \
+    -e "s|@HATCHET_ROOT@|$root|g" \
+    -e "s|@HOME@|$HOME|g" \
+    -e "s|@NODE_BIN_DIR@|$node_bin_dir|g" \
+    "$template" >"$output"
+  chmod 0600 "$output"
+  plutil -lint "$output" >/dev/null
+done
+
+if [ "${1:-}" = "--render-only" ]; then
+  printf '%s\n' "rendered Hatchet LaunchAgents"
+  exit 0
+fi
+
+if [ "$#" -eq 0 ]; then
+  printf '%s\n' "name at least one service: worker, webhook, or reconcile" >&2
+  exit 2
+fi
+
+for service in "$@"; do
+  case "$service" in
+    worker|webhook|reconcile) ;;
+    *)
+      printf 'unknown Hatchet launchd service: %s\n' "$service" >&2
+      exit 2
+      ;;
+  esac
+  label="com.misty-step.omp-hatchet-$service"
+  plist="$launch_agents/$label.plist"
+  launchctl bootout "gui/$uid/$label" >/dev/null 2>&1 || true
+  launchctl bootstrap "gui/$uid" "$plist"
+  printf 'installed %s\n' "$label"
+done

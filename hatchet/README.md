@@ -85,3 +85,82 @@ scripts/stop                          # stop engine; preserve volumes/history
 Run the worker under a process supervisor or terminal that owns its lifecycle;
 do not daemonize it by hand. `npm run build && npm test` runs the focused
 Hatchet typecheck and test suite.
+
+## Powder moved-to-ready ingress
+
+Powder signs the exact raw JSON body in `X-Signature-256` as
+`sha256=<hex HMAC-SHA256>`. The accepted envelope is
+`powder.card_event.v1` with `event_type: "moved-to-ready"`, a stable
+`event_id`, the ready card snapshot under `card`, and the status transition
+under `change`. Powder retries one delivery with the same event id up to six
+times. The receiver acknowledges unrelated cards without triggering so a
+global moved-to-ready subscription does not retry them.
+
+The configured card is re-read from Powder before admission. A delayed event
+for a card that has already left `ready` is acknowledged without a run. Powder
+events do not carry a repository HEAD, so webhook and reconciliation both let
+the shared trigger snapshot current HEAD and derive the same `cardId:headSha`
+key. Duplicate delivery returns the stored run; it never reruns completed work.
+
+Runtime configuration stays under ignored `local/`:
+
+- `local/operator-wildcard.json` adds `powder.baseUrl`,
+  `powder.apiTokenFile`, and `powder.readyStatus`.
+- The base URL is the Mint proxy URL for the deployed Powder origin.
+- The token file contains only the approved Mint placeholder, never credential
+  bytes. The operator config, token file, and
+  `local/powder-webhook-secret` must be mode `0600`.
+
+`powder subscription-*` is database-only. For a deployed Powder instance,
+`scripts/create-powder-subscription.mjs` uses the configured Mint proxy, creates
+exactly the `moved-to-ready` subscription, and writes the one-shot signing
+secret directly to `local/powder-webhook-secret` with `0600` mode. It prints
+only the non-secret subscription record:
+
+```sh
+scripts/create-powder-subscription.mjs \
+  https://<tailnet-host>:<https-port>/webhook/powder
+```
+
+Expose loopback port `8099` with Tailscale Serve on a dedicated HTTPS port.
+Never use `tailscale funnel`:
+
+```sh
+tailscale serve --bg --yes --https=<https-port> http://127.0.0.1:8099
+curl --fail https://<tailnet-host>:<https-port>/health
+```
+
+## Persistent LaunchAgents
+
+Tracked templates under `launchd/` install three user agents with explicit
+working directory, PATH, ignored config paths, and log paths:
+
+- `com.misty-step.omp-hatchet-worker`: `KeepAlive` worker.
+- `com.misty-step.omp-hatchet-webhook`: `KeepAlive` loopback webhook.
+- `com.misty-step.omp-hatchet-reconcile`: `--once` every 300 seconds.
+
+Render and validate without loading anything:
+
+```sh
+scripts/install-launchd --render-only
+```
+
+Load auxiliary services independently. For worker handoff, first prove the
+Hatchet engine is healthy, stop the prior supervisor-owned worker, then load
+the launchd worker. Never overlap two workers:
+
+```sh
+scripts/install-launchd webhook reconcile
+# stop the prior supervised worker here
+scripts/install-launchd worker
+launchctl print "gui/$(id -u)/com.misty-step.omp-hatchet-worker"
+```
+
+Focused ingress checks:
+
+```sh
+npm run build
+npx vitest run tests/powder-webhook.test.ts tests/idempotency.test.ts
+scripts/reconcile --once
+scripts/probe-powder-webhook.mjs http://127.0.0.1:8099/webhook/powder
+```

@@ -1,41 +1,19 @@
-import { readFile, stat } from "node:fs/promises";
 import { setTimeout as delay } from "node:timers/promises";
-import { z } from "zod";
 import { readOperatorConfig } from "./config.js";
+import { createPowderCardReader } from "./powder-client.js";
 import { triggerConfiguredWorkflow } from "./trigger-service.js";
 
-const cardSchema = z.object({
-  id: z.string(),
-  status: z.string(),
-  headSha: z.string().regex(/^[0-9a-f]{40}$/i).optional(),
-});
-const responseSchema = z.union([cardSchema, z.object({ card: cardSchema }).transform(({ card }) => card)]);
 const operatorConfig = await readOperatorConfig();
 if (!operatorConfig.powder) throw new Error("operator config powder section is required");
-
-let authorization: string | undefined;
-if (operatorConfig.powder.apiTokenFile) {
-  const metadata = await stat(operatorConfig.powder.apiTokenFile);
-  if ((metadata.mode & 0o077) !== 0) throw new Error("Powder API token file must have mode 0600");
-  authorization = `Bearer ${(await readFile(operatorConfig.powder.apiTokenFile, "utf8")).trim()}`;
-}
+const readPowderCard = await createPowderCardReader(operatorConfig);
 
 async function reconcileOnce(): Promise<object> {
-  const url = new URL(`/api/v1/cards/${encodeURIComponent(operatorConfig.cardId)}`, operatorConfig.powder!.baseUrl);
-  const headers = new Headers();
-  if (authorization) headers.set("authorization", authorization);
-  const response = await fetch(url, {
-    headers,
-    signal: AbortSignal.timeout(10_000),
-  });
-  if (!response.ok) throw new Error(`Powder card read failed with HTTP ${response.status}`);
-  const card = responseSchema.parse(await response.json());
-  if (card.id !== operatorConfig.cardId) throw new Error("Powder returned a different card");
+  const card = await readPowderCard();
   if (card.status !== operatorConfig.powder!.readyStatus) {
     return { cardId: card.id, status: card.status, triggered: false };
   }
-  const result = await triggerConfiguredWorkflow(operatorConfig, "reconciler", card.headSha);
-  return { cardId: card.id, status: card.status, triggered: true, ...result };
+  const result = await triggerConfiguredWorkflow(operatorConfig, "reconciler");
+  return { cardId: card.id, status: card.status, triggered: !result.duplicate, ...result };
 }
 
 if (process.argv.includes("--once")) {
