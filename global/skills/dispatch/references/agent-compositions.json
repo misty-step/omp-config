@@ -1,6 +1,27 @@
 {
   "schema_version": "omp.dispatch.agent-compositions.v1",
   "agents": {
+    "builder": {
+      "when_to_use": "One accepted implementation change taken to a live, gated, evidence-backed outcome.",
+      "model": [
+        "openai-codex/gpt-5.6-luna:xhigh",
+        "anthropic/claude-sonnet-5:xhigh",
+        "openrouter/z-ai/glm-5.2:high"
+      ],
+      "thinkingLevel": "xhigh",
+      "autoloadSkills": [
+        "deliver",
+        "ci",
+        "powder",
+        "factory-apps",
+        "research"
+      ],
+      "spawns": [
+        "scout",
+        "code-critic",
+        "qa"
+      ]
+    },
     "cassandra": {
       "when_to_use": "One live production failure, incident response, digital forensics, or root-cause analysis.",
       "model": [
@@ -8,7 +29,6 @@
         "anthropic/claude-sonnet-5:high"
       ],
       "thinkingLevel": "xhigh",
-      "tools": "*",
       "autoloadSkills": [
         "factory-apps",
         "estate-infrastructure",
@@ -18,34 +38,16 @@
         "scout"
       ]
     },
-    "argus": {
-      "when_to_use": "A full code-review program across model families, including Cursor Thermo-Nuclear review and live verification.",
-      "model": [
-        "anthropic/claude-fable-5:high",
-        "openai-codex/gpt-5.6-sol:high"
-      ],
-      "thinkingLevel": "high",
-      "tools": "*",
-      "autoloadSkills": [
-        "code-review",
-        "peer-harnesses",
-        "ci"
-      ],
-      "spawns": [
-        "scout",
-        "cerberus",
-        "scully",
-        "reviewer"
-      ]
-    },
-    "cerberus": {
-      "when_to_use": "One fresh-context adversarial read-only review lane.",
+    "code-critic": {
+      "when_to_use": "One fresh-context static critique lane. Carries no doctrine; the brief injects exactly one review lens.",
       "model": [
         "xai-oauth/grok-4.5:high",
-        "openai-codex/gpt-5.6-sol:high"
+        "openai-codex/gpt-5.6-sol:high",
+        "kimi-code/k3:high",
+        "openrouter/z-ai/glm-5.2:high"
       ],
       "thinkingLevel": "high",
-      "tools": "read,grep,glob,lsp,bash,web_search",
+      "tools": "read,grep,glob,lsp,web_search",
       "autoloadSkills": [],
       "spawns": []
     },
@@ -56,7 +58,6 @@
         "openai-codex/gpt-5.6-sol:high"
       ],
       "thinkingLevel": "high",
-      "tools": "*",
       "autoloadSkills": [
         "groom",
         "research",
@@ -68,8 +69,8 @@
         "scout",
         "magellan",
         "daedalus",
-        "cerberus",
-        "scully"
+        "code-critic",
+        "qa"
       ]
     },
     "daedalus": {
@@ -86,23 +87,23 @@
       ],
       "spawns": []
     },
-    "hephaestus": {
-      "when_to_use": "One accepted implementation change with a live oracle and authoring authority.",
+    "fixer": {
+      "when_to_use": "Remediation of a ranked findings packet under a two-round cap, without weakening a gate or a test.",
       "model": [
         "openai-codex/gpt-5.6-luna:xhigh",
-        "anthropic/claude-sonnet-5:high"
+        "anthropic/claude-sonnet-5:xhigh",
+        "openrouter/z-ai/glm-5.2:high"
       ],
       "thinkingLevel": "xhigh",
-      "tools": "*",
       "autoloadSkills": [
-        "deliver",
-        "ci"
+        "refactor",
+        "ci",
+        "powder",
+        "review-tests"
       ],
       "spawns": [
         "scout",
-        "argus",
-        "cerberus",
-        "scully"
+        "code-critic"
       ]
     },
     "magellan": {
@@ -119,18 +120,43 @@
       ],
       "spawns": []
     },
-    "scully": {
-      "when_to_use": "Independent live verification through a browser, API, CLI, library consumer, MCP call, or job transition.",
+    "qa": {
+      "when_to_use": "Independent live verification through a browser, HTTP request, CLI, library consumer, MCP call, or job transition.",
       "model": [
-        "anthropic/claude-sonnet-5:high",
-        "openai-codex/gpt-5.6-luna:high"
+        "anthropic/claude-sonnet-5:xhigh",
+        "google-antigravity/gemini-3.6-flash:high",
+        "openai-codex/gpt-5.6-luna:xhigh"
+      ],
+      "thinkingLevel": "xhigh",
+      "tools": "read,grep,glob,bash,browser,web_search",
+      "autoloadSkills": [
+        "verify-live",
+        "ci",
+        "powder"
+      ],
+      "spawns": []
+    },
+    "reviewer": {
+      "when_to_use": "A full review program: pick a critic bench, fan out cross-family critique and live verification, return one deduplicated ranked findings packet.",
+      "model": [
+        "anthropic/claude-fable-5:high",
+        "openai-codex/gpt-5.6-sol:high",
+        "kimi-code/k3:high"
       ],
       "thinkingLevel": "high",
       "tools": "read,grep,glob,lsp,bash,web_search",
       "autoloadSkills": [
-        "ci"
+        "code-review",
+        "peer-harnesses",
+        "dispatch",
+        "project-engineering",
+        "powder"
       ],
-      "spawns": []
+      "spawns": [
+        "code-critic",
+        "qa",
+        "scout"
+      ]
     },
     "solomon": {
       "when_to_use": "A contested decision that needs one evidence-backed ruling and reversal conditions.",

@@ -3,7 +3,6 @@ name: cassandra
 description: Reproduce-first production incident investigator. Explains a live-system failure with evidence and named blast radius; no speculative remediation.
 model: openai-codex/gpt-5.6-luna:xhigh, anthropic/claude-sonnet-5:high
 thinkingLevel: xhigh
-tools: '*'
 spawns: scout
 autoloadSkills: factory-apps,estate-infrastructure,mint
 readSummarize: true

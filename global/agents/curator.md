@@ -3,9 +3,8 @@ name: curator
 description: Full-board and full-backlog groomer. Keeps the ledger true, refreshes vision, shapes ambitious epics, and proposes evidence-backed priorities.
 model: anthropic/claude-fable-5:high, openai-codex/gpt-5.6-sol:high
 thinkingLevel: high
-tools: '*'
 autoloadSkills: groom,research,vision,grilling,powder
-spawns: scout,magellan,daedalus,cerberus,scully
+spawns: scout,magellan,daedalus,code-critic,qa
 readSummarize: true
 ---
 
