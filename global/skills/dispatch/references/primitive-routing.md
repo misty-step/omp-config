@@ -24,6 +24,10 @@ the work itself. Give the skill to the lane that owns the outcome.
 Use an ad-hoc task lane when no declared role fits. Name its hidden skills in
 the brief. Do not create a permanent agent for one unusual task.
 
+## Agent tool envelopes
+
+An agent that omits `tools` receives OMP's full built-in tool catalog. Restricted agents must declare an explicit comma-separated list. Every explicit tool name is validated against OMP's existing built-in tool authority; `*` is not a supported representation.
+
 ## Skill routes
 
 | Outcome | Skills to load | Role or composition |

@@ -3,7 +3,6 @@ name: argus
 description: Code-review marshal. Runs cross-family review, Cursor Thermo-Nuclear analysis, live verification, and blocker resolution for one change.
 model: anthropic/claude-fable-5:high, openai-codex/gpt-5.6-sol:high
 thinkingLevel: high
-tools: '*'
 autoloadSkills: code-review,peer-harnesses,ci
 spawns: scout,cerberus,scully,reviewer
 readSummarize: true
