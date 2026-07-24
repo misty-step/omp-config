@@ -25,6 +25,9 @@ class OmpRecipeTests(unittest.TestCase):
         (skill / "SKILL.md").write_text("demo skill\n")
         (skill / "references" / "detail.md").write_text("nested detail\n")
         (skill / "scripts" / "run").write_text("#!/bin/sh\n")
+        task_skill = self.root / "source-skills" / "task-demo"
+        task_skill.mkdir(parents=True)
+        (task_skill / "SKILL.md").write_text("task demo skill\n")
         self.spec = self.root / "recipe-source.json"
         self.output = self.root / "compiled"
         self.write_recipe()
@@ -41,6 +44,7 @@ class OmpRecipeTests(unittest.TestCase):
                 {"provider": "openrouter", "model": "fallback", "reasoning": "medium"},
             ],
             "skills": [{"name": "demo", "path": "source-skills/demo"}],
+            "taskSkills": [{"name": "task-demo", "path": "source-skills/task-demo"}],
             "mcpServers": [],
         }
 
@@ -59,6 +63,57 @@ class OmpRecipeTests(unittest.TestCase):
         ):
             with self.assertRaises(omp_recipe.RecipeError):
                 omp_recipe.validate_recipe(legacy)
+
+    def test_task_skills_key_is_required(self) -> None:
+        recipe = self.recipe()
+        del recipe["taskSkills"]
+        with self.assertRaises(omp_recipe.RecipeError):
+            omp_recipe.validate_recipe(recipe)
+
+    def test_task_skills_rejects_bad_entry_shape(self) -> None:
+        for bad_task_skills in (
+            "not-a-list",
+            ["not-an-object"],
+            [{"name": "task-demo"}],
+            [{"name": "task-demo", "path": "source-skills/task-demo", "extra": True}],
+        ):
+            recipe = self.recipe()
+            recipe["taskSkills"] = bad_task_skills
+            with self.assertRaises(omp_recipe.RecipeError):
+                omp_recipe.validate_recipe(recipe)
+
+    def test_task_skills_rejects_duplicate_name(self) -> None:
+        recipe = self.recipe()
+        recipe["taskSkills"] = [
+            {"name": "task-demo", "path": "source-skills/task-demo"},
+            {"name": "task-demo", "path": "source-skills/demo"},
+        ]
+        with self.assertRaisesRegex(omp_recipe.RecipeError, r"duplicate taskSkill entry at taskSkills\[1\]"):
+            omp_recipe.validate_recipe(recipe)
+
+    def test_task_skills_rejects_duplicate_source_path(self) -> None:
+        recipe = self.recipe()
+        recipe["taskSkills"] = [
+            {"name": "task-demo", "path": "source-skills/task-demo"},
+            {"name": "task-demo-again", "path": "source-skills/task-demo"},
+        ]
+        with self.assertRaisesRegex(omp_recipe.RecipeError, r"duplicate taskSkill source path at taskSkills\[1\]"):
+            omp_recipe.validate_recipe(recipe)
+
+    def test_task_skills_rejects_missing_skill_md_at_compile(self) -> None:
+        recipe = self.recipe()
+        recipe["taskSkills"] = [{"name": "no-skill-md", "path": "source-skills/no-skill-md"}]
+        (self.root / "source-skills" / "no-skill-md").mkdir()
+        self.write_recipe(recipe)
+        with self.assertRaisesRegex(omp_recipe.RecipeError, "taskSkill no-skill-md is missing SKILL.md"):
+            self.compile()
+
+    def test_task_skills_empty_list_is_valid(self) -> None:
+        recipe = self.recipe()
+        recipe["taskSkills"] = []
+        self.write_recipe(recipe)
+        compiled = self.compile()
+        self.assertEqual(compiled["taskSkills"], [])
 
     def test_compile_packages_complete_skill_directory(self) -> None:
         self.compile()
