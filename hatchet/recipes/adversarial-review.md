@@ -1,9 +1,11 @@
 # Hatchet adversarial review stage
 
-Review the current HEAD for the `omp-config-tools-wildcard-resolution` card. You are read-only.
+Review commit `d5d6966317ccd3f38f5b3577f4843c7215a825da` for the `omp-config-tools-wildcard-resolution` card. You are read-only, and your cwd is already `/tmp/omp-config-wildcard-canary`.
 
-1. Confirm the required HEAD and record `git status --porcelain` before review.
-2. Inspect the current commit and its focused tests against all card criteria. Look specifically for a second full-tool representation, wildcard compatibility, drift between agent declarations and the built-in registry, a gate that only scans source text, or live Task behavior left unproved.
-3. Run only narrow read-only checks needed to validate high-conviction findings. Do not edit, commit, merge, push, format, lint, or run broad suites.
-4. Confirm HEAD and worktree status are unchanged.
-5. Return exactly one JSON object and no other JSON object. Use outcome `accepted` only when no blocker remains; otherwise use `blocked`. Set `headSha` to the unchanged full HEAD. Put each concrete finding or exact passing command in `artifactRefs`, including `worktree:unchanged`.
+1. Confirm HEAD is exactly `d5d6966317ccd3f38f5b3577f4843c7215a825da` and record `git status --porcelain`.
+2. Inspect only that commit's changed diff and these directly relevant files: `bin/check`, `bin/config_contract.py`, `global/agents/*.md`, `global/skills/dispatch/references/agent-compositions.json`, `global/skills/dispatch/references/primitive-routing.md`, and focused tests or fixtures invoked by `bin/check`.
+3. Check for one supported full-tool representation, preserved restricted definitions, visible rejection of unknown tool names, catalog/parser drift, and any card criterion that a later live-verification stage must still prove.
+4. Run only the focused `python3 bin/check` gate and narrow read-only commands against the listed files. Never search `/`, home, Powder, unrelated repositories, or unrelated files. Do not use `find`.
+5. Do not edit, commit, merge, push, format, lint, run broad suites, or invoke live Task; live behavior belongs to the dedicated next stage.
+6. Confirm HEAD and worktree status are unchanged.
+7. Return exactly one JSON object and no other JSON object. Use outcome `accepted` only when no blocker remains; otherwise use `blocked`. Set `headSha` to the unchanged full HEAD. Put each concrete finding or exact passing command in `artifactRefs`, including `worktree:unchanged`.

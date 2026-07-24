@@ -31,7 +31,7 @@ type StartRecipeTask = (options: {
 // classification below treats as transient (exit 70) and therefore retryable
 // up to invokeRunnerWithRetry's bounded attempt cap — the same outcome as any
 // other transient stage failure, not a hang.
-const stageTimeoutMs = 10 * 60_000;
+const stageTimeoutMs = 8 * 60_000;
 
 const flagToField: Record<string, keyof AdapterInput> = {
   "--recipe": "recipe",
