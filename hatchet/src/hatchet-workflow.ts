@@ -22,7 +22,14 @@ export function declarePrWorkflow(client: Hatchet) {
     // explicitly; the residual `retries: 2` covers everything else.
     retries: 2,
     backoff: { factor: 2, maxSeconds: 10 },
-    executionTimeout: "2h",
+    // Outer bound over every stage of one card, including review/remediate
+    // rounds. Agents run unattended for hours, so this exists only to reclaim
+    // a worker slot from a workflow that will never finish.
+    executionTimeout: "72h",
+    // The worker runs one slot, so a second card waits behind a run that may
+    // take hours. Without this the queued card dies on the SDK's short default
+    // long before a slot frees.
+    scheduleTimeout: "72h",
     fn: async (input: PrWorkflowInput, ctx: DurableContext<PrWorkflowInput>) => {
       try {
         return evidencePacketSchema.parse(await runPrWorkflow(input, ctx.abortController.signal));

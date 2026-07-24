@@ -63,13 +63,14 @@ type StartRecipeTask = (options: {
   onPrepared?: (descriptor: RecipeLaunchDescriptor) => Promise<void>;
 }) => Promise<RecipeTaskHandle>;
 
-// Bounds a single recipe-agent attempt so one hung or slow-to-converge model
-// call cannot occupy an invokeRunnerWithRetry attempt indefinitely. A timeout
-// rejects `handle.wait()` with a plain Error, which the adapter's own exit
-// classification below treats as transient (exit 70) and therefore retryable
-// up to invokeRunnerWithRetry's bounded attempt cap — the same outcome as any
-// other transient stage failure, not a hang.
-const stageTimeoutMs = 8 * 60_000;
+// Backstop against a genuinely hung process, not a convergence bound. The
+// underlying `client.waitForIdle` timer (oh-my-pi rpc-client) starts once and
+// never resets on streaming activity, so any value here caps a *working*
+// agent by wall clock alone. A recipe stage is one or more real agents doing
+// real work - `adversarial_review` fans out several critic lanes - and may
+// legitimately run for hours. Keep this far above any honest stage so only a
+// wedged process trips it; cancellation, not this timer, is the live control.
+const stageTimeoutMs = 12 * 60 * 60_000;
 const terminalToolParameters = z.toJSONSchema(runnerTerminalSchema) as Record<string, unknown>;
 
 // Live Task projection matters only for a stage whose OWN instructions spawn

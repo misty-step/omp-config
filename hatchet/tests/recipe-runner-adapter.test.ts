@@ -329,9 +329,14 @@ describe("shared-runner Hatchet adapter", () => {
       task: "fix the card",
       cwd: "/worktree",
       signal: expect.any(AbortSignal),
-      timeoutMs: 8 * 60_000,
+      timeoutMs: expect.any(Number),
       hostTools: expect.any(Array),
     });
+    // The underlying timer never resets on agent activity, so this value caps a
+    // WORKING agent by wall clock. A stage is real agents doing real work and
+    // may run for hours; anything in the minutes range kills honest runs. Pin
+    // the property, not the number, so tuning stays free but re-tightening fails.
+    expect(observedOptions?.timeoutMs).toBeGreaterThanOrEqual(60 * 60_000);
     expect(observedOptions?.beforeStart).toBeUndefined();
     expect(stopped).toBe(true);
   });
