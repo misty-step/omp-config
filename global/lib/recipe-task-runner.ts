@@ -1,10 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { realpathSync } from "node:fs";
+import { rm } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 export const RECIPE_LAUNCH_SCHEMA = "omp.recipe.launch.v1";
+export const RECIPE_TASK_MAX_DEPTH = 4;
 
 export interface RecipeTaskEvent {
 	type: string;
@@ -238,7 +240,15 @@ export function recipeTaskProgress(event: RecipeTaskEvent): string | undefined {
 	return undefined;
 }
 
+async function cleanupRuntimeRoot(runtimeRoot: string): Promise<void> {
+	await rm(runtimeRoot, { recursive: true, force: true });
+}
+
 export async function startRecipeTask(options: StartRecipeTaskOptions): Promise<RecipeTaskHandle> {
+	return startRecipeTaskAtDepth(options, 0);
+}
+
+async function startRecipeTaskAtDepth(options: StartRecipeTaskOptions, depth: number): Promise<RecipeTaskHandle> {
 	const cwd = resolve(options.cwd);
 	const bundle = resolve(cwd, options.recipe);
 	const runtimeRoot = join(tmpdir(), `omp-recipe-task-${randomUUID()}`);
@@ -256,9 +266,28 @@ export async function startRecipeTask(options: StartRecipeTaskOptions): Promise<
 		options.cliPath ?? process.env.OMP_RECIPE_CLI_PATH,
 		join(ompSourceRoot, "packages/coding-agent/src/cli.ts"),
 	);
-	const descriptor = await prepareLaunch(bundle, cwd, runtimeRoot, compilerPath, pythonPath, options.signal);
-	const rpc = await loadRpcClientModule(rpcClientModule);
+	let descriptor: RecipeLaunchDescriptor | undefined;
+	try {
+		descriptor = await prepareLaunch(bundle, cwd, runtimeRoot, compilerPath, pythonPath, options.signal);
+		return await startPreparedRecipeTask(options, depth, descriptor, rpcClientModule, cliPath);
+	} catch (error) {
+		try {
+			await cleanupRuntimeRoot(descriptor?.runtimeRoot ?? runtimeRoot);
+		} catch (cleanupError) {
+			throw new AggregateError([error, cleanupError], "recipe task failed and its runtime root could not be removed");
+		}
+		throw error;
+	}
+}
 
+async function startPreparedRecipeTask(
+	options: StartRecipeTaskOptions,
+	depth: number,
+	descriptor: RecipeLaunchDescriptor,
+	rpcClientModule: string,
+	cliPath: string,
+): Promise<RecipeTaskHandle> {
+	const rpc = await loadRpcClientModule(rpcClientModule);
 	const nestedTool: RpcClientTool = {
 		name: "recipe_task",
 		label: "Recipe Task",
@@ -274,23 +303,29 @@ export async function startRecipeTask(options: StartRecipeTaskOptions): Promise<
 			additionalProperties: false,
 		},
 		async execute(params, context): Promise<string> {
+			if (depth >= RECIPE_TASK_MAX_DEPTH) {
+				throw new Error(`recipe_task maximum nesting depth ${RECIPE_TASK_MAX_DEPTH} exceeded`);
+			}
 			const recipe = requireString(params.recipe, "recipe_task.recipe");
 			const task = requireString(params.task, "recipe_task.task");
 			let streamed = "";
-			const nested = await startRecipeTask({
-				...options,
-				recipe,
-				task,
-				cwd: descriptor.cwd,
-				signal: context.signal,
-				onEvent(event) {
-					const progress = recipeTaskProgress(event);
-					if (progress) {
-						streamed += progress;
-						context.sendUpdate({ content: [{ type: "text", text: streamed }] });
-					}
+			const nested = await startRecipeTaskAtDepth(
+				{
+					...options,
+					recipe,
+					task,
+					cwd: descriptor.cwd,
+					signal: context.signal,
+					onEvent(event) {
+						const progress = recipeTaskProgress(event);
+						if (progress) {
+							streamed += progress;
+							context.sendUpdate({ content: [{ type: "text", text: streamed }] });
+						}
+					},
 				},
-			});
+				depth + 1,
+			);
 			try {
 				return (await nested.wait()).text;
 			} finally {
@@ -322,9 +357,13 @@ export async function startRecipeTask(options: StartRecipeTaskOptions): Promise<
 		if (stopPromise) return stopPromise;
 		stopped = true;
 		stopPromise = (async () => {
-			if (abortFirst && started) await client.abort().catch(() => {});
-			await client.stop();
-			unsubscribe();
+			try {
+				if (abortFirst && started) await client.abort().catch(() => {});
+				await client.stop();
+			} finally {
+				unsubscribe();
+				await cleanupRuntimeRoot(descriptor.runtimeRoot);
+			}
 		})();
 		return stopPromise;
 	};

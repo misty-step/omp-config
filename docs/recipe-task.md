@@ -88,7 +88,7 @@ The extension wire input is exactly:
 
 A relative recipe path resolves against the active session cwd. The cwd is also passed separately to the compiler and the child process. Progress events stream through the tool update callback. The extension maps its abort signal to `handle.stop()`.
 
-Every recipe process receives one explicit host custom tool named `recipe_task`. A nested call starts another fresh RPC process as a sibling under the runner host, with its own config and session roots. The host custom-tool list contains only `recipe_task`; it does not copy custom primitives from the parent process. The nested recipe controls its own instructions and skills.
+Every recipe process receives one explicit host custom tool named `recipe_task`. A nested call starts another fresh RPC process as a sibling under the runner host, with its own config and session roots. The host custom-tool list contains only `recipe_task`; it does not copy custom primitives from the parent process. The nested recipe controls its own instructions and skills. Nesting is capped at four levels; an attempt to exceed the cap fails before another process is prepared or spawned.
 
 The extension never registers `task`. Native OMP `task` remains a separate built-in tool.
 
@@ -103,7 +103,7 @@ const result = await handle.wait();
 await handle.stop();
 ```
 
-`send` uses RPC steering. `wait` returns the final assistant text and the fresh runtime/session paths after the child is reaped. `stop` sends RPC abort when the child is ready and then waits for process-tree shutdown. Cancellation during startup still forces process-tree shutdown.
+`send` uses RPC steering. `wait` returns the final assistant text and the paths that identified the fresh runtime/session. `stop` sends RPC abort when the child is ready and then waits for process-tree shutdown. Success, error, startup cancellation, and explicit stop all remove the fresh runtime root after process reap; cleanup is idempotent. Buzz's stable runtime is not removed.
 
 Run a compiled bundle from the CLI:
 

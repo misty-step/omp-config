@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { startRecipeTask } from "../global/lib/recipe-task-runner.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
@@ -36,12 +36,6 @@ function pidIsAlive(pid: number): boolean {
 	}
 }
 
-function fixtureLog(agentDir: string): Array<Record<string, unknown>> {
-	return readFileSync(join(agentDir, "fixture-state.jsonl"), "utf8")
-		.trim()
-		.split("\n")
-		.map(line => JSON.parse(line) as Record<string, unknown>);
-}
 
 function recipeOptions(recipe: string, task: string) {
 	return {
@@ -86,12 +80,12 @@ describe("recipe task runner", () => {
 			expect(result.text).toContain("parent=absent");
 			expect(result.text).not.toContain("PARENT_ONLY_SECRET_MARKER");
 			expect(progress).toContain("message_update");
-			const started = fixtureLog(handle.descriptor.agentDir).find(entry => entry.type === "started");
-			const pid = Number(started?.pid);
+			const pid = Number(result.text.match(/^pid=(\d+)/)?.[1]);
 			expect(pidIsAlive(pid)).toBeFalse();
-			expect(fixtureLog(handle.descriptor.agentDir).find(entry => entry.type === "host_tools")?.tools).toEqual([
-				"recipe_task",
-			]);
+			expect(result.text).toContain("hostTools=recipe_task");
+			expect(existsSync(handle.descriptor.runtimeRoot)).toBeFalse();
+			await handle.stop();
+			expect(existsSync(handle.descriptor.runtimeRoot)).toBeFalse();
 		} finally {
 			if (prior === undefined) delete process.env.OMP_RECIPE_PARENT_ONLY;
 			else process.env.OMP_RECIPE_PARENT_ONLY = prior;
@@ -111,7 +105,8 @@ describe("recipe task runner", () => {
 		await second.stop();
 		expect(pidIsAlive(firstPid)).toBeFalse();
 		expect(pidIsAlive(secondPid)).toBeFalse();
-		expect(fixtureLog(second.descriptor.agentDir).some(entry => entry.type === "abort")).toBeTrue();
+		expect(existsSync(first.descriptor.runtimeRoot)).toBeFalse();
+		expect(existsSync(second.descriptor.runtimeRoot)).toBeFalse();
 	});
 
 	test("nested recipe_task launches a clean sibling runtime", async () => {
@@ -132,8 +127,28 @@ describe("recipe task runner", () => {
 		expect(outerAgent).not.toBe(nestedAgent);
 		expect(pidIsAlive(outerPid)).toBeFalse();
 		expect(pidIsAlive(nestedPid)).toBeFalse();
-		expect(fixtureLog(String(nestedAgent)).find(entry => entry.type === "host_tools")?.tools).toEqual([
-			"recipe_task",
-		]);
+		expect(nested).toContain("hostTools=recipe_task");
+		expect(existsSync(handle.descriptor.runtimeRoot)).toBeFalse();
+		expect(existsSync(dirname(String(nestedAgent)))).toBeFalse();
+	});
+
+	test("nested recipe_task stops before spawning past the depth cap", async () => {
+		const auditFile = join(scratch, "fixture-processes.jsonl");
+		rmSync(auditFile, { force: true });
+		const handle = await startRecipeTask(recipeOptions("alpha-bundle", "DEPTH 5 alpha-bundle"));
+		const result = await handle.wait();
+		expect(result.text).toContain("recipe_task maximum nesting depth 4 exceeded");
+		const launches = readFileSync(auditFile, "utf8")
+			.trim()
+			.split("\n")
+			.map(line => JSON.parse(line) as { pid: number; agentDir: string });
+		expect(launches).toHaveLength(5);
+		expect(new Set(launches.map(launch => launch.pid)).size).toBe(5);
+		expect(new Set(launches.map(launch => launch.agentDir)).size).toBe(5);
+		for (const launch of launches) {
+			expect(pidIsAlive(launch.pid)).toBeFalse();
+			expect(existsSync(dirname(launch.agentDir))).toBeFalse();
+		}
+		expect(existsSync(handle.descriptor.runtimeRoot)).toBeFalse();
 	});
 });

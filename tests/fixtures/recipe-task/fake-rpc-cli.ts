@@ -7,6 +7,7 @@ const agentDir = process.env.PI_CODING_AGENT_DIR;
 if (!agentDir) throw new Error("PI_CODING_AGENT_DIR is required");
 const pidFile = join(agentDir, "child.pid");
 const logFile = join(agentDir, "fixture-state.jsonl");
+const auditFile = join(process.cwd(), "fixture-processes.jsonl");
 const skillsDir = join(agentDir, "skills");
 const skills = readdirSync(skillsDir, { withFileTypes: true })
 	.filter(entry => entry.isDirectory())
@@ -26,10 +27,12 @@ appendFileSync(
 		skills,
 	})}\n`,
 );
+appendFileSync(auditFile, `${JSON.stringify({ pid: process.pid, agentDir })}\n`);
 
 let lastText = "";
 let waitingForSteer = false;
 let waitingForNested = false;
+let hostTools: string[] = [];
 
 function send(frame: unknown): void {
 	process.stdout.write(`${JSON.stringify(frame)}\n`);
@@ -46,7 +49,7 @@ function finish(text: string): void {
 }
 
 function marker(): string {
-	return `pid=${process.pid};agent=${agentDir};instructions=${instructions};skills=${skills.join(",")};parent=${process.env.OMP_RECIPE_PARENT_ONLY ?? "absent"}`;
+	return `pid=${process.pid};agent=${agentDir};instructions=${instructions};skills=${skills.join(",")};parent=${process.env.OMP_RECIPE_PARENT_ONLY ?? "absent"};hostTools=${hostTools.join(",")}`;
 }
 
 function cleanup(): void {
@@ -72,9 +75,9 @@ lines.on("line", line => {
 	const id = frame.id;
 	const type = frame.type;
 	if (type === "set_host_tools") {
-		const tools = (frame.tools as Array<{ name: string }>).map(tool => tool.name);
-		appendFileSync(logFile, `${JSON.stringify({ type: "host_tools", tools })}\n`);
-		send({ type: "response", id, command: type, success: true, data: { toolNames: tools } });
+		hostTools = (frame.tools as Array<{ name: string }>).map(tool => tool.name);
+		appendFileSync(logFile, `${JSON.stringify({ type: "host_tools", tools: hostTools })}\n`);
+		send({ type: "response", id, command: type, success: true, data: { toolNames: hostTools } });
 		return;
 	}
 	if (type === "prompt") {
@@ -82,6 +85,23 @@ lines.on("line", line => {
 		const message = String(frame.message);
 		if (message.startsWith("HOLD")) {
 			waitingForSteer = true;
+			return;
+		}
+		if (message.startsWith("DEPTH ")) {
+			const [remainingText, recipe] = message.slice(6).split(" ");
+			const remaining = Number(remainingText);
+			if (remaining <= 0) {
+				finish(`${marker()};depth=complete`);
+				return;
+			}
+			waitingForNested = true;
+			send({
+				type: "host_tool_call",
+				id: "nested-request",
+				toolCallId: "nested-call",
+				toolName: "recipe_task",
+				arguments: { recipe, task: `DEPTH ${remaining - 1} ${recipe}` },
+			});
 			return;
 		}
 		if (message.startsWith("NEST ")) {
