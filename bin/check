@@ -233,6 +233,36 @@ def check_extension_cotenancy(contract: Contract) -> None:
             continue
         fail(f"foreign-writer audit: unexpected extension entry: {entry}")
 
+def omp_builtin_tool_names() -> set[str]:
+    try:
+        result = subprocess.run(
+            ["omp", "--help"],
+            cwd=ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30,
+        )
+    except FileNotFoundError:
+        fail("OMP executable is not available on PATH")
+    except subprocess.TimeoutExpired:
+        fail("OMP tool authority lookup timed out")
+    if result.returncode:
+        detail = result.stderr.strip() or result.stdout.strip()
+        fail(f"OMP tool authority lookup failed: {detail}")
+    marker = "Available Tools"
+    if marker not in result.stdout:
+        fail("OMP help omitted its built-in tool authority")
+    authority = result.stdout.split(marker, 1)[1]
+    names = {
+        match.group(1)
+        for line in authority.splitlines()
+        if (match := re.match(r"\s{2}([A-Za-z][A-Za-z0-9_-]*)\s+-\s+", line))
+    }
+    if not names:
+        fail("OMP help exposed an empty built-in tool authority")
+    return names
+
 
 def check_tree(contract: Contract) -> None:
     settings = contract.surface("settings").source
@@ -264,6 +294,7 @@ def check_tree(contract: Contract) -> None:
                 fail(f"{label} found in {relative(path)}")
 
     skill_names = {path.name for path in skill_dir.iterdir() if path.is_dir()}
+    builtin_tool_names = omp_builtin_tool_names()
     agent_names: set[str] = set()
     agent_fields: dict[str, dict[str, str]] = {}
     for path in sorted(agent_dir.glob("*.md")):
@@ -289,8 +320,14 @@ def check_tree(contract: Contract) -> None:
         thinking = fields.get("thinkingLevel")
         if thinking not in THINKING_LEVELS:
             fail(f"agent {name} requires an explicit supported thinkingLevel")
-        if not fields.get("tools"):
-            fail(f"agent {name} requires an explicit tool envelope")
+        tools = fields.get("tools")
+        if tools is not None:
+            explicit_tools = split_csv(tools)
+            if not explicit_tools:
+                fail(f"agent {name} requires a non-empty explicit tool list or omitted tools")
+            for tool in explicit_tools:
+                if tool not in builtin_tool_names:
+                    fail(f"agent {name} names unknown tool {tool!r}")
         for skill in split_csv(fields.get("autoloadSkills", "")):
             if skill not in skill_names:
                 fail(f"agent {name} autoloads missing skill {skill}")
