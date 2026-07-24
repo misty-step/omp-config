@@ -1,9 +1,9 @@
 import { access } from "node:fs/promises";
 import { setTimeout as delay } from "node:timers/promises";
 import { describe, expect, it } from "vitest";
-import { invokeRunner, invokeRunnerWithRetry, runnerEnvironment } from "../src/runner.js";
+import { defaultSleeper, invokeRunner, invokeRunnerWithRetry, runnerEnvironment } from "../src/runner.js";
 import type { StageName } from "../src/contracts.js";
-import { DeterministicInputError, RunnerCancelledError } from "../src/errors.js";
+import { DeterministicInputError, RunnerCancelledError, TransientRunnerError } from "../src/errors.js";
 
 const fixtureRoot = new URL("../fixtures/", import.meta.url);
 const runnerPath = new URL("recipe-runner.sh", fixtureRoot).pathname;
@@ -135,6 +135,46 @@ describe("runner adapter", () => {
       controller.abort();
       await expect(run).rejects.toBeInstanceOf(RunnerCancelledError);
       await expect(access(runtimeRoot)).rejects.toMatchObject({ code: "ENOENT" });
+    } finally {
+      if (previousRunner === undefined) delete process.env.OMP_RECIPE_RUNNER;
+      else process.env.OMP_RECIPE_RUNNER = previousRunner;
+      if (previousModule === undefined) delete process.env.OMP_RECIPE_SHARED_RUNNER_MODULE;
+      else process.env.OMP_RECIPE_SHARED_RUNNER_MODULE = previousModule;
+    }
+  });
+
+  it("treats a schema-invalid assistant terminal as transient and retries it to recovery", async () => {
+    const singleAttemptCwd = `${fixtureRoot.pathname}runs/adapter-malformed-terminal-single`;
+    const retryCwd = `${fixtureRoot.pathname}runs/adapter-malformed-terminal-retry`;
+    const singleHeadSha = await gitInit(singleAttemptCwd);
+    const retryHeadSha = await gitInit(retryCwd);
+    const previousRunner = process.env.OMP_RECIPE_RUNNER;
+    const previousModule = process.env.OMP_RECIPE_SHARED_RUNNER_MODULE;
+    process.env.OMP_RECIPE_RUNNER = new URL("../scripts/recipe-runner", import.meta.url).pathname;
+    process.env.OMP_RECIPE_SHARED_RUNNER_MODULE = new URL(
+      "../fixtures/malformed-terminal-recipe-task.ts",
+      import.meta.url,
+    ).href;
+    try {
+      await expect(invokeRunner({
+        recipePath: "/unused/compiled-recipe",
+        task: "first attempt is schema-invalid",
+        cwd: singleAttemptCwd,
+        stage: "adversarial_review",
+        round: 1,
+        expectedHeadSha: singleHeadSha,
+      }, new AbortController().signal)).rejects.toBeInstanceOf(TransientRunnerError);
+
+      const attempt = await invokeRunnerWithRetry({
+        recipePath: "/unused/compiled-recipe",
+        task: "malformed on attempt one, valid on attempt two",
+        cwd: retryCwd,
+        stage: "adversarial_review",
+        round: 1,
+        expectedHeadSha: retryHeadSha,
+      }, new AbortController().signal, defaultSleeper);
+      expect(attempt.attempts).toBe(2);
+      expect(attempt.terminal.headSha).toBe("a".repeat(40));
     } finally {
       if (previousRunner === undefined) delete process.env.OMP_RECIPE_RUNNER;
       else process.env.OMP_RECIPE_RUNNER = previousRunner;

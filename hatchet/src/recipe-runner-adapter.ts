@@ -150,10 +150,14 @@ async function main(argv: string[]): Promise<number> {
     if (controller.signal.aborted) return 130;
     const message = error instanceof Error ? error.message : String(error);
     process.stderr.write(`hatchet-recipe-runner: ${message}\n`);
+    // Malformed CLI arguments are a genuine deterministic input problem: the
+    // same recipe/round/head will fail identically on every retry. A missing
+    // or schema-invalid terminal object is the *model's* non-deterministic
+    // output for this attempt — a fresh attempt can plausibly produce a
+    // conforming terminal, so it must stay transient/retryable (exit 70)
+    // rather than aborting the whole Hatchet run as non-retryable.
     return error instanceof z.ZodError || message.startsWith("invalid Hatchet runner arguments")
       || message.startsWith("duplicate Hatchet runner argument")
-      || message.startsWith("expected exactly one terminal JSON object")
-      || message.startsWith("assistant terminal JSON")
       ? 64
       : 70;
   } finally {
