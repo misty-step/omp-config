@@ -17,7 +17,9 @@ a human-approval-required terminal state.
   and `operatorApprovalRequired: true`.
 - Idempotency is keyed by `cardId:headSha` or an explicit key. Admission is
   serialized before mutable HEAD validation. Concurrent and completed-run
-  replays resolve the stored v2 input/run before reading HEAD; legacy
+  replays resolve the stored v2 input/run before reading HEAD. Lock owner
+  metadata recovers dead-process locks, never steals a live-owner lock, and
+  bounds active-lock waits instead of hanging an ingress request. Legacy
   single-recipe checkpoints require a new key.
 - `src/recipe-runner-adapter.ts` accepts the Hatchet runner flags and invokes
   the shared `startRecipeTask` API directly under Bun. It suppresses progress
