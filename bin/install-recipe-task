@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+dest=${1:-"$HOME/.local/bin/recipe-task"}
+share=${OMP_RECIPE_INSTALL_ROOT:-"${XDG_DATA_HOME:-$HOME/.local/share}/omp-recipe-task"}
+mkdir -p "$(dirname -- "$dest")" "$share/bin" "$share/global/lib"
+cp "$root/bin/recipe-task.ts" "$root/bin/omp_recipe.py" "$share/bin/"
+cp "$root/global/lib/recipe-task-runner.ts" "$share/global/lib/"
+cat >"$dest" <<EOF
+#!/bin/sh
+exec bun "$share/bin/recipe-task.ts" "\$@"
+EOF
+chmod 755 "$dest" "$share/bin/recipe-task.ts" "$share/bin/omp_recipe.py"
+printf 'installed %s with runtime sources at %s\n' "$dest" "$share"

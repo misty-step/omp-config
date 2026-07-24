@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "omp.recipe.v1",
+  "instructions": "instructions.md",
+  "models": [
+    {
+      "provider": "fixture",
+      "model": "fixture-model",
+      "reasoning": "off"
+    }
+  ],
+  "skills": [
+    {
+      "name": "beta-marker",
+      "path": "skills/beta-marker"
+    }
+  ],
+  "mcpServers": []
+}

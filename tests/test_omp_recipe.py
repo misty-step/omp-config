@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import io
 import json
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -192,6 +194,84 @@ class OmpRecipeTests(unittest.TestCase):
             {"provider": "anthropic", "model": "claude-primary", "reasoning": "high"}
         ]
         self.assertEqual(omp_recipe.render_models(custom_only), "providers: {}\n")
+
+    def test_fresh_runtime_root_is_caller_owned_and_environment_is_allowlisted(self) -> None:
+        self.compile()
+        workspace = self.root / "fresh-workspace"
+        workspace.mkdir()
+        first_root = self.root / "launch-one"
+        second_root = self.root / "launch-two"
+
+        first = omp_recipe.prepare_runtime(
+            self.output,
+            workspace,
+            environ={"PATH": "/bin", "PARENT_ONLY": "must-not-cross"},
+            runtime_root=first_root,
+        )
+        second = omp_recipe.prepare_runtime(
+            self.output,
+            workspace,
+            environ={"PATH": "/bin", "PARENT_ONLY": "must-not-cross"},
+            runtime_root=second_root,
+        )
+
+        self.assertEqual(first.root, first_root.resolve())
+        self.assertEqual(second.root, second_root.resolve())
+        self.assertNotEqual(first.agent_dir, second.agent_dir)
+        self.assertNotIn("PARENT_ONLY", first.env)
+        self.assertFalse((self.output / "runtime" / "agent").exists())
+        descriptor = omp_recipe.launch_descriptor(self.output, first)
+        self.assertEqual(descriptor["schemaVersion"], omp_recipe.LAUNCH_SCHEMA)
+        self.assertEqual(descriptor["runtimeRoot"], str(first_root.resolve()))
+        self.assertEqual(descriptor["cwd"], str(workspace.resolve()))
+        self.assertEqual(descriptor["env"], first.env)
+        self.assertTrue(Path(descriptor["sessionDir"]).is_dir())
+
+    def test_fresh_runtime_refuses_preexisting_root_without_mutation(self) -> None:
+        self.compile()
+        workspace = self.root / "fresh-workspace"
+        workspace.mkdir()
+        runtime_root = self.root / "claimed-runtime"
+        runtime_root.mkdir()
+        sentinel = runtime_root / "sentinel"
+        sentinel.write_text("preserve\n")
+
+        with self.assertRaises(omp_recipe.RecipeError):
+            omp_recipe.prepare_runtime(
+                self.output,
+                workspace,
+                runtime_root=runtime_root,
+            )
+
+        self.assertEqual(sentinel.read_text(), "preserve\n")
+
+    def test_machine_prepare_command_emits_only_launch_json(self) -> None:
+        self.compile()
+        workspace = self.root / "command-workspace"
+        workspace.mkdir()
+        runtime_root = self.root / "command-runtime"
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+
+        with redirect_stdout(stdout), redirect_stderr(stderr):
+            result = omp_recipe.main(
+                [
+                    "prepare-runtime",
+                    "--bundle",
+                    str(self.output),
+                    "--cwd",
+                    str(workspace),
+                    "--runtime-root",
+                    str(runtime_root),
+                ]
+            )
+
+        self.assertEqual(result, 0)
+        self.assertEqual(stderr.getvalue(), "")
+        descriptor = json.loads(stdout.getvalue())
+        self.assertEqual(descriptor["schemaVersion"], omp_recipe.LAUNCH_SCHEMA)
+        self.assertEqual(descriptor["runtimeRoot"], str(runtime_root.resolve()))
+        self.assertEqual(descriptor["cwd"], str(workspace.resolve()))
 
 
 if __name__ == "__main__":
