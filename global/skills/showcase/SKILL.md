@@ -37,8 +37,8 @@ the operator look credible.
 | Draft a case study | `templates/case-study.md` |
 
 Use `curator` with `/groom` when product direction is unsettled. Use `/design`
-for visible artifact critique or implementation polish. Dispatch `scully` for
-live surface verification. Dispatch `hephaestus` to build the groomed slice.
+for visible artifact critique or implementation polish. Dispatch `qa` for
+live surface verification. Dispatch `builder` to build the groomed slice.
 This skill decides what showcase work is worth doing and what proof must exist
 before it is public.
 
