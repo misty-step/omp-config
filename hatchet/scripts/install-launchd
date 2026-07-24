@@ -50,7 +50,19 @@ for service in "$@"; do
   esac
   label="com.misty-step.omp-hatchet-$service"
   plist="$launch_agents/$label.plist"
-  launchctl bootout "gui/$uid/$label" >/dev/null 2>&1 || true
+  target="gui/$uid/$label"
+  if launchctl print "$target" >/dev/null 2>&1; then
+    launchctl bootout "$target"
+    attempts=0
+    while launchctl print "$target" >/dev/null 2>&1; do
+      attempts=$((attempts + 1))
+      if [ "$attempts" -ge 50 ]; then
+        printf 'timed out stopping %s\n' "$label" >&2
+        exit 1
+      fi
+      sleep 0.1
+    done
+  fi
   launchctl bootstrap "gui/$uid" "$plist"
   printf 'installed %s\n' "$label"
 done
