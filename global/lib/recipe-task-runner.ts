@@ -51,6 +51,7 @@ export interface StartRecipeTaskOptions {
 	onEvent?: (event: RecipeTaskEvent) => void;
 	timeoutMs?: number;
 	hostTools?: RecipeTaskHostTool[];
+	beforeStart?: (descriptor: RecipeLaunchDescriptor) => Promise<void>;
 	compilerPath?: string;
 	pythonPath?: string;
 	ompSourceRoot?: string;
@@ -290,6 +291,7 @@ async function startPreparedRecipeTask(
 	cliPath: string,
 ): Promise<RecipeTaskHandle> {
 	const rpc = await loadRpcClientModule(rpcClientModule);
+	await options.beforeStart?.(descriptor);
 	const nestedTool: RecipeTaskHostTool = {
 		name: "recipe_task",
 		label: "Recipe Task",
@@ -315,6 +317,7 @@ async function startPreparedRecipeTask(
 				{
 					...options,
 					hostTools: undefined,
+					beforeStart: undefined,
 					recipe,
 					task,
 					cwd: descriptor.cwd,

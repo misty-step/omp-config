@@ -1,4 +1,5 @@
-import { resolve } from "node:path";
+import { lstat, readFile, realpath, stat, symlink } from "node:fs/promises";
+import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { runnerTerminalSchema, shaSchema, stageNameSchema, type RunnerTerminal } from "./contracts.js";
@@ -28,6 +29,15 @@ type RecipeTaskHandle = {
   wait(): Promise<{ text: string }>;
   stop(): Promise<void>;
 };
+type RecipeLaunchDescriptor = {
+  cwd: string;
+  agentDir: string;
+  model: {
+    provider: string;
+    id: string;
+    reasoning: string;
+  };
+};
 type StartRecipeTask = (options: {
   recipe: string;
   task: string;
@@ -35,6 +45,7 @@ type StartRecipeTask = (options: {
   signal: AbortSignal;
   timeoutMs: number;
   hostTools: RecipeTaskHostTool[];
+  beforeStart?: (descriptor: RecipeLaunchDescriptor) => Promise<void>;
 }) => Promise<RecipeTaskHandle>;
 
 // Bounds a single recipe-agent attempt so one hung or slow-to-converge model
@@ -72,6 +83,44 @@ export function parseAdapterInput(argv: string[]): AdapterInput {
   return adapterInputSchema.parse(values);
 }
 
+
+async function ensureDirectoryLink(source: string, target: string): Promise<void> {
+  const resolvedSource = await realpath(source);
+  if (!(await stat(resolvedSource)).isDirectory()) {
+    throw new Error(`live Task projection source is not a directory: ${source}`);
+  }
+  try {
+    const targetStat = await lstat(target);
+    if (!targetStat.isSymbolicLink() || await realpath(target) !== resolvedSource) {
+      throw new Error(`live Task projection target already exists: ${target}`);
+    }
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    await symlink(resolvedSource, target, "dir");
+  }
+}
+
+export async function stageLiveTaskProjection(descriptor: RecipeLaunchDescriptor): Promise<void> {
+  const preservedPaths = ["AGENTS.md", "config.yml", "models.yml"]
+    .map(name => join(descriptor.agentDir, name));
+  const preservedContent = await Promise.all(preservedPaths.map(path => readFile(path)));
+  const preservedModel = JSON.stringify(descriptor.model);
+
+  await ensureDirectoryLink(
+    join(descriptor.cwd, "global", "agents"),
+    join(descriptor.agentDir, "agents"),
+  );
+  await ensureDirectoryLink(
+    join(descriptor.cwd, "global", "skills", "deliver"),
+    join(descriptor.agentDir, "skills", "deliver"),
+  );
+
+  const currentContent = await Promise.all(preservedPaths.map(path => readFile(path)));
+  if (currentContent.some((content, index) => !content.equals(preservedContent[index]!))
+    || JSON.stringify(descriptor.model) !== preservedModel) {
+    throw new Error("live Task projection changed the parent recipe composition");
+  }
+}
 
 async function loadStartRecipeTask(): Promise<StartRecipeTask> {
   // Tests select a process-level fake; production always falls back to the Bun-only shared runner.
@@ -130,6 +179,7 @@ export async function runRecipeAdapter(
       signal,
       timeoutMs: stageTimeoutMs,
       hostTools: [terminalTool],
+      ...(input.stage === "live_verify" ? { beforeStart: stageLiveTaskProjection } : {}),
     });
     await Promise.race([handle.wait(), cancellation.promise]);
     if (terminalViolation) throw terminalViolation;

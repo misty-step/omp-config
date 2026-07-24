@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { appendFileSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import * as readline from "node:readline";
 
@@ -13,6 +13,13 @@ const skills = readdirSync(skillsDir, { withFileTypes: true })
 	.filter(entry => entry.isDirectory())
 	.map(entry => entry.name)
 	.sort();
+const agentsDir = join(agentDir, "agents");
+const agents = existsSync(agentsDir)
+	? readdirSync(agentsDir, { withFileTypes: true })
+		.filter(entry => entry.isFile() && entry.name.endsWith(".md"))
+		.map(entry => entry.name.slice(0, -3))
+		.sort()
+	: [];
 const instructions = readFileSync(join(agentDir, "AGENTS.md"), "utf8").trim();
 writeFileSync(pidFile, `${process.pid}\n`);
 appendFileSync(
@@ -49,7 +56,7 @@ function finish(text: string): void {
 }
 
 function marker(): string {
-	return `pid=${process.pid};agent=${agentDir};instructions=${instructions};skills=${skills.join(",")};parent=${process.env.OMP_RECIPE_PARENT_ONLY ?? "absent"};hostTools=${hostTools.join(",")}`;
+	return `pid=${process.pid};agent=${agentDir};instructions=${instructions};skills=${skills.join(",")};agents=${agents.join(",")};parent=${process.env.OMP_RECIPE_PARENT_ONLY ?? "absent"};hostTools=${hostTools.join(",")}`;
 }
 
 function cleanup(): void {

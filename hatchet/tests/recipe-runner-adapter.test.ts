@@ -1,6 +1,13 @@
 import { once } from "node:events";
+import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { parseAdapterInput, runRecipeAdapter } from "../src/recipe-runner-adapter.js";
+import {
+  parseAdapterInput,
+  runRecipeAdapter,
+  stageLiveTaskProjection,
+} from "../src/recipe-runner-adapter.js";
 
 const headSha = "a".repeat(40);
 const terminal = { version: 1 as const, outcome: "completed" as const, headSha, artifactRefs: ["gate: pass"] };
@@ -31,6 +38,64 @@ describe("shared-runner Hatchet adapter", () => {
     expect(() => parseAdapterInput([...argv, "--unknown", "value"])).toThrow(/invalid Hatchet runner arguments/);
   });
 
+  it("stages live Task agents without changing the parent recipe composition", async () => {
+    const scratch = await mkdtemp(join(tmpdir(), "hatchet-live-projection-"));
+    const cwd = join(scratch, "worktree");
+    const agentDir = join(scratch, "agent");
+    try {
+      await mkdir(join(cwd, "global", "agents"), { recursive: true });
+      await mkdir(join(cwd, "global", "skills", "deliver"), { recursive: true });
+      await mkdir(join(agentDir, "skills", "ci"), { recursive: true });
+      await writeFile(join(cwd, "global", "agents", "hephaestus.md"), "hephaestus");
+      await writeFile(join(cwd, "global", "agents", "cerberus.md"), "cerberus");
+      await writeFile(join(cwd, "global", "skills", "deliver", "SKILL.md"), "deliver");
+      await writeFile(join(agentDir, "skills", "ci", "SKILL.md"), "recipe ci");
+      const preserved = new Map([
+        ["AGENTS.md", "recipe instructions"],
+        ["config.yml", "recipe config"],
+        ["models.yml", "recipe models"],
+      ]);
+      for (const [name, content] of preserved) await writeFile(join(agentDir, name), content);
+      const descriptor = {
+        cwd,
+        agentDir,
+        model: { provider: "openrouter", id: "qwen/qwen3.7-max", reasoning: "high" },
+      };
+      const modelBefore = structuredClone(descriptor.model);
+
+      await stageLiveTaskProjection(descriptor);
+
+      expect(await realpath(join(agentDir, "agents"))).toBe(await realpath(join(cwd, "global", "agents")));
+      expect(await realpath(join(agentDir, "skills", "deliver")))
+        .toBe(await realpath(join(cwd, "global", "skills", "deliver")));
+      expect(await readFile(join(agentDir, "skills", "ci", "SKILL.md"), "utf8")).toBe("recipe ci");
+      for (const [name, content] of preserved) {
+        expect(await readFile(join(agentDir, name), "utf8")).toBe(content);
+      }
+      expect(descriptor.model).toEqual(modelBefore);
+    } finally {
+      await rm(scratch, { recursive: true, force: true });
+    }
+  });
+
+
+  it("wires pre-start projection only for live verification", async () => {
+    const liveArgv = [...argv];
+    liveArgv[liveArgv.indexOf("--stage") + 1] = "live_verify";
+    let beforeStart: unknown;
+    const result = await runRecipeAdapter(liveArgv, new AbortController().signal, async (options) => {
+      beforeStart = options.beforeStart;
+      return {
+        async wait() {
+          await options.hostTools[0]!.execute(terminal, hostContext);
+          return { text: "" };
+        },
+        async stop() {},
+      };
+    });
+    expect(beforeStart).toBe(stageLiveTaskProjection);
+    expect(result).toEqual(terminal);
+  });
 
   it("captures one validated terminal through the explicit host tool", async () => {
     let stopped = false;
@@ -56,6 +121,7 @@ describe("shared-runner Hatchet adapter", () => {
       timeoutMs: 8 * 60_000,
       hostTools: expect.any(Array),
     });
+    expect(observedOptions?.beforeStart).toBeUndefined();
     expect(stopped).toBe(true);
   });
 

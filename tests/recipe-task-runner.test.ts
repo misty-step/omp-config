@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { startRecipeTask } from "../global/lib/recipe-task-runner.ts";
@@ -67,10 +67,17 @@ describe("recipe task runner", () => {
 		const prior = process.env.OMP_RECIPE_PARENT_ONLY;
 		process.env.OMP_RECIPE_PARENT_ONLY = "PARENT_ONLY_SECRET_MARKER";
 		const progress: string[] = [];
+		let parentModel: Record<string, string> | undefined;
 		try {
 			const handle = await startRecipeTask({
 				...recipeOptions("alpha-bundle", "report markers"),
 				onEvent: event => progress.push(event.type),
+				async beforeStart(descriptor) {
+					parentModel = structuredClone(descriptor.model);
+					mkdirSync(join(descriptor.agentDir, "agents"));
+					writeFileSync(join(descriptor.agentDir, "agents", "hephaestus.md"), "hephaestus");
+					writeFileSync(join(descriptor.agentDir, "agents", "cerberus.md"), "cerberus");
+				},
 				hostTools: [{
 					name: "hatchet_terminal",
 					label: "Hatchet Terminal",
@@ -91,6 +98,9 @@ describe("recipe task runner", () => {
 			const pid = Number(result.text.match(/^pid=(\d+)/)?.[1]);
 			expect(pidIsAlive(pid)).toBeFalse();
 			expect(result.text).toContain("hostTools=recipe_task,hatchet_terminal");
+			expect(result.text).toContain("agents=cerberus,hephaestus");
+			expect(result.text).toContain("ALPHA_INSTRUCTION_MARKER");
+			expect(handle.descriptor.model).toEqual(parentModel);
 			expect(existsSync(handle.descriptor.runtimeRoot)).toBeFalse();
 			await handle.stop();
 			expect(existsSync(handle.descriptor.runtimeRoot)).toBeFalse();
