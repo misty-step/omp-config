@@ -76,7 +76,7 @@ true per-agent add-and-subtract catalogs.
    conflicts, and inspect evidence before integration.
 
 For XL implementation or design work, dispatch `daedalus` first to produce the
-dependency graph. Then fan out one `hephaestus` or `designer` lane per
+dependency graph. Then fan out one `builder` or `designer` lane per
 independent slice. Keep recursion within the configured depth.
 
 ## Required manifest
@@ -104,9 +104,9 @@ The chief executive owns:
 - conflict resolution and final judgment;
 - integration and the final live proof.
 
-Specialist lanes own execution. Use `argus` for code-review programs,
-`cerberus` for one adversarial read-only review, `cassandra` for incidents and
-digital forensics, `scully` for live verification, `hephaestus` for accepted
+Specialist lanes own execution. Use `reviewer` for code-review programs,
+`code-critic` for one adversarial read-only review, `cassandra` for incidents and
+digital forensics, `qa` for live verification, `builder` for accepted
 implementation, `daedalus` for architecture, `magellan` for broad research,
 `curator` for full-board grooming, and `solomon` for contested decisions.
 

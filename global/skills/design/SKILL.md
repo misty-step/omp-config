@@ -9,7 +9,7 @@ description: |
   screen", or any product-facing visual artifact. Options mode on request:
   2-4 blind parallel directions, each rendered and screenshot-verified.
   Do not use when: a mechanical style fix with no design decision (just make
-  the edit), or behavior verification (dispatch `scully`). Trigger: /design.
+  the edit), or behavior verification (dispatch `qa`). Trigger: /design.
 argument-hint: "<artifact-or-surface> [intent]"
 ---
 
@@ -80,7 +80,7 @@ produce the same layout with different paint count as one.
 - Baseline hygiene rules for new UI → `baseline-ui`.
 - WCAG/ARIA/keyboard deep pass → `fixing-accessibility`.
 - Animation jank or scroll performance → `fixing-motion-performance`.
-- Behavior verification and evidence capture → dispatch `scully`.
+- Behavior verification and evidence capture → dispatch `qa`.
 
 Update `DESIGN.md` when a durable token or layout fact changed; the lab copy
 you iterated in is a sketch — ship the final diff, never the sketch files.

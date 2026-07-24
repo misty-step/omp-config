@@ -37,8 +37,8 @@ the specialist skills own shaping, verification, review, CI, and closeout.
 | Goal, acceptance, or tradeoff is unresolved | `curator` with `/groom` |
 | External facts would change the design | `magellan` with `/research` |
 | Product identity or long-lived direction is unsettled | `curator` with `/vision` |
-| Running behavior needs proof | `scully` |
-| Non-trivial diff needs fresh-context judgment | `argus` |
+| Running behavior needs proof | `qa` |
+| Non-trivial diff needs fresh-context judgment | `reviewer` |
 | The repository gate is absent, weak, or red | `/ci` |
 | Independent heavy lanes materially shorten the critical path | `/sprites` |
 | Delivery exposed a reusable repo-technical lesson | `/compound` after proof |
@@ -69,9 +69,9 @@ load `global/references/works-critique.md` before pre-ship review.
 
 ## Prove and land
 
-- Dispatch `scully` against the live surface and retain reviewable evidence
+- Dispatch `qa` against the live surface and retain reviewable evidence
   where the repository keeps receipts.
-- Dispatch `argus` with the diff and oracle, not the author's reasoning trail.
+- Dispatch `reviewer` with the diff and oracle, not the author's reasoning trail.
   Resolve every blocking finding, then re-prove affected behavior.
 - Run the repository gate. Strengthen it only when the likely regression is
   in scope and the existing gate would miss it.
