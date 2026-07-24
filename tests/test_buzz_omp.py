@@ -15,7 +15,11 @@ from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MODULE_PATH = ROOT / "bin" / "buzz_omp.py"
+BIN = ROOT / "bin"
+sys.path.insert(0, str(BIN))
+import omp_recipe
+
+MODULE_PATH = BIN / "buzz_omp.py"
 MODULE_SPEC = importlib.util.spec_from_file_location(
     "buzz_omp_test_module", MODULE_PATH
 )
@@ -81,9 +85,13 @@ class BuzzOmpTests(unittest.TestCase):
     def setUp(self) -> None:
         self.source_tmp = tempfile.TemporaryDirectory(prefix="adapter-test-source-")
         self.source = Path(self.source_tmp.name)
-        (self.source / "AGENTS.md").write_text("agent instructions\n")
+        (self.source / "instructions.md").write_text("agent instructions\n")
         (self.source / "skills" / "demo").mkdir(parents=True)
         (self.source / "skills" / "demo" / "SKILL.md").write_text("demo skill\n")
+        (self.source / "skills" / "demo" / "references").mkdir()
+        (self.source / "skills" / "demo" / "references" / "detail.md").write_text(
+            "nested resource\n"
+        )
         self.child_tmp = tempfile.TemporaryDirectory(prefix="adapter-test-child-")
         self.child = Path(self.child_tmp.name) / "fake-child"
         self.child.write_text(FAKE_CHILD)
@@ -96,23 +104,22 @@ class BuzzOmpTests(unittest.TestCase):
     def make_bundle(
         self, *, mcp: list[dict] | None = None, models: list[dict] | None = None
     ) -> Path:
-        manifest = {
-            "schemaVersion": buzz_omp.SCHEMA,
-            "agent": {"name": "demo-agent", "displayName": "Demo Agent"},
+        recipe = {
+            "schemaVersion": omp_recipe.SCHEMA,
+            "instructions": "instructions.md",
             "models": models
             or [
                 {"provider": "openrouter", "model": "primary", "reasoning": "medium"},
                 {"provider": "openrouter", "model": "fallback", "reasoning": "high"},
                 {"provider": "openrouter", "model": "last", "reasoning": "low"},
             ],
-            "agentsMd": "AGENTS.md",
-            "skills": [{"name": "demo", "path": "skills/demo/SKILL.md"}],
+            "skills": [{"name": "demo", "path": "skills/demo"}],
             "mcpServers": mcp if mcp is not None else [],
         }
-        spec = self.source / "manifest.json"
-        spec.write_text(json.dumps(manifest))
+        spec = self.source / "recipe.json"
+        spec.write_text(json.dumps(recipe))
         bundle = self.source / "bundle"
-        buzz_omp.compile_bundle(spec, bundle)
+        omp_recipe.compile_recipe(spec, bundle)
         return bundle
 
     def invoke(
@@ -210,9 +217,14 @@ class BuzzOmpTests(unittest.TestCase):
         first_runtime = next(
             message for message in first if message["kind"] == "runtime"
         )
+        agent = Path(first_runtime["agent"])
         Path(first_runtime["home"], "sentinel").write_text("remove")
         Path(first_runtime["cwd"], "sentinel").write_text("remove")
-        Path(first_runtime["agent"], "sentinel").write_text("preserve")
+        (agent / "sentinel").write_text("remove")
+        (agent / "mcp.json").write_text("{}")
+        (agent / "RULES.md").write_text("stale")
+        (agent / "sessions").mkdir()
+        (agent / "sessions" / "history.jsonl").write_text("preserve\n")
 
         _, restarted, _ = self.invoke(bundle, self.session_request())
         restarted_runtime = next(
@@ -224,7 +236,13 @@ class BuzzOmpTests(unittest.TestCase):
             self.assertTrue(Path(restarted_runtime[key]).is_absolute())
         self.assertFalse(Path(restarted_runtime["home"], "sentinel").exists())
         self.assertFalse(Path(restarted_runtime["cwd"], "sentinel").exists())
-        self.assertTrue(Path(restarted_runtime["agent"], "sentinel").exists())
+        self.assertFalse(Path(restarted_runtime["agent"], "sentinel").exists())
+        self.assertFalse(Path(restarted_runtime["agent"], "mcp.json").exists())
+        self.assertFalse(Path(restarted_runtime["agent"], "RULES.md").exists())
+        self.assertEqual(
+            Path(restarted_runtime["agent"], "sessions", "history.jsonl").read_text(),
+            "preserve\n",
+        )
 
         other_bundle = self.source / "other-bundle"
         shutil.copytree(bundle, other_bundle)
@@ -290,28 +308,21 @@ class BuzzOmpTests(unittest.TestCase):
 
     def test_validation_failures(self) -> None:
         base = {
-            "schemaVersion": buzz_omp.SCHEMA,
-            "agent": {"name": "demo-agent", "displayName": "Demo Agent"},
+            "schemaVersion": omp_recipe.SCHEMA,
+            "instructions": "instructions.md",
             "models": [
                 {"provider": "openrouter", "model": "primary", "reasoning": "medium"}
             ],
-            "agentsMd": "AGENTS.md",
-            "skills": [{"name": "demo", "path": "skills/demo/SKILL.md"}],
+            "skills": [{"name": "demo", "path": "skills/demo"}],
             "mcpServers": [],
         }
         cases = {
-            "path traversal": {**base, "agentsMd": "../AGENTS.md"},
+            "path traversal": {**base, "instructions": "../instructions.md"},
             "unknown key": {**base, "unexpected": True},
             "invalid reasoning": {
                 **base,
                 "models": [
                     {"provider": "openrouter", "model": "primary", "reasoning": "turbo"}
-                ],
-            },
-            "unsupported provider": {
-                **base,
-                "models": [
-                    {"provider": "anthropic", "model": "claude", "reasoning": "high"}
                 ],
             },
             "malformed MCP": {**base, "mcpServers": [{"name": "broken"}]},
@@ -326,22 +337,22 @@ class BuzzOmpTests(unittest.TestCase):
             "duplicate skill name": {
                 **base,
                 "skills": [
-                    {"name": "demo", "path": "skills/demo/SKILL.md"},
-                    {"name": "demo", "path": "skills/demo/SKILL.md"},
+                    {"name": "demo", "path": "skills/demo"},
+                    {"name": "demo", "path": "skills/demo"},
                 ],
             },
             "duplicate skill source": {
                 **base,
                 "skills": [
-                    {"name": "demo", "path": "skills/demo/SKILL.md"},
-                    {"name": "other", "path": "skills/demo/SKILL.md"},
+                    {"name": "demo", "path": "skills/demo"},
+                    {"name": "other", "path": "skills/demo"},
                 ],
             },
         }
-        for label, manifest in cases.items():
+        for label, recipe in cases.items():
             with self.subTest(label=label):
-                with self.assertRaises(buzz_omp.BundleError):
-                    buzz_omp.validate_manifest(manifest)
+                with self.assertRaises(omp_recipe.RecipeError):
+                    omp_recipe.validate_recipe(recipe)
 
     def test_runtime_symlink_is_rejected_without_external_mutation(self) -> None:
         bundle = self.make_bundle()
@@ -352,32 +363,30 @@ class BuzzOmpTests(unittest.TestCase):
         shutil.rmtree(bundle / "runtime")
         (bundle / "runtime").symlink_to(external, target_is_directory=True)
 
-        with self.assertRaises(buzz_omp.BundleError):
+        with self.assertRaises(omp_recipe.RecipeError):
             self.invoke(bundle, self.session_request())
 
         self.assertEqual(sentinel.read_text(), "preserve")
 
-    def test_compile_rejects_symlinked_skill_source(self) -> None:
+    def test_compile_rejects_nested_symlinked_skill_source(self) -> None:
         external = self.source / "external-skill"
         external.write_text("outside")
-        skill = self.source / "skills" / "demo" / "SKILL.md"
-        skill.unlink()
-        skill.symlink_to(external)
-        manifest = {
-            "schemaVersion": buzz_omp.SCHEMA,
-            "agent": {"name": "demo-agent", "displayName": "Demo Agent"},
+        nested = self.source / "skills" / "demo" / "references" / "outside.md"
+        nested.symlink_to(external)
+        recipe = {
+            "schemaVersion": omp_recipe.SCHEMA,
+            "instructions": "instructions.md",
             "models": [
                 {"provider": "openrouter", "model": "primary", "reasoning": "medium"}
             ],
-            "agentsMd": "AGENTS.md",
-            "skills": [{"name": "demo", "path": "skills/demo/SKILL.md"}],
+            "skills": [{"name": "demo", "path": "skills/demo"}],
             "mcpServers": [],
         }
-        spec = self.source / "symlink-manifest.json"
-        spec.write_text(json.dumps(manifest))
+        spec = self.source / "symlink-recipe.json"
+        spec.write_text(json.dumps(recipe))
 
-        with self.assertRaises(buzz_omp.BundleError):
-            buzz_omp.compile_bundle(spec, self.source / "symlink-bundle")
+        with self.assertRaises(omp_recipe.RecipeError):
+            omp_recipe.compile_recipe(spec, self.source / "symlink-bundle")
 
     def test_proxy_credentials_are_not_inherited(self) -> None:
         with patch.dict(
@@ -441,6 +450,78 @@ class BuzzOmpTests(unittest.TestCase):
         self.assertEqual(messages[0]["id"], 18)
         self.assertEqual(messages[0]["error"]["code"], -32602)
         self.assertNotIn("kind", messages[0])
+
+    def test_session_lifecycle_rejects_unassigned_model_and_thinking(self) -> None:
+        forbidden = {
+            "model": "openrouter/unassigned",
+            "thinking": "max",
+        }
+        for method in sorted(buzz_omp.SESSION_METHODS):
+            for config_id, value in forbidden.items():
+                with self.subTest(method=method, config_id=config_id):
+                    request = json.dumps(
+                        {
+                            "jsonrpc": "2.0",
+                            "id": f"{method}:{config_id}",
+                            "method": method,
+                            "params": {config_id: value},
+                        }
+                    ) + "\n"
+                    _, messages, _ = self.invoke(self.make_bundle(), request)
+                    self.assertEqual(len(messages), 1)
+                    self.assertEqual(messages[0]["error"]["code"], -32602)
+                    self.assertIn(config_id, messages[0]["error"]["message"])
+
+    def test_same_id_child_request_does_not_consume_creation_response(self) -> None:
+        child = self.source / "same-id-child"
+        child.write_text(
+            "#!"
+            + sys.executable
+            + "\n"
+            + textwrap.dedent(
+                """
+                import json
+                import sys
+
+                for line in sys.stdin:
+                    message = json.loads(line)
+                    request = {
+                        "jsonrpc": "2.0",
+                        "id": message["id"],
+                        "method": "client/same_id",
+                        "params": {},
+                    }
+                    response = {
+                        "jsonrpc": "2.0",
+                        "id": message["id"],
+                        "result": {
+                            "sessionId": "filtered",
+                            "configOptions": [{
+                                "id": "model",
+                                "currentValue": "openrouter/unassigned",
+                                "options": [
+                                    {"value": "openrouter/unassigned"},
+                                    {"value": "openrouter/primary"},
+                                ],
+                            }],
+                        },
+                    }
+                    print(json.dumps(request, separators=(",", ":")), flush=True)
+                    print(json.dumps(response, separators=(",", ":")), flush=True)
+                """
+            )
+        )
+        child.chmod(child.stat().st_mode | stat.S_IXUSR)
+        _, messages, _ = self.invoke(
+            self.make_bundle(), self.session_request(), child=child
+        )
+        self.assertEqual(messages[0]["method"], "client/same_id")
+        option = messages[1]["result"]["configOptions"][0]
+        self.assertEqual(
+            [item["value"] for item in option["options"]],
+            ["openrouter/primary"],
+        )
+        self.assertEqual(option["currentValue"], "openrouter/primary")
 
     def test_creation_response_exposes_only_primary_model_and_thinking(self) -> None:
         child = self.source / "model-child"

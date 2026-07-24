@@ -5,6 +5,6 @@ dest=${1:-"$HOME/.local/bin/buzz-omp"}
 dest_dir=$(dirname -- "$dest")
 mkdir -p "$dest_dir"
 cp "$root/bin/buzz-omp" "$dest"
-cp "$root/bin/buzz_omp.py" "$dest_dir/buzz_omp.py"
-chmod 755 "$dest" "$dest_dir/buzz_omp.py"
-printf 'installed %s and %s\n' "$dest" "$dest_dir/buzz_omp.py"
+cp "$root/bin/buzz_omp.py" "$root/bin/omp_recipe.py" "$dest_dir/"
+chmod 755 "$dest" "$dest_dir/buzz_omp.py" "$dest_dir/omp_recipe.py"
+printf 'installed %s, %s, and %s\n' "$dest" "$dest_dir/buzz_omp.py" "$dest_dir/omp_recipe.py"

@@ -1,27 +1,26 @@
 # Buzz OMP adapter
 
-The Buzz OMP adapter starts one isolated OMP ACP runtime for each compiled agent bundle. Each bundle fixes the agent instructions, skills, MCP servers, primary model, fallback models, and reasoning levels.
+The Buzz OMP adapter starts one isolated OMP ACP runtime for each compiled OMP recipe. Each recipe fixes the instructions, skills, MCP servers, primary model, fallback models, and reasoning levels.
 
-This is a working prototype. It does not define the final Roster composition format.
+The reusable recipe compiler and runtime preparation use `omp.recipe.v1`. Buzz adds only the ACP transport policy.
 
 ## Files
 
-- `bin/buzz_omp.py`: bundle compiler and ACP proxy.
+- `bin/omp_recipe.py`: recipe schema, compiler, and runtime preparation.
+- `bin/buzz_omp.py`: thin Buzz ACP adapter.
 - `bin/buzz-omp`: command wrapper.
 - `bin/install-buzz-omp`: local installer.
-- `tests/test_buzz_omp.py`: contract and isolation tests.
+- `tests/test_omp_recipe.py`: recipe compiler and runtime tests.
+- `tests/test_buzz_omp.py`: ACP adapter tests.
 
-## Bundle manifest
+## Recipe
 
-A manifest uses schema `buzz-omp.bundle.v1`.
+A recipe uses schema `omp.recipe.v1`.
 
 ```json
 {
-  "schemaVersion": "buzz-omp.bundle.v1",
-  "agent": {
-    "name": "omp-alpha",
-    "displayName": "OmpAlpha"
-  },
+  "schemaVersion": "omp.recipe.v1",
+  "instructions": "instructions.md",
   "models": [
     {
       "provider": "openrouter",
@@ -34,11 +33,10 @@ A manifest uses schema `buzz-omp.bundle.v1`.
       "reasoning": "high"
     }
   ],
-  "agentsMd": "AGENTS.md",
   "skills": [
     {
       "name": "alpha-sigil",
-      "path": "skills/alpha-sigil/SKILL.md"
+      "path": "skills/alpha-sigil"
     }
   ],
   "mcpServers": [
@@ -50,18 +48,18 @@ A manifest uses schema `buzz-omp.bundle.v1`.
 }
 ```
 
-The first model is the primary model. Later entries form the ordered fallback chain. Version 1 accepts only the `openrouter` provider because it uses the Mint OpenRouter proxy route.
+The first model is the primary model. Later entries form the ordered fallback chain. Providers are not restricted to OpenRouter. The current runtime supplies the Mint placeholder configuration when a recipe selects OpenRouter; other provider names use OMP's provider configuration.
 
-Paths are relative to the manifest directory. The compiler rejects path traversal, symbolic links, duplicate skill names, duplicate skill source paths, duplicate model entries, unknown keys, and malformed MCP entries.
+Paths are relative to the recipe file's directory. `instructions` names one file. Each skill `path` names a complete directory whose root contains `SKILL.md`; the compiler packages every nested file and directory. It rejects path traversal, symbolic links at any depth, duplicate skill names, duplicate skill source paths, duplicate model entries, unknown keys, and malformed MCP entries.
 
 ## Compile and install
 
 ```sh
 bin/install-buzz-omp
-buzz-omp compile /path/to/manifest.json ~/.local/share/buzz-omp/bundles/omp-alpha
+buzz-omp compile /path/to/recipe.json ~/.local/share/buzz-omp/bundles/omp-alpha
 ```
 
-The compiler copies the selected files into an immutable bundle shape. The runtime refreshes its copies from that bundle at each launch.
+Compilation stages and validates the complete recipe before replacing an existing output. It replaces only outputs marked as owned by `omp.recipe.v1`, refuses unrelated directories, and leaves the previous compiled recipe intact after any validation or copy failure. Successful recompilation preserves only the allowlisted OMP session/history state.
 
 ## Connect Buzz
 
@@ -117,21 +115,22 @@ The adapter enforces these boundaries:
 
 - It replaces the ACP client `cwd` and `mcpServers` on `session/new`, `session/load`, `session/resume`, and `session/fork`.
 - It runs OMP with `--no-extensions` and disables project, user, Claude, Codex, and OpenCode discovery.
+- It rebuilds the runtime discovery tree from compiled recipe inputs on every launch, while retaining only known session/history state.
 - It exposes only the assigned primary model and thinking level through ACP configuration options.
-- It rejects unassigned model and thinking selections before OMP receives them.
+- It rejects unassigned model and thinking values on every session lifecycle request and configuration change before OMP receives them.
 - It does not pass host proxy credential variables to OMP.
-- It rejects symbolic links in the bundle source, bundle output, runtime directories, and runtime files.
+- It rejects symbolic links in recipe inputs, compiled output, runtime directories, and packaged skill descendants.
 - It preserves non-session ACP NDJSON byte-for-byte.
 
-Each bundle has a stable `runtime/agent` directory. OMP stores session state there. Each process launch clears `runtime/home` and `runtime/cwd`, then restores the assigned instructions, skills, model configuration, and MCP configuration. This preserves ACP sessions while it removes workspace and home-directory drift.
+The recipe runtime accepts its workspace cwd as a separate caller-supplied argument. Buzz supplies a stable, isolated `runtime/cwd` and clears it before each launch. OMP state lives in `runtime/agent`; each launch atomically rebuilds that discovery directory from the compiled instructions and complete skill directories while retaining the allowlisted session/history files.
 
 ## Verify
 
 Run the focused contract suite:
 
 ```sh
-python3 -m unittest tests/test_buzz_omp.py
-python3 -m py_compile bin/buzz_omp.py
+python3 -m unittest tests/test_omp_recipe.py tests/test_buzz_omp.py
+python3 -m py_compile bin/omp_recipe.py bin/buzz_omp.py
 sh -n bin/buzz-omp bin/install-buzz-omp
 ```
 
