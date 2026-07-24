@@ -1,0 +1,1 @@
+FIXTURE_SCENARIO=verification-failed

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "omp.recipe.v1",
+  "instructions": "hatchet/recipes/terminal-evidence.md",
+  "models": [
+    { "provider": "openrouter", "model": "google/gemini-3.5-flash-lite", "reasoning": "low" },
+    { "provider": "openrouter", "model": "z-ai/glm-5.2", "reasoning": "medium" }
+  ],
+  "skills": [
+    { "name": "deliver", "path": "global/skills/deliver" }
+  ],
+  "mcpServers": []
+}

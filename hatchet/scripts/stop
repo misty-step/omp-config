@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+# Deliberately omit --volumes: Postgres history and ignored Hatchet config survive.
+exec docker compose -f "$root/compose.yaml" down

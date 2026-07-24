@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "omp.recipe.v1",
+  "instructions": "hatchet/recipes/implement.md",
+  "models": [
+    { "provider": "openrouter", "model": "openai/gpt-5.6-luna", "reasoning": "high" },
+    { "provider": "openrouter", "model": "anthropic/claude-sonnet-5", "reasoning": "high" }
+  ],
+  "skills": [
+    { "name": "project-engineering", "path": "global/skills/project-engineering" },
+    { "name": "harness-engineering", "path": "global/skills/harness-engineering" },
+    { "name": "refactor", "path": "global/skills/refactor" }
+  ],
+  "mcpServers": []
+}

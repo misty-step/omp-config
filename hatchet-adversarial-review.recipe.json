@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "omp.recipe.v1",
+  "instructions": "hatchet/recipes/adversarial-review.md",
+  "models": [
+    { "provider": "openrouter", "model": "deepseek/deepseek-v4-pro", "reasoning": "high" },
+    { "provider": "openrouter", "model": "z-ai/glm-5.2", "reasoning": "high" }
+  ],
+  "skills": [
+    { "name": "code-review", "path": "global/skills/code-review" }
+  ],
+  "mcpServers": []
+}

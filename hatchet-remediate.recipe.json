@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "omp.recipe.v1",
+  "instructions": "hatchet/recipes/remediate.md",
+  "models": [
+    { "provider": "openrouter", "model": "z-ai/glm-5.2", "reasoning": "high" },
+    { "provider": "openrouter", "model": "qwen/qwen3.7-max", "reasoning": "high" }
+  ],
+  "skills": [
+    { "name": "project-engineering", "path": "global/skills/project-engineering" },
+    { "name": "refactor", "path": "global/skills/refactor" },
+    { "name": "ci", "path": "global/skills/ci" }
+  ],
+  "mcpServers": []
+}
