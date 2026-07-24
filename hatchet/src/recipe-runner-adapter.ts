@@ -13,6 +13,17 @@ const adapterInputSchema = z.object({
 }).strict();
 
 type AdapterInput = z.infer<typeof adapterInputSchema>;
+type RecipeTaskHostTool = {
+  name: string;
+  label: string;
+  description: string;
+  loadMode: "essential";
+  parameters: Record<string, unknown>;
+  execute(params: Record<string, unknown>, context: {
+    signal: AbortSignal;
+    sendUpdate(update: string | { content: Array<{ type: "text"; text: string }> }): void;
+  }): Promise<string>;
+};
 type RecipeTaskHandle = {
   wait(): Promise<{ text: string }>;
   stop(): Promise<void>;
@@ -23,6 +34,7 @@ type StartRecipeTask = (options: {
   cwd: string;
   signal: AbortSignal;
   timeoutMs: number;
+  hostTools: RecipeTaskHostTool[];
 }) => Promise<RecipeTaskHandle>;
 
 // Bounds a single recipe-agent attempt so one hung or slow-to-converge model
@@ -32,6 +44,7 @@ type StartRecipeTask = (options: {
 // up to invokeRunnerWithRetry's bounded attempt cap — the same outcome as any
 // other transient stage failure, not a hang.
 const stageTimeoutMs = 8 * 60_000;
+const terminalToolParameters = z.toJSONSchema(runnerTerminalSchema) as Record<string, unknown>;
 
 const flagToField: Record<string, keyof AdapterInput> = {
   "--recipe": "recipe",
@@ -59,52 +72,6 @@ export function parseAdapterInput(argv: string[]): AdapterInput {
   return adapterInputSchema.parse(values);
 }
 
-export function extractTerminalObject(text: string): RunnerTerminal {
-  const parsedObjects: unknown[] = [];
-  let objectStart = -1;
-  let depth = 0;
-  let inString = false;
-  let escaped = false;
-
-  for (let index = 0; index < text.length; index += 1) {
-    const character = text[index];
-    if (objectStart === -1) {
-      if (character === "{") {
-        objectStart = index;
-        depth = 1;
-      }
-      continue;
-    }
-    if (inString) {
-      if (escaped) escaped = false;
-      else if (character === "\\") escaped = true;
-      else if (character === "\"") inString = false;
-      continue;
-    }
-    if (character === "\"") {
-      inString = true;
-    } else if (character === "{") {
-      depth += 1;
-    } else if (character === "}") {
-      depth -= 1;
-      if (depth === 0) {
-        try {
-          parsedObjects.push(JSON.parse(text.slice(objectStart, index + 1)));
-        } catch {
-          // Non-JSON braces in assistant prose are not terminal objects.
-        }
-        objectStart = -1;
-      }
-    }
-  }
-
-  if (parsedObjects.length !== 1) {
-    throw new Error(`expected exactly one terminal JSON object; found ${parsedObjects.length}`);
-  }
-  const parsed = runnerTerminalSchema.safeParse(parsedObjects[0]);
-  if (!parsed.success) throw new Error("assistant terminal JSON does not match runnerTerminalSchema");
-  return parsed.data;
-}
 
 async function loadStartRecipeTask(): Promise<StartRecipeTask> {
   // Tests select a process-level fake; production always falls back to the Bun-only shared runner.
@@ -125,6 +92,30 @@ export async function runRecipeAdapter(
   const input = parseAdapterInput(argv);
   const start = startRecipeTask ?? await loadStartRecipeTask();
   let handle: RecipeTaskHandle | undefined;
+  let terminal: RunnerTerminal | undefined;
+  let terminalCalls = 0;
+  let terminalViolation: Error | undefined;
+  const terminalTool: RecipeTaskHostTool = {
+    name: "hatchet_terminal",
+    label: "Hatchet Terminal",
+    description: "Complete the current Hatchet stage with its typed terminal evidence. Call exactly once after all checks.",
+    loadMode: "essential",
+    parameters: terminalToolParameters,
+    async execute(params): Promise<string> {
+      terminalCalls += 1;
+      if (terminalCalls !== 1) {
+        terminalViolation = new Error("hatchet_terminal must be called exactly once");
+        throw terminalViolation;
+      }
+      const parsed = runnerTerminalSchema.safeParse(params);
+      if (!parsed.success) {
+        terminalViolation = new Error("hatchet_terminal arguments do not match runnerTerminalSchema");
+        throw terminalViolation;
+      }
+      terminal = parsed.data;
+      return "Hatchet terminal accepted. Do not call this tool again. End the turn.";
+    },
+  };
   const cancellation = Promise.withResolvers<never>();
   const abort = (): void => cancellation.reject(
     signal.reason instanceof Error ? signal.reason : new Error("Hatchet recipe runner interrupted"),
@@ -138,9 +129,14 @@ export async function runRecipeAdapter(
       cwd: input.cwd,
       signal,
       timeoutMs: stageTimeoutMs,
+      hostTools: [terminalTool],
     });
-    const result = await Promise.race([handle.wait(), cancellation.promise]);
-    return extractTerminalObject(result.text);
+    await Promise.race([handle.wait(), cancellation.promise]);
+    if (terminalViolation) throw terminalViolation;
+    if (terminalCalls !== 1 || terminal === undefined) {
+      throw new Error("recipe did not call hatchet_terminal exactly once");
+    }
+    return terminal;
   } finally {
     signal.removeEventListener("abort", abort);
     await handle?.stop();

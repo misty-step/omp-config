@@ -50,6 +50,7 @@ export interface StartRecipeTaskOptions {
 	signal?: AbortSignal;
 	onEvent?: (event: RecipeTaskEvent) => void;
 	timeoutMs?: number;
+	hostTools?: RecipeTaskHostTool[];
 	compilerPath?: string;
 	pythonPath?: string;
 	ompSourceRoot?: string;
@@ -57,18 +58,18 @@ export interface StartRecipeTaskOptions {
 	cliPath?: string;
 }
 
-interface RpcClientToolContext {
+export interface RecipeTaskHostToolContext {
 	signal: AbortSignal;
 	sendUpdate(update: string | { content: Array<{ type: "text"; text: string }> }): void;
 }
 
-interface RpcClientTool {
+export interface RecipeTaskHostTool {
 	name: string;
 	label: string;
 	description: string;
 	loadMode: "essential";
 	parameters: Record<string, unknown>;
-	execute(params: Record<string, unknown>, context: RpcClientToolContext): Promise<string>;
+	execute(params: Record<string, unknown>, context: RecipeTaskHostToolContext): Promise<string>;
 }
 
 interface RpcClientLike {
@@ -84,7 +85,7 @@ interface RpcClientLike {
 
 interface RpcClientModule {
 	RpcClient: new (options: Record<string, unknown>) => RpcClientLike;
-	defineRpcClientTool?: (tool: RpcClientTool) => RpcClientTool;
+	defineRpcClientTool?: (tool: RecipeTaskHostTool) => RecipeTaskHostTool;
 }
 
 const SAFE_PREPARE_ENV = [
@@ -289,7 +290,7 @@ async function startPreparedRecipeTask(
 	cliPath: string,
 ): Promise<RecipeTaskHandle> {
 	const rpc = await loadRpcClientModule(rpcClientModule);
-	const nestedTool: RpcClientTool = {
+	const nestedTool: RecipeTaskHostTool = {
 		name: "recipe_task",
 		label: "Recipe Task",
 		description: "Run a task in a fresh sibling OMP process prepared from a compiled omp.recipe.v1 bundle.",
@@ -313,6 +314,7 @@ async function startPreparedRecipeTask(
 			const nested = await startRecipeTaskAtDepth(
 				{
 					...options,
+					hostTools: undefined,
 					recipe,
 					task,
 					cwd: descriptor.cwd,
@@ -334,7 +336,13 @@ async function startPreparedRecipeTask(
 			}
 		},
 	};
-	const customTool = rpc.defineRpcClientTool ? rpc.defineRpcClientTool(nestedTool) : nestedTool;
+	const hostToolNames = new Set(["recipe_task"]);
+	for (const tool of options.hostTools ?? []) {
+		if (hostToolNames.has(tool.name)) throw new Error(`duplicate recipe task host tool ${tool.name}`);
+		hostToolNames.add(tool.name);
+	}
+	const customTools = [nestedTool, ...(options.hostTools ?? [])]
+		.map(tool => rpc.defineRpcClientTool ? rpc.defineRpcClientTool(tool) : tool);
 	const client = new rpc.RpcClient({
 		cliPath,
 		cwd: descriptor.cwd,
@@ -344,7 +352,7 @@ async function startPreparedRecipeTask(
 		model: descriptor.model.id,
 		sessionDir: descriptor.sessionDir,
 		args: ["--thinking", descriptor.model.reasoning],
-		customTools: [customTool],
+		customTools,
 	});
 
 	let started = false;

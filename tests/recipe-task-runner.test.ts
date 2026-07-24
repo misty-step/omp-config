@@ -71,6 +71,14 @@ describe("recipe task runner", () => {
 			const handle = await startRecipeTask({
 				...recipeOptions("alpha-bundle", "report markers"),
 				onEvent: event => progress.push(event.type),
+				hostTools: [{
+					name: "hatchet_terminal",
+					label: "Hatchet Terminal",
+					description: "Capture one typed terminal.",
+					loadMode: "essential",
+					parameters: { type: "object" },
+					async execute() { return "accepted"; },
+				}],
 			});
 			expect(handle.descriptor.env.OMP_RECIPE_PARENT_ONLY).toBeUndefined();
 			expect(handle.descriptor.runtimeRoot).not.toBe(join(alphaBundle, "runtime"));
@@ -82,7 +90,7 @@ describe("recipe task runner", () => {
 			expect(progress).toContain("message_update");
 			const pid = Number(result.text.match(/^pid=(\d+)/)?.[1]);
 			expect(pidIsAlive(pid)).toBeFalse();
-			expect(result.text).toContain("hostTools=recipe_task");
+			expect(result.text).toContain("hostTools=recipe_task,hatchet_terminal");
 			expect(existsSync(handle.descriptor.runtimeRoot)).toBeFalse();
 			await handle.stop();
 			expect(existsSync(handle.descriptor.runtimeRoot)).toBeFalse();

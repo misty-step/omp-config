@@ -143,7 +143,7 @@ describe("runner adapter", () => {
     }
   });
 
-  it("treats a schema-invalid assistant terminal as transient and retries it to recovery", async () => {
+  it("treats schema-invalid typed terminal arguments as transient and retries to recovery", async () => {
     const singleAttemptCwd = `${fixtureRoot.pathname}runs/adapter-malformed-terminal-single`;
     const retryCwd = `${fixtureRoot.pathname}runs/adapter-malformed-terminal-retry`;
     const singleHeadSha = await gitInit(singleAttemptCwd);
@@ -158,7 +158,7 @@ describe("runner adapter", () => {
     try {
       await expect(invokeRunner({
         recipePath: "/unused/compiled-recipe",
-        task: "first attempt is schema-invalid",
+        task: "first attempt has schema-invalid terminal arguments",
         cwd: singleAttemptCwd,
         stage: "adversarial_review",
         round: 1,
@@ -167,7 +167,7 @@ describe("runner adapter", () => {
 
       const attempt = await invokeRunnerWithRetry({
         recipePath: "/unused/compiled-recipe",
-        task: "malformed on attempt one, valid on attempt two",
+        task: "invalid terminal arguments on attempt one, valid on attempt two",
         cwd: retryCwd,
         stage: "adversarial_review",
         round: 1,

@@ -45,7 +45,7 @@ function taskForStage(
       headSha: result.terminal.headSha,
       artifactRefs: result.terminal.artifactRefs,
     })))}.`;
-  return `${input.task}\n\nHatchet durable stage: ${stage}. Round: ${round}. Required current head: ${headSha}.${terminalState}${priorEvidence}\nRun only the assigned OMP recipe. Do not merge. Return exactly one version-1 terminal JSON object with outcome, full headSha, and artifactRefs.`;
+  return `${input.task}\n\nHatchet durable stage: ${stage}. Round: ${round}. Required current head: ${headSha}.${terminalState}${priorEvidence}\nRun only the assigned OMP recipe. Do not merge. Complete the stage by calling the essential hatchet_terminal tool exactly once with outcome, full headSha, and artifactRefs; do not print terminal JSON.`;
 }
 
 function requireOutcome(stage: StageName, terminal: RunnerTerminal, allowed: RunnerTerminal["outcome"][]): void {
