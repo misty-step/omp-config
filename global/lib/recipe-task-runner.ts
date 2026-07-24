@@ -3,6 +3,7 @@ import { realpathSync } from "node:fs";
 import { rm } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { dirname, isAbsolute, join, resolve } from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 export const RECIPE_LAUNCH_SCHEMA = "omp.recipe.launch.v1";
@@ -353,12 +354,21 @@ async function startPreparedRecipeTask(
 	let waitPromise: Promise<RecipeTaskResult> | undefined;
 	const unsubscribe = client.onSessionEvent(event => options.onEvent?.(event));
 
+	// A soft "abort" RPC message asks the agent to stop gracefully, but the
+	// underlying process may be mid tool-call and unresponsive until that call
+	// finishes. `.catch(() => {})` only guards against rejection, not a hang —
+	// without a bound, a stalled abort() ack blocks client.stop() (the actual
+	// process kill) and therefore blocks cleanupRuntimeRoot(), leaking the
+	// runtime root until the caller's own hard-kill grace period expires.
+	const abortAckTimeoutMs = 3_000;
 	const shutdown = (abortFirst: boolean): Promise<void> => {
 		if (stopPromise) return stopPromise;
 		stopped = true;
 		stopPromise = (async () => {
 			try {
-				if (abortFirst && started) await client.abort().catch(() => {});
+				if (abortFirst && started) {
+					await Promise.race([client.abort().catch(() => {}), delay(abortAckTimeoutMs)]);
+				}
 				await client.stop();
 			} finally {
 				unsubscribe();

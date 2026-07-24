@@ -22,7 +22,16 @@ type StartRecipeTask = (options: {
   task: string;
   cwd: string;
   signal: AbortSignal;
+  timeoutMs: number;
 }) => Promise<RecipeTaskHandle>;
+
+// Bounds a single recipe-agent attempt so one hung or slow-to-converge model
+// call cannot occupy an invokeRunnerWithRetry attempt indefinitely. A timeout
+// rejects `handle.wait()` with a plain Error, which the adapter's own exit
+// classification below treats as transient (exit 70) and therefore retryable
+// up to invokeRunnerWithRetry's bounded attempt cap — the same outcome as any
+// other transient stage failure, not a hang.
+const stageTimeoutMs = 10 * 60_000;
 
 const flagToField: Record<string, keyof AdapterInput> = {
   "--recipe": "recipe",
@@ -128,6 +137,7 @@ export async function runRecipeAdapter(
       task: input.task,
       cwd: input.cwd,
       signal,
+      timeoutMs: stageTimeoutMs,
     });
     const result = await Promise.race([handle.wait(), cancellation.promise]);
     return extractTerminalObject(result.text);

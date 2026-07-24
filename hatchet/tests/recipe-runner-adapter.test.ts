@@ -48,6 +48,7 @@ describe("shared-runner Hatchet adapter", () => {
       task: "fix the card",
       cwd: "/worktree",
       signal: expect.any(AbortSignal),
+      timeoutMs: 10 * 60_000,
     });
     expect(stopped).toBe(true);
   });
