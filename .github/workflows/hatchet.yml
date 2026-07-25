@@ -35,6 +35,13 @@ jobs:
           cache: npm
           cache-dependency-path: hatchet/package-lock.json
 
+      # scripts/recipe-runner resolves bun from PATH or $BUN_BIN and exits 78
+      # (EX_CONFIG) without it. Absent bun, the runner never writes a run's
+      # .adapter-runtime, and the fixture tests that read it fail downstream.
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - run: npm ci
 
       - name: typecheck
