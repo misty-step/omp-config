@@ -8,7 +8,11 @@
     "overmind": {
       "type": "stdio",
       "command": "/Users/phaedrus/.local/libexec/overmind/current/overmind",
-      "args": ["mcp", "--api-base", "http://127.0.0.1:4177"]
+      "args": [
+        "mcp",
+        "--api-base",
+        "http://127.0.0.1:4177"
+      ]
     },
     "qmd": {
       "type": "http",
