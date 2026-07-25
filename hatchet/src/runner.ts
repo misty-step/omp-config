@@ -304,11 +304,32 @@ export async function invokeRunner(request: RunnerRequest, signal: AbortSignal):
   }
 }
 
+// Attempts and backoff are sized for what actually makes a stage transient
+// here: machine contention. A cold OMP start has a hardcoded 30s readiness cap
+// in the rpc-client, and on a loaded box (measured: load average 9.8 with the
+// factory, an operator session and review lanes all live) that cap is what
+// trips, not anything slow in the stage - the bundle is 28K, prepare-runtime
+// is 86ms and a bare `omp` starts in half a second.
+//
+// A load spike lasts minutes, so the retry window has to outlast one. Delays
+// are 1s, 4s, 16s, 64s, 120s: ~3.4 minutes of backoff across six attempts,
+// plus the ~30s each failed readiness attempt burns before giving up, for
+// roughly six minutes of tolerance. The window is pinned by a test, because an
+// earlier version of this capped at 60s yet never exceeded 2s in practice: the
+// exponent ran out of attempts long before it reached its own ceiling.
+const retryBaseMs = 1_000;
+const retryFactor = 4;
+const retryCeilingMs = 120_000;
+
+export function retryDelayMs(attempt: number): number {
+  return Math.min(retryBaseMs * retryFactor ** (attempt - 1), retryCeilingMs);
+}
+
 export async function invokeRunnerWithRetry(
   request: RunnerRequest,
   signal: AbortSignal,
   sleeper: RetrySleeper = defaultSleeper,
-  maxAttempts = 3,
+  maxAttempts = 6,
 ): Promise<RunnerAttempt> {
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
@@ -317,7 +338,7 @@ export async function invokeRunnerWithRetry(
       if (!(error instanceof TransientRunnerError) || attempt === maxAttempts) {
         throw error;
       }
-      await sleeper(Math.min(250 * 2 ** (attempt - 1), 2_000), signal);
+      await sleeper(retryDelayMs(attempt), signal);
     }
   }
   throw new Error("unreachable runner retry state");

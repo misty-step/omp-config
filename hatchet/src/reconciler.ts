@@ -11,6 +11,7 @@ import {
 } from "./powder-client.js";
 import { triggerConfiguredWorkflow, type CardOverride, type TriggerResult } from "./trigger-service.js";
 import type { TriggerSource } from "./contracts.js";
+import { findInFlightRun } from "./run-liveness.js";
 
 export type TriggerFn = (
   config: OperatorConfig,
@@ -21,10 +22,13 @@ export type TriggerFn = (
   readPowderCard?: PowderCardReader,
 ) => Promise<TriggerResult>;
 
+export type CheckInFlightFn = (cardId: string) => Promise<string | undefined>;
+
 export type ReconcileDependencies = {
   readPowderCard?: PowderCardReader;
   listReadyCards?: PowderReadyQueueReader;
   trigger?: TriggerFn;
+  checkInFlight?: CheckInFlightFn;
 };
 
 /**
@@ -43,6 +47,24 @@ export function selectReadyCard(
   });
 }
 
+type LivenessVerdict =
+  | { kind: "clear" }
+  | { kind: "in_flight"; runId: string }
+  | { kind: "unknown"; reason: string };
+
+async function inspectLiveness(cardId: string, deps: ReconcileDependencies): Promise<LivenessVerdict> {
+  const checkInFlight = deps.checkInFlight ?? findInFlightRun;
+  try {
+    const runId = await checkInFlight(cardId);
+    return runId ? { kind: "in_flight", runId } : { kind: "clear" };
+  } catch (error) {
+    // Fail closed. Starting a possibly-duplicate run is strictly worse than
+    // skipping a tick: the next tick is 300 seconds away, while two runs
+    // sharing one worktree fight over HEAD and both die on stale-head checks.
+    return { kind: "unknown", reason: error instanceof Error ? error.message : String(error) };
+  }
+}
+
 async function reconcileSingle(
   config: OperatorConfig,
   deps: ReconcileDependencies,
@@ -52,6 +74,27 @@ async function reconcileSingle(
   const card = await readPowderCard();
   if (card.status !== config.powder!.readyStatus) {
     return { mode: "single", cardId: card.id, status: card.status, triggered: false };
+  }
+  const liveness = await inspectLiveness(card.id, deps);
+  if (liveness.kind === "in_flight") {
+    return {
+      mode: "single",
+      cardId: card.id,
+      status: card.status,
+      triggered: false,
+      reason: "run_in_flight",
+      runId: liveness.runId,
+    };
+  }
+  if (liveness.kind === "unknown") {
+    return {
+      mode: "single",
+      cardId: card.id,
+      status: card.status,
+      triggered: false,
+      reason: "liveness_lookup_failed",
+      detail: liveness.reason,
+    };
   }
   // The card was just read; hand it to the trigger so the trigger never has to
   // re-read the card and the card facts come from this exact card, not config.
@@ -82,7 +125,23 @@ async function reconcileReadyQueue(
       reason: "card_missing_repository",
     };
   }
-  // Serial factory: at most one trigger attempt per reconcile tick, ever.
+  // Serial factory: at most one trigger attempt per reconcile tick, ever. A
+  // busy card consumes the tick rather than yielding to the next candidate -
+  // there is one worktree, so "skip ahead to another card" would just start a
+  // second run that fights the first one over HEAD.
+  const liveness = await inspectLiveness(selected.id, deps);
+  if (liveness.kind !== "clear") {
+    return {
+      mode: "ready-queue",
+      cardId: selected.id,
+      status: selected.status,
+      triggered: false,
+      candidateCount: cards.length,
+      ...(liveness.kind === "in_flight"
+        ? { reason: "run_in_flight", runId: liveness.runId }
+        : { reason: "liveness_lookup_failed", detail: liveness.reason }),
+    };
+  }
   // The selected card was just listed; hand it in so the trigger derives card
   // facts from it rather than re-reading by id.
   const result = await trigger(config, "reconciler", undefined, undefined, { cardId: selected.id, repository, card: selected });

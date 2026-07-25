@@ -108,6 +108,49 @@ describe("reconcileOnce single-card mode (legacy, preserved)", () => {
     const result = await reconcileOnce(config, deps);
     expect(result).toMatchObject({ triggered: false, duplicate: true });
   });
+
+  it("does not trigger a card whose run is still in flight", async () => {
+    const trigger = vi.fn(async () => fakeTriggerResult());
+    const deps: ReconcileDependencies = {
+      readPowderCard: async () => card("busy-card", "ready"),
+      trigger,
+      checkInFlight: async () => "run-live-1",
+    };
+    const result = await reconcileOnce(baseConfig({ cardId: "busy-card" }), deps);
+
+    expect(trigger).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ cardId: "busy-card", triggered: false, reason: "run_in_flight", runId: "run-live-1" });
+  });
+
+  it("triggers a card whose last run failed, so a dead run never wedges it", async () => {
+    // The self-heal property. `checkInFlight` reports undefined for any
+    // terminal run, including a failure that left local state half-written.
+    // If this ever regresses to reading execution-state files, a failed run
+    // leaves `final: null` forever and the card can never be picked up again.
+    const trigger = vi.fn(async () => fakeTriggerResult({ runId: "run-next" }));
+    const deps: ReconcileDependencies = {
+      readPowderCard: async () => card("recovered-card", "ready"),
+      trigger,
+      checkInFlight: async () => undefined,
+    };
+    const result = await reconcileOnce(baseConfig({ cardId: "recovered-card" }), deps);
+
+    expect(trigger).toHaveBeenCalledTimes(1);
+    expect(result).toMatchObject({ cardId: "recovered-card", triggered: true, runId: "run-next" });
+  });
+
+  it("does not trigger when the liveness lookup itself fails", async () => {
+    const trigger = vi.fn(async () => fakeTriggerResult());
+    const deps: ReconcileDependencies = {
+      readPowderCard: async () => card("unknown-card", "ready"),
+      trigger,
+      checkInFlight: async () => { throw new Error("hatchet unreachable"); },
+    };
+    const result = await reconcileOnce(baseConfig({ cardId: "unknown-card" }), deps);
+
+    expect(trigger).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ cardId: "unknown-card", triggered: false, reason: "liveness_lookup_failed" });
+  });
 });
 
 describe("reconcileOnce ready-queue mode", () => {
@@ -226,5 +269,21 @@ describe("reconcileOnce ready-queue mode", () => {
 
     expect(trigger).not.toHaveBeenCalled();
     expect(result).toMatchObject({ cardId: "no-repo-card", triggered: false, reason: "card_missing_repository" });
+  });
+
+  it("lets a busy card consume the ready-queue tick instead of starting a rival run", async () => {
+    const trigger = vi.fn(async () => fakeTriggerResult());
+    const deps: ReconcileDependencies = {
+      listReadyCards: async () => [card("busy", "ready", "omp/a"), card("idle", "ready", "omp/a")],
+      trigger,
+      checkInFlight: async (cardId) => (cardId === "busy" ? "run-live-2" : undefined),
+    };
+    const config = baseConfig({ powder: { baseUrl: "https://powder.example.test", readyStatus: "ready", mode: "ready-queue" } });
+    const result = await reconcileOnce(config, deps);
+
+    // One worktree means one run: skipping ahead to "idle" would start a
+    // second run that fights the first over HEAD.
+    expect(trigger).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ cardId: "busy", triggered: false, reason: "run_in_flight", runId: "run-live-2" });
   });
 });

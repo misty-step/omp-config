@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { describe, expect, it } from "vitest";
-import { defaultSleeper, invokeRunner, invokeRunnerWithRetry, runnerEnvironment } from "../src/runner.js";
+import { defaultSleeper, invokeRunner, invokeRunnerWithRetry, retryDelayMs, runnerEnvironment } from "../src/runner.js";
 import type { CardFacts, StageName } from "../src/contracts.js";
 import { DeterministicInputError, RunnerCancelledError, StageTimeoutError, TransientRunnerError } from "../src/errors.js";
 
@@ -719,5 +719,16 @@ describe("runner adapter", () => {
     if (observedRecipePath !== undefined) {
       await expect(access(observedRecipePath)).rejects.toMatchObject({ code: "ENOENT" });
     }
+  });
+
+  it("keeps a retry window long enough to outlast a load spike", () => {
+    const delays = [1, 2, 3, 4, 5].map((attempt) => retryDelayMs(attempt));
+    expect(delays).toEqual([1_000, 4_000, 16_000, 64_000, 120_000]);
+    // What makes a stage transient here is machine contention, and a load
+    // spike lasts minutes. A previous schedule capped at 60s but never got
+    // past 2s, because the exponent ran out of attempts before reaching the
+    // ceiling - the total, not the cap, is the property worth defending.
+    const windowMs = delays.reduce((total, ms) => total + ms, 0);
+    expect(windowMs).toBeGreaterThan(3 * 60_000);
   });
 });
