@@ -36,9 +36,9 @@ Runtime context for this run: {{task}}
    it. A criterion you could not reach at all is `SKIP` with the reason,
    never `PASS`.
 
-5. Confirm HEAD and worktree still match step 1's record. Never edit,
-   commit, merge, push, deploy, format, or run a broad suite — those
-   belong to other stages. Hatchet stops at human approval, never here.
+5. Confirm HEAD and worktree still match step 1's record. Never edit, commit,
+   merge, push, deploy, format, run a broad suite, or call `gh` — those belong
+   to other stages. This stage ends after verification and never merges.
 
 6. After every live check, call `hatchet_terminal` exactly once with
    outcome `verified` only if every surface is `PASS` or an explicitly

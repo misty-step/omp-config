@@ -124,6 +124,22 @@ describe("card facts reach every stage request", () => {
       },
       readHead: () => Promise.resolve("b".repeat(40)),
       requireHead: (_dir: string, _expected: string, _edge: string) => Promise.resolve(),
+      // This test is about card facts reaching stages, not about publishing.
+      // The stub records nothing; it only keeps the PR lifecycle inert.
+      github: {
+        ensureBranch: () => Promise.resolve(),
+        publishBranch: () => Promise.resolve(),
+        ensurePullRequest: () => Promise.resolve({
+          number: 1,
+          url: "https://github.com/omp/fixture/pull/1",
+          branch: "hatchet/card",
+          base: "master",
+        }),
+        postComment: () => Promise.resolve(),
+        readPrContext: () => Promise.resolve({ comments: [] }),
+        readChecks: () => Promise.resolve({ conclusion: "none" as const, headSha: "b".repeat(40), failing: [] }),
+        mergePullRequest: () => Promise.resolve(),
+      },
     };
 
     try {

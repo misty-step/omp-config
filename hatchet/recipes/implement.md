@@ -31,9 +31,10 @@ Runtime context for this run: {{task}}
    dead code, now-wrong docs for the paths you touched — and nothing else.
 
 6. Commit once with `git -c user.name='OMP Hatchet Builder' -c
-   user.email='omp-hatchet-builder@local' commit ...`. Never merge, push,
-   deploy, or rewrite history; this run stops at the commit and a human
-   approves and lands it later.
+   user.email='omp-hatchet-builder@local' commit ...`. Never merge, push/publish,
+   deploy, or run any PR command (`gh` included); the workflow publishes the
+   branch and opens a pull request after this stage returns. The commit left
+   at HEAD becomes that pull request automatically.
 
 7. After the commit and checks, call `hatchet_terminal` exactly once with
    outcome `completed`, the new full HEAD, and artifact refs for the

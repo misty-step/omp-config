@@ -73,10 +73,10 @@ case "$stage" in
   adversarial_review)
     case "$scenario_name" in
       blocked-first|blocked-twice)
-        echo '{"version":1,"outcome":"blocked","headSha":"'"$actual_head"'","artifactRefs":["review-blocked-'$round'"]}'
+        echo '{"version":1,"outcome":"blocked","headSha":"'"$actual_head"'","artifactRefs":["review-blocked-'$round'"],"findings":"fixture review round '$round': blocking problem in fixture.ts:1"}'
         exit 0
         ;;
-      *) echo '{"version":1,"outcome":"accepted","headSha":"'"$actual_head"'","artifactRefs":["review-accepted-'$round'"]}'
+      *) echo '{"version":1,"outcome":"accepted","headSha":"'"$actual_head"'","artifactRefs":["review-accepted-'$round'"],"findings":"fixture review round '$round': checked everything, no blockers"}'
         exit 0 ;;
     esac
     ;;

@@ -3,7 +3,7 @@ import { access, readFile, stat } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
-import { recipePathsSchema } from "./contracts.js";
+import { defaultPrSettings, prSettingsSchema, recipePathsSchema } from "./contracts.js";
 
 const sourceRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 export const hatchetRoot = resolve(process.env.HATCHET_ROOT ?? sourceRoot);
@@ -26,6 +26,9 @@ const operatorConfigSchema = z.object({
     mode: z.enum(["single", "ready-queue"]).default("single"),
     repositoryAllowlist: z.array(z.string().min(1)).min(1).optional(),
   }).strict().optional(),
+  // Optional here, resolved at the trigger: an operator who says nothing gets
+  // `defaultPrSettings`, which never merges.
+  pr: prSettingsSchema.optional(),
 }).strict().superRefine((config, ctx) => {
   const mode = config.powder?.mode ?? "single";
   if (mode !== "single") return;

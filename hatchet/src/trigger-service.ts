@@ -1,4 +1,4 @@
-import { cardFactsSchema, prWorkflowInputSchema, type CardFacts, type PrWorkflowInput, type TriggerSource } from "./contracts.js";
+import { cardFactsSchema, defaultPrSettings, prWorkflowInputSchema, type CardFacts, type PrWorkflowInput, type TriggerSource } from "./contracts.js";
 import { currentHeadSha } from "./git-head.js";
 import { createHatchetClient } from "./hatchet-client.js";
 import { declarePrWorkflow } from "./hatchet-workflow.js";
@@ -61,6 +61,10 @@ export async function triggerConfiguredWorkflow(
   if (!cardId) throw new Error("cardId is required to trigger a workflow");
   if (!repository) throw new Error("repository is required to trigger a workflow");
   const requestedHead = requestedHeadSha?.toLowerCase();
+  // The operator config may leave publishing policy unspecified; the trigger is
+  // where it resolves, so an absent block and an explicit default compare equal
+  // in the admission check below rather than looking like a changed input.
+  const prSettings = config.pr ?? defaultPrSettings;
   const initialHead = requestedIdempotencyKey ? undefined : await currentHeadSha(config.cwd);
   const idempotencyKey = requestedIdempotencyKey ?? `${cardId}:${requestedHead ?? initialHead}`;
   // The admission comparison deliberately excludes `card`: a card's body may be
@@ -74,6 +78,7 @@ export async function triggerConfiguredWorkflow(
     recipePaths: config.recipePaths,
     cwd: config.cwd,
     task: config.task,
+    pr: prSettings,
     idempotencyKey,
   });
   const { mapping, duplicate } = await withIdempotentTrigger(
@@ -99,6 +104,7 @@ export async function triggerConfiguredWorkflow(
         recipePaths: config.recipePaths,
         cwd: config.cwd,
         task: config.task,
+        pr: prSettings,
         card,
         idempotencyKey,
         triggerSource: source,
@@ -113,6 +119,7 @@ export async function triggerConfiguredWorkflow(
         recipePaths: admittedInput.recipePaths,
         cwd: admittedInput.cwd,
         task: admittedInput.task,
+        pr: admittedInput.pr,
         idempotencyKey: admittedInput.idempotencyKey,
       });
       if (admitted !== expectedAdmission || (requestedHead && requestedHead !== admittedInput.headSha)) {

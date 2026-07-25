@@ -20,8 +20,8 @@ stage's durable evidence: {{task}}
    finding of your own — this stage packages, it never judges.
 
 2. Confirm the required HEAD, current branch, the recipe-authored commits
-   that produced it, and a clean worktree. Never merge, push, edit, or
-   commit.
+   that produced it, and a clean worktree. Never merge, push, edit, commit, or
+   call `gh`.
 
 3. Assemble the artifact refs so they compactly preserve, in one place:
 
@@ -30,7 +30,9 @@ stage's durable evidence: {{task}}
    - every adversarial-review round's outcome (`accepted` or `blocked`)
      and its ranked findings packet;
    - the live-verification PASS/WARN/FAIL/SKIP evidence;
-   - `merge:false;operatorApprovalRequired:true`.
+   - whether merge is allowed: `merge:true` only when the verifier accepted,
+     GitHub reported checks `green`, and the operator enabled it; otherwise
+     `merge:false;operatorApprovalRequired:true`.
 
    A field you cannot find in the runtime context is a hard stop, not a
    gap to paper over — this stage has no authority to invent evidence.
@@ -40,6 +42,7 @@ stage's durable evidence: {{task}}
    is the only completion channel. Do not print terminal JSON or call
    `yield`; after the tool accepts the terminal, end the turn.
 
-5. If the proposed state is `awaiting_operator_approval`, name it exactly.
-   Never claim operator approval, card completion, merge, or deployment —
-   Hatchet stops here; a human decides next.
+5. If the proposed state is `awaiting_operator_approval`, name it exactly. Do
+   not claim operator approval, card completion, or deployment. A merge may
+   occur only when the verifier accepted, GitHub reported checks green, and the
+   operator enabled it; otherwise the run stops for operator approval.

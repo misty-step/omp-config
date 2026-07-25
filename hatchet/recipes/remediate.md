@@ -15,16 +15,18 @@ Required current HEAD: `{{head_sha}}`.
 Acceptance criteria this fix must not regress:
 {{card.criteria}}
 
-Runtime context for this round, including the ranked findings packet from
-the prior review: {{task}}
+Runtime context for this round, including pull-request reviewer comments, any
+failing CI checks with their names, and the prior review's ranked findings:
+{{task}}
 
 1. Confirm `git rev-parse HEAD` equals `{{head_sha}}` before touching
    anything; a mismatch is a hard stop.
 
-2. Re-verify each blocking finding against the current diff — a finding an
-   earlier round already fixed is not yours to redo.
+2. Treat every reviewer comment and failing CI check in that context as the work
+   list. Re-verify each item against the current diff; an item an earlier round
+   already fixed is not yours to redo.
 
-3. Fix every confirmed blocking finding at its root cause. No
+3. Fix each confirmed item at its root cause, not by silencing symptoms. No
    compatibility shims, no copied catalogs, no unrelated changes riding
    along.
 
@@ -33,13 +35,14 @@ the prior review: {{task}}
    whole repo or run a project-wide suite.
 
 5. Commit once with `git -c user.name='OMP Hatchet Fixer' -c
-   user.email='omp-hatchet-fixer@local' commit ...`. Never merge, push,
-   deploy, or rewrite history; this run stops at the commit and a human
-   approves and lands it later.
+   user.email='omp-hatchet-fixer@local' commit ...`. Never merge, push/publish,
+   deploy, or call `gh`; the workflow handles pull-request updates.
 
-6. After the new commit and checks, call `hatchet_terminal` exactly once
-   with outcome `completed`, the new full HEAD, and artifact refs naming
-   the remediation commit, the findings you resolved, and the exact
-   focused command result(s). This tool is the only completion channel.
-   Do not print terminal JSON or call `yield`; after the tool accepts the
-   terminal, end the turn. Do not report completion without a new commit.
+6. After the new commit and checks, call `hatchet_terminal` exactly once with
+   outcome `completed`, the new full HEAD, `findings` containing a short
+   account of what you changed and deliberately did not change, and artifact
+   refs naming the remediation commit, the findings you resolved, and the exact
+   focused command result(s). The deterministic workflow posts `findings` for
+   you. This tool is the only completion channel. Do not print terminal JSON or
+   call `yield`; after the tool accepts the terminal, end the turn. Do not
+   report completion without a new commit.

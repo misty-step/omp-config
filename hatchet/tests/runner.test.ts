@@ -600,7 +600,15 @@ describe("runner adapter", () => {
     const templatePath = `${cwd}-template.sh`;
     const scenario = await readFile(scenarioPath("happy"), "utf8");
     await writeFile(templatePath, scenario, "utf8");
-    const tmpBefore = new Set(await readdir(tmpdir()));
+    // Scan a temp dir this invocation OWNS. Scanning the shared `tmpdir()` for
+    // `omp-recipe-rendered-*` made every concurrently-rendering test look like a
+    // leak here, so the assertion failed on unrelated work rather than on a bug.
+    // `os.tmpdir()` re-reads TMPDIR per call, and tests within a file run
+    // sequentially, so scoping it is safe.
+    const scratch = `${cwd}-tmp`;
+    await mkdir(scratch, { recursive: true, mode: 0o700 });
+    const priorTmpdir = process.env.TMPDIR;
+    process.env.TMPDIR = scratch;
     try {
       await invokeRunner({
         recipePath: templatePath,
@@ -611,13 +619,15 @@ describe("runner adapter", () => {
         expectedHeadSha: headSha,
         card: testCard,
       }, new AbortController().signal);
-      const tmpAfter = await readdir(tmpdir());
-      const leftoverRendered = tmpAfter.filter(
-        (name) => name.startsWith("omp-recipe-rendered-") && !tmpBefore.has(name),
+      const leftoverRendered = (await readdir(scratch)).filter(
+        (name) => name.startsWith("omp-recipe-rendered-"),
       );
       expect(leftoverRendered).toEqual([]);
     } finally {
+      if (priorTmpdir === undefined) delete process.env.TMPDIR;
+      else process.env.TMPDIR = priorTmpdir;
       await rm(templatePath, { force: true });
+      await rm(scratch, { recursive: true, force: true });
     }
   });
 
