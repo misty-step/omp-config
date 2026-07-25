@@ -693,7 +693,7 @@ def start_broker(path, kind):
     token = secrets.token_hex(32)
     try:
         for _ in range(128):
-            root_leaf = f"roster-sprite-broker-{os.getpid()}-{secrets.token_hex(12)}"
+            root_leaf = f"omp-sprite-broker-{os.getpid()}-{secrets.token_hex(12)}"
             try:
                 mkdir_at(temporary_root_fd, root_leaf, 0o700)
                 os.fsync(temporary_root_fd)

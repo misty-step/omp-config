@@ -24,7 +24,7 @@ verification, and final judgment.
 - Never run `--engine api`, `--provider openai`, `--no-azure`, `--models`, or
   API preflight from this skill.
 - If an Oracle command would need an API key or per-token billing, do not use
-  Oracle for that work; use the normal roster/research paths
+  Oracle for that work; use the normal research paths
   instead.
 
 ## Workflow

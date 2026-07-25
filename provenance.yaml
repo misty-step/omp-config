@@ -69,6 +69,12 @@
         "target": "presets",
         "kind": "directory",
         "origin": "local"
+      },
+      "claude_hooks": {
+        "source": "global/hooks/claude-safety.py",
+        "target": "hooks/claude-safety.py",
+        "kind": "file",
+        "origin": "local"
       }
     }
   },
@@ -78,11 +84,13 @@
     "mode": "symlink"
   },
   "upstream": {
-    "repository": "/Users/phaedrus/Development/_retired/roster",
+    "repository": "/Users/phaedrus/Development/_archives/roster-2026-07-22.tgz",
+    "archive_sha256": "463ad9c5b5b4d281dea599db36c61a3a599a031e810bf480efed27b153dcc930",
     "revision": "24a57a32a491891dffa747a1deb82c6cae0364f6",
     "skill_catalog": "primitives/skills/skills-index.yaml",
     "migrated_at": "2026-07-16",
-    "status": "retired"
+    "status": "retired",
+    "archive_only": "true"
   },
   "runtime_dependencies": {
     "bundled_agents": [
@@ -110,7 +118,8 @@
     "memories",
     "terminal-sessions",
     "managed-skills",
-    "extensions"
+    "extensions",
+    "hooks"
   ],
   "migration": {
     "agents": "rewritten for OMP task-agent frontmatter and prompt bodies",

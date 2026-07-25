@@ -201,3 +201,5 @@ bash:
 github: 
   enabled: true
 autoResume: true
+dev: 
+  autoqaConsent: granted

@@ -75,7 +75,7 @@ agent grader here once run. **PENDING — no run yet.**
 
 ## Run log
 
-**No run yet.** Origin Roster-era backlog (retired 2026-07-16); no card tracker survives it.
+**No run yet.** Revisit when this skill changes.
 `/deliver` is the highest-usage first-party skill (36 recorded invocations per
 the 2026-07-01 groom telemetry read) and had no eval coverage before this. A
 run that didn't fire both arms + a falsifiable grader is not a result — this

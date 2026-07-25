@@ -8,11 +8,11 @@ snapshot, not a product status source.
 
 | App | Role | Skills | MCP | SDK | Harness/system state | Gap |
 |---|---|---|---|---|---|---|
-| Canary | observability, uptime, incidents, health checks, error timelines | product root `SKILL.md`, imported as `misty-canary`; repo-local `canary-qa` and `canary-deploy` | implemented via `bin/canary mcp-server`; historically registered in factory MCP `global` profile | TypeScript SDK in `clients/typescript` | trusted project path exists; Roster now owns the canonical MCP catalog | 2026-07-11: complete Roster-launchable entry; retired profile materializer is out of contract |
-| Powder | backlog, issues/cards, claims, relations, operator input | root product `SKILL.md`, imported as `misty-powder`; repo-local `powder-qa` | implemented in `crates/powder-mcp`; historically profile-gated for non-Adminifi/non-r90 repos | no SDK observed | trusted project path exists; Roster now owns the canonical MCP catalog and launcher | SDK absent; 2026-07-11 retired profile materializer is out of contract |
+| Canary | observability, uptime, incidents, health checks, error timelines | product root `SKILL.md`, imported as `misty-canary`; repo-local `canary-qa` and `canary-deploy` | implemented via `bin/canary mcp-server`; historically registered in factory MCP `global` profile | TypeScript SDK in `clients/typescript` | trusted project path exists; the global MCP catalog is authoritative | 2026-07-11: complete launcher entry; retired profile materializer is out of contract |
+| Powder | backlog, issues/cards, claims, relations, operator input | root product `SKILL.md`, imported as the Powder product skill; repo-local `powder-qa` | implemented in `crates/powder-mcp`; historically profile-gated for non-Adminifi/non-r90 repos | no SDK observed | trusted project path exists; the global MCP catalog and launcher are authoritative | SDK absent; 2026-07-11 retired profile materializer is out of contract |
 | Landmark | release intelligence, versions, changelogs, release kit, fleet adoption | product root `SKILL.md`, imported as `misty-landmark`; dogfood skill remains contributor-facing | no MCP observed | no SDK observed | trusted project path exists; Harness preferred stack now says Landmark | no MCP/SDK; current product-owned surface is skill + CLI/action |
 | Aesthetic | UI/UX system, Misty Step law, tokens, static registry | product root `SKILL.md`, imported as `misty-aesthetic` | no MCP observed | package/static API via `@misty-step/aesthetic` | trusted project path exists; Harness Kit imports product skill | CLI/MCP intentionally later per local vision |
-| Bitterblossom | ad-hoc supervised dispatch, Mode B reflex loops, durable runs | portable product skill in `primitives/skills/.external/misty-bitterblossom`, imported as `misty-bitterblossom`; repo-local dogfood skill | read-only MCP via `bb --config <plane> mcp serve`; registered in factory MCP `factory-ops` profile | no SDK observed | trusted project path exists; Harness Kit imports product skill and installs factory MCP registry | mutating MCP tools remain intentionally absent |
+| Bitterblossom | ad-hoc supervised dispatch, Mode B reflex loops, durable runs | portable product skill in `global/external/misty-bitterblossom`, imported as `misty-bitterblossom`; repo-local dogfood skill | read-only MCP via `bb --config <plane> mcp serve`; registered in factory MCP `factory-ops` profile | no SDK observed | trusted project path exists; Harness Kit imports product skill and installs factory MCP registry | mutating MCP tools remain intentionally absent |
 
 ## Evidence Read
 
@@ -55,8 +55,8 @@ snapshot, not a product status source.
 ## System Configuration Finding
 
 The local Codex config trusts the five app checkout paths. The former Harness
-Kit MCP registry was later retired in favor of Roster's single
-`primitives/mcps/registry.yaml` catalog.
+The legacy MCP registry was later retired in favor of the single
+`global/mcp.json` catalog.
 
 Do not register placeholder MCPs. Register only when the real instance and
 auth source are known:
@@ -81,10 +81,10 @@ auth source are known:
 - Added first-party `factory-apps` skill so future agents have an app-visible
   router for Canary, Powder, Landmark, Aesthetic, and Bitterblossom.
 - Added product-owned external skill imports in `registry.yaml`:
-  `misty-canary`, `misty-powder`, `misty-landmark`, `misty-aesthetic`, and
+  `misty-canary`, the Powder product skill, `misty-landmark`, `misty-aesthetic`, and
   `misty-bitterblossom`.
 - Added the former factory MCP registry plus `check-mcp-registry` so MCP
-  policy was data, validated, and bootstrapped; Roster now owns the single
+  policy was data, validated, and bootstrapped; the global MCP catalog now owns the single
   catalog.
 - Updated Harness Engineering preferred stack defaults:
   - Powder is the default backlog/work-state system.
@@ -102,6 +102,6 @@ These require clean product-repo branches or concrete deployment credentials:
   agent surface.
 - Decide whether Aesthetic earns an MCP after repeated adoption work proves it
   needs one beyond skill/package/static API.
-- Keep complete Roster-launchable MCPs distinct from `external` bindings that
+- Keep complete launcher MCPs distinct from `external` bindings that
   a consumer runtime supplies. Direct role references remain the only binding
   layer; the retired profile materializer is not part of the product contract.

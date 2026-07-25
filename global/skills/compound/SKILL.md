@@ -37,6 +37,6 @@ the smallest corpus slice that can be wrong.
 
 ## Completion Gate
 
-See `primitives/shared/AGENTS.md` (Prove) for the shared core.
+See `global/AGENTS.md` (Prove) for the shared core.
 `/compound` adds: the path written or updated, the overlap query used, the
 evidence anchor, and 3-6 retrieval terms future agents should grep.
