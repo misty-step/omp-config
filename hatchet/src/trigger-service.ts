@@ -1,4 +1,5 @@
-import { cardFactsSchema, defaultPrSettings, prWorkflowInputSchema, type CardFacts, type PrWorkflowInput, type TriggerSource } from "./contracts.js";
+import { cardFactsSchema, defaultPrSettings, prBranchForCard, prWorkflowInputSchema, type CardFacts, type PrWorkflowInput, type TriggerSource } from "./contracts.js";
+import { createGithubClient, type GithubClient } from "./github.js";
 import { currentHeadSha } from "./git-head.js";
 import { createHatchetClient } from "./hatchet-client.js";
 import { declarePrWorkflow } from "./hatchet-workflow.js";
@@ -55,6 +56,7 @@ export async function triggerConfiguredWorkflow(
   requestedIdempotencyKey?: string,
   cardOverride?: CardOverride,
   readPowderCard?: PowderCardReader,
+  githubClient: GithubClient = createGithubClient(),
 ): Promise<TriggerResult> {
   const cardId = cardOverride?.cardId ?? config.cardId;
   const repository = cardOverride?.repository ?? config.repository;
@@ -65,6 +67,16 @@ export async function triggerConfiguredWorkflow(
   // where it resolves, so an absent block and an explicit default compare equal
   // in the admission check below rather than looking like a changed input.
   const prSettings = config.pr ?? defaultPrSettings;
+  // The card's branch must exist BEFORE the head is read. The head pins the run
+  // and every stage asserts against it, so creating the branch later - inside
+  // the workflow - would move HEAD out from under a pin already taken and fail
+  // `implement` on a stale-head error. Unattended runs have nobody to
+  // pre-position the worktree, so the trigger does it.
+  await githubClient.ensureBranch(
+    config.cwd,
+    prSettings.base,
+    prBranchForCard(cardId, prSettings.branchPrefix),
+  );
   const initialHead = requestedIdempotencyKey ? undefined : await currentHeadSha(config.cwd);
   const idempotencyKey = requestedIdempotencyKey ?? `${cardId}:${requestedHead ?? initialHead}`;
   // The admission comparison deliberately excludes `card`: a card's body may be
