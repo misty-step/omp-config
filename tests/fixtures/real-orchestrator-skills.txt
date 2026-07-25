@@ -1,0 +1,16 @@
+<skills>
+- dispatch: Compose and supervise focused subagents for substantive work. Select the
+declared role, model/provider/reasoning level, hidden skills, MCPs, tools,
+verifier, and lane contract. Use when work can be delegated, a specialist
+skill is needed, or the operator asks to route, compose, delegate, review,
+investigate, build, verify, or groom. Trigger: /dispatch, /route, /delegate.
+
+- research: Web research, multi-AI delegation, and multi-perspective validation.
+/research [query], /research delegate [task].
+Use when: "search for", "look up", "research", "delegate",
+"get perspectives", "web search", "find out", "investigate",
+"introspect", "check readwise", "saved articles", "reading list",
+"what are people saying", "X search", "trending", "which model",
+"compare models", "best model for", "model selection".
+Trigger: /research.
+</skills>
