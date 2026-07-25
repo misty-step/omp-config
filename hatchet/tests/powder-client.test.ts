@@ -107,6 +107,28 @@ describe("createPowderReadyQueueReader", () => {
     writeSpy.mockRestore();
   });
 
+  it("fails fast when the cursor stops advancing", async () => {
+    let requestCount = 0;
+    const fakeFetch = (async () => {
+      requestCount += 1;
+      return new Response(
+        // Same cursor forever: without a guard this re-fetches one page 100
+        // times and returns 100 copies of the same card.
+        JSON.stringify({
+          cards: [{ id: "stuck", status: "ready", repo: "omp/a" }],
+          total_count: 9,
+          has_more: true,
+          next_after: "frozen-cursor",
+        }),
+        { status: 200 },
+      );
+    }) as typeof fetch;
+
+    const listReadyCards = await createPowderReadyQueueReader(config(), fakeFetch);
+    await expect(listReadyCards()).rejects.toThrow(/cursor did not advance past frozen-cursor after 2 cards/);
+    expect(requestCount).toBe(2);
+  });
+
   it("reports when pagination exceeds its explicit page cap", async () => {
     let requestCount = 0;
     const fakeFetch = (async () => {
