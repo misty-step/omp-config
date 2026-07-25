@@ -25,8 +25,6 @@ Runtime context for this run: {{task}}
    - `review-security` — secrets, auth, injection, trust boundaries.
    - `review-vision` — product/UX shape and rendered behavior.
    - `code-review` — general correctness, structure, maintainability.
-   - `cursor-thermo-nuclear-code-quality-review` — harsh maintainability
-     pass for structural change or spaghetti-branching risk.
    - `fixing-accessibility` — WCAG/ARIA/keyboard defects on UI changes.
 
 3. For each chosen lens, spawn exactly one `code-critic` subagent through

@@ -3,6 +3,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { runnerTerminalSchema, shaSchema, stageNameSchema, type RunnerTerminal, type StageName } from "./contracts.js";
+import { stageTimeoutExitCode } from "./errors.js";
 
 const adapterInputSchema = z.object({
   recipe: z.string().min(1),
@@ -71,6 +72,19 @@ type StartRecipeTask = (options: {
 // legitimately run for hours. Keep this far above any honest stage so only a
 // wedged process trips it; cancellation, not this timer, is the live control.
 const stageTimeoutMs = 12 * 60 * 60_000;
+// Exact prefix of the Error message `client.waitForIdle(timeoutMs)` (oh-my-pi
+// rpc-client.ts) rejects with once `stageTimeoutMs` elapses without the
+// agent going idle. This is the ONLY `waitForIdle` call in the recipe-task
+// launch path (`global/lib/recipe-task-runner.ts`'s `startPreparedRecipeTask`
+// and every nested `recipe_task` depth it spawns), and it is always given
+// this same `stageTimeoutMs` — so this exact prefix unambiguously means "the
+// 12h backstop fired," never a shorter unrelated timeout (e.g. the separate
+// 30s "Timeout waiting for agent to become ready" RPC-startup check). `main`
+// matches on it to report `stageTimeoutExitCode` instead of the generic
+// transient exit 70, so `runner.ts` treats a wedged stage as one spent
+// attempt rather than retrying a process that already proved it cannot
+// converge in the allotted time.
+const stageTimeoutMessagePrefix = "Timeout waiting for agent to become idle";
 const terminalToolParameters = z.toJSONSchema(runnerTerminalSchema) as Record<string, unknown>;
 
 // Live Task projection matters only for a stage whose OWN instructions spawn
@@ -155,15 +169,27 @@ export async function stageLiveTaskProjection(descriptor: RecipeLaunchDescriptor
     join(descriptor.cwd, "global", "agents"),
     join(descriptor.home, ".omp", "agent", "agents"),
   );
-  // Child (task) skills are a SECOND explicit, bounded allowlist declared on
-  // the recipe as `taskSkills` — distinct from the parent's own `skills`,
-  // which `agentDir` already governs via the compiled bundle's existing
-  // strict allowlist. A spawned Task child (e.g. a code-critic lane) reads
-  // its lens skill under `PI_CODING_AGENT_DIR/skills` the same way the
-  // parent does (oh-my-pi discovery/builtin.ts uses `getAgentDir()`, which
-  // honors `PI_CODING_AGENT_DIR`). Project exactly the names this recipe
-  // declared — never widen the parent's own skill surface and never
-  // project all of `global/skills`.
+  // `taskSkills` is a SECOND explicit, bounded allowlist declared on the
+  // recipe — additional to the compiled bundle's own `skills` allowlist,
+  // for a skill only this stage's Task children need (e.g. a code-critic
+  // lens). It does NOT stay scoped to those children: `descriptor.agentDir`
+  // IS this process's own `PI_CODING_AGENT_DIR` (bin/omp_recipe.py's
+  // `prepare_runtime` sets `PI_CODING_AGENT_DIR` to the exact same
+  // `agent_dir` it returns as `agentDir`), and oh-my-pi's own skill
+  // discovery (discovery/builtin.ts's `loadSkills`, scanning
+  // `getAgentDir()/skills`) runs once, at THIS process's own startup, over
+  // whatever `stageLiveTaskProjection` staged here moments earlier via
+  // `beforeStart` (global/lib/recipe-task-runner.ts's
+  // `startPreparedRecipeTask` calls it before `client.start()` spawns the
+  // process at all). A Task child spawned later never repeats that scan —
+  // it inherits the parent's already-discovered list by reference
+  // (task/structured-subagent.ts's `resolveAutoloadSkills` reads
+  // `session.skills`, and `buildExecutorOptions` forwards it as
+  // `ExecutorOptions.skills`, so `sdk.ts` skips its own discovery). One
+  // scan, one directory, shared by the stage's own agent and every Task
+  // child it spawns — there is no child-only discovery root to project
+  // into instead. `taskSkills` is still a bounded, explicit allowlist (never
+  // a mirror of all of `global/skills`); it is just not children-exclusive.
   const recipeManifest = recipeManifestSchema.parse(
     JSON.parse(await readFile(join(descriptor.bundle, "recipe.json"), "utf8")),
   );
@@ -290,10 +316,18 @@ async function main(argv: string[]): Promise<number> {
     // output for this attempt — a fresh attempt can plausibly produce a
     // conforming terminal, so it must stay transient/retryable (exit 70)
     // rather than aborting the whole Hatchet run as non-retryable.
-    return error instanceof z.ZodError || message.startsWith("invalid Hatchet runner arguments")
-      || message.startsWith("duplicate Hatchet runner argument")
-      ? 64
-      : 70;
+    if (error instanceof z.ZodError || message.startsWith("invalid Hatchet runner arguments")
+      || message.startsWith("duplicate Hatchet runner argument")) {
+      return 64;
+    }
+    // The stage hit its 12h stageTimeoutMs backstop: wedged, not unlucky.
+    // Reported distinctly from the generic transient exit 70 so
+    // `invokeRunnerWithRetry` spends exactly one attempt instead of burning
+    // up to 3 * 12h on a process that already proved it cannot converge.
+    if (message.startsWith(stageTimeoutMessagePrefix)) {
+      return stageTimeoutExitCode;
+    }
+    return 70;
   } finally {
     process.off("SIGINT", interrupt);
     process.off("SIGTERM", interrupt);

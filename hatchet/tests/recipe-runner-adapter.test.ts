@@ -1,5 +1,5 @@
 import { once } from "node:events";
-import { lstat, mkdir, mkdtemp, readFile, realpath, rm, stat, writeFile } from "node:fs/promises";
+import { lstat, mkdir, mkdtemp, readdir, readFile, realpath, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -115,7 +115,8 @@ describe("shared-runner Hatchet adapter", () => {
 
       // taskSkills is a bounded allowlist, not a mirror of global/skills: an
       // undeclared skill that exists in the checkout must never appear under
-      // the child's discovery root.
+      // PI_CODING_AGENT_DIR/skills — the one root the stage's own agent and
+      // every Task child it spawns both discover from.
       await expect(stat(join(agentDir, "skills", "code-review"))).rejects.toThrow();
 
       expect(await readFile(join(agentDir, "skills", "ci", "SKILL.md"), "utf8")).toBe("recipe ci");
@@ -123,6 +124,64 @@ describe("shared-runner Hatchet adapter", () => {
         expect(await readFile(join(agentDir, name), "utf8")).toBe(content);
       }
       expect(descriptor.model).toEqual(modelBefore);
+    } finally {
+      await rm(scratch, { recursive: true, force: true });
+    }
+  });
+
+  it("widens the stage's own PI_CODING_AGENT_DIR skill surface — taskSkills are not scoped to Task children only", async () => {
+    // bin/omp_recipe.py's prepare_runtime sets PI_CODING_AGENT_DIR to the
+    // exact same path it returns as `agentDir`, and oh-my-pi's own skill
+    // discovery (discovery/builtin.ts's loadSkills, scanning
+    // getAgentDir()/skills) runs once at THIS process's own startup — after
+    // stageLiveTaskProjection (this recipe's `beforeStart` hook) has already
+    // staged taskSkills there. A Task child spawned later never repeats that
+    // scan; it inherits the parent's already-discovered list by reference
+    // (task/structured-subagent.ts's resolveAutoloadSkills reads
+    // session.skills, forwarded verbatim as ExecutorOptions.skills). One
+    // scan, one directory: a taskSkill and a compile-time-baked `skills`
+    // entry must land as siblings under the exact same agentDir/skills
+    // listing — there is no separate child-only discovery root to isolate
+    // taskSkills into instead.
+    const scratch = await mkdtemp(join(tmpdir(), "hatchet-live-projection-shared-root-"));
+    const cwd = join(scratch, "worktree");
+    const agentDir = join(scratch, "agent");
+    const home = join(scratch, "home");
+    const bundle = join(scratch, "bundle");
+    try {
+      await mkdir(join(cwd, "global", "agents"), { recursive: true });
+      await mkdir(join(cwd, "global", "skills", "review-tests"), { recursive: true });
+      // Simulates bin/omp_recipe.py's _replace_runtime_agent output: a
+      // compile-time `skills` entry baked into agentDir before this process
+      // ever starts, i.e. the same root PI_CODING_AGENT_DIR will point to.
+      await mkdir(join(agentDir, "skills", "code-review"), { recursive: true });
+      await mkdir(home, { recursive: true });
+      await mkdir(bundle, { recursive: true });
+      await writeFile(join(cwd, "global", "skills", "review-tests", "SKILL.md"), "review-tests");
+      await writeFile(join(agentDir, "skills", "code-review", "SKILL.md"), "code-review");
+      for (const name of ["AGENTS.md", "config.yml", "models.yml"]) {
+        await writeFile(join(agentDir, name), "recipe fixed content");
+      }
+      await writeFile(
+        join(bundle, "recipe.json"),
+        JSON.stringify({ taskSkills: [{ name: "review-tests", path: "global/skills/review-tests" }] }),
+      );
+      const descriptor = {
+        cwd,
+        agentDir,
+        home,
+        runtimeRoot: join(scratch, "runtime"),
+        bundle,
+        model: { provider: "openrouter", id: "qwen/qwen3.7-max", reasoning: "high" },
+      };
+
+      await stageLiveTaskProjection(descriptor);
+
+      // One `readdir` — the same scan oh-my-pi's loadSkills() performs at
+      // this process's own startup — surfaces both the pre-existing
+      // compile-time skill and the freshly projected taskSkill as siblings.
+      const skillNames = (await readdir(join(agentDir, "skills"))).sort();
+      expect(skillNames).toEqual(["code-review", "review-tests"]);
     } finally {
       await rm(scratch, { recursive: true, force: true });
     }

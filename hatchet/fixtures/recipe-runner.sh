@@ -59,6 +59,13 @@ case "$stage" in
         fi
         git -C "$cwd" commit --allow-empty -m "fixture implement $round" >/dev/null
         ;;
+      stage-timeout)
+        counter="$cwd/.fixture-attempt-count"
+        count=$(( $(cat "$counter" 2>/dev/null || echo 0) + 1 ))
+        echo "$count" > "$counter"
+        echo "implement wedged" >&2
+        exit 82
+        ;;
       cancellation) echo "implement sleep" >&2; sleep 30 ;;
       *) git -C "$cwd" commit --allow-empty -m "fixture implement $round" >/dev/null ;;
     esac

@@ -7,7 +7,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import type { CardFacts } from "./contracts.js";
 import { runnerTerminalSchema, type RunnerTerminal, type StageName } from "./contracts.js";
-import { DeterministicInputError, RunnerCancelledError, TransientRunnerError } from "./errors.js";
+import { DeterministicInputError, RunnerCancelledError, StageTimeoutError, TransientRunnerError, stageTimeoutExitCode } from "./errors.js";
 import { renderRecipe } from "./recipe-template.js";
 
 const stderrTailLimit = 2 * 1024;
@@ -273,9 +273,11 @@ export async function invokeRunner(request: RunnerRequest, signal: AbortSignal):
           `stderr bytes=${stderrBytes}`,
           `stderr tail=${JSON.stringify(stderrTail.toString("utf8"))}`,
         ].join("; ");
-        reject(deterministicExitCodes[code ?? -1] === true
-          ? new DeterministicInputError(detail)
-          : new TransientRunnerError(detail));
+        reject(code === stageTimeoutExitCode
+          ? new StageTimeoutError(detail)
+          : deterministicExitCodes[code ?? -1] === true
+            ? new DeterministicInputError(detail)
+            : new TransientRunnerError(detail));
         return;
       }
       try {

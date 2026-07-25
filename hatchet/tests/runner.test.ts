@@ -7,7 +7,7 @@ import { setTimeout as delay } from "node:timers/promises";
 import { describe, expect, it } from "vitest";
 import { defaultSleeper, invokeRunner, invokeRunnerWithRetry, runnerEnvironment } from "../src/runner.js";
 import type { CardFacts, StageName } from "../src/contracts.js";
-import { DeterministicInputError, RunnerCancelledError, TransientRunnerError } from "../src/errors.js";
+import { DeterministicInputError, RunnerCancelledError, StageTimeoutError, TransientRunnerError } from "../src/errors.js";
 
 const fixtureRoot = new URL("../fixtures/", import.meta.url);
 const runnerPath = new URL("recipe-runner.sh", fixtureRoot).pathname;
@@ -262,6 +262,32 @@ describe("runner adapter", () => {
     }, new AbortController().signal);
     expect(attempt.attempts).toBeGreaterThan(1);
     expect(attempt.terminal.outcome).toBe("completed");
+  });
+
+  it("treats a stage-timeout exit as terminal — exactly one attempt, unlike a transient exit that retries", async () => {
+    const cwd = `${fixtureRoot.pathname}runs/runner-stage-timeout`;
+    const headSha = await gitInit(cwd);
+    let error: unknown;
+    try {
+      await invokeRunnerWithRetry({
+        recipePath: scenarioPath("stage-timeout"),
+        task: "stage-timeout",
+        cwd,
+        stage: "implement",
+        round: 1,
+        expectedHeadSha: headSha,
+        card: testCard,
+      }, new AbortController().signal);
+    } catch (caught) {
+      error = caught;
+    }
+    expect(error).toBeInstanceOf(StageTimeoutError);
+    expect(error).not.toBeInstanceOf(TransientRunnerError);
+    // The fixture increments this counter on every invocation — exactly one
+    // spawn proves invokeRunnerWithRetry never retried the wedged stage,
+    // unlike the exit-70 scenario above which keeps going until it succeeds.
+    const attemptCount = await readFile(join(cwd, ".fixture-attempt-count"), "utf8");
+    expect(attemptCount.trim()).toBe("1");
   });
 
   it("aborts and reaps the child process", async () => {

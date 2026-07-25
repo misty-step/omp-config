@@ -11,7 +11,8 @@
     { "name": "review-tests", "path": "global/skills/review-tests" },
     { "name": "review-security", "path": "global/skills/review-security" },
     { "name": "review-vision", "path": "global/skills/review-vision" },
-    { "name": "code-review", "path": "global/skills/code-review" }
+    { "name": "code-review", "path": "global/skills/code-review" },
+    { "name": "fixing-accessibility", "path": "global/skills/fixing-accessibility" }
   ],
   "mcpServers": []
 }
