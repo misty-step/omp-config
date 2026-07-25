@@ -235,6 +235,21 @@ export function createGithubClient(exec: Exec = defaultExec): GithubClient {
     },
 
     async publishBranch(cwd, branch): Promise<void> {
+      // `git push origin <branch>` pushes the REF, wherever HEAD happens to
+      // be. If anything moved HEAD after ensureBranch - a human or another
+      // agent running `git checkout` in a shared work tree - the stage's
+      // commits land on that other branch and this pushes an unchanged ref.
+      // The observable symptom is a later "No commits between master and
+      // <branch>" from pull request creation, which names neither the real
+      // cause nor the branch that swallowed the work. Refuse here instead.
+      const head = (await run(exec, "git", ["rev-parse", "--abbrev-ref", "HEAD"], cwd)).trim();
+      if (head !== branch) {
+        throw new Error(
+          `refusing to publish ${branch}: work tree ${cwd} is on ${head}. ` +
+            "HEAD moved after this run created its branch, so the run's commits are not on it. " +
+            "The work tree must belong to this run alone.",
+        );
+      }
       await run(exec, "git", ["push", "--set-upstream", "origin", branch], cwd);
     },
 

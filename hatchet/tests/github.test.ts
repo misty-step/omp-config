@@ -226,6 +226,7 @@ describe("GithubClient", () => {
 
   it("surfaces a non-zero command exit with the captured stderr", async () => {
     const fake = fakeExec((call) => {
+      if (call.file === "git" && call.args[0] === "rev-parse") return ok("card/branch\n");
       if (call.file === "git" && call.args[0] === "push") {
         return { stdout: "", stderr: "fatal: permission denied", exitCode: 1 };
       }
@@ -234,5 +235,23 @@ describe("GithubClient", () => {
 
     await expect(createGithubClient(fake.exec).publishBranch(cwd, "card/branch"))
       .rejects.toThrow(/git push.*fatal: permission denied/iu);
+  });
+
+  // Measured live: a second agent ran `git checkout -b` in the work tree the
+  // factory was using. The stage's commits landed on that branch, this pushed
+  // an unmoved ref, and the run died later at pull request creation with
+  // "No commits between master and <branch>" - naming neither the cause nor
+  // the branch holding the work.
+  it("refuses to publish when HEAD has moved off the run's branch", async () => {
+    const fake = fakeExec((call) => {
+      if (call.file === "git" && call.args[0] === "rev-parse") {
+        return ok("someone-elses-branch\n");
+      }
+      return ok();
+    });
+
+    await expect(createGithubClient(fake.exec).publishBranch(cwd, "card/branch"))
+      .rejects.toThrow(/refusing to publish card\/branch: work tree .* is on someone-elses-branch/u);
+    expect(fake.calls.some((call) => call.args[0] === "push")).toBe(false);
   });
 });
