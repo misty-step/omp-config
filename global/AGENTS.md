@@ -47,6 +47,8 @@ Subagents may coordinate through the hub when it shortens the dependency path, b
 
 State the goal and live authority before mutation. Prefer deep modules, small interfaces, Rust, deletion, and declarations over imperative glue. Fix causes in the highest-leverage layer. Deterministic code owns policy, persistence, approval, sandboxing, and gates; models own semantic judgment.
 
+Constrain the artifact, not the agent. A lint rule, test, mutation score, coverage floor, CI gate or required ADR sits outside the context window, costs no tokens, and cannot be reasoned around; a prose rule is paid for on every request and competes with every other instruction in scope. Before writing a rule into any `AGENTS.md`, skill, or prompt, ask whether it can be a gate in the repository under test instead — if it can, that is where it belongs and the prose comes out. Prose surface is a budget: prefer deleting a primitive over documenting it better, progressive disclosure over upfront loading, an expressive interface over worked examples, and executable references — a test suite, a rubric, a function to port — over prose describing intent. Gates cannot express taste; that is what a verifier with a rubric is for, and the one place opinionated prose still pays.
+
 For behavior changes, establish the failing live oracle first, then implement, then exercise the exact changed surface. Unit tests alone are not acceptance. Never weaken a gate, mock an internal seam, or claim verification without naming the command, request, rendered behavior, or other evidence actually observed.
 
 Read the live repository before editing and preserve concurrent user work. Misty Step repositories use `master`, never `main`.

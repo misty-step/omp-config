@@ -74,6 +74,12 @@ self-improving-agent optimizations showing proxy gains without real gains, and
 - **Watch the agent tells.** Clones, `as any` / `@ts-ignore`, swallowed errors,
   `todo!()` stubs, dead scaffolding — they compile and pass tests, so review
   tuned for human mistakes misses them. Gate them mechanically.
+- **Convert corrections into rules.** A repeated agent mistake is a missing gate,
+  not a missing instruction. Write the project-specific rule that fails the build
+  on it — a custom ESLint rule, an `ast-grep` pattern, Clippy
+  `disallowed_methods` — then delete the prose that asked nicely. Rules encoding
+  *this* repo's invariants beat any generic ruleset, and they compound: each
+  correction becomes permanent and costs no context.
 
 ## The menu (illustrative — compose for the repo, free/OSS only)
 
@@ -83,7 +89,9 @@ self-hostable, or a ~20-line homebrew tripwire; never force a paid SaaS on a
 consumer.
 
 - **Behavioral:** tests green / no-merge-on-red; executable acceptance specs
-  (Gherkin) when business-owned; the suite *is* the gate.
+  (Gherkin) when business-owned; end-to-end flows for user-visible surfaces;
+  property-based tests where inputs have algebraic structure. The suite *is* the
+  gate.
 - **Coverage quality:** `diff-cover` (patch coverage from any LCOV/Cobertura);
   `cargo-mutants --in-diff` / Stryker / mutmut (mutation).
 - **Structure (ratchet):** homebrew god-file LOC tripwire; jscpd / PMD-CPD
@@ -95,6 +103,12 @@ consumer.
   size-limit / cargo-bloat budgets.
 - **Architecture (fitness functions):** ArchUnit / dependency-cruiser /
   import-linter — layering and dependency-direction rules as a build failure.
+- **Project invariants:** custom ESLint rules / `ast-grep` patterns / Clippy
+  `disallowed_methods` + `disallowed_types` — one rule per mistake this repo has
+  actually made.
+- **Decision record:** a diff that changes architecture, adds a dependency, or
+  alters a public contract fails without an ADR. The gate is the record's
+  existence and linkage, never its prose quality.
 - **Hygiene:** secret scan over source AND commit/PR metadata; forbidden
   markers; warnings-as-errors (`-D warnings`, strict typecheck).
 - **Homebrew wins:** the god-file ratchet, an orphan-marker grep, and a
