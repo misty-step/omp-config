@@ -319,42 +319,79 @@ class BuzzOmpTests(unittest.TestCase):
             "taskSkills": [],
         }
         cases = {
-            "path traversal": {**base, "instructions": "../instructions.md"},
-            "unknown key": {**base, "unexpected": True},
-            "invalid reasoning": {
-                **base,
-                "models": [
-                    {"provider": "openrouter", "model": "primary", "reasoning": "turbo"}
-                ],
-            },
-            "malformed MCP": {**base, "mcpServers": [{"name": "broken"}]},
-            "both MCP transports": {
-                **base,
-                "mcpServers": [{"name": "broken", "command": "x", "url": "http://x"}],
-            },
-            "extra MCP field": {
-                **base,
-                "mcpServers": [{"name": "broken", "url": "http://x", "extra": True}],
-            },
-            "duplicate skill name": {
-                **base,
-                "skills": [
-                    {"name": "demo", "path": "skills/demo"},
-                    {"name": "demo", "path": "skills/demo"},
-                ],
-            },
-            "duplicate skill source": {
-                **base,
-                "skills": [
-                    {"name": "demo", "path": "skills/demo"},
-                    {"name": "other", "path": "skills/demo"},
-                ],
-            },
+            "path traversal": (
+                {**base, "instructions": "../instructions.md"},
+                "instructions must be a safe relative path",
+            ),
+            "unknown key": (
+                {**base, "unexpected": True},
+                "recipe keys must be exactly",
+            ),
+            "invalid reasoning": (
+                {
+                    **base,
+                    "models": [
+                        {
+                            "provider": "openrouter",
+                            "model": "primary",
+                            "reasoning": "turbo",
+                        }
+                    ],
+                },
+                "models[0].reasoning must be one of",
+            ),
+            "malformed MCP": (
+                {**base, "mcpServers": [{"name": "broken"}]},
+                "mcpServers[0] requires exactly one of command or url",
+            ),
+            "both MCP transports": (
+                {
+                    **base,
+                    "mcpServers": [
+                        {"name": "broken", "command": "x", "url": "http://x"}
+                    ],
+                },
+                "mcpServers[0] requires exactly one of command or url",
+            ),
+            "extra MCP field": (
+                {
+                    **base,
+                    "mcpServers": [
+                        {"name": "broken", "url": "http://x", "extra": True}
+                    ],
+                },
+                "mcpServers[0] has unknown fields",
+            ),
+            "duplicate skill name": (
+                {
+                    **base,
+                    "skills": [
+                        {"name": "demo", "path": "skills/demo"},
+                        {"name": "demo", "path": "skills/demo"},
+                    ],
+                },
+                "duplicate skill entry",
+            ),
+            "duplicate skill source": (
+                {
+                    **base,
+                    "skills": [
+                        {"name": "demo", "path": "skills/demo"},
+                        {"name": "other", "path": "skills/demo"},
+                    ],
+                },
+                "duplicate skill source path",
+            ),
         }
-        for label, recipe in cases.items():
+        for label, (recipe, expected_message) in cases.items():
             with self.subTest(label=label):
-                with self.assertRaises(omp_recipe.RecipeError):
+                with self.assertRaises(omp_recipe.RecipeError) as cm:
                     omp_recipe.validate_recipe(recipe)
+                self.assertIn(
+                    expected_message,
+                    str(cm.exception),
+                    f"{label} raised the wrong check: {cm.exception}",
+                )
 
     def test_runtime_symlink_is_rejected_without_external_mutation(self) -> None:
         bundle = self.make_bundle()
@@ -388,8 +425,11 @@ class BuzzOmpTests(unittest.TestCase):
         spec = self.source / "symlink-recipe.json"
         spec.write_text(json.dumps(recipe))
 
-        with self.assertRaises(omp_recipe.RecipeError):
+        with self.assertRaises(omp_recipe.RecipeError) as cm:
             omp_recipe.compile_recipe(spec, self.source / "symlink-bundle")
+        message = str(cm.exception)
+        self.assertIn("skill demo must not contain symlinks", message)
+        self.assertIn("outside.md", message)
 
     def test_proxy_credentials_are_not_inherited(self) -> None:
         with patch.dict(
@@ -625,6 +665,183 @@ class BuzzOmpTests(unittest.TestCase):
         self.assertEqual(messages, [])
         self.assertEqual(stderr, "")
         self.assertEqual(capture.read_text(), raw)
+
+    def test_batch_array_to_child_is_rejected_and_not_forwarded(self) -> None:
+        exploit = (
+            '[{"jsonrpc":"2.0","id":1,"method":"session/new","params":'
+            '{"cwd":"/evil","mcpServers":[{"name":"exfil","command":"/bin/sh"}],'
+            '"model":"openrouter/unassigned","thinking":"max"}}]\n'
+        )
+        status, messages, stderr = self.invoke(self.make_bundle(), exploit)
+        self.assertEqual(status, 0)
+        self.assertEqual(len(messages), 1)
+        self.assertIsNone(messages[0]["id"])
+        self.assertEqual(messages[0]["error"]["code"], -32600)
+        self.assertNotIn("kind", messages[0])
+        self.assertEqual(stderr, "")
+
+    def test_batch_array_from_child_is_dropped_and_not_forwarded(self) -> None:
+        child = self.source / "batch-child"
+        child.write_text(
+            "#!"
+            + sys.executable
+            + "\n"
+            + textwrap.dedent(
+                """
+                import sys
+
+                sys.stdin.readline()
+                sys.stdout.write('[{"jsonrpc":"2.0","id":1,"result":{}}]\\n')
+                sys.stdout.flush()
+                """
+            )
+        )
+        child.chmod(child.stat().st_mode | stat.S_IXUSR)
+        status, messages, stderr = self.invoke(
+            self.make_bundle(), self.session_request(), child=child
+        )
+        self.assertEqual(status, 0)
+        self.assertEqual(messages, [])
+        self.assertIn("batch", stderr.lower())
+
+    def test_extra_session_params_are_dropped_for_every_lifecycle_method(
+        self,
+    ) -> None:
+        for method in sorted(buzz_omp.SESSION_METHODS):
+            with self.subTest(method=method):
+                request = (
+                    json.dumps(
+                        {
+                            "jsonrpc": "2.0",
+                            "id": f"{method}-extra",
+                            "method": method,
+                            "params": {
+                                "sessionId": "existing-session",
+                                "cwd": "/caller",
+                                "mcpServers": [
+                                    {"name": "caller", "command": "not-used"}
+                                ],
+                                "env": [{"name": "SECRET", "value": "leak"}],
+                                "configPath": "/etc/secret-config.yml",
+                                "agentDir": "/not-the-bundle-agent",
+                            },
+                        }
+                    )
+                    + "\n"
+                )
+                _, messages, _ = self.invoke(self.make_bundle(), request)
+                expected_kind = "response" if method == "session/new" else "other"
+                received = next(
+                    message
+                    for message in messages
+                    if message.get("kind") == expected_kind
+                )["received"]
+                params = received["params"]
+                self.assertNotIn("env", params)
+                self.assertNotIn("configPath", params)
+                self.assertNotIn("agentDir", params)
+                self.assertNotEqual(params["cwd"], "/caller")
+                self.assertEqual(params["mcpServers"], [])
+                if method != "session/new":
+                    self.assertEqual(params["sessionId"], "existing-session")
+
+    def test_session_new_allows_assigned_primary_model_and_thinking(self) -> None:
+        models = [
+            {"provider": "openrouter", "model": "primary", "reasoning": "medium"},
+            {"provider": "openrouter", "model": "fallback", "reasoning": "high"},
+        ]
+        request = (
+            json.dumps(
+                {
+                    "jsonrpc": "2.0",
+                    "id": 99,
+                    "method": "session/new",
+                    "params": {
+                        "cwd": "/caller",
+                        "mcpServers": [],
+                        "model": "openrouter/primary",
+                        "thinking": "medium",
+                    },
+                }
+            )
+            + "\n"
+        )
+        _, messages, _ = self.invoke(self.make_bundle(models=models), request)
+        received = next(
+            message for message in messages if message["kind"] == "response"
+        )["received"]
+        self.assertEqual(received["params"]["model"], "openrouter/primary")
+        self.assertEqual(received["params"]["thinking"], "medium")
+
+    def test_unknown_config_id_is_rejected_by_default(self) -> None:
+        request = (
+            json.dumps(
+                {
+                    "jsonrpc": "2.0",
+                    "id": 55,
+                    "method": "session/set_config_option",
+                    "params": {
+                        "sessionId": "session",
+                        "configId": "mode",
+                        "value": "yolo",
+                    },
+                }
+            )
+            + "\n"
+        )
+        _, messages, _ = self.invoke(self.make_bundle(), request)
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(messages[0]["id"], 55)
+        self.assertEqual(messages[0]["error"]["code"], -32602)
+        self.assertIn("mode", messages[0]["error"]["message"])
+        self.assertNotIn("kind", messages[0])
+
+    def test_allowed_model_config_option_is_forwarded(self) -> None:
+        request = (
+            json.dumps(
+                {
+                    "jsonrpc": "2.0",
+                    "id": 66,
+                    "method": "session/set_config_option",
+                    "params": {
+                        "sessionId": "session",
+                        "configId": "model",
+                        "value": "openrouter/primary",
+                    },
+                }
+            )
+            + "\n"
+        )
+        _, messages, _ = self.invoke(self.make_bundle(), request)
+        received = next(
+            message for message in messages if message.get("kind") == "other"
+        )["received"]
+        self.assertEqual(received["params"]["configId"], "model")
+        self.assertEqual(received["params"]["value"], "openrouter/primary")
+
+    def test_compile_rejects_hardlinked_skill_source_file(self) -> None:
+        secret = self.source / "outside-secret.md"
+        secret.write_text("outside secret content")
+        linked = self.source / "skills" / "demo" / "leak.md"
+        os.link(secret, linked)
+        recipe = {
+            "schemaVersion": omp_recipe.SCHEMA,
+            "instructions": "instructions.md",
+            "models": [
+                {"provider": "openrouter", "model": "primary", "reasoning": "medium"}
+            ],
+            "skills": [{"name": "demo", "path": "skills/demo"}],
+            "mcpServers": [],
+            "taskSkills": [],
+        }
+        spec = self.source / "hardlink-recipe.json"
+        spec.write_text(json.dumps(recipe))
+
+        with self.assertRaises(omp_recipe.RecipeError) as cm:
+            omp_recipe.compile_recipe(spec, self.source / "hardlink-bundle")
+        message = str(cm.exception)
+        self.assertIn("hard-linked", message)
+        self.assertIn("leak.md", message)
 
 
 if __name__ == "__main__":

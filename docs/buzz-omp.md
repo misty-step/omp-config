@@ -39,6 +39,7 @@ A recipe uses schema `omp.recipe.v1`.
       "path": "skills/alpha-sigil"
     }
   ],
+  "taskSkills": [],
   "mcpServers": [
     {
       "name": "powder",
@@ -50,7 +51,7 @@ A recipe uses schema `omp.recipe.v1`.
 
 The first model is the primary model. Later entries form the ordered fallback chain. Providers are not restricted to OpenRouter. The current runtime supplies the Mint placeholder configuration when a recipe selects OpenRouter; other provider names use OMP's provider configuration.
 
-Paths are relative to the recipe file's directory. `instructions` names one file. Each skill `path` names a complete directory whose root contains `SKILL.md`; the compiler packages every nested file and directory. It rejects path traversal, symbolic links at any depth, duplicate skill names, duplicate skill source paths, duplicate model entries, unknown keys, and malformed MCP entries.
+Paths are relative to the recipe file's directory. `instructions` names one file. Each skill or task-skill `path` names a complete directory whose root contains `SKILL.md`; the compiler packages every nested file and directory. It rejects path traversal, symbolic links at any depth, hard-linked regular files at any depth, duplicate skill names, duplicate skill source paths, duplicate model entries, unknown keys, and malformed MCP entries.
 
 ## Compile and install
 
@@ -113,13 +114,16 @@ The prototype created and accepted a webhook run on the hosted Misty Step relay.
 
 The adapter enforces these boundaries:
 
-- It replaces the ACP client `cwd` and `mcpServers` on `session/new`, `session/load`, `session/resume`, and `session/fork`.
+- It rejects any top-level JSON-RPC batch array (`[...]`) in either direction with a JSON-RPC error (`-32600 Invalid Request`, `id: null`) instead of forwarding or filtering it element-by-element; the ACP transport here is one JSON object per line, and a batch is not a supported shape.
+- It reconstructs `session/new`, `session/load`, `session/resume`, and `session/fork` params from an explicit per-method allowlist (`cwd`, `mcpServers`, `sessionId` where applicable, `model`, `thinking`) and drops every other client-supplied key, rather than mutating a client-controlled dict in place. `cwd` and `mcpServers` are always overwritten with the bundle's own values.
 - It runs OMP with `--no-extensions` and disables project, user, Claude, Codex, and OpenCode discovery.
 - It rebuilds the runtime discovery tree from compiled recipe inputs on every launch, while retaining only known session/history state.
 - It exposes only the assigned primary model and thinking level through ACP configuration options.
 - It rejects unassigned model and thinking values on every session lifecycle request and configuration change before OMP receives them.
+- `session/set_config_option` is deny-by-default: only `configId` values of `model` and `thinking` are ever allowed; any other `configId` (for example `mode`) is rejected without inspecting its value.
 - It does not pass host proxy credential variables to OMP.
 - It rejects symbolic links in recipe inputs, compiled output, runtime directories, and packaged skill descendants.
+- It rejects hard-linked regular files (`st_nlink > 1`) inside recipe source trees, so a file linked in from outside the tree cannot be compiled into a bundle under a second name.
 - It preserves non-session ACP NDJSON byte-for-byte.
 
 The recipe runtime accepts its workspace cwd as a separate caller-supplied argument. Buzz supplies a stable, isolated `runtime/cwd` and clears it before each launch. OMP state lives in `runtime/agent`; each launch atomically rebuilds that discovery directory from the compiled instructions and complete skill directories while retaining the allowlisted session/history files.
@@ -133,6 +137,8 @@ python3 -m unittest tests/test_omp_recipe.py tests/test_buzz_omp.py
 python3 -m py_compile bin/omp_recipe.py bin/buzz_omp.py
 sh -n bin/buzz-omp bin/install-buzz-omp
 ```
+
+`tests/test_buzz_omp.py` covers the proxy's isolation boundary directly, including batch-array rejection in both directions, the session-param allowlist (and that extra client-supplied keys such as `env`, `configPath`, and `agentDir` are dropped), the `session/set_config_option` deny-by-default policy, and hard-link rejection in `bin/omp_recipe.py`. Run `python3 -m unittest tests/test_buzz_omp.py -v` to see each case by name.
 
 Run a direct ACP smoke test against a compiled bundle. Verify the response marker, tool list, model option list, and MCP result.
 

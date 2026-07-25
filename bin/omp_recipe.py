@@ -220,6 +220,8 @@ def _regular_file(root: Path, relative: Path, label: str) -> Path:
     path = _path_without_links(root, relative, label)
     if not path.is_file():
         raise RecipeError(f"{label} must be a regular file: {path}")
+    if path.stat().st_nlink > 1:
+        raise RecipeError(f"{label} must not be a hard-linked file: {path}")
     return path
 
 
@@ -239,6 +241,10 @@ def _directory(root: Path, relative: Path, label: str) -> Path:
                 raise RecipeError(f"{label} must not contain symlinks: {child}")
             if not child.is_file():
                 raise RecipeError(f"{label} contains a non-regular file: {child}")
+            if child.stat().st_nlink > 1:
+                raise RecipeError(
+                    f"{label} must not contain hard-linked files: {child}"
+                )
     return directory
 
 

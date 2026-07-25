@@ -19,6 +19,12 @@ from omp_recipe import (
 )
 
 SESSION_METHODS = {"session/new", "session/load", "session/resume", "session/fork"}
+SESSION_PASSTHROUGH_KEYS: dict[str, tuple[str, ...]] = {
+    "session/new": ("model", "thinking"),
+    "session/load": ("sessionId", "model", "thinking"),
+    "session/resume": ("sessionId", "model", "thinking"),
+    "session/fork": ("sessionId", "model", "thinking"),
+}
 
 
 def _acp_mcp_servers(recipe: dict[str, Any]) -> list[dict[str, Any]]:
@@ -91,6 +97,10 @@ def run_proxy(bundle: Path) -> int:
     allowed_model_set = set(allowed_models)
     allowed_thinking = [recipe["models"][0]["reasoning"]]
     allowed_thinking_set = set(allowed_thinking)
+    allowed_config_values = {
+        "model": allowed_model_set,
+        "thinking": allowed_thinking_set,
+    }
     creation_ids: Counter[Any] = Counter()
     creation_lock = threading.Lock()
     stdout_lock = threading.Lock()
@@ -110,6 +120,19 @@ def run_proxy(bundle: Path) -> int:
             },
         }
         write_parent(json.dumps(response, separators=(",", ":")) + "\n")
+
+    def reject_batch() -> dict[str, Any]:
+        return {
+            "jsonrpc": "2.0",
+            "id": None,
+            "error": {
+                "code": -32600,
+                "message": (
+                    "batched JSON-RPC requests are not supported; the ACP "
+                    "transport requires exactly one JSON object per line"
+                ),
+            },
+        }
 
     def filter_config_options(message: dict[str, Any]) -> None:
         result = message.get("result")
@@ -144,38 +167,43 @@ def run_proxy(bundle: Path) -> int:
                     message = json.loads(line)
                 except json.JSONDecodeError:
                     message = None
+                if type(message) is list:
+                    write_parent(
+                        json.dumps(reject_batch(), separators=(",", ":")) + "\n"
+                    )
+                    continue
                 if type(message) is dict:
                     method = message.get("method")
                     params = message.get("params")
                     if type(params) is not dict:
                         params = {}
-                    requested: list[tuple[str, Any]] = []
                     if method == "session/set_config_option":
-                        requested.append((params.get("configId"), params.get("value")))
+                        config_id = params.get("configId")
+                        allowed = allowed_config_values.get(config_id)
+                        if allowed is None or params.get("value") not in allowed:
+                            reject_config_request(message, config_id)
+                            continue
                     elif method in SESSION_METHODS:
-                        for config_id in ("model", "thinking"):
-                            if config_id in params:
-                                requested.append((config_id, params[config_id]))
-                    allowed_values = {
-                        "model": allowed_model_set,
-                        "thinking": allowed_thinking_set,
-                    }
-                    rejected = next(
-                        (
-                            config_id
-                            for config_id, value in requested
-                            if config_id in allowed_values
-                            and value not in allowed_values[config_id]
-                        ),
-                        None,
-                    )
-                    if rejected is not None:
-                        reject_config_request(message, rejected)
-                        continue
-                    if method in SESSION_METHODS:
-                        message["params"] = params
-                        params["mcpServers"] = mcp_servers
-                        params["cwd"] = str(prepared.cwd)
+                        rejected = next(
+                            (
+                                config_id
+                                for config_id in ("model", "thinking")
+                                if config_id in params
+                                and params[config_id]
+                                not in allowed_config_values[config_id]
+                            ),
+                            None,
+                        )
+                        if rejected is not None:
+                            reject_config_request(message, rejected)
+                            continue
+                        passthrough = SESSION_PASSTHROUGH_KEYS[method]
+                        rewritten_params = {
+                            key: params[key] for key in passthrough if key in params
+                        }
+                        rewritten_params["mcpServers"] = mcp_servers
+                        rewritten_params["cwd"] = str(prepared.cwd)
+                        message["params"] = rewritten_params
                         request_id = message.get("id")
                         if request_id is not None:
                             with creation_lock:
@@ -200,6 +228,14 @@ def run_proxy(bundle: Path) -> int:
                     message = json.loads(reply)
                 except json.JSONDecodeError:
                     message = None
+                if type(message) is list:
+                    sys.stderr.write(
+                        "buzz-omp: dropped a batch-shaped JSON-RPC message from "
+                        "the child; the ACP transport allows only one JSON "
+                        "object per line\n"
+                    )
+                    sys.stderr.flush()
+                    continue
                 if type(message) is dict:
                     response_id = message.get("id")
                     is_response = "method" not in message and (
