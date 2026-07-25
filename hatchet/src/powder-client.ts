@@ -106,6 +106,14 @@ export async function createPowderReadyQueueReader(
         );
         return cards;
       }
+      if (page.next_after === nextAfter) {
+        // A cursor that does not advance would re-fetch the same page until
+        // the cap, duplicating every card on it. Bounded, but silent and
+        // wrong: name it here rather than 99 requests later.
+        throw new Error(
+          `Powder ready-queue cursor did not advance past ${page.next_after} after ${cards.length} cards`,
+        );
+      }
       nextAfter = page.next_after;
     }
 
