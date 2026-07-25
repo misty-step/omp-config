@@ -1,1 +1,1 @@
-/Users/phaedrus/Development/omp-config-buzz-omp/hatchet/fixtures/scenarios/blocked-twice.sh
+../scenarios/blocked-twice.sh

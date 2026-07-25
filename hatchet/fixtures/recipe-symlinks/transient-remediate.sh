@@ -1,1 +1,1 @@
-/Users/phaedrus/Development/omp-config-buzz-omp/hatchet/fixtures/scenarios/transient.sh
+../scenarios/transient.sh

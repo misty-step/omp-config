@@ -1,4 +1,5 @@
 import { execFileSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { access, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -12,6 +13,14 @@ import { DeterministicInputError, RunnerCancelledError, StageTimeoutError, Trans
 const fixtureRoot = new URL("../fixtures/", import.meta.url);
 const runnerPath = new URL("recipe-runner.sh", fixtureRoot).pathname;
 process.env.OMP_RECIPE_RUNNER = runnerPath;
+
+// One test drives the REAL oh-my-pi RpcClient, so it needs that source tree
+// on disk. It is a sibling checkout, not a package dependency, so there is no
+// path we can resolve. Point OMP_SOURCE_ROOT at a checkout to run it; without
+// one — CI, a fresh clone — it skips rather than failing on someone's absent
+// home directory.
+const ompSourceRoot = process.env.OMP_SOURCE_ROOT ?? "/Users/phaedrus/Development/oh-my-pi";
+const hasOmpSource = existsSync(join(ompSourceRoot, "packages/coding-agent/src/modes/rpc/rpc-client.ts"));
 
 function scenarioPath(name: string): string {
   return new URL(`scenarios/${name}.sh`, fixtureRoot).pathname;
@@ -350,13 +359,12 @@ describe("runner adapter", () => {
     }
   });
 
-  it("SIGTERM to a real held adapter still reclaims its runtime root and receipt via the parent", async () => {
+  it.skipIf(!hasOmpSource)("SIGTERM to a real held adapter still reclaims its runtime root and receipt via the parent", async () => {
     const runId = randomUUID();
     const cwd = `${fixtureRoot.pathname}runs/sigterm-reclaim-${runId}`;
     const bundleDir = `${cwd}-bundle`;
     await rm(cwd, { recursive: true, force: true });
     await mkdir(cwd, { recursive: true, mode: 0o700 });
-    const ompSourceRoot = "/Users/phaedrus/Development/oh-my-pi";
     compileFixtureBundle(
       new URL("../../tests/fixtures/recipe-task/alpha/recipe.json", import.meta.url).pathname,
       bundleDir,
