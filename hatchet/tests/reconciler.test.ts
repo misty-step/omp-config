@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { OperatorConfig } from "../src/config.js";
-import type { PowderCard } from "../src/powder-client.js";
+import { createPowderReadyQueueReader, type PowderCard } from "../src/powder-client.js";
 import { reconcileOnce, selectReadyCard, type ReconcileDependencies } from "../src/reconciler.js";
 import type { TriggerResult } from "../src/trigger-service.js";
 
@@ -146,6 +146,29 @@ describe("reconcileOnce ready-queue mode", () => {
       triggered: true,
       candidateCount: 3,
     });
+  });
+  it("selects a ready card returned on a later queue page", async () => {
+    let requestCount = 0;
+    const fakeFetch = (async () => {
+      requestCount += 1;
+      const page = requestCount === 1
+        ? { cards: [card("first-page", "blocked", "omp/a")], has_more: true, next_after: "page-2" }
+        : { cards: [card("later-page", "ready", "omp/a")], has_more: false };
+      return new Response(JSON.stringify(page), { status: 200 });
+    }) as typeof fetch;
+    const listReadyCards = await createPowderReadyQueueReader(queueConfig(), fakeFetch);
+    const trigger = vi.fn().mockResolvedValue(fakeTriggerResult({ runId: "run-later" }));
+
+    const result = await reconcileOnce(queueConfig(), { listReadyCards, trigger });
+
+    expect(trigger).toHaveBeenCalledWith(
+      expect.anything(),
+      "reconciler",
+      undefined,
+      undefined,
+      { cardId: "later-page", repository: "omp/a", card: expect.objectContaining({ id: "later-page" }) },
+    );
+    expect(result).toMatchObject({ cardId: "later-page", triggered: true, runId: "run-later" });
   });
 
   it("filters by repositoryAllowlist before selecting a candidate", async () => {

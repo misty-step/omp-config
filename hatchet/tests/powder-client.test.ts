@@ -41,6 +41,55 @@ describe("createPowderReadyQueueReader", () => {
     expect(capturedUrl?.pathname).toBe("/api/v1/cards");
     expect(capturedUrl?.searchParams.get("status")).toBe("ready");
   });
+  it("follows pagination until all ready cards are returned", async () => {
+    const requestedAfter: Array<string | null> = [];
+    let requestCount = 0;
+    const fakeFetch = (async (url: string | URL) => {
+      const requestUrl = new URL(url as string);
+      requestedAfter.push(requestUrl.searchParams.get("after"));
+      requestCount += 1;
+      if (requestCount === 1) {
+        return new Response(
+          JSON.stringify({
+            cards: [{ id: "first-page", status: "ready", repo: "omp/a" }],
+            total_count: 2,
+            has_more: true,
+            next_after: "page-2",
+          }),
+          { status: 200 },
+        );
+      }
+      return new Response(
+        JSON.stringify({
+          cards: [{ id: "later-page", status: "ready", repo: "omp/a" }],
+          total_count: 2,
+          has_more: false,
+        }),
+        { status: 200 },
+      );
+    }) as typeof fetch;
+
+    const listReadyCards = await createPowderReadyQueueReader(config(), fakeFetch);
+    const cards = await listReadyCards();
+
+    expect(cards.map(({ id }) => id)).toEqual(["first-page", "later-page"]);
+    expect(requestedAfter).toEqual([null, "page-2"]);
+  });
+
+  it("reports when pagination exceeds its explicit page cap", async () => {
+    let requestCount = 0;
+    const fakeFetch = (async () => {
+      requestCount += 1;
+      return new Response(
+        JSON.stringify({ cards: [], total_count: 1, has_more: true, next_after: `page-${requestCount + 1}` }),
+        { status: 200 },
+      );
+    }) as typeof fetch;
+
+    const listReadyCards = await createPowderReadyQueueReader(config(), fakeFetch);
+    await expect(listReadyCards()).rejects.toThrow(/exceeded maximum of 100 pages/);
+    expect(requestCount).toBe(100);
+  });
 
   it("throws on a non-OK HTTP response", async () => {
     const fakeFetch = (async () => new Response("", { status: 503 })) as typeof fetch;

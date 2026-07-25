@@ -21,7 +21,12 @@ const powderCardResponseSchema = z.union([
 ]);
 const powderCardListResponseSchema = z.object({
   cards: z.array(powderCardSchema),
+  has_more: z.boolean(),
+  next_after: z.string().min(1).nullable().optional(),
 }).passthrough();
+
+const POWDER_READY_QUEUE_PAGE_LIMIT = 100;
+const POWDER_READY_QUEUE_MAX_PAGES = 100;
 
 export type PowderCard = z.infer<typeof powderCardSchema>;
 export type PowderCardReader = () => Promise<PowderCard>;
@@ -72,17 +77,30 @@ export async function createPowderReadyQueueReader(
   const readyStatus = config.powder.readyStatus;
 
   return async () => {
-    const url = new URL("api/v1/cards", baseUrl);
-    url.searchParams.set("status", readyStatus);
-    url.searchParams.set("limit", "100");
-    const headers = new Headers();
-    if (authorization) headers.set("authorization", authorization);
-    const response = await fetchImpl(url, {
-      headers,
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (!response.ok) throw new Error(`Powder ready-queue list failed with HTTP ${response.status}`);
-    const page = powderCardListResponseSchema.parse(await response.json());
-    return page.cards;
+    const cards: PowderCard[] = [];
+    let nextAfter: string | undefined;
+
+    for (let pageNumber = 1; pageNumber <= POWDER_READY_QUEUE_MAX_PAGES; pageNumber += 1) {
+      const url = new URL("api/v1/cards", baseUrl);
+      url.searchParams.set("status", readyStatus);
+      url.searchParams.set("limit", String(POWDER_READY_QUEUE_PAGE_LIMIT));
+      if (nextAfter) url.searchParams.set("after", nextAfter);
+      const headers = new Headers();
+      if (authorization) headers.set("authorization", authorization);
+      const response = await fetchImpl(url, {
+        headers,
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (!response.ok) throw new Error(`Powder ready-queue list failed with HTTP ${response.status}`);
+      const page = powderCardListResponseSchema.parse(await response.json());
+      cards.push(...page.cards);
+      if (!page.has_more) return cards;
+      if (!page.next_after) {
+        throw new Error("Powder ready-queue response has_more=true without next_after");
+      }
+      nextAfter = page.next_after;
+    }
+
+    throw new Error(`Powder ready-queue pagination exceeded maximum of ${POWDER_READY_QUEUE_MAX_PAGES} pages`);
   };
 }
