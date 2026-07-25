@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "omp.recipe.v1",
+  "instructions": "hatchet/recipes/adversarial-review.md",
+  "models": [
+    { "provider": "openrouter", "model": "anthropic/claude-fable-5", "reasoning": "high" }
+  ],
+  "skills": [
+    { "name": "code-review", "path": "global/skills/code-review" }
+  ],
+  "taskSkills": [
+    { "name": "review-tests", "path": "global/skills/review-tests" },
+    { "name": "review-security", "path": "global/skills/review-security" },
+    { "name": "review-vision", "path": "global/skills/review-vision" },
+    { "name": "code-review", "path": "global/skills/code-review" },
+    { "name": "fixing-accessibility", "path": "global/skills/fixing-accessibility" }
+  ],
+  "mcpServers": []
+}

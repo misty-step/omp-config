@@ -1,0 +1,23 @@
+#!/bin/sh
+set -eu
+
+# A bare `exec bun` inherits whatever PATH the caller had. Under launchd the
+# worker's PATH omitted bun's directory, so every stage died with a bare 127
+# that named nothing. Resolve bun explicitly and exit 78 (EX_CONFIG, already in
+# runner.ts's deterministicExitCodes) so a missing runtime is never mistaken for
+# the adapter itself exiting 127.
+#
+# PATH and BUN_BIN are the only sanctioned channels: runner.ts's
+# runnerEnvironmentKeys passes PATH through and deliberately withholds HOME, so
+# this script must never reach into a home directory to find its runtime.
+BUN="${BUN_BIN:-$(command -v bun 2>/dev/null || true)}"
+if [ -z "$BUN" ]; then
+  for candidate in /opt/homebrew/bin/bun /usr/local/bin/bun; do
+    if [ -x "$candidate" ]; then BUN="$candidate"; break; fi
+  done
+fi
+if [ -z "$BUN" ]; then
+  echo "recipe-runner: bun not found on PATH or in \$BUN_BIN" >&2
+  exit 78
+fi
+exec "$BUN" "$(dirname "$0")/../src/recipe-runner-adapter.ts" "$@"

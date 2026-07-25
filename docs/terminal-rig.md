@@ -33,6 +33,8 @@ The rig runs against stock OMP APIs. It does not patch the OMP package.
 |---|---|---|
 |global/extensions/promptspace.ts|~/.omp/agent/extensions/promptspace.ts|Prompt spacing, the bare prompt marker, the padded input panel, and the status line.|
 |global/extensions/agent-hub.ts|~/.omp/agent/extensions/agent-hub.ts|Read-only /agent-hub overlay with the subagent roster and live activity.|
+|global/extensions/recipe-task.ts|~/.omp/agent/extensions/recipe-task.ts|Temporary isolated `recipe_task` tool; native `task` remains unchanged.|
+|global/lib/recipe-task-runner.ts|~/.omp/agent/lib/recipe-task-runner.ts|Shared RPC recipe process runner used by the extension and CLI.|
 |global/themes/*.json|~/.omp/agent/themes/|Theme library. Kanagawa is the active dark theme. Kanagawa Lotus is the active light theme.|
 |global/presets/*.yml|~/.omp/agent/presets/|Launch overlays for lean, design, operations, and research work.|
 |global/config.yml|~/.omp/agent/config.yml|The promptspace settings contract, including plain chrome, custom empty status segments, and active themes.|
@@ -40,7 +42,7 @@ The rig runs against stock OMP APIs. It does not patch the OMP package.
 
 bin/install creates the live links. It may back up conflicting authority targets. It does not copy runtime state into this repository.
 
-The extensions directory is co-tenanted. herdr-omp-agent-state.ts remains a real, Herdr-managed file at ~/.omp/agent/extensions/herdr-omp-agent-state.ts. Its header states that Herdr overwrites it during integration updates. The provenance contract records this cotenant with owner herdr. The two OMP extension files are separate file links. The installed audit rejects every other extension entry. This prevents an invisible writer from entering the projected home. It also prevents Herdr from writing into the repository and prevents Git operations from rolling back the integration.
+The extensions directory is co-tenanted. herdr-omp-agent-state.ts remains a real, Herdr-managed file at ~/.omp/agent/extensions/herdr-omp-agent-state.ts. Its header states that Herdr overwrites it during integration updates. The provenance contract records this cotenant with owner herdr. The three OMP extension files are separate file links. The installed audit rejects every other extension entry. This prevents an invisible writer from entering the projected home. It also prevents Herdr from writing into the repository and prevents Git operations from rolling back the integration.
 
 The Herdr file was adopted as a runtime cotenant on 2026-07-21. It was not copied into this repository.
 

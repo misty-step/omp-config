@@ -58,6 +58,18 @@
         "kind": "file",
         "origin": "migrated"
       },
+      "extension_recipe_task": {
+        "source": "global/extensions/recipe-task.ts",
+        "target": "extensions/recipe-task.ts",
+        "kind": "file",
+        "origin": "local"
+      },
+      "recipe_task_runner": {
+        "source": "global/lib/recipe-task-runner.ts",
+        "target": "lib/recipe-task-runner.ts",
+        "kind": "file",
+        "origin": "local"
+      },
       "themes": {
         "source": "global/themes",
         "target": "themes",
@@ -110,7 +122,8 @@
     "memories",
     "terminal-sessions",
     "managed-skills",
-    "extensions"
+    "extensions",
+    "lib"
   ],
   "migration": {
     "agents": "rewritten for OMP task-agent frontmatter and prompt bodies",

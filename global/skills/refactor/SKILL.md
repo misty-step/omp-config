@@ -63,7 +63,7 @@ secrets or private customer data in `/tmp`.
    Mechanical formatting is not a milestone, and a step you cannot test and
    commit independently is too large.
 4. **Live-test immediately.** Use the repo's verification path, dispatch
-   `scully`, or use the surface-specific route. Refactors break integration
+   `qa`, or use the surface-specific route. Refactors break integration
    seams; unit tests alone do not close a milestone.
 5. **Autoreview the milestone** with fresh-context critique when substantive.
    Critics get the artifact and the oracle only — never the author's reasoning

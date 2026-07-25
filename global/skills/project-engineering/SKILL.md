@@ -46,7 +46,7 @@ Use the existing owner for method; keep this skill at the composition layer.
 | Concern | Owner |
 |---|---|
 | Fast/full gates, coverage, mutation, supply chain | `global/skills/ci/SKILL.md` and `global/references/quality-gates.md` |
-| Runtime and user-boundary proof | `global/references/verification-system-first.md`; dispatch `scully` for independent live verification |
+| Runtime and user-boundary proof | `global/references/verification-system-first.md`; dispatch `qa` for independent live verification |
 | Model or agent capability | `global/skills/eval-design/SKILL.md` |
 | Canary, Powder, Landmark | `global/skills/factory-apps/SKILL.md` |
 | Module depth, seams, dependency direction | `global/external/mattpocock-codebase-design/SKILL.md` |

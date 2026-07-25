@@ -4,7 +4,7 @@ description: Full-board and full-backlog groomer. Keeps the ledger true, refresh
 model: anthropic/claude-fable-5:high, openai-codex/gpt-5.6-sol:high
 thinkingLevel: high
 autoloadSkills: groom,research,vision,grilling,powder
-spawns: scout,magellan,daedalus,cerberus,scully
+spawns: scout,magellan,daedalus,code-critic,qa
 readSummarize: true
 ---
 

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "omp.recipe.v1",
+  "instructions": "instructions.md",
+  "models": [
+    {
+      "provider": "openrouter",
+      "model": "google/gemini-3.5-flash-lite",
+      "reasoning": "low"
+    }
+  ],
+  "skills": [
+    {
+      "name": "live-marker",
+      "path": "skills/live-marker"
+    }
+  ],
+  "taskSkills": [],
+  "mcpServers": []
+}
