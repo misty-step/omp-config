@@ -46,11 +46,23 @@
         "kind": "directory",
         "origin": "copied"
       },
+      "skill_composer_manifest": {
+        "source": "global/skill-composer-manifest.json",
+        "target": "skill-composer-manifest.json",
+        "kind": "file",
+        "origin": "local"
+      },
       "extension_agent_hub": {
         "source": "global/extensions/agent-hub.ts",
         "target": "extensions/agent-hub.ts",
         "kind": "file",
         "origin": "migrated"
+      },
+      "extension_skill_composer": {
+        "source": "global/extensions/skill-composer.ts",
+        "target": "extensions/skill-composer.ts",
+        "kind": "file",
+        "origin": "local"
       },
       "extension_promptspace": {
         "source": "global/extensions/promptspace.ts",

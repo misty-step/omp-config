@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "agents": {
+    "orchestrator": ["research", "dispatch"],
+    "magellan": ["project-engineering"],
+    "builder": ["dispatch", "powder"]
+  }
+}
