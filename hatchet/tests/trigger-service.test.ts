@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { rm } from "node:fs/promises";
 import { cardFactsSchema, prWorkflowInputSchema, runnerTerminalSchema, type CardFacts, type PrWorkflowInput, type RunnerTerminal } from "../src/contracts.js";
 import { runPrWorkflow } from "../src/pr-workflow.js";
-import { cardFactsFromPowderCard } from "../src/trigger-service.js";
+import { admissionPrSettings, cardFactsFromPowderCard } from "../src/trigger-service.js";
 import { withIdempotentTrigger } from "../src/idempotency.js";
 import { executionRoot, idempotencyRoot } from "../src/config.js";
 import type { PowderCard } from "../src/powder-client.js";
@@ -169,6 +169,10 @@ describe("idempotency is unaffected by card text", () => {
   // withIdempotentTrigger: a card whose body is edited mid-flight dedupes to
   // the same run (createRun called exactly once, duplicate=true on the second
   // admission), and the admission check passes because it excludes card text.
+  // Mirrors triggerConfiguredWorkflow's admission exactly, reusing the same
+  // pr-slice helper so this cannot silently diverge from production. It did:
+  // this helper omitted `pr` entirely, which is why an autoMerge flip
+  // colliding with a recorded run went unnoticed until it wedged a live card.
   function admissionOf(input: PrWorkflowInput): string {
     return JSON.stringify({
       version: input.version,
@@ -177,6 +181,7 @@ describe("idempotency is unaffected by card text", () => {
       recipePaths: input.recipePaths,
       cwd: input.cwd,
       task: input.task,
+      pr: admissionPrSettings(input.pr),
       idempotencyKey: input.idempotencyKey,
     });
   }
@@ -247,6 +252,58 @@ describe("idempotency is unaffected by card text", () => {
     expect((second.mapping.input as PrWorkflowInput).card.body).toBe(realReadyCard.body);
 
     // Clean up the idempotency mapping so the test is hermetic.
+    const stem = createHash("sha256").update(idempotencyKey).digest("hex");
+    await rm(`${idempotencyRoot}/${stem}.json`, { force: true });
+    await rm(`${idempotencyRoot}/${stem}.lock`, { recursive: true, force: true });
+  });
+
+  // Measured live: flipping autoMerge on the operator config made every
+  // recorded run at the current head collide, and the card stayed wedged until
+  // the head moved. autoMerge decides what to do after the work is done and
+  // green; it never changes what work runs.
+  it("an operator flipping autoMerge dedupes to the same run", async () => {
+    const idempotencyKey = "automerge-flip-test:" + "b".repeat(40);
+    const merging = buildInput(realReadyCard, idempotencyKey);
+    const notMerging = prWorkflowInputSchema.parse({
+      ...merging,
+      pr: { ...merging.pr, autoMerge: !merging.pr.autoMerge },
+    });
+
+    expect(notMerging.pr.autoMerge).not.toBe(merging.pr.autoMerge);
+    expect(admissionOf(notMerging)).toBe(admissionOf(merging));
+
+    // ...while a change that does alter the work still collides.
+    const otherBase = prWorkflowInputSchema.parse({
+      ...merging,
+      pr: { ...merging.pr, base: `${merging.pr.base}-elsewhere` },
+    });
+    expect(admissionOf(otherBase)).not.toBe(admissionOf(merging));
+
+    let createRunCalls = 0;
+    const first = await withIdempotentTrigger(
+      idempotencyKey,
+      async () => merging,
+      (input) => expect(admissionOf(input)).toBe(admissionOf(merging)),
+      async () => {
+        createRunCalls += 1;
+        return "run-merging";
+      },
+    );
+    expect(first.duplicate).toBe(false);
+
+    const second = await withIdempotentTrigger(
+      idempotencyKey,
+      async () => notMerging,
+      (input) => expect(admissionOf(input)).toBe(admissionOf(merging)),
+      async () => {
+        createRunCalls += 1;
+        return "run-not-merging";
+      },
+    );
+    expect(second.duplicate).toBe(true);
+    expect(second.mapping.runId).toBe("run-merging");
+    expect(createRunCalls).toBe(1);
+
     const stem = createHash("sha256").update(idempotencyKey).digest("hex");
     await rm(`${idempotencyRoot}/${stem}.json`, { force: true });
     await rm(`${idempotencyRoot}/${stem}.lock`, { recursive: true, force: true });

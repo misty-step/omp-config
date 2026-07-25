@@ -49,6 +49,15 @@ export function cardFactsFromPowderCard(card: PowderCard): CardFacts {
   });
 }
 
+/**
+ * The slice of PR settings that identifies the WORK a run performs, as opposed
+ * to the policy applied to its result. Both sides of the idempotency admission
+ * check derive from this so they cannot drift apart.
+ */
+export function admissionPrSettings(pr: PrWorkflowInput["pr"]): { base: string; branchPrefix: string } {
+  return { base: pr.base, branchPrefix: pr.branchPrefix };
+}
+
 export async function triggerConfiguredWorkflow(
   config: OperatorConfig,
   source: TriggerSource,
@@ -83,6 +92,13 @@ export async function triggerConfiguredWorkflow(
   // edited mid-flight, and that edit must not break idempotency. Only the card
   // id and head pin the run; the card's words ride along on the input. The
   // idempotency key above likewise excludes card text.
+  //
+  // It excludes `pr.autoMerge` for the same reason. That flag decides whether
+  // to press merge once the work is already done and green; it does not change
+  // what work runs. Including it meant an operator toggling the switch
+  // collided with every recorded run at the current head and wedged those
+  // cards until the head moved. `base` and `branchPrefix` stay in: they name
+  // the branch the run creates, so they are part of the work.
   const expectedAdmission = JSON.stringify({
     version: config.version,
     cardId,
@@ -90,7 +106,7 @@ export async function triggerConfiguredWorkflow(
     recipePaths: config.recipePaths,
     cwd: config.cwd,
     task: config.task,
-    pr: prSettings,
+    pr: admissionPrSettings(prSettings),
     idempotencyKey,
   });
   const { mapping, duplicate } = await withIdempotentTrigger(
@@ -131,7 +147,7 @@ export async function triggerConfiguredWorkflow(
         recipePaths: admittedInput.recipePaths,
         cwd: admittedInput.cwd,
         task: admittedInput.task,
-        pr: admittedInput.pr,
+        pr: admissionPrSettings(admittedInput.pr),
         idempotencyKey: admittedInput.idempotencyKey,
       });
       if (admitted !== expectedAdmission || (requestedHead && requestedHead !== admittedInput.headSha)) {
