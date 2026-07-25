@@ -115,6 +115,7 @@ class BuzzOmpTests(unittest.TestCase):
             ],
             "skills": [{"name": "demo", "path": "skills/demo"}],
             "mcpServers": mcp if mcp is not None else [],
+            "taskSkills": [],
         }
         spec = self.source / "recipe.json"
         spec.write_text(json.dumps(recipe))
@@ -315,6 +316,7 @@ class BuzzOmpTests(unittest.TestCase):
             ],
             "skills": [{"name": "demo", "path": "skills/demo"}],
             "mcpServers": [],
+            "taskSkills": [],
         }
         cases = {
             "path traversal": {**base, "instructions": "../instructions.md"},
@@ -381,6 +383,7 @@ class BuzzOmpTests(unittest.TestCase):
             ],
             "skills": [{"name": "demo", "path": "skills/demo"}],
             "mcpServers": [],
+            "taskSkills": [],
         }
         spec = self.source / "symlink-recipe.json"
         spec.write_text(json.dumps(recipe))
