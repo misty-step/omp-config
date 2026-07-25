@@ -42,6 +42,7 @@ An agent that omits `tools` receives OMP's full built-in tool catalog. Restricte
 | produce interface alternatives | `design`, `image-gen` | bundled `designer`; use `daedalus` first when architecture is unsettled |
 | improve an existing interface without replacing its identity | `improve-ui`, `baseline-ui` | bundled `designer` for review; `builder` for implementation |
 | accessibility or motion defects | `fixing-accessibility`, `fixing-motion-performance` | `builder` plus `qa`; add a vision pass |
+| draft or input loss on remount in a Yew WASM app | `yew-draft-persistence` | `builder`; `qa` confirms the draft survives on the live surface |
 | produce a rendered report | none — bare lane with a browser render loop | ad-hoc authoring lane; verify in a browser |
 | create public proof and launch material | `showcase` | `builder` plus `designer` and `qa` |
 | create or repair documentation | `document` | `magellan` sources; `builder` writes; `code-critic` checks claims |
@@ -51,10 +52,12 @@ An agent that omits `tools` receives OMP's full built-in tool catalog. Restricte
 | engineer harness primitives | `harness-engineering`, `writing-great-skills` | `builder`; `reviewer` review; `qa` live probe |
 | evaluate a skill | `skill-eval`, `eval-design` | ad-hoc eval lane; use Crucible; blind grader from another family |
 | design an MCP surface | `mcp-design`, `harness-engineering` | `daedalus` architecture; `builder` implementation; `qa` replay |
+| scope an MCP server to one directory subtree | `r90-ledger-guard` | the lane changing OMP configuration; also audits the R90 Habitat and Powder split |
 | operate Misty Step apps | `factory-apps`; then the named app skill or MCP | `cassandra` for incidents; `builder` for planned changes |
 | operate Estate infrastructure | `estate-infrastructure` | `cassandra` for incidents; `builder` for approved changes |
 | call a credentialed vendor API | `mint` | the specialist lane that owns the call; never expose credential bytes |
 | manage Powder work | `powder` | the lane that owns the card; `curator` for board-wide work |
+| manage operator tasks, reminders, and follow-ups | `todoist` | the lane that owns the request; Todoist holds life tasks, Powder holds work |
 | prepare remote public sandboxes | `sprites` | `builder` with a clean checkpoint |
 | post an Overmind milestone | `overmind-feed-post` | the lane that produced the milestone |
 | operate a herdr fleet | `herdr-fleet-ops` | one ad-hoc operations lane |
