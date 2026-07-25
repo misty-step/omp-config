@@ -21,7 +21,12 @@ const powderCardResponseSchema = z.union([
 ]);
 const powderCardListResponseSchema = z.object({
   cards: z.array(powderCardSchema),
+  has_more: z.boolean(),
+  next_after: z.string().min(1).nullable().optional(),
 }).passthrough();
+
+const POWDER_READY_QUEUE_PAGE_LIMIT = 100;
+const POWDER_READY_QUEUE_MAX_PAGES = 100;
 
 export type PowderCard = z.infer<typeof powderCardSchema>;
 export type PowderCardReader = () => Promise<PowderCard>;
@@ -72,17 +77,38 @@ export async function createPowderReadyQueueReader(
   const readyStatus = config.powder.readyStatus;
 
   return async () => {
-    const url = new URL("api/v1/cards", baseUrl);
-    url.searchParams.set("status", readyStatus);
-    url.searchParams.set("limit", "100");
-    const headers = new Headers();
-    if (authorization) headers.set("authorization", authorization);
-    const response = await fetchImpl(url, {
-      headers,
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (!response.ok) throw new Error(`Powder ready-queue list failed with HTTP ${response.status}`);
-    const page = powderCardListResponseSchema.parse(await response.json());
-    return page.cards;
+    const cards: PowderCard[] = [];
+    let nextAfter: string | undefined;
+
+    for (let pageNumber = 1; pageNumber <= POWDER_READY_QUEUE_MAX_PAGES; pageNumber += 1) {
+      const url = new URL("api/v1/cards", baseUrl);
+      url.searchParams.set("status", readyStatus);
+      url.searchParams.set("limit", String(POWDER_READY_QUEUE_PAGE_LIMIT));
+      if (nextAfter) url.searchParams.set("after", nextAfter);
+      const headers = new Headers();
+      if (authorization) headers.set("authorization", authorization);
+      const response = await fetchImpl(url, {
+        headers,
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (!response.ok) throw new Error(`Powder ready-queue list failed with HTTP ${response.status}`);
+      const page = powderCardListResponseSchema.parse(await response.json());
+      cards.push(...page.cards);
+      if (!page.has_more) return cards;
+      if (!page.next_after) {
+        // Powder reports has_more on its final partial page but supplies no
+        // cursor (observed live: 288 ready cards, page 3 of 3 returns 88 with
+        // has_more=true, next_after=null). There is no further page to ask
+        // for, so this is exhaustion. Throwing here would discard a complete
+        // result set and disable ready-queue mode outright.
+        process.stderr.write(
+          `hatchet: Powder reported has_more with no next_after after ${cards.length} cards; treating as end of queue\n`,
+        );
+        return cards;
+      }
+      nextAfter = page.next_after;
+    }
+
+    throw new Error(`Powder ready-queue pagination exceeded maximum of ${POWDER_READY_QUEUE_MAX_PAGES} pages`);
   };
 }
