@@ -96,7 +96,15 @@ export async function createPowderReadyQueueReader(
       cards.push(...page.cards);
       if (!page.has_more) return cards;
       if (!page.next_after) {
-        throw new Error("Powder ready-queue response has_more=true without next_after");
+        // Powder reports has_more on its final partial page but supplies no
+        // cursor (observed live: 288 ready cards, page 3 of 3 returns 88 with
+        // has_more=true, next_after=null). There is no further page to ask
+        // for, so this is exhaustion. Throwing here would discard a complete
+        // result set and disable ready-queue mode outright.
+        process.stderr.write(
+          `hatchet: Powder reported has_more with no next_after after ${cards.length} cards; treating as end of queue\n`,
+        );
+        return cards;
       }
       nextAfter = page.next_after;
     }

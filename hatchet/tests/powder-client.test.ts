@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { OperatorConfig } from "../src/config.js";
 import { createPowderReadyQueueReader } from "../src/powder-client.js";
 
@@ -74,6 +74,37 @@ describe("createPowderReadyQueueReader", () => {
 
     expect(cards.map(({ id }) => id)).toEqual(["first-page", "later-page"]);
     expect(requestedAfter).toEqual([null, "page-2"]);
+  });
+
+  // Powder's real behavior, measured against the production board: with 288
+  // ready cards at limit=100, page 3 returns 88 cards AND has_more=true AND
+  // next_after=null. A client that trusts has_more over the cursor's absence
+  // fails on every call.
+  it("treats has_more without a cursor as the end of the queue", async () => {
+    let requestCount = 0;
+    const stderr: string[] = [];
+    const writeSpy = vi
+      .spyOn(process.stderr, "write")
+      .mockImplementation((chunk: unknown) => {
+        stderr.push(String(chunk));
+        return true;
+      });
+    const fakeFetch = (async () => {
+      requestCount += 1;
+      const page = requestCount === 1
+        ? { cards: [{ id: "full-page", status: "ready", repo: "omp/a" }], total_count: 2, has_more: true, next_after: "page-2" }
+        // The live final-page shape: partial, claims more, offers no cursor.
+        : { cards: [{ id: "partial-final", status: "ready", repo: "omp/a" }], total_count: 2, has_more: true, next_after: null };
+      return new Response(JSON.stringify(page), { status: 200 });
+    }) as typeof fetch;
+
+    const listReadyCards = await createPowderReadyQueueReader(config(), fakeFetch);
+    const cards = await listReadyCards();
+
+    expect(cards.map(({ id }) => id)).toEqual(["full-page", "partial-final"]);
+    expect(requestCount).toBe(2);
+    expect(stderr.join("")).toMatch(/has_more with no next_after after 2 cards/);
+    writeSpy.mockRestore();
   });
 
   it("reports when pagination exceeds its explicit page cap", async () => {
