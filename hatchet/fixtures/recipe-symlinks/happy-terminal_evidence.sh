@@ -1,1 +1,1 @@
-/Users/phaedrus/Development/omp-config-buzz-omp/hatchet/fixtures/scenarios/happy.sh
+../scenarios/happy.sh
