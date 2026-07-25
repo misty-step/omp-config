@@ -1,0 +1,44 @@
+name: hatchet
+
+# Hatchet merges its own pull requests only when the head commit has a green
+# check. Without a workflow here, pr-workflow.ts refuses to merge at all (see
+# "refuses to merge when no CI is configured at all"), so the factory could
+# open pull requests forever and never close one. This is that check.
+on:
+  pull_request:
+    paths:
+      - "hatchet/**"
+      - ".github/workflows/hatchet.yml"
+  push:
+    branches: [master]
+    paths:
+      - "hatchet/**"
+      - ".github/workflows/hatchet.yml"
+
+concurrency:
+  group: hatchet-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: hatchet
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: hatchet/package-lock.json
+
+      - run: npm ci
+
+      - name: typecheck
+        run: npx tsc -p tsconfig.json --noEmit
+
+      - name: tests
+        run: npx vitest run
