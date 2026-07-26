@@ -1,6 +1,0 @@
-#!/bin/sh
-set -eu
-root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-mkdir -p "$root/local/hatchet-config"
-chmod 0700 "$root/local" "$root/local/hatchet-config"
-exec docker compose -f "$root/compose.yaml" up -d --wait
