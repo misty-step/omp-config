@@ -3,7 +3,7 @@ import { z } from "zod";
 export const shaSchema = z.string().regex(/^[0-9a-f]{40}$/i, "expected a full git SHA");
 export const artifactRefSchema = z.string().min(1).max(2048);
 
-export const triggerSourceSchema = z.enum(["manual", "webhook", "reconciler", "fixture"]);
+export const triggerSourceSchema = z.enum(["manual", "webhook", "reconciler"]);
 export type TriggerSource = z.infer<typeof triggerSourceSchema>;
 
 export const recipePathsSchema = z.object({
@@ -75,9 +75,7 @@ export const prWorkflowInputSchema = z.object({
   cwd: z.string().min(1),
   task: z.string().min(1),
   card: cardFactsSchema,
-  idempotencyKey: z.string().min(1).max(512),
   triggerSource: triggerSourceSchema,
-  requestedAt: z.string().datetime(),
   // Defaulted so a state file written before publishing existed still replays.
   pr: prSettingsSchema.default(defaultPrSettings),
 }).strict();

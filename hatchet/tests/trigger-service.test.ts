@@ -1,11 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { createHash } from "node:crypto";
 import { rm } from "node:fs/promises";
 import { cardFactsSchema, prWorkflowInputSchema, runnerTerminalSchema, type CardFacts, type PrWorkflowInput, type RunnerTerminal } from "../src/contracts.js";
 import { runPrWorkflow } from "../src/pr-workflow.js";
-import { admissionPrSettings, cardFactsFromPowderCard } from "../src/trigger-service.js";
-import { withIdempotentTrigger } from "../src/idempotency.js";
-import { executionRoot, idempotencyRoot } from "../src/config.js";
+import { cardFactsFromPowderCard, triggerConfiguredWorkflow } from "../src/trigger-service.js";
+import { executionRoot } from "../src/config.js";
 import type { PowderCard } from "../src/powder-client.js";
 
 // Real Powder read-side shape (confirmed against the live API by the lead):
@@ -27,7 +25,7 @@ const realReadyCard: PowderCard = {
   ],
 };
 
-function baseInput(card: CardFacts, idempotencyKey: string): PrWorkflowInput {
+function baseInput(card: CardFacts): PrWorkflowInput {
   return prWorkflowInputSchema.parse({
     version: 1,
     cardId: "buzz-omp-allowlist-allow-path-test",
@@ -43,9 +41,7 @@ function baseInput(card: CardFacts, idempotencyKey: string): PrWorkflowInput {
     cwd: "/repo",
     task: "task",
     card,
-    idempotencyKey,
-    triggerSource: "fixture",
-    requestedAt: "2026-07-23T00:00:00.000Z",
+    triggerSource: "manual",
   });
 }
 
@@ -93,11 +89,11 @@ describe("card facts reach every stage request", () => {
     const observedCards: CardFacts[] = [];
     const observedStages: string[] = [];
     const card: CardFacts = cardFactsFromPowderCard(realReadyCard);
-    // Unique idempotency key per run keeps the persisted execution state
-    // hermetic — loadWorkflowState re-reads and re-parses whatever the run
-    // checkpoints, so a stale file from a prior shape would otherwise mask
-    // the real behavior under test.
-    const input = baseInput(card, `card-reaches-stages-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+    // Checkpoints hang off the run id, so a unique one per test keeps the
+    // persisted execution state hermetic: loadWorkflowState re-reads whatever
+    // the run wrote, and a stale file would otherwise mask the real behavior.
+    const runId = `card-reaches-stages-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const input = baseInput(card);
 
     const dependencies = {
       async runStage(
@@ -143,7 +139,7 @@ describe("card facts reach every stage request", () => {
     };
 
     try {
-      await runPrWorkflow(input, new AbortController().signal, dependencies as never);
+      await runPrWorkflow(input, runId, new AbortController().signal, dependencies as never);
 
       // Every stage observed received the exact card facts.
       expect(observedStages.length).toBeGreaterThan(0);
@@ -156,156 +152,85 @@ describe("card facts reach every stage request", () => {
       }
     } finally {
       // Clean up the persisted execution state so the test is hermetic.
-      const stateStem = createHash("sha256").update(input.idempotencyKey).digest("hex");
-      await rm(`${executionRoot}/${stateStem}.json`, { force: true }).catch(() => {});
+      await rm(`${executionRoot}/${runId}.json`, { force: true }).catch(() => {});
     }
   });
 });
 
-describe("idempotency is unaffected by card text", () => {
-  // The admission comparison in triggerConfiguredWorkflow deliberately
-  // excludes `card`, and the idempotency key is `${cardId}:${head}` before the
-  // card is ever read. Prove this end-to-end through the real
-  // withIdempotentTrigger: a card whose body is edited mid-flight dedupes to
-  // the same run (createRun called exactly once, duplicate=true on the second
-  // admission), and the admission check passes because it excludes card text.
-  // Mirrors triggerConfiguredWorkflow's admission exactly, reusing the same
-  // pr-slice helper so this cannot silently diverge from production. It did:
-  // this helper omitted `pr` entirely, which is why an autoMerge flip
-  // colliding with a recorded run went unnoticed until it wedged a live card.
-  function admissionOf(input: PrWorkflowInput): string {
-    return JSON.stringify({
-      version: input.version,
-      cardId: input.cardId,
-      repository: input.repository,
-      recipePaths: input.recipePaths,
-      cwd: input.cwd,
-      task: input.task,
-      pr: admissionPrSettings(input.pr),
-      idempotencyKey: input.idempotencyKey,
+// These two properties survived the move to engine-native idempotency, and both
+// were real incidents. A card's body is edited while its run is in flight; an
+// operator flips autoMerge mid-run. Neither changes what work is running, so
+// neither may start a second run against the same worktree.
+//
+// The old implementation enforced this by excluding both from a hand-built
+// fingerprint. The engine now enforces it by keying on the card alone, so what
+// is left to prove is that this function reports the dedupe rather than
+// dispatching around it.
+describe("admission ignores everything except the card", () => {
+  const live = { runId: "run-already-going", headSha: "b".repeat(40) };
+  const config = {
+    version: 1 as const,
+    cardId: "card-1",
+    repository: "omp-config",
+    recipePaths: {
+      implement: "/recipes/implement",
+      adversarial_review: "/recipes/review",
+      remediate: "/recipes/remediate",
+      live_verify: "/recipes/verify",
+      terminal_evidence: "/recipes/evidence",
+    },
+    cwd: "/repo",
+    task: "task",
+  };
+  // A dispatch would need these; the test asserts they are never reached.
+  const githubClient = { ensureBranch: async () => {} } as never;
+
+  it("reports the live run instead of starting a second one", async () => {
+    const result = await triggerConfiguredWorkflow({
+      config,
+      source: "manual",
+      githubClient,
+      checkInFlight: async () => live,
     });
-  }
 
-  function buildInput(cardToUse: PowderCard, idempotencyKey: string): PrWorkflowInput {
-    return prWorkflowInputSchema.parse({
-      version: 1,
-      cardId: "buzz-omp-allowlist-allow-path-test",
-      repository: "omp-config",
-      headSha: "a".repeat(40),
-      recipePaths: {
-        implement: "/recipes/implement",
-        adversarial_review: "/recipes/review",
-        remediate: "/recipes/remediate",
-        live_verify: "/recipes/verify",
-        terminal_evidence: "/recipes/evidence",
-      },
-      cwd: "/repo",
-      task: "task",
-      card: cardFactsFromPowderCard(cardToUse),
-      idempotencyKey,
-      triggerSource: "reconciler",
-      requestedAt: "2026-07-23T00:00:00.000Z",
-    });
-  }
-
-  it("a card whose body is edited mid-flight dedupes to the same run", async () => {
-    const idempotencyKey = "buzz-omp-allowlist-allow-path-test:" + "a".repeat(40);
-    const editedCard: PowderCard = { ...realReadyCard, body: "EDITED MID-FLIGHT BODY" };
-
-    const expectedAdmission = admissionOf(buildInput(realReadyCard, idempotencyKey));
-    let createRunCalls = 0;
-
-    const first = await withIdempotentTrigger(
-      idempotencyKey,
-      async () => buildInput(realReadyCard, idempotencyKey),
-      (input) => {
-        expect(admissionOf(input)).toBe(expectedAdmission);
-      },
-      async () => {
-        createRunCalls += 1;
-        return "run-A";
-      },
-    );
-    expect(first.duplicate).toBe(false);
-    expect(first.mapping.runId).toBe("run-A");
-
-    // Second admission: same idempotency key, edited card body. Must dedupe.
-    const second = await withIdempotentTrigger(
-      idempotencyKey,
-      async () => buildInput(editedCard, idempotencyKey),
-      (input) => {
-        // Exact assertion text proving idempotency is unaffected by card text:
-        // the edited card's admission equals the original's, because card is
-        // excluded from the comparison.
-        expect(admissionOf(input)).toBe(expectedAdmission);
-      },
-      async () => {
-        createRunCalls += 1;
-        return "run-B";
-      },
-    );
-    expect(second.duplicate).toBe(true);
-    expect(second.mapping.runId).toBe("run-A");
-    expect(createRunCalls).toBe(1); // createRun ran exactly once — the edited card did not fork a new run
-
-    // The persisted mapping carries the card from the first (winning) build.
-    expect((second.mapping.input as PrWorkflowInput).card.body).toBe(realReadyCard.body);
-
-    // Clean up the idempotency mapping so the test is hermetic.
-    const stem = createHash("sha256").update(idempotencyKey).digest("hex");
-    await rm(`${idempotencyRoot}/${stem}.json`, { force: true });
-    await rm(`${idempotencyRoot}/${stem}.lock`, { recursive: true, force: true });
+    expect(result).toEqual({ runId: "run-already-going", duplicate: true, headSha: "b".repeat(40) });
   });
 
-  // Measured live: flipping autoMerge on the operator config made every
-  // recorded run at the current head collide, and the card stayed wedged until
-  // the head moved. autoMerge decides what to do after the work is done and
-  // green; it never changes what work runs.
-  it("an operator flipping autoMerge dedupes to the same run", async () => {
-    const idempotencyKey = "automerge-flip-test:" + "b".repeat(40);
-    const merging = buildInput(realReadyCard, idempotencyKey);
-    const notMerging = prWorkflowInputSchema.parse({
-      ...merging,
-      pr: { ...merging.pr, autoMerge: !merging.pr.autoMerge },
+  it("returns the head the live run pinned, not the caller's", async () => {
+    // The caller is asking on behalf of a newer commit. Reporting its own head
+    // back would hide the fact that this commit is not the one running.
+    const result = await triggerConfiguredWorkflow({
+      config,
+      source: "manual",
+      headSha: "c".repeat(40),
+      githubClient,
+      checkInFlight: async () => live,
     });
 
-    expect(notMerging.pr.autoMerge).not.toBe(merging.pr.autoMerge);
-    expect(admissionOf(notMerging)).toBe(admissionOf(merging));
+    expect(result.headSha).toBe("b".repeat(40));
+    expect(result.duplicate).toBe(true);
+  });
 
-    // ...while a change that does alter the work still collides.
-    const otherBase = prWorkflowInputSchema.parse({
-      ...merging,
-      pr: { ...merging.pr, base: `${merging.pr.base}-elsewhere` },
+  it("dedupes on the card whose run is live, not on the requesting card's text", async () => {
+    // Card body/priority/criteria are not inputs to the lookup at all: it takes
+    // a card id. Proven by asking with a card override whose text differs and
+    // observing the same verdict.
+    const seen: string[] = [];
+    const result = await triggerConfiguredWorkflow({
+      config,
+      source: "reconciler",
+      githubClient,
+      card: {
+        cardId: "card-1",
+        card: { id: "card-1", status: "ready", title: "edited mid-flight", body: "rewritten" },
+      },
+      checkInFlight: async (cardId) => {
+        seen.push(cardId);
+        return live;
+      },
     });
-    expect(admissionOf(otherBase)).not.toBe(admissionOf(merging));
 
-    let createRunCalls = 0;
-    const first = await withIdempotentTrigger(
-      idempotencyKey,
-      async () => merging,
-      (input) => expect(admissionOf(input)).toBe(admissionOf(merging)),
-      async () => {
-        createRunCalls += 1;
-        return "run-merging";
-      },
-    );
-    expect(first.duplicate).toBe(false);
-
-    const second = await withIdempotentTrigger(
-      idempotencyKey,
-      async () => notMerging,
-      (input) => expect(admissionOf(input)).toBe(admissionOf(merging)),
-      async () => {
-        createRunCalls += 1;
-        return "run-not-merging";
-      },
-    );
-    expect(second.duplicate).toBe(true);
-    expect(second.mapping.runId).toBe("run-merging");
-    expect(createRunCalls).toBe(1);
-
-    const stem = createHash("sha256").update(idempotencyKey).digest("hex");
-    await rm(`${idempotencyRoot}/${stem}.json`, { force: true });
-    await rm(`${idempotencyRoot}/${stem}.lock`, { recursive: true, force: true });
+    expect(seen).toEqual(["card-1"]);
+    expect(result.duplicate).toBe(true);
   });
 });

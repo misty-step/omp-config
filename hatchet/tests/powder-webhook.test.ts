@@ -160,23 +160,22 @@ describe("Powder webhook HTTP contract", () => {
     });
   });
 
-  it("returns the existing run for a duplicate event and leaves HEAD/key derivation to the shared trigger", async () => {
+  it("returns the existing run for a duplicate event and leaves HEAD derivation to the shared trigger", async () => {
     const body = eventBody(configuredCardId, "evt-duplicate");
     let admitted = false;
-    const triggerCalls: Array<{ head: string | undefined; key: string | undefined }> = [];
+    // A Powder event carries no commit, so the webhook must pass neither a head
+    // nor a card override and let the trigger snapshot HEAD itself. Recording
+    // the whole request is how we prove it adds nothing of its own.
+    const triggerCalls: Array<Record<string, unknown>> = [];
     await withServer({
       config,
       secret,
       readPowderCard: async () => ({ id: configuredCardId, status: "ready" }),
-      triggerWorkflow: async (_config, _source, head, key) => {
-        triggerCalls.push({ head, key });
+      triggerWorkflow: async (request) => {
+        triggerCalls.push({ ...request });
         const duplicate = admitted;
         admitted = true;
-        return {
-          runId: "run-existing",
-          duplicate,
-          idempotencyKey: `${configuredCardId}:${"a".repeat(40)}`,
-        };
+        return { runId: "run-existing", duplicate, headSha: "a".repeat(40) };
       },
     }, async (baseUrl) => {
       const first = await fetch(`${baseUrl}/webhook/powder`, {
@@ -191,9 +190,10 @@ describe("Powder webhook HTTP contract", () => {
       });
       expect(await first.json()).toMatchObject({ runId: "run-existing", duplicate: false, triggered: true });
       expect(await second.json()).toMatchObject({ runId: "run-existing", duplicate: true, triggered: false });
+      // Exactly the config and the source — no head, no card override.
       expect(triggerCalls).toEqual([
-        { head: undefined, key: undefined },
-        { head: undefined, key: undefined },
+        { config, source: "webhook" },
+        { config, source: "webhook" },
       ]);
     });
   });

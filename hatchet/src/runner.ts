@@ -48,7 +48,7 @@ export function runnerEnvironment(source: NodeJS.ProcessEnv = process.env): Node
   return environment;
 }
 
-export type RunnerRequest = {
+type RunnerRequest = {
   recipePath: string;
   task: string;
   cwd: string;
@@ -63,7 +63,7 @@ export type RunnerAttempt = {
   attempts: number;
 };
 
-export type RetrySleeper = (milliseconds: number, signal: AbortSignal) => Promise<void>;
+type RetrySleeper = (milliseconds: number, signal: AbortSignal) => Promise<void>;
 
 export const defaultSleeper: RetrySleeper = async (milliseconds, signal) => {
   try {

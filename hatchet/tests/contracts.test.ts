@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { prWorkflowInputSchema, evidencePacketSchema } from "../src/contracts.js";
-import { canonicalInputHash, loadWorkflowState } from "../src/state-store.js";
+import { loadWorkflowState } from "../src/state-store.js";
 
 const baseInput = {
   version: 1 as const,
@@ -17,9 +17,7 @@ const baseInput = {
   cwd: "/repo",
   task: "task",
   card: { title: "card title", body: "", criteria: [] },
-  idempotencyKey: "key",
-  triggerSource: "fixture" as const,
-  requestedAt: "2026-07-23T00:00:00.000Z",
+  triggerSource: "manual" as const,
 };
 
 describe("contracts", () => {
@@ -71,11 +69,10 @@ describe("contracts", () => {
   });
 });
 
-describe("state store idempotency", () => {
-  it("returns a fresh state for unknown inputs", async () => {
-    const input = prWorkflowInputSchema.parse({ ...baseInput, idempotencyKey: `fresh-${Date.now()}` });
-    const state = await loadWorkflowState(input);
-    expect(state.stages).toEqual([]);
-    expect(state.inputHash).toBe(canonicalInputHash(input));
+describe("state store", () => {
+  it("returns a fresh state for an unknown run id", async () => {
+    const runId = `fresh-${Date.now()}`;
+    const state = await loadWorkflowState(runId);
+    expect(state).toEqual({ version: 3, runId, stages: [] });
   });
 });

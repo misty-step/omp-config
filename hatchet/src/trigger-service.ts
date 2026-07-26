@@ -3,15 +3,24 @@ import { createGithubClient, type GithubClient } from "./github.js";
 import { currentHeadSha } from "./git-head.js";
 import { createHatchetClient } from "./hatchet-client.js";
 import { declarePrWorkflow } from "./hatchet-workflow.js";
-import { withIdempotentTrigger } from "./idempotency.js";
+import { findInFlightRun, type LiveRun } from "./run-liveness.js";
+import { withDispatchLock } from "./dispatch-lock.js";
 import type { OperatorConfig } from "./config.js";
 import { DeterministicInputError } from "./errors.js";
 import { createPowderCardReader, type PowderCard, type PowderCardReader } from "./powder-client.js";
 
 export type TriggerResult = {
-  runId: string;
+  // Absent only in one case: another process held the dispatch lock and its run
+  // was not yet visible to the engine query. The card IS being dispatched — an
+  // empty string here would be indistinguishable from a real id to every caller
+  // that logs it or writes it to Powder, so there is no id instead of a fake one.
+  runId?: string;
   duplicate: boolean;
-  idempotencyKey: string;
+  // The commit the run is pinned to. When `duplicate` is true this is the head
+  // the LIVE run took, which may be behind the caller's: a commit landing
+  // mid-run does not start a second run, so this is how a caller tells
+  // "my change is running" from "my change is queued behind the one that is".
+  headSha?: string;
 };
 
 export type CardOverride = {
@@ -50,31 +59,38 @@ export function cardFactsFromPowderCard(card: PowderCard): CardFacts {
 }
 
 /**
- * The slice of PR settings that identifies the WORK a run performs, as opposed
- * to the policy applied to its result. Both sides of the idempotency admission
- * check derive from this so they cannot drift apart.
+ * A trigger request. This is an object rather than a positional list because
+ * the list had grown to six parameters, four of them optional, and callers
+ * padded the gaps with `undefined` — a shape where removing one parameter
+ * silently slides every later argument into the wrong slot.
  */
-export function admissionPrSettings(pr: PrWorkflowInput["pr"]): { base: string; branchPrefix: string } {
-  return { base: pr.base, branchPrefix: pr.branchPrefix };
+function delay(ms: number): Promise<void> {
+  const { promise, resolve } = Promise.withResolvers<void>();
+  setTimeout(resolve, ms);
+  return promise;
 }
 
-export async function triggerConfiguredWorkflow(
-  config: OperatorConfig,
-  source: TriggerSource,
-  requestedHeadSha?: string,
-  requestedIdempotencyKey?: string,
-  cardOverride?: CardOverride,
-  readPowderCard?: PowderCardReader,
-  githubClient: GithubClient = createGithubClient(),
-): Promise<TriggerResult> {
+export type TriggerRequest = {
+  config: OperatorConfig;
+  source: TriggerSource;
+  headSha?: string;
+  card?: CardOverride;
+  readPowderCard?: PowderCardReader;
+  githubClient?: GithubClient;
+  checkInFlight?: (cardId: string) => Promise<LiveRun | undefined>;
+};
+
+export async function triggerConfiguredWorkflow(request: TriggerRequest): Promise<TriggerResult> {
+  const { config, source, card: cardOverride, readPowderCard } = request;
+  const githubClient = request.githubClient ?? createGithubClient();
+  const checkInFlight = request.checkInFlight ?? findInFlightRun;
   const cardId = cardOverride?.cardId ?? config.cardId;
   const repository = cardOverride?.repository ?? config.repository;
   if (!cardId) throw new Error("cardId is required to trigger a workflow");
   if (!repository) throw new Error("repository is required to trigger a workflow");
-  const requestedHead = requestedHeadSha?.toLowerCase();
+  const requestedHead = request.headSha?.toLowerCase();
   // The operator config may leave publishing policy unspecified; the trigger is
-  // where it resolves, so an absent block and an explicit default compare equal
-  // in the admission check below rather than looking like a changed input.
+  // where it resolves.
   const prSettings = config.pr ?? defaultPrSettings;
   // The card's branch must exist BEFORE the head is read. The head pins the run
   // and every stage asserts against it, so creating the branch later - inside
@@ -86,87 +102,82 @@ export async function triggerConfiguredWorkflow(
     prSettings.base,
     prBranchForCard(cardId, prSettings.branchPrefix),
   );
-  const initialHead = requestedIdempotencyKey ? undefined : await currentHeadSha(config.cwd);
-  const idempotencyKey = requestedIdempotencyKey ?? `${cardId}:${requestedHead ?? initialHead}`;
-  // The admission comparison deliberately excludes `card`: a card's body may be
-  // edited mid-flight, and that edit must not break idempotency. Only the card
-  // id and head pin the run; the card's words ride along on the input. The
-  // idempotency key above likewise excludes card text.
-  //
-  // It excludes `pr.autoMerge` for the same reason. That flag decides whether
-  // to press merge once the work is already done and green; it does not change
-  // what work runs. Including it meant an operator toggling the switch
-  // collided with every recorded run at the current head and wedged those
-  // cards until the head moved. `base` and `branchPrefix` stay in: they name
-  // the branch the run creates, so they are part of the work.
-  const expectedAdmission = JSON.stringify({
-    version: config.version,
+  // The engine's live run status is the authority on whether this card is
+  // busy. A terminal run — including a FAILED one — releases its card here by
+  // definition, which is what the deleted filesystem mapping could never do.
+  const live = await checkInFlight(cardId);
+  if (live) return { runId: live.runId, duplicate: true, ...(live.headSha ? { headSha: live.headSha } : {}) };
+
+  const headSha = requestedHead ?? await currentHeadSha(config.cwd);
+  // Card facts come from the card actually read — never operator config.
+  // Ready-queue reconciliation hands the card it already read via
+  // cardOverride.card; the manual/webhook paths read it from Powder here.
+  const powderCard = cardOverride?.card ?? await (readPowderCard ?? (await createPowderCardReader(config)))();
+  const input = prWorkflowInputSchema.parse({
+    version: 1,
     cardId,
     repository,
+    headSha,
     recipePaths: config.recipePaths,
     cwd: config.cwd,
     task: config.task,
-    pr: admissionPrSettings(prSettings),
-    idempotencyKey,
+    pr: prSettings,
+    card: cardFactsFromPowderCard(powderCard),
+    triggerSource: source,
   });
-  const { mapping, duplicate } = await withIdempotentTrigger(
-    idempotencyKey,
-    async () => {
-      const actualHeadSha = await currentHeadSha(config.cwd);
-      const headSha = requestedHead ?? initialHead ?? actualHeadSha;
-      if (headSha !== actualHeadSha) {
-        throw new DeterministicInputError(
-          `trigger rejected stale head: requested ${headSha}, current ${actualHeadSha}`,
-        );
-      }
-      // Card facts come from the card actually read — never operator config.
-      // Ready-queue reconciliation hands the card it already read via
-      // cardOverride.card; the manual/webhook paths read it from Powder here.
-      const powderCard = cardOverride?.card ?? await (readPowderCard ?? (await createPowderCardReader(config)))();
-      const card = cardFactsFromPowderCard(powderCard);
-      return prWorkflowInputSchema.parse({
-        version: 1,
-        cardId,
-        repository,
-        headSha,
-        recipePaths: config.recipePaths,
-        cwd: config.cwd,
-        task: config.task,
-        pr: prSettings,
-        card,
-        idempotencyKey,
-        triggerSource: source,
-        requestedAt: new Date().toISOString(),
-      });
-    },
-    (admittedInput: PrWorkflowInput) => {
-      const admitted = JSON.stringify({
-        version: admittedInput.version,
-        cardId: admittedInput.cardId,
-        repository: admittedInput.repository,
-        recipePaths: admittedInput.recipePaths,
-        cwd: admittedInput.cwd,
-        task: admittedInput.task,
-        pr: admissionPrSettings(admittedInput.pr),
-        idempotencyKey: admittedInput.idempotencyKey,
-      });
-      if (admitted !== expectedAdmission || (requestedHead && requestedHead !== admittedInput.headSha)) {
-        throw new DeterministicInputError("idempotency key reused with different trigger input");
-      }
-    },
-    async (input: PrWorkflowInput) => {
-      const client = await createHatchetClient();
-      const workflow = declarePrWorkflow(client);
-      const reference = await workflow.runNoWait(input, {
-        additionalMetadata: {
-          card_id: input.cardId,
-          head_sha: input.headSha,
-          idempotency_key: input.idempotencyKey,
-          trigger_source: input.triggerSource,
-        },
-      });
-      return await reference.runId;
-    },
-  );
-  return { runId: mapping.runId, duplicate, idempotencyKey };
+
+  // Two triggers can both pass the check above before either dispatches, and
+  // two runs sharing one worktree fight over HEAD and both die. The engine
+  // would normally close that window, but the deployed one ignores the
+  // idempotency config (verified live — see hatchet-workflow.ts).
+  const dispatched = await withDispatchLock(cardId, async () => {
+    const client = await createHatchetClient();
+    const workflow = declarePrWorkflow(client);
+    const reference = await workflow.runNoWait(input, {
+      additionalMetadata: {
+        // findInFlightRun queries on card_id, so this tag is load-bearing, not
+        // decoration: without it a card's live run is invisible to the reconciler.
+        card_id: input.cardId,
+        head_sha: input.headSha,
+        trigger_source: input.triggerSource,
+      },
+    });
+    const runId = await reference.runId;
+    // Measured: a dispatched run takes roughly 500ms to appear in the engine's
+    // additionalMetadata index, though it is RUNNING immediately. Releasing the
+    // lock at dispatch would leave a window where the next trigger's liveness
+    // check sees nothing and starts a rival run. Hold until the run is
+    // observable by the same query that guards admission.
+    let observable = false;
+    for (const delayMs of [100, 200, 400, 800, 1600]) {
+      observable = Boolean(await checkInFlight(cardId));
+      if (observable) break;
+      await delay(delayMs);
+    }
+    if (!observable) {
+      // Releasing here reopens the double-dispatch window this loop exists to
+      // close. It should be unreachable — say so loudly rather than letting a
+      // slower index or a broken metadata filter surface weeks later as an
+      // unexplained rival run.
+      process.stderr.write(
+        `trigger: run ${runId} for card ${cardId} was not observable within 3.1s; ` +
+        `dispatch lock releasing anyway, a concurrent trigger may start a rival run\n`,
+      );
+    }
+    return runId;
+  });
+
+  if (!dispatched) {
+    // Another process is dispatching this same card right now. Report the
+    // dedupe rather than inventing a run id; the next tick observes its run.
+    // The holder's run may not be queryable yet, so give it a moment before
+    // reporting an unobservable dispatch.
+    for (const delayMs of [150, 400, 1000]) {
+      const raced = await checkInFlight(cardId);
+      if (raced) return { runId: raced.runId, duplicate: true, ...(raced.headSha ? { headSha: raced.headSha } : {}) };
+      await delay(delayMs);
+    }
+    return { duplicate: true, headSha };
+  }
+  return { runId: dispatched, duplicate: false, headSha };
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { OperatorConfig } from "../src/config.js";
 import { createPowderReadyQueueReader, type PowderCard } from "../src/powder-client.js";
-import { reconcileOnce, selectReadyCard, type ReconcileDependencies } from "../src/reconciler.js";
+import { reconcileOnce, type ReconcileDependencies } from "../src/reconciler.js";
 import type { TriggerResult } from "../src/trigger-service.js";
 
 function baseConfig(overrides: Partial<OperatorConfig> = {}): OperatorConfig {
@@ -32,43 +32,15 @@ function card(id: string, status: string, repo?: string): PowderCard {
 }
 
 function fakeTriggerResult(overrides: Partial<TriggerResult> = {}): TriggerResult {
-  return { runId: "run-1", duplicate: false, idempotencyKey: "key", ...overrides };
+  return { runId: "run-1", duplicate: false, ...overrides };
 }
-
-describe("selectReadyCard", () => {
-  const cards = [
-    card("c-blocked", "blocked", "omp/a"),
-    card("c-first-ready", "ready", "omp/a"),
-    card("c-second-ready", "ready", "omp/b"),
-  ];
-
-  it("returns the first card matching the ready status, preserving order", () => {
-    expect(selectReadyCard(cards, "ready")?.id).toBe("c-first-ready");
-  });
-
-  it("skips cards whose status does not match", () => {
-    expect(selectReadyCard([card("only-blocked", "blocked")], "ready")).toBeUndefined();
-  });
-
-  it("filters by repository allowlist when provided", () => {
-    expect(selectReadyCard(cards, "ready", ["omp/b"])?.id).toBe("c-second-ready");
-  });
-
-  it("skips cards missing a repo when an allowlist is configured", () => {
-    const noRepo = [card("no-repo", "ready")];
-    expect(selectReadyCard(noRepo, "ready", ["omp/a"])).toBeUndefined();
-  });
-
-  it("returns undefined when no card is eligible", () => {
-    expect(selectReadyCard(cards, "ready", ["omp/z"])).toBeUndefined();
-  });
-});
 
 describe("reconcileOnce single-card mode (legacy, preserved)", () => {
   it("does not trigger when the configured card is not ready", async () => {
     const config = baseConfig();
     const trigger = vi.fn();
     const deps: ReconcileDependencies = {
+      checkInFlight: async () => undefined,
       findOpenPullRequest: async () => undefined,
       readPowderCard: async () => card("template-card", "blocked"),
       trigger,
@@ -83,20 +55,19 @@ describe("reconcileOnce single-card mode (legacy, preserved)", () => {
     const trigger = vi.fn().mockResolvedValue(fakeTriggerResult());
     const readyCard = { ...card("template-card", "ready"), title: "Template card", criteria: [{ text: "a" }] };
     const deps: ReconcileDependencies = {
+      checkInFlight: async () => undefined,
       findOpenPullRequest: async () => undefined,
       readPowderCard: async () => readyCard,
       trigger,
     };
     const result = await reconcileOnce(config, deps);
     expect(trigger).toHaveBeenCalledTimes(1);
-    expect(trigger).toHaveBeenCalledWith(
+    expect(trigger).toHaveBeenCalledWith({
       config,
-      "reconciler",
-      undefined,
-      undefined,
-      { cardId: "template-card", card: readyCard },
-      expect.any(Function),
-    );
+      source: "reconciler",
+      card: { cardId: "template-card", card: readyCard },
+      readPowderCard: expect.any(Function),
+    });
     expect(result).toMatchObject({ mode: "single", cardId: "template-card", triggered: true, runId: "run-1" });
   });
 
@@ -104,6 +75,7 @@ describe("reconcileOnce single-card mode (legacy, preserved)", () => {
     const config = baseConfig();
     const trigger = vi.fn().mockResolvedValue(fakeTriggerResult({ duplicate: true }));
     const deps: ReconcileDependencies = {
+      checkInFlight: async () => undefined,
       findOpenPullRequest: async () => undefined,
       readPowderCard: async () => card("template-card", "ready"),
       trigger,
@@ -118,7 +90,7 @@ describe("reconcileOnce single-card mode (legacy, preserved)", () => {
       findOpenPullRequest: async () => undefined,
       readPowderCard: async () => card("busy-card", "ready"),
       trigger,
-      checkInFlight: async () => "run-live-1",
+      checkInFlight: async () => ({ runId: "run-live-1" }),
     };
     const result = await reconcileOnce(baseConfig({ cardId: "busy-card" }), deps);
 
@@ -126,11 +98,15 @@ describe("reconcileOnce single-card mode (legacy, preserved)", () => {
     expect(result).toMatchObject({ cardId: "busy-card", triggered: false, reason: "run_in_flight", runId: "run-live-1" });
   });
 
-  it("triggers a card whose last run failed, so a dead run never wedges it", async () => {
-    // The self-heal property. `checkInFlight` reports undefined for any
-    // terminal run, including a failure that left local state half-written.
-    // If this ever regresses to reading execution-state files, a failed run
-    // leaves `final: null` forever and the card can never be picked up again.
+  it("triggers the card when the liveness check reports it clear", async () => {
+    // This proves the reconciler acts on a clear verdict. It does NOT prove the
+    // self-heal property it used to claim: `checkInFlight` is stubbed here, so
+    // a version of it that wedged on failed runs would pass this just as well.
+    //
+    // What actually releases a dead run's card lives in findInFlightRun, which
+    // asks the engine for QUEUED/RUNNING runs only. That is proven end-to-end
+    // by the live wedge proof in the PR: a run failed with HEAD unmoved, and
+    // the next trigger was admitted with a new run id.
     const trigger = vi.fn(async () => fakeTriggerResult({ runId: "run-next" }));
     const deps: ReconcileDependencies = {
       findOpenPullRequest: async () => undefined,
@@ -178,17 +154,15 @@ describe("reconcileOnce ready-queue mode", () => {
       card("second-ready", "ready", "omp/b"),
     ];
     const trigger = vi.fn().mockResolvedValue(fakeTriggerResult({ runId: "run-first" }));
-    const deps: ReconcileDependencies = { listReadyCards: async () => cards, trigger , findOpenPullRequest: async () => undefined };
+    const deps: ReconcileDependencies = { checkInFlight: async () => undefined, listReadyCards: async () => cards, trigger , findOpenPullRequest: async () => undefined };
     const result = await reconcileOnce(queueConfig(), deps);
 
     expect(trigger).toHaveBeenCalledTimes(1);
-    expect(trigger).toHaveBeenCalledWith(
-      expect.anything(),
-      "reconciler",
-      undefined,
-      undefined,
-      { cardId: "first-ready", repository: "omp/a", card: cards[1] },
-    );
+    expect(trigger).toHaveBeenCalledWith({
+      config: expect.anything(),
+      source: "reconciler",
+      card: { cardId: "first-ready", repository: "omp/a", card: cards[1] },
+    });
     expect(result).toMatchObject({
       mode: "ready-queue",
       cardId: "first-ready",
@@ -208,19 +182,17 @@ describe("reconcileOnce ready-queue mode", () => {
     const listReadyCards = await createPowderReadyQueueReader(queueConfig(), fakeFetch);
     const trigger = vi.fn().mockResolvedValue(fakeTriggerResult({ runId: "run-later" }));
 
-    const result = await reconcileOnce(queueConfig(), {
+    const result = await reconcileOnce(queueConfig(), { checkInFlight: async () => undefined,
       listReadyCards,
       trigger,
       findOpenPullRequest: async () => undefined,
     });
 
-    expect(trigger).toHaveBeenCalledWith(
-      expect.anything(),
-      "reconciler",
-      undefined,
-      undefined,
-      { cardId: "later-page", repository: "omp/a", card: expect.objectContaining({ id: "later-page" }) },
-    );
+    expect(trigger).toHaveBeenCalledWith({
+      config: expect.anything(),
+      source: "reconciler",
+      card: { cardId: "later-page", repository: "omp/a", card: expect.objectContaining({ id: "later-page" }) },
+    });
     expect(result).toMatchObject({ cardId: "later-page", triggered: true, runId: "run-later" });
   });
 
@@ -230,24 +202,22 @@ describe("reconcileOnce ready-queue mode", () => {
       { ...card("allowed-repo", "ready", "omp/allowed"), title: "Allowed" },
     ];
     const trigger = vi.fn().mockResolvedValue(fakeTriggerResult());
-    const deps: ReconcileDependencies = { listReadyCards: async () => cards, trigger , findOpenPullRequest: async () => undefined };
+    const deps: ReconcileDependencies = { checkInFlight: async () => undefined, listReadyCards: async () => cards, trigger , findOpenPullRequest: async () => undefined };
     const result = await reconcileOnce(queueConfig({ repositoryAllowlist: ["omp/allowed"] }), deps);
 
     expect(trigger).toHaveBeenCalledTimes(1);
-    expect(trigger).toHaveBeenCalledWith(
-      expect.anything(),
-      "reconciler",
-      undefined,
-      undefined,
-      { cardId: "allowed-repo", repository: "omp/allowed", card: cards[1] },
-    );
+    expect(trigger).toHaveBeenCalledWith({
+      config: expect.anything(),
+      source: "reconciler",
+      card: { cardId: "allowed-repo", repository: "omp/allowed", card: cards[1] },
+    });
     expect(result).toMatchObject({ cardId: "allowed-repo", triggered: true });
   });
 
   it("never triggers when no candidate is ready and allowed", async () => {
     const cards = [card("blocked", "blocked", "omp/a"), card("wrong-repo", "ready", "omp/excluded")];
     const trigger = vi.fn();
-    const deps: ReconcileDependencies = { listReadyCards: async () => cards, trigger , findOpenPullRequest: async () => undefined };
+    const deps: ReconcileDependencies = { checkInFlight: async () => undefined, listReadyCards: async () => cards, trigger , findOpenPullRequest: async () => undefined };
     const result = await reconcileOnce(queueConfig({ repositoryAllowlist: ["omp/allowed"] }), deps);
 
     expect(trigger).not.toHaveBeenCalled();
@@ -261,7 +231,7 @@ describe("reconcileOnce ready-queue mode", () => {
       card("third-ready", "ready", "omp/c"),
     ];
     const trigger = vi.fn().mockResolvedValue(fakeTriggerResult());
-    const deps: ReconcileDependencies = { listReadyCards: async () => cards, trigger , findOpenPullRequest: async () => undefined };
+    const deps: ReconcileDependencies = { checkInFlight: async () => undefined, listReadyCards: async () => cards, trigger , findOpenPullRequest: async () => undefined };
     await reconcileOnce(queueConfig(), deps);
 
     expect(trigger).toHaveBeenCalledTimes(1);
@@ -270,7 +240,7 @@ describe("reconcileOnce ready-queue mode", () => {
   it("surfaces a duplicate trigger without treating it as newly triggered", async () => {
     const cards = [card("already-triggered", "ready", "omp/a")];
     const trigger = vi.fn().mockResolvedValue(fakeTriggerResult({ duplicate: true }));
-    const deps: ReconcileDependencies = { listReadyCards: async () => cards, trigger , findOpenPullRequest: async () => undefined };
+    const deps: ReconcileDependencies = { checkInFlight: async () => undefined, listReadyCards: async () => cards, trigger , findOpenPullRequest: async () => undefined };
     const result = await reconcileOnce(queueConfig(), deps);
 
     expect(result).toMatchObject({ cardId: "already-triggered", triggered: false, duplicate: true });
@@ -279,16 +249,14 @@ describe("reconcileOnce ready-queue mode", () => {
   it("falls back to the template repository when a card omits repo", async () => {
     const cards = [{ ...card("no-repo-card", "ready"), title: "No repo" }];
     const trigger = vi.fn().mockResolvedValue(fakeTriggerResult());
-    const deps: ReconcileDependencies = { listReadyCards: async () => cards, trigger , findOpenPullRequest: async () => undefined };
+    const deps: ReconcileDependencies = { checkInFlight: async () => undefined, listReadyCards: async () => cards, trigger , findOpenPullRequest: async () => undefined };
     const result = await reconcileOnce(queueConfig(), deps);
 
-    expect(trigger).toHaveBeenCalledWith(
-      expect.anything(),
-      "reconciler",
-      undefined,
-      undefined,
-      { cardId: "no-repo-card", repository: "omp/template-repo", card: cards[0] },
-    );
+    expect(trigger).toHaveBeenCalledWith({
+      config: expect.anything(),
+      source: "reconciler",
+      card: { cardId: "no-repo-card", repository: "omp/template-repo", card: cards[0] },
+    });
     expect(result).toMatchObject({ triggered: true });
   });
 
@@ -297,7 +265,7 @@ describe("reconcileOnce ready-queue mode", () => {
     const trigger = vi.fn();
     const config = queueConfig();
     config.repository = undefined;
-    const deps: ReconcileDependencies = { listReadyCards: async () => cards, trigger , findOpenPullRequest: async () => undefined };
+    const deps: ReconcileDependencies = { checkInFlight: async () => undefined, listReadyCards: async () => cards, trigger , findOpenPullRequest: async () => undefined };
     const result = await reconcileOnce(config, deps);
 
     expect(trigger).not.toHaveBeenCalled();
@@ -310,7 +278,7 @@ describe("reconcileOnce ready-queue mode", () => {
       findOpenPullRequest: async () => undefined,
       listReadyCards: async () => [card("busy", "ready", "omp/a"), card("idle", "ready", "omp/a")],
       trigger,
-      checkInFlight: async (cardId) => (cardId === "busy" ? "run-live-2" : undefined),
+      checkInFlight: async (cardId) => (cardId === "busy" ? { runId: "run-live-2" } : undefined),
     };
     const config = baseConfig({ powder: { baseUrl: "https://powder.example.test", readyStatus: "ready", mode: "ready-queue" } });
     const result = await reconcileOnce(config, deps);
@@ -328,7 +296,7 @@ describe("reconcileOnce ready-queue mode", () => {
     const cards = [card("parked", "ready", "omp/a"), card("fresh", "ready", "omp/a")];
     const trigger = vi.fn().mockResolvedValue(fakeTriggerResult({ runId: "run-fresh" }));
     const asked: Array<{ cardId: string; branchPrefix: string; cwd: string }> = [];
-    const result = await reconcileOnce(queueConfig(), {
+    const result = await reconcileOnce(queueConfig(), { checkInFlight: async () => undefined,
       listReadyCards: async () => cards,
       trigger,
       findOpenPullRequest: async (cardId, branchPrefix, cwd) => {
@@ -355,7 +323,7 @@ describe("reconcileOnce ready-queue mode", () => {
   it("reports an all-parked queue as having no ready card", async () => {
     const cards = [card("parked-1", "ready", "omp/a"), card("parked-2", "ready", "omp/a")];
     const trigger = vi.fn();
-    const result = await reconcileOnce(queueConfig(), {
+    const result = await reconcileOnce(queueConfig(), { checkInFlight: async () => undefined,
       listReadyCards: async () => cards,
       trigger,
       findOpenPullRequest: async () => "https://github.com/o/r/pull/9",
