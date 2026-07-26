@@ -109,10 +109,9 @@ standard into epics, deletions, sequencing, and first pickups.
   first-time user would notice. Fan the perspectives out as parallel
   fresh-context lanes; pull in `/research` when outside knowledge would
   change a verdict. When the sweep keeps returning the obvious (the *mundane
-  harvest* failure), route the divergence through `nous-creative-ideation` — a
-  routed library of named methods (lateral provocations, analogy/biomimicry,
-  premortem-and-inversion) that manufactures non-obvious lenses on purpose. The
-  bar is genuine diversity and depth of exploration, judged fresh each session.
+  harvest* failure), deliberately introduce an adjacent-domain lens or an
+  inversion before accepting the consensus. The bar is genuine diversity and
+  depth of exploration, judged fresh each session.
 - **Describe the best version of this software,** not the next safe
   increment: elegant, easy to change, personalizable, delightful,
   operationally boring, and valuable enough to matter. The distance between

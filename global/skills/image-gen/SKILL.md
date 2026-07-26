@@ -38,7 +38,7 @@ anything code-bound**. Raster mockups are non-responsive, expose one viewport,
 fail accessibility, carry no component architecture, and hide loading/error/empty
 states — visual output reads ~80% done while the buildable reality is ~20%. For
 those, build an **HTML/CSS prototype** (house "think in HTML" doctrine, and the
-`design`/`impeccable` skills) or a Figma/wireframe — they render real fonts, real
+  `design` skill) or a Figma/wireframe — they render real fonts, real
 data, real breakpoints, and are editable. Image gen accelerates the **front** of
 the design funnel (ideation, exploration, stakeholder buy-in); it is not the
 shipped UI. Routine plans and simple status reports stay text-first.

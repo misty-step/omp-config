@@ -1,7 +1,7 @@
 # Skill authoring standard (roster house conventions)
 
 The judgment layer lives in the vendored
-`primitives/skills/.external/mattpocock-writing-great-skills/SKILL.md`
+`global/external/mattpocock-writing-great-skills/SKILL.md`
 (predictability, invocation choice, the six failure modes, information hierarchy,
 leading words, positive framing, and the no-op test) and Anthropic's
 progressive-disclosure guidance

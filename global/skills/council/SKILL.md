@@ -113,9 +113,5 @@ Reading the lanes is the work — don't just paste them.
 
 - `/peer-harnesses` — peer dispatch mechanics, live model index, the adversarial-critique
   counterpart (use that to *review*, this to *generate*).
-- `nous-creative-ideation` — a routed library of named ideation methods. Seed a
-  member's persona with a specific method (OuLiPo, TRIZ, lateral provocations),
-  or run the question through one first when the bench risks converging on the
-  obvious.
 - The OpenRouter MCP (user-scoped) — live model catalog, benchmarks, pricing,
   and balance for choosing the bench.

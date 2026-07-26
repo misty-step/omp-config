@@ -27,13 +27,3 @@ for the convention and its prior art.
 - Pinned commit: `d574778f94cf620fcc8ce741584093bc650a61d3` (MIT)
 - Vendored 2026-07-07 (roster-926 phase A); also the judgment layer behind
   `global/references/skill-authoring-standard.md`.
-
-## emilkowalski-skills
-
-- Source: `emilkowalski/skills`
-- Pinned commit: `f76beceb7d3fc8c43309cefad5a095a206103a4e` (MIT)
-- Four aliases: `emil-emil-design-eng`, `emil-review-animations`,
-  `emil-apple-design`, and `emil-animation-vocabulary`.
-- Vendored 2026-07-09 (roster-944); the first two author/review motion, Apple
-  Design is a conditional physical-interface philosophy, and Animation
-  Vocabulary names effects without joining generative design fanout.
