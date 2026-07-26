@@ -1,1 +1,0 @@
-FIXTURE_SCENARIO=stage-timeout
