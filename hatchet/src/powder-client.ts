@@ -32,7 +32,7 @@ export type PowderCard = z.infer<typeof powderCardSchema>;
 export type PowderCardReader = () => Promise<PowderCard>;
 export type PowderReadyQueueReader = () => Promise<PowderCard[]>;
 
-async function readAuthorization(config: OperatorConfig): Promise<string | undefined> {
+export async function readAuthorization(config: OperatorConfig): Promise<string | undefined> {
   const tokenFile = config.powder?.apiTokenFile;
   if (!tokenFile) return undefined;
   const metadata = await stat(tokenFile);
