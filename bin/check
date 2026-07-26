@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import re
 import subprocess
@@ -264,6 +265,70 @@ def omp_builtin_tool_names() -> set[str]:
     return names
 
 
+def check_skill_catalog(contract: Contract, declared_skills: set[str]) -> None:
+    catalog_path = ROOT / "global" / "skill-catalog.json"
+    try:
+        catalog = json.loads(catalog_path.read_text())
+    except (OSError, json.JSONDecodeError) as error:
+        fail(f"{relative(catalog_path)} is invalid: {error}")
+    if not isinstance(catalog, dict) or catalog.get("schema_version") != "omp.skill-catalog.v1":
+        fail(f"{relative(catalog_path)} has an unsupported schema_version")
+    entries = catalog.get("skills")
+    if not isinstance(entries, dict) or set(entries) != declared_skills:
+        found = set(entries) if isinstance(entries, dict) else set()
+        fail(
+            f"skill catalog drift: missing={sorted(declared_skills - found)}, "
+            f"extra={sorted(found - declared_skills)}"
+        )
+    classifications = {
+        "evidence-backed workflow",
+        "narrow live operations contract",
+        "merged guidance",
+    }
+    for name, entry in entries.items():
+        if not isinstance(entry, dict):
+            fail(f"skill catalog entry {name} must be an object")
+        classification = entry.get("classification")
+        if classification not in classifications:
+            fail(f"skill catalog entry {name} has invalid classification {classification!r}")
+        if not isinstance(entry.get("basis"), str) or not entry["basis"].strip():
+            fail(f"skill catalog entry {name} requires a non-empty basis")
+        evidence = entry.get("evidence")
+        if classification == "evidence-backed workflow":
+            if not isinstance(evidence, dict):
+                fail(f"skill catalog workflow {name} requires Crucible evidence")
+            if not isinstance(evidence.get("report"), str) or "crucible" not in evidence["report"].lower():
+                fail(f"skill catalog workflow {name} requires a Crucible report path")
+            if not isinstance(evidence.get("fixtures"), int) or evidence["fixtures"] < 2:
+                fail(f"skill catalog workflow {name} requires at least two fixtures")
+            if not isinstance(evidence.get("trials_per_cell"), int) or evidence["trials_per_cell"] < 1:
+                fail(f"skill catalog workflow {name} requires trials_per_cell")
+            if evidence.get("verdict") != "keep":
+                fail(f"skill catalog workflow {name} requires a keep verdict")
+            if not isinstance(evidence.get("limits"), str) or not evidence["limits"].strip():
+                fail(f"skill catalog workflow {name} must disclose sample limits")
+        elif evidence is not None:
+            fail(f"skill catalog non-workflow {name} must not claim workflow evidence")
+
+    first_party_hashes: dict[str, str] = {}
+    for directory in contract.surface("skills").source.iterdir():
+        skill_file = directory / "SKILL.md"
+        if directory.is_dir() and skill_file.is_file():
+            digest = hashlib.sha256(skill_file.read_bytes()).hexdigest()
+            first_party_hashes[digest] = directory.name
+    external_dir = ROOT / "global" / "external"
+    for directory in external_dir.iterdir():
+        skill_file = directory / "SKILL.md"
+        if not skill_file.is_file():
+            continue
+        digest = hashlib.sha256(skill_file.read_bytes()).hexdigest()
+        if digest in first_party_hashes:
+            fail(
+                f"duplicate skill payload: {first_party_hashes[digest]} and "
+                f"{directory.name} share SKILL.md"
+            )
+
+
 def check_tree(contract: Contract) -> None:
     settings = contract.surface("settings").source
     context = contract.surface("context").source
@@ -395,6 +460,7 @@ def check_tree(contract: Contract) -> None:
         if name in declared_skills:
             fail(f"duplicate skill name {name}")
         declared_skills.add(name)
+    check_skill_catalog(contract, declared_skills)
     expected_visible_skills = {"dispatch", "research"}
     if visible_skills != expected_visible_skills:
         fail(

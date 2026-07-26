@@ -65,9 +65,10 @@ skim) or produces an undifferentiated finding list with no severity ranking.
 
 ## Human anchor
 
-The operator blind-grades fixture 2 (the plausible-but-wrong double-count bug
-— the hardest to catch and the easiest for a lenient grader to wave through).
-Record the verdict and match/mismatch here once run. **PENDING — no run yet.**
+The operator ruling accepts the blind Crucible proxy for this sweep. The
+2026-07-21 run beat the no-skill arm on 2 of 3 paired fixtures (including the
+false-positive control); each cell had one worker trial. Human anchor was not
+required under the current operator ruling.
 
 ## Cadence
 
@@ -82,8 +83,6 @@ Record the verdict and match/mismatch here once run. **PENDING — no run yet.**
 
 ## Run log
 
-**No run yet.** Origin Roster-era backlog (retired 2026-07-16); no card tracker survives it.
-`/code-review` is the second-highest-usage first-party skill (33 recorded
-invocations per the 2026-07-01 groom telemetry read) and had no eval coverage
-before this. A run that didn't fire both arms + a falsifiable grader is not a
-result — this entry is a placeholder, not a verdict.
+Evidence: `~/Development/crucible/runs/local/skill-null-sweep/report.md`.
+Verdict: keep. Sample limits: three fixtures, one worker trial per arm per
+fixture, one Grok grader family, and an unanchored proxy result.

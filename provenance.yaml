@@ -46,6 +46,12 @@
         "kind": "directory",
         "origin": "copied"
       },
+      "skill_catalog": {
+        "source": "global/skill-catalog.json",
+        "target": "skill-catalog.json",
+        "kind": "file",
+        "origin": "local"
+      },
       "extension_agent_hub": {
         "source": "global/extensions/agent-hub.ts",
         "target": "extensions/agent-hub.ts",

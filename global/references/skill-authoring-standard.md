@@ -1,13 +1,12 @@
-# Skill authoring standard (roster house conventions)
+# Skill authoring standard (OMP house conventions)
 
-The judgment layer lives in the vendored
-`primitives/skills/.external/mattpocock-writing-great-skills/SKILL.md`
-(predictability, invocation choice, the six failure modes, information hierarchy,
-leading words, positive framing, and the no-op test) and Anthropic's
-progressive-disclosure guidance
-(`docs/research/roster-926-import-design-brief.md`). This file resolves their
+The judgment layer lives in the local `global/skills/writing-great-skills/SKILL.md`
+reference (predictability, invocation choice, the six failure modes,
+information hierarchy, leading words, positive framing, and the no-op test) and
+Anthropic's progressive-disclosure guidance. This file resolves their
 frontier-model tension and adds only the house conventions they leave open.
 Apply the no-op test to every line — including lines from this standard.
+
 
 ## Frontmatter
 
@@ -48,11 +47,10 @@ One-line pointers instead of local rewordings:
   commits, and final artifacts stay normal English.`
 - Vision: `Read root VISION.md when present; if missing or stale, route to
   /vision.`
-- Verification loops: point at
-  `primitives/shared/references/verification-system-first.md` — do not
-  re-derive it.
-- Simplicity: the delete-first/Ponytail load trigger lives inside
-  `primitives/shared/references/delete-first.md`; skills just point there.
+- Verification loops: point at `global/references/verification-system-first.md` —
+  do not re-derive it.
+- Simplicity: the delete-first/Ponytail load trigger lives in shared guidance;
+  skills just point there.
 
 A skill that needs a *different* rule than the shared line says is making a
 claim — state the delta explicitly and say why, next to the pointer.
@@ -66,7 +64,7 @@ Never fork the table.
 ## Frontier-model resolution
 
 WGS asks for ordered steps with completion criteria; current frontier-model
-guidance warns that procedural checklists over-constrain capable models. Roster
+guidance warns that procedural checklists over-constrain capable models. OMP
 targets frontier orchestrators by default, so encode the invariant process,
 boundaries, oracle, and stop condition—not a narrated SDLC. Ordered steps earn
 their place only when tool order is semantically required or `/skill-eval`

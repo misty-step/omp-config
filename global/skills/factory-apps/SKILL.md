@@ -16,15 +16,15 @@ argument-hint: "[canary|powder|landmark|aesthetic|bitterblossom|mint|audit]"
 
 Use the owned factory app before inventing local state, bespoke glue, or a
 generic third-party workflow. Product repos own the concrete skills and MCP
-servers; omp-config imports those skills under `misty-*` aliases and manages MCP
-registration in `primitives/mcps/registry.yaml`.
+servers; omp-config owns the local OMP projection and manages MCP
+registration in `global/mcp.json`.
 
 ## Router
 
 | Need | App | First surface | Fallback |
 |---|---|---|---|
 | uptime, incidents, error timelines, health checks, service evidence, production debugging | Canary | Canary MCP when registered | `misty-canary`, `canary` on `PATH`, API |
-| backlog, issue cards, claims, relations, operator input requests, work status | Powder | Powder MCP when configured | `misty-powder`, CLI, API |
+| backlog, issue cards, claims, relations, operator input requests, work status | Powder | Powder MCP when configured | the local `powder` skill, CLI, API |
 | release intelligence, versions, changelogs, release notes, release kit, fleet adoption | Landmark | `misty-landmark` and `landmark describe --json` / dry-run CLI/action paths | `docs/agent-integration.md`, `docs/fleet-integration-playbook.md` |
 | UI/UX, Misty Step design law, tokens, static design registry, rendered design gate | Aesthetic | `misty-aesthetic`, `@misty-step/aesthetic` package, static API, law gate | `docs/ADOPTING.md`, `DESIGN.md` |
 | event-triggered agents, reflex loops, durable runs | Bitterblossom | `misty-bitterblossom`, `bb` CLI/API | product plane config; MCP source exists but is not registered in interactive harnesses |

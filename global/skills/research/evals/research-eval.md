@@ -62,11 +62,10 @@ no-op "research" (equivalent to raw prompting) fails because the raw arm
 reliably answers from memory with no dates, no source list, and no stated
 uncertainty — exactly the gap the objective checks catch without a judge.
 
-## Human anchor
-
-The operator blind-grades fixture 1 (model comparison — verifiable against
-the operator's own current knowledge of pricing/availability). Record the
-verdict and match/mismatch here once run. **PENDING — no run yet.**
+The operator ruling accepts the blind Crucible proxy for this sweep. The
+2026-07-21 run beat the no-skill arm on 2 of 3 paired fixtures; each cell had
+one worker trial. Human anchor was not required under the current operator
+ruling.
 
 ## Cadence
 
@@ -80,8 +79,7 @@ verdict and match/mismatch here once run. **PENDING — no run yet.**
 
 ## Run log
 
-**No run yet.** Origin Roster-era backlog (retired 2026-07-16); no card tracker survives it.
-`/research` is the third-highest-usage first-party skill (27 recorded
-invocations per the 2026-07-01 groom telemetry read) and had no eval coverage
-before this. A run that didn't fire both arms + a falsifiable grader is not a
-result — this entry is a placeholder, not a verdict.
+Evidence: `~/Development/crucible/runs/local/skill-null-sweep/report.md`.
+Verdict: keep. Sample limits: three fixtures, one worker trial per arm per
+fixture, one Grok grader family, and a fixture-rubric defect noted in the
+report; the proxy result is unanchored.

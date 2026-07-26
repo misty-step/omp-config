@@ -1,12 +1,10 @@
-# Roster external skill registry — vendored sources, pinned.
+# OMP external skill registry — vendored sources, pinned.
 #
-# Skills are discovered from the filesystem (skills/*/SKILL.md). This file is
-# the provenance ledger for third-party skills:
-# Each source is vendored into `primitives/skills/.external/<alias>/` at its
-# pinned SHA. The committed payload and `.sync-meta.json` receipt are the
-# reviewable import; `roster check` rejects registry/receipt/directory drift.
-# Editing a vendored external makes it a fork — mark it here and stop
-# syncing it.
+# Skills under this directory are externally owned and are never projected as
+# first-party OMP skills. `registry.yaml` is the provenance ledger for each
+# retained source; the committed payload and `.sync-meta.json` receipt are the
+# reviewable import.
+
 #
 # Schema (per source):
 #   repo:          <org>/<repo>          required. GitHub path.
@@ -62,14 +60,6 @@ sources:
     layout: root
     skills_path: "."
     skill_name: canary
-    alias_prefix: "misty-"
-
-  - repo: misty-step/powder
-    ref: 8c7a16a7c1bf3748ea939691a6545bd0f73c8f40
-    pin: 8c7a16a7c1bf3748ea939691a6545bd0f73c8f40
-    layout: root
-    skills_path: "."
-    skill_name: powder
     alias_prefix: "misty-"
 
   - repo: misty-step/landmark
@@ -330,30 +320,15 @@ sources:
     alias_prefix: "nous-"
     include: [creative-ideation]
 
-  # mattpocock/skills — Matt Pocock's skills collection. Three vendored:
-  # `writing-great-skills` (the skill-prose predictability doctrine our
-  # skill-authoring-standard builds on), `grilling` (relentless
-  # decision-extraction interview; kept here for provenance only — superseded
-  # 2026-07-15, roster-grilling-batch, by the roster-authored batching version
-  # at `primitives/skills/grilling/SKILL.md`, which the skills-index now
-  # routes to), and `codebase-design` (invocable deep-module vocabulary:
-  # deletion test, seam discipline, design-it-twice — the skill form of the
-  # collapse-toward-declaration doctrine).
-  #
-  # FIT NOTE (2026-07-08 scan): the rest of the repo is either
-  # tracker-coupled workflow (to-spec/to-tickets/triage/wayfinder duplicate
-  # the Powder + /groom + /deliver spine), covered by first-party skills
-  # (tdd, diagnosing-bugs, code-review, research), or TS-toolchain/personal.
-  # Re-scan on registry review rather than vendoring wider.
-  #
-  # LICENSE: MIT.
+  # mattpocock/skills — retain distinct grilling and codebase-design references.
+  # writing-great-skills is maintained once under global/skills.
   - repo: mattpocock/skills
     ref: main
     pin: 66898f60e8c744e269f8ce06c2b2b99ce7660d5f
     layout: multi-root
     skills_path: skills
     alias_prefix: "mattpocock-"
-    include: [writing-great-skills, grilling, codebase-design]
+    include: [grilling, codebase-design]
 
   # zeke/swiss-design-skill — pure Swiss International Style (IBM Plex Sans,
   # stone palette, opacity-based hierarchy, 12-col grid, one accent, no
