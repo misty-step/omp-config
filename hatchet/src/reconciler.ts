@@ -10,8 +10,9 @@ import {
   type PowderReadyQueueReader,
 } from "./powder-client.js";
 import { triggerConfiguredWorkflow, type CardOverride, type TriggerResult } from "./trigger-service.js";
-import type { TriggerSource } from "./contracts.js";
+import { defaultPrSettings, type TriggerSource } from "./contracts.js";
 import { findInFlightRun } from "./run-liveness.js";
+import { findOpenPullRequestForCard } from "./github.js";
 
 export type TriggerFn = (
   config: OperatorConfig,
@@ -23,40 +24,74 @@ export type TriggerFn = (
 ) => Promise<TriggerResult>;
 
 export type CheckInFlightFn = (cardId: string) => Promise<string | undefined>;
+export type FindOpenPullRequestFn = (
+  cardId: string,
+  branchPrefix: string,
+  cwd: string,
+) => Promise<string | undefined>;
 
 export type ReconcileDependencies = {
   readPowderCard?: PowderCardReader;
   listReadyCards?: PowderReadyQueueReader;
   trigger?: TriggerFn;
   checkInFlight?: CheckInFlightFn;
+  findOpenPullRequest?: FindOpenPullRequestFn;
 };
 
 /**
- * Selects the first ready card eligible for a factory trigger, preserving
- * the caller's ordering. Pure and deterministic: no I/O, no clock.
+ * Every ready card eligible for a factory trigger, in the caller's order.
+ * Pure and deterministic: no I/O, no clock. The reconciler walks these rather
+ * than taking only the first, because a candidate can turn out to be parked on
+ * an open pull request and must be skipped without consuming the tick.
  */
-export function selectReadyCard(
+export function eligibleReadyCards(
   cards: readonly PowderCard[],
   readyStatus: string,
   repositoryAllowlist?: readonly string[],
-): PowderCard | undefined {
-  return cards.find((card) => {
+): PowderCard[] {
+  return cards.filter((card) => {
     if (card.status !== readyStatus) return false;
     if (!repositoryAllowlist) return true;
     return card.repo !== undefined && repositoryAllowlist.includes(card.repo);
   });
 }
 
+/**
+ * The first eligible ready card, preserving the caller's ordering.
+ */
+export function selectReadyCard(
+  cards: readonly PowderCard[],
+  readyStatus: string,
+  repositoryAllowlist?: readonly string[],
+): PowderCard | undefined {
+  return eligibleReadyCards(cards, readyStatus, repositoryAllowlist)[0];
+}
+
 type LivenessVerdict =
   | { kind: "clear" }
   | { kind: "in_flight"; runId: string }
+  | { kind: "pr_open"; url: string }
   | { kind: "unknown"; reason: string };
 
-async function inspectLiveness(cardId: string, deps: ReconcileDependencies): Promise<LivenessVerdict> {
+async function inspectLiveness(
+  cardId: string,
+  config: OperatorConfig,
+  deps: ReconcileDependencies,
+): Promise<LivenessVerdict> {
   const checkInFlight = deps.checkInFlight ?? findInFlightRun;
+  const findOpenPr = deps.findOpenPullRequest ?? findOpenPullRequestForCard;
   try {
     const runId = await checkInFlight(cardId);
-    return runId ? { kind: "in_flight", runId } : { kind: "clear" };
+    if (runId) return { kind: "in_flight", runId };
+    // A card whose work is already sitting in an open pull request is not
+    // waiting for the factory - it is waiting for a human. Powder still calls
+    // it ready because the factory never writes card status back, so without
+    // this the reconciler re-runs the same card every tick forever, paying
+    // full agent cost each time to rebuild what is already up for review.
+    const branchPrefix = (config.pr ?? defaultPrSettings).branchPrefix;
+    const url = await findOpenPr(cardId, branchPrefix, config.cwd);
+    if (url) return { kind: "pr_open", url };
+    return { kind: "clear" };
   } catch (error) {
     // Fail closed. Starting a possibly-duplicate run is strictly worse than
     // skipping a tick: the next tick is 300 seconds away, while two runs
@@ -75,7 +110,7 @@ async function reconcileSingle(
   if (card.status !== config.powder!.readyStatus) {
     return { mode: "single", cardId: card.id, status: card.status, triggered: false };
   }
-  const liveness = await inspectLiveness(card.id, deps);
+  const liveness = await inspectLiveness(card.id, config, deps);
   if (liveness.kind === "in_flight") {
     return {
       mode: "single",
@@ -84,6 +119,16 @@ async function reconcileSingle(
       triggered: false,
       reason: "run_in_flight",
       runId: liveness.runId,
+    };
+  }
+  if (liveness.kind === "pr_open") {
+    return {
+      mode: "single",
+      cardId: card.id,
+      status: card.status,
+      triggered: false,
+      reason: "pull_request_open",
+      url: liveness.url,
     };
   }
   if (liveness.kind === "unknown") {
@@ -111,9 +156,60 @@ async function reconcileReadyQueue(
   const cards = await listReadyCards();
   const readyStatus = config.powder!.readyStatus;
   const repositoryAllowlist = config.powder!.repositoryAllowlist;
-  const selected = selectReadyCard(cards, readyStatus, repositoryAllowlist);
+  const candidates = eligibleReadyCards(cards, readyStatus, repositoryAllowlist);
+
+  // A card whose work already sits in an open pull request is not busy, it is
+  // parked on a human indefinitely. Consuming the tick on it - the way a truly
+  // in-flight run does - would let one unreviewed PR starve the whole queue,
+  // which is worse than the re-run it prevents. So these are skipped over,
+  // not waited on.
+  let selected: PowderCard | undefined;
+  let parked = 0;
+  let blocked: { reason: string; detail: string } | undefined;
+  for (const candidate of candidates) {
+    const verdict = await inspectLiveness(candidate.id, config, deps);
+    if (verdict.kind === "pr_open") {
+      parked += 1;
+      continue;
+    }
+    if (verdict.kind === "unknown") {
+      blocked = { reason: "liveness_lookup_failed", detail: verdict.reason };
+      selected = candidate;
+      break;
+    }
+    if (verdict.kind === "in_flight") {
+      // Serial factory: one worktree, so a running card consumes the tick
+      // rather than yielding. Skipping ahead would start a second run that
+      // fights the first over HEAD.
+      blocked = { reason: "run_in_flight", detail: verdict.runId };
+      selected = candidate;
+      break;
+    }
+    selected = candidate;
+    break;
+  }
+
   if (!selected) {
-    return { mode: "ready-queue", triggered: false, candidateCount: cards.length, reason: "no_ready_card" };
+    return {
+      mode: "ready-queue",
+      triggered: false,
+      candidateCount: cards.length,
+      reason: "no_ready_card",
+      ...(parked > 0 ? { parkedOnOpenPullRequests: parked } : {}),
+    };
+  }
+  if (blocked) {
+    return {
+      mode: "ready-queue",
+      cardId: selected.id,
+      status: selected.status,
+      triggered: false,
+      candidateCount: cards.length,
+      ...(parked > 0 ? { parkedOnOpenPullRequests: parked } : {}),
+      ...(blocked.reason === "run_in_flight"
+        ? { reason: "run_in_flight", runId: blocked.detail }
+        : { reason: "liveness_lookup_failed", detail: blocked.detail }),
+    };
   }
   const repository = selected.repo ?? config.repository;
   if (!repository) {
@@ -125,23 +221,6 @@ async function reconcileReadyQueue(
       reason: "card_missing_repository",
     };
   }
-  // Serial factory: at most one trigger attempt per reconcile tick, ever. A
-  // busy card consumes the tick rather than yielding to the next candidate -
-  // there is one worktree, so "skip ahead to another card" would just start a
-  // second run that fights the first one over HEAD.
-  const liveness = await inspectLiveness(selected.id, deps);
-  if (liveness.kind !== "clear") {
-    return {
-      mode: "ready-queue",
-      cardId: selected.id,
-      status: selected.status,
-      triggered: false,
-      candidateCount: cards.length,
-      ...(liveness.kind === "in_flight"
-        ? { reason: "run_in_flight", runId: liveness.runId }
-        : { reason: "liveness_lookup_failed", detail: liveness.reason }),
-    };
-  }
   // The selected card was just listed; hand it in so the trigger derives card
   // facts from it rather than re-reading by id.
   const result = await trigger(config, "reconciler", undefined, undefined, { cardId: selected.id, repository, card: selected });
@@ -151,6 +230,7 @@ async function reconcileReadyQueue(
     status: selected.status,
     triggered: !result.duplicate,
     candidateCount: cards.length,
+    ...(parked > 0 ? { parkedOnOpenPullRequests: parked } : {}),
     ...result,
   };
 }
