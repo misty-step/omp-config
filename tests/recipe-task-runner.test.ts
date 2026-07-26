@@ -201,6 +201,44 @@ describe("recipe task runner", () => {
 		expect(childPidFileExistedAtCallTime).toBeFalse();
 	});
 
+	test("OMP_RECIPE_MINT_ALIAS survives the prepare env filter into models.yml", async () => {
+		// Billing evidence caught the regression this pins: the Hatchet factory
+		// set the variable at every hop and every run still billed the DEFAULT
+		// key, because SAFE_PREPARE_ENV - the third allowlist in the chain -
+		// dropped it before the compiler wrote the runtime's models.yml.
+		process.env.OMP_RECIPE_MINT_ALIAS = "prepare-env-proof";
+		// The alias only surfaces for openrouter models, and the shared alpha
+		// fixture deliberately uses a non-network fixture provider - so this
+		// test carries its own minimal bundle.
+		const bundle = join(scratch, "openrouter-bundle");
+		rmSync(bundle, { recursive: true, force: true });
+		mkdirSync(bundle, { recursive: true });
+		writeFileSync(join(bundle, "recipe.json"), JSON.stringify({
+			schemaVersion: "omp.recipe.v1",
+			instructions: "instructions.md",
+			models: [{ provider: "openrouter", model: "z-ai/glm-5.2", reasoning: "high" }],
+			skills: [],
+			taskSkills: [],
+			mcpServers: [],
+		}));
+		writeFileSync(join(bundle, "instructions.md"), "inspect and exit");
+		writeFileSync(join(bundle, ".omp-recipe-owned"), "omp.recipe.v1\n");
+		mkdirSync(join(bundle, "runtime"), { recursive: true });
+		try {
+			let modelsYml = "";
+			const handle = await startRecipeTask({
+				...recipeOptions(bundle, "inspect"),
+				async onPrepared(descriptor) {
+					modelsYml = readFileSync(join(descriptor.agentDir, "models.yml"), "utf8");
+				},
+			});
+			await handle.wait();
+			expect(modelsYml).toContain("__mint.openrouter.prepare-env-proof__");
+		} finally {
+			delete process.env.OMP_RECIPE_MINT_ALIAS;
+		}
+	});
+
 	test("nested recipe_task stops before spawning past the depth cap", async () => {
 		const auditFile = join(scratch, "fixture-processes.jsonl");
 		rmSync(auditFile, { force: true });
