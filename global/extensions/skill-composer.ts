@@ -107,11 +107,28 @@ function identityFromPrompt(promptText: string): {
 	error?: string;
 } {
 	const markers = [...promptText.matchAll(IDENTITY_PATTERN)];
-	if (markers.length === 1) return { agent: markers[0]?.[1] };
-	if (promptText.includes(IDENTITY_PREFIX)) {
+	// Count raw prefix occurrences. If the prefix appears more times than the
+	// valid pattern matches, a malformed marker is present. A malformed marker
+	// must be drift even when one valid marker also exists — otherwise a stale
+	// `<!-- omp-composition-agent: bad name! -->` next to a valid marker
+	// silently composes the valid allowlist.
+	let prefixCount = 0;
+	for (let from = 0; ; prefixCount++) {
+		const idx = promptText.indexOf(IDENTITY_PREFIX, from);
+		if (idx < 0) break;
+		from = idx + IDENTITY_PREFIX.length;
+	}
+	if (prefixCount !== markers.length) {
 		return {
 			error:
-				"skill composer: prompt-shape drift: expected exactly one valid agent identity marker",
+				"skill composer: prompt-shape drift: malformed agent identity marker (prefix present but pattern unmatched)",
+		};
+	}
+	if (markers.length === 1) return { agent: markers[0]?.[1] };
+	if (markers.length > 1) {
+		return {
+			error:
+				"skill composer: prompt-shape drift: expected exactly one agent identity marker",
 		};
 	}
 	return {};
@@ -175,15 +192,20 @@ function parseSkillsBlock(
 }
 
 /**
- * Reject descriptions that could escape the <skills> metadata block. A
- * description containing `</skills>` would inject top-level prompt content;
- * `</skill>` breaks the custom template. Both are reject-and-drift errors.
+ * Reject descriptions that could escape the <skills> metadata block or inject
+ * fake roster entries. Closers are matched case- and whitespace-insensitively
+ * so `</SKILLS>`, `</skills >`, and CRLF variants cannot splice outside the
+ * block. A description containing a newline-led `- name: ...` line would
+ * inject a subtracted skill back into the composed block, defeating the
+ * allowlist — reject it as drift.
  */
 function validateDescription(name: string, description: string): string | undefined {
-	if (description.includes("</skills>"))
-		return `skill composer: prompt-shape drift: skill ${name} description contains </skills>`;
-	if (description.includes("</skill>"))
-		return `skill composer: prompt-shape drift: skill ${name} description contains </skill>`;
+	if (/<\/skills\s*>/i.test(description))
+		return `skill composer: prompt-shape drift: skill ${name} description contains a </skills> closer`;
+	if (/<\/skill\s*>/i.test(description))
+		return `skill composer: prompt-shape drift: skill ${name} description contains a </skill> closer`;
+	if (/^- [a-z][a-z0-9_-]*: /m.test(description))
+		return `skill composer: prompt-shape drift: skill ${name} description contains a roster-entry line`;
 	return undefined;
 }
 
@@ -222,120 +244,131 @@ function renderSkillsBlock(
 	if ("error" in parsed) return { error: parsed.error };
 	const existing = parsed;
 
-	// Resolve descriptions: prefer catalog, fall back to existing block.
-	const descriptions = requested.map((name) => {
-		const description = catalog[name] ?? existing.get(name);
-		if (!description) return undefined;
-		const error = validateDescription(name, description);
-		if (error) return undefined;
-		return `- ${name}: ${description}`;
-	});
-	if (descriptions.some((line) => line === undefined)) {
-		const missing = requested.filter(
-			(name) => !catalog[name] && !existing.has(name),
-		);
-		if (missing.length > 0) {
-			return {
-				error: `skill composer: missing declared skill description(s): ${missing.join(", ")}`,
-			};
-		}
-		// A description existed but failed validation.
-		for (const name of requested) {
-			const desc = catalog[name] ?? existing.get(name);
-			if (desc) {
-				const error = validateDescription(name, desc);
-				if (error) return { error };
-			}
-		}
+	// Resolve descriptions: prefer the existing in-prompt description (which
+	// is OMP's native folded-scalar render) so the composed block matches what
+	// OMP would render, falling back to the catalog for added skills. This
+	// avoids a single-line catalog reformat diverging from the native block.
+	const missing = requested.filter(
+		(name) => !existing.has(name) && !catalog[name],
+	);
+	if (missing.length > 0) {
 		return {
-			error: `skill composer: description validation failed for agent ${agent}`,
+			error: `skill composer: missing declared skill description(s): ${missing.join(", ")}`,
 		};
 	}
+	for (const name of requested) {
+		const description = existing.get(name) ?? catalog[name];
+		const error = validateDescription(name, description);
+		if (error) return { error };
+	}
+	const descriptions = requested.map(
+		(name) => `- ${name}: ${existing.get(name) ?? catalog[name]}`,
+	);
 	const replacement = `<skills>\n${descriptions.join("\n")}\n</skills>`;
-	const markerlessPrompt = promptText.replace(IDENTITY_PATTERN, "");
-	// Use a replacer function to avoid String.replace interpreting $&, $`, $'
-	// in the replacement string.
-	return {
-		prompt: markerlessPrompt.replace(matches[0]?.[0] ?? "", () => replacement),
-	};
+	// Replace the block on the original prompt text, then strip the identity
+	// marker. Ordering matters: computing the replacement against promptText
+	// (pre-strip) guarantees the block is found, so a no-op replace cannot
+	// report changed:true.
+	const replaced = promptText.replace(matches[0]?.[0] ?? "", () => replacement);
+	return { prompt: replaced.replace(IDENTITY_PATTERN, "") };
 }
 
+/**
+ * A provider system-prompt carrier: a single string field (`instructions`),
+ * one element of a string/`{text}` array (`system`/`systemPrompt`), or one
+ * part of a Gemini `systemInstruction.parts` array. OMP splits the system
+ * prompt into multiple cache-breakpoint chunks, so the `system` carrier is a
+ * multi-element array on Anthropic (each element `{text: chunk}` with no
+ * `type` field). `replace` returns the new value for the carrier's field.
+ */
 interface Carrier {
-	kind: "string" | "string-array" | "text-array" | "gemini";
-	key: "systemPrompt" | "system" | "instructions" | "systemInstruction";
-	value: unknown;
+	field: "systemPrompt" | "system" | "instructions" | "systemInstruction";
 	text: string;
+	replace: (newText: string) => unknown;
+}
+
+function collectCarriers(payload: Record<string, unknown>): Carrier[] {
+	const candidates: Carrier[] = [];
+	const instructions = payload.instructions;
+	if (typeof instructions === "string") {
+		candidates.push({ field: "instructions", text: instructions, replace: (t) => t });
+	}
+	for (const field of ["systemPrompt", "system"] as const) {
+		const value = payload[field];
+		if (typeof value === "string") {
+			candidates.push({ field, text: value, replace: (t) => t });
+		} else if (Array.isArray(value)) {
+			value.forEach((element, index) => {
+				if (typeof element === "string") {
+					candidates.push({
+						field,
+						text: element,
+						replace: (t) => {
+							const next = [...value];
+							next[index] = t;
+							return next;
+						},
+					});
+				} else if (isRecord(element) && typeof element.text === "string") {
+					// Anthropic `{text}` (no type) and OpenAI `{type:"text", text}`.
+					candidates.push({
+						field,
+						text: element.text,
+						replace: (t) => {
+							const next = [...value];
+							next[index] = { ...element, text: t };
+							return next;
+						},
+					});
+				}
+			});
+		}
+	}
+	const systemInstruction = payload.systemInstruction;
+	if (isRecord(systemInstruction) && Array.isArray(systemInstruction.parts)) {
+		const parts = systemInstruction.parts;
+		parts.forEach((part, index) => {
+			if (isRecord(part) && typeof part.text === "string") {
+				candidates.push({
+					field: "systemInstruction",
+					text: part.text,
+					replace: (t) => {
+						const nextParts = [...parts];
+						nextParts[index] = { ...part, text: t };
+						return { ...systemInstruction, parts: nextParts };
+					},
+				});
+			}
+		});
+	}
+	return candidates;
 }
 
 function findCarrier(payload: Record<string, unknown>): {
 	carrier?: Carrier;
 	error?: string;
 } {
-	const candidates: Carrier[] = [];
-	for (const key of ["systemPrompt", "system", "instructions"] as const) {
-		const value = payload[key];
-		if (typeof value === "string")
-			candidates.push({ kind: "string", key, value, text: value });
-		else if (Array.isArray(value) && value.length === 1) {
-			const first = value[0];
-			if (typeof first === "string") {
-				candidates.push({ kind: "string-array", key, value, text: first });
-			} else if (
-				isRecord(first) &&
-				first.type === "text" &&
-				typeof first.text === "string"
-			) {
-				candidates.push({ kind: "text-array", key, value, text: first.text });
-			}
-		}
-	}
-	const systemInstruction = payload.systemInstruction;
-	if (
-		isRecord(systemInstruction) &&
-		Array.isArray(systemInstruction.parts) &&
-		systemInstruction.parts.length === 1
-	) {
-		const part = systemInstruction.parts[0];
-		if (isRecord(part) && typeof part.text === "string") {
-			candidates.push({
-				kind: "gemini",
-				key: "systemInstruction",
-				value: systemInstruction,
-				text: part.text,
-			});
-		}
-	}
-	const marked = candidates.filter((candidate) =>
-		candidate.text.includes(IDENTITY_PREFIX),
-	);
+	const carriers = collectCarriers(payload);
+	const marked = carriers.filter((c) => c.text.includes(IDENTITY_PREFIX));
 	if (marked.length === 1) return { carrier: marked[0] };
-	if (marked.length > 1)
+	if (marked.length > 1) {
 		return {
 			error:
-				"skill composer: prompt-shape drift: agent marker appears in multiple provider fields",
+				"skill composer: prompt-shape drift: agent marker appears in multiple provider system-prompt carriers",
 		};
-	return {};
-}
-
-function replaceCarrier(carrier: Carrier, text: string): unknown {
-	if (carrier.kind === "string") return text;
-	if (carrier.kind === "string-array") return [text];
-	if (carrier.kind === "text-array") {
-		if (!Array.isArray(carrier.value) || carrier.value.length !== 1)
-			return carrier.value;
-		const item = carrier.value[0];
-		return isRecord(item) ? [{ ...item, text }] : carrier.value;
 	}
-	if (
-		!isRecord(carrier.value) ||
-		!Array.isArray(carrier.value.parts) ||
-		carrier.value.parts.length !== 1
-	)
-		return carrier.value;
-	const part = carrier.value.parts[0];
-	return isRecord(part)
-		? { ...carrier.value, parts: [{ ...part, text }] }
-		: carrier.value;
+	// No marked carrier. If the marker prefix appears in a carrier but did not
+	// match the identity pattern, that is drift. A marker appearing only in a
+	// non-carrier field (e.g. a user message quoting AGENTS.md) is NOT drift —
+	// scanning the whole payload would raise a permanent per-request error on
+	// harmless user input, so the scan is scoped to carrier candidates only.
+	if (carriers.some((c) => c.text.includes(IDENTITY_PREFIX))) {
+		return {
+			error:
+				"skill composer: prompt-shape drift: identity marker present in carrier but unparseable",
+		};
+	}
+	return {};
 }
 
 export function composeProviderRequest(
@@ -369,16 +402,10 @@ export function composeProviderRequest(
 			afterBytes: originalBytes,
 		};
 	if (!located.carrier) {
-		if (JSON.stringify(payload).includes(IDENTITY_PREFIX)) {
-			return {
-				payload,
-				changed: false,
-				error:
-					"skill composer: prompt-shape drift: no supported provider system-prompt carrier",
-				beforeBytes: originalBytes,
-				afterBytes: originalBytes,
-			};
-		}
+		// No carrier carries the marker. findCarrier already reported drift
+		// if a carrier held an unparseable marker; reaching here means the
+		// marker is absent from every carrier (e.g. an undeclared agent with
+		// no marker), which is a silent skip — not drift.
 		return { payload, changed: false };
 	}
 	const identity = identityFromPrompt(located.carrier.text);
@@ -430,7 +457,7 @@ export function composeProviderRequest(
 	}
 	const next = {
 		...payload,
-		[located.carrier.key]: replaceCarrier(located.carrier, rendered.prompt),
+		[located.carrier.field]: located.carrier.replace(rendered.prompt),
 	};
 	const afterBytes = Buffer.byteLength(JSON.stringify(next));
 	return {

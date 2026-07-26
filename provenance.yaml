@@ -144,5 +144,29 @@
     "extensions": "copied from omp-aesthetic; herdr-omp-agent-state.ts remains herdr-managed runtime state",
     "themes": "copied from omp-aesthetic",
     "presets": "local launch overlays"
+  },
+  "skill_composer_measurements": {
+    "live_orchestrator": {
+      "carrier": "instructions",
+      "source": "tests/fixtures/live-orchestrator-instructions.txt",
+      "before_bytes": 78414,
+      "after_bytes": 78368,
+      "delta_bytes": 46,
+      "note": "Near-zero: orchestrator visible skills already match the manifest; composition strips the marker and reorders."
+    },
+    "builder_lane_subtraction": {
+      "autoload_skills": ["deliver", "ci", "powder", "factory-apps", "research"],
+      "manifest_skills": ["dispatch", "powder"],
+      "before_bytes": 2112,
+      "after_bytes": 723,
+      "delta_bytes": 1389,
+      "reduction_pct": 65.8,
+      "note": "Subtraction cache-prefix saving; real skill descriptions from global/skills/."
+    },
+    "no_rewrite_baseline": {
+      "before_bytes": "equal to after_bytes",
+      "delta_bytes": 0,
+      "note": "Composition disabled (absent manifest); byte-for-byte preserved."
+    }
   }
 }
