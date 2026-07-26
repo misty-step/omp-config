@@ -72,6 +72,8 @@ session with cache headers, which this offline prototype does not record.
 
 ## Upstream feature request
 
+The upstream tracking request is filed as [can1357/oh-my-pi#4570](https://github.com/can1357/oh-my-pi/issues/4570), **per-role context filtering for subagents**. It asks for the same strict skill-visibility boundary through an agent-role allowlist or an extension hook. The contract below records the additional seams this prototype needs: identity must be structured, and an individual spawn must be able to override its declared allowlist.
+
 The deletion condition for this extension is an upstream OMP contract that
 provides:
 
@@ -82,14 +84,11 @@ provides:
 3. A **per-spawn `skills` parameter** so each spawn can override the agent's
    default allowlist.
 
-The previously-linked issue #1334 is the closed `autoloadSkills` frontmatter
-feature (additive loading only) and does **not** request this contract. The
-actual feature request is staged in `docs/upstream-skill-composition-request.md`.
+Issue #1334 is the closed `autoloadSkills` frontmatter feature (additive
+loading only), not this contract. Issue #4570 is the filed upstream tracking
+request; the local extension is deleted when OMP exposes all three seams above.
 
-**Filing status:** stage rules forbid running `gh` from a Hatchet stage, so the
-request cannot be filed as a GitHub issue from here. The complete, ready-to-file
-request lives in `docs/upstream-skill-composition-request.md`; the workflow or
-card owner must file it against `can1357/oh-my-pi` with the title "Stable
-declared-agent identity + exact per-spawn skill allowlist (addition and
-subtraction)" and link the issue URL here. The local extension is deleted when
-OMP exposes the contract above.
+When that happens, delete `global/extensions/skill-composer.ts`,
+`global/skill-composer-manifest.json`, and the
+`<!-- omp-composition-agent -->` markers in agent prompts. The composition
+contract moves to declared-agent frontmatter and the per-spawn parameter.

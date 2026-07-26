@@ -1,7 +1,6 @@
 # Upstream feature request: stable declared-agent identity + exact per-spawn skill allowlist
 
-This document is the feature request to file against `can1357/oh-my-pi`.
-Once filed as a GitHub issue, link it from `docs/skill-composer.md`.
+Filed upstream as [can1357/oh-my-pi#4570](https://github.com/can1357/oh-my-pi/issues/4570), this document records the exact contract requested from OMP. The filed issue tracks per-role context filtering; this proposal names the structured identity and per-spawn override needed to make the boundary exact.
 
 ## Problem
 

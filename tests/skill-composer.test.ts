@@ -39,6 +39,37 @@ const liveOrchestratorInstructions = readFileSync(
  * block from the catalog (simulating additive autoloadSkills) so the test
  * exercises subtraction against realistic content.
  */
+const declaredAgentFiles: Record<string, string> = {
+	orchestrator: join(import.meta.dir, "..", "global", "AGENTS.md"),
+	magellan: join(import.meta.dir, "..", "global", "agents", "magellan.md"),
+	builder: join(import.meta.dir, "..", "global", "agents", "builder.md"),
+};
+
+/** Read the actual declared-agent prompt, retaining a synthetic unknown lane. */
+function declaredAgentPrompt(agent: string): string {
+	const file = declaredAgentFiles[agent];
+	return file
+		? readFileSync(file, "utf8")
+		: `<!-- omp-composition-agent: ${agent} -->`;
+}
+
+function declaredAutoloadSkills(agent: string): string[] {
+	const value = declaredAgentPrompt(agent).match(/^autoloadSkills:\s*(.+)$/m)?.[1]?.trim();
+	if (!value || value === "''" || value === '""') return [];
+	return value.split(",").map((name) => name.trim()).filter(Boolean);
+}
+
+function requestForSkills(
+	agent: string,
+	skills: string[],
+): { systemPrompt: string[] } {
+	const entries = skills
+		.filter((name) => catalog[name])
+		.map((name) => `- ${name}: ${catalog[name]}`);
+	const block = `<skills>\n${entries.join("\n\n")}\n</skills>`;
+	const prompt = `${declaredAgentPrompt(agent)}\n\n${block}\n\nTOOLS`;
+	return { systemPrompt: [prompt] };
+}
 function fullSkillsBlock(): string {
 	const allSkills = ["research", "dispatch", "project-engineering", "powder"];
 	const entries = allSkills
@@ -53,8 +84,12 @@ function fullSkillsBlock(): string {
  * shape (string `instructions` or `systemPrompt` array).
  */
 function request(agent: string): { systemPrompt: string[] } {
-	const prompt = `ROLE\n\n<!-- omp-composition-agent: ${agent} -->\n\nRUNTIME\n\n# Skills & Rules\n${fullSkillsBlock()}\n\nTOOLS`;
-	return { systemPrompt: [prompt] };
+	return requestForSkills(agent, [
+		"research",
+		"dispatch",
+		"project-engineering",
+		"powder",
+	]);
 }
 
 /**
@@ -252,6 +287,29 @@ describe("strict per-agent skill composition", () => {
 		const rewrittenDelta = rewritten.beforeBytes! - rewritten.afterBytes!;
 		expect(baselineDelta).toBe(0);
 		expect(rewrittenDelta).toBeGreaterThan(0);
+	});
+	test("measures real builder-lane subtraction against its autoload declarations", () => {
+		const original = requestForSkills(
+			"builder",
+			declaredAutoloadSkills("builder"),
+		);
+		const baseline = composeProviderRequest(original, undefined, catalog);
+		const rewritten = composeProviderRequest(
+			original,
+			compositionManifest,
+			catalog,
+		);
+
+		expect(baseline.beforeBytes).toBe(baseline.afterBytes);
+		expect(rewritten.changed).toBe(true);
+		const carrier = skillsBlockOf(rewritten);
+		expect(rewritten.beforeBytes! - rewritten.afterBytes!).toBeGreaterThan(0);
+		expect(carrier).toContain("- dispatch:");
+		expect(carrier).toContain("- powder:");
+		expect(carrier).not.toMatch(/- deliver:/);
+		expect(carrier).not.toMatch(/- ci:/);
+		expect(carrier).not.toMatch(/- factory-apps:/);
+		expect(carrier).not.toMatch(/- research:/);
 	});
 
 	test("reports drift through the live provider hook without changing bytes", () => {
