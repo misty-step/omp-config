@@ -57,7 +57,7 @@ first-class groom emission rather than waiting on a separate `/vision` pass.
 ## Tidy (mandatory)
 
 Keep the board of record true — Powder cards, not stale files (Shared Operating
-Spine: Durable State and Closeout; misty-powder skill, Powder MCP/CLI). Consume the card store; don't
+Spine: Durable State and Closeout; the local `powder` skill, Powder MCP/CLI). Consume the card store; don't
 hand-roll closure:
 
 - **Close shipped work.** A card whose work merged moves to done/shipped via

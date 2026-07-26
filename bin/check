@@ -310,6 +310,13 @@ def check_skill_catalog(contract: Contract, declared_skills: set[str]) -> None:
         elif evidence is not None:
             fail(f"skill catalog non-workflow {name} must not claim workflow evidence")
 
+    # Duplicate-payload tripwire: this is a byte-exact SHA-256 guard against
+    # re-vendoring an external SKILL.md that is identical to a first-party
+    # copy. It is deliberately NOT a semantic-duplicate or drift detector — a
+    # local copy that edits even one frontmatter line will not trip it. The
+    # accepted reading of acceptance criterion 3 is one-time cleanup plus this
+    # regression tripwire; sanctioned local copies are pinned by
+    # `global/external/registry.yaml`, not regenerated or drift-checked here.
     first_party_hashes: dict[str, str] = {}
     for directory in contract.surface("skills").source.iterdir():
         skill_file = directory / "SKILL.md"

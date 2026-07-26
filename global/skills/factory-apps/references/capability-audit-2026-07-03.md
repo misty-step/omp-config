@@ -3,6 +3,10 @@
 Scope: live local checkouts for Canary, Powder, Landmark, Aesthetic,
 Bitterblossom, plus Harness Kit and the local Codex config. This is an audit
 snapshot, not a product status source.
+> Superseded 2026-07-25: the `misty-powder` external import this snapshot names
+> was removed in the OMP authority sweep; the first-party `powder` skill
+> (global/skills/powder) is now the board-of-record authority. Read the rows
+> below as history, not as the current skill inventory.
 
 ## Summary Matrix
 

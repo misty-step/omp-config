@@ -1,0 +1,43 @@
+name: omp-config
+
+# Defends the OMP skill catalog and config gates: the catalog-parity /
+# evidence-shape / duplicate-payload rules in bin/check and the tests that
+# pin them. Hatchet's own workflow only covers hatchet/**, so without this
+# job the python gate and its tests never run on catalog changes.
+on:
+  pull_request:
+    paths:
+      - "global/**"
+      - "bin/**"
+      - "tests/**"
+      - "provenance.yaml"
+      - ".github/workflows/omp-config.yml"
+  push:
+    branches: [master]
+    paths:
+      - "global/**"
+      - "bin/**"
+      - "tests/**"
+      - "provenance.yaml"
+      - ".github/workflows/omp-config.yml"
+
+concurrency:
+  group: omp-config-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: skill-catalog tests
+        run: python3 -m unittest tests/test_skill_catalog.py
+
+      - name: omp-config source gate
+        run: python3 bin/check
