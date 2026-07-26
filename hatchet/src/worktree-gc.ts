@@ -52,6 +52,8 @@ type GcOptions = {
   remove?: (path: string) => Promise<void>;
   /** Best-effort deregistration of the worktree record in its parent repo, given the parent repo's git dir. */
   prune?: (parentGitDir: string) => Promise<void>;
+  /** Explicit allowlist of realpath-resolved roots the GC may operate on (beyond `~/.omp/wt`). */
+  allowedRoots?: string[];
 };
 
 function positiveInteger(value: string | undefined, fallback: number): number {
@@ -68,6 +70,27 @@ export function worktreeGcPolicy(environment: NodeJS.ProcessEnv = process.env): 
     maxCount: positiveInteger(environment.OMP_WORKTREE_MAX_COUNT, worktreeGcDefaults.maxCount),
     maxBytes: positiveInteger(environment.OMP_WORKTREE_MAX_BYTES, worktreeGcDefaults.maxBytes),
   };
+}
+
+const ALLOWLIST_ENV = "OMP_WORKTREE_ROOT_ALLOW";
+
+/** Roots explicitly allowed to host GC (in addition to any path ending in `.omp/wt`).
+ *  Read from `OMP_WORKTREE_ROOT_ALLOW` (colon-separated), each resolved to an absolute path. */
+export function worktreeGcAllowedRoots(environment: NodeJS.ProcessEnv = process.env): string[] {
+  const raw = environment[ALLOWLIST_ENV];
+  if (!raw) return [];
+  return raw
+    .split(":")
+    .map(part => resolve(part.trim()))
+    .filter(part => part.length > 0);
+}
+
+/** A root is allowed only if it ends in `.omp/wt` or is an explicit allowlist entry. */
+function isAllowedRoot(rootReal: string, allowlist: string[]): boolean {
+  const segments = rootReal.split(sep).filter(Boolean);
+  const n = segments.length;
+  if (n >= 2 && segments[n - 2] === ".omp" && segments[n - 1] === "wt") return true;
+  return allowlist.includes(rootReal);
 }
 
 function errorMessage(error: unknown): string {
@@ -197,7 +220,10 @@ async function isWorktreeInUse(path: string): Promise<UseResult> {
   }
 }
 
-/** Resolve the parent repository's .git dir from a worktree's `.git` gitdir pointer. */
+/** Resolve the parent repository's .git dir from a worktree's `.git` gitdir pointer.
+ *  Relative gitdir pointers are resolved against the worktree dir (not process.cwd())
+ *  so they point at the worktree's own parent repo. Targets without a `.git` segment
+ *  are refused to avoid pruning an unidentifiable repo. */
 async function parentGitDir(worktreePath: string): Promise<string | null> {
   let marker: string;
   try {
@@ -207,14 +233,16 @@ async function parentGitDir(worktreePath: string): Promise<string | null> {
   }
   const match = marker.match(/^gitdir:\s*(\S+)/m);
   if (!match || match[1] === undefined) return null;
-  const gitdir = resolve(match[1]);
+  const gitdir = resolve(worktreePath, match[1]);
   const segments = gitdir.split(sep);
   const gitIdx = segments.lastIndexOf(".git");
   if (gitIdx >= 0 && segments[gitIdx + 1] === "worktrees") {
     return segments.slice(0, gitIdx + 1).join(sep);
   }
-  // Not under a .git/worktrees layout; assume the pointer is the repo gitdir itself.
-  return gitdir;
+  if (gitIdx >= 0) {
+    return gitdir;
+  }
+  return null;
 }
 
 async function pruneParentWorktree(parentGitDir: string): Promise<void> {
@@ -250,6 +278,12 @@ export async function gcWorktrees(
     return { root, scanned: 0, removed: [], remainingCount: 0, remainingBytes: 0, budgetExceeded: false, errors };
   }
 
+  const allowlist = options.allowedRoots ?? worktreeGcAllowedRoots();
+  if (!isAllowedRoot(rootReal, allowlist)) {
+    errors.push(`refused GC root outside ~/.omp/wt allowlist: ${rootReal}`);
+    return { root, scanned: 0, removed: [], remainingCount: 0, remainingBytes: 0, budgetExceeded: false, errors };
+  }
+
   const nowMs = options.nowMs ?? Date.now();
   const isClean = options.isClean ?? isCleanWorktree;
   const isInUse = options.isInUse ?? isWorktreeInUse;
@@ -275,7 +309,7 @@ export async function gcWorktrees(
   const eligible: Eligible[] = [];
   for (const candidate of candidates) {
     const cleanResult = await isClean(candidate.path);
-    if (cleanResult === "dirty") continue;
+    if (cleanResult !== "clean") continue;
     const use = await isInUse(candidate.path);
     if (use.error) errors.push(`lsof failure for ${candidate.path}: ${use.error}`);
     if (use.inUse) continue;
@@ -320,7 +354,7 @@ export async function gcWorktrees(
     if (useNow.error) errors.push(`lsof failure (recheck) for ${candidate.path}: ${useNow.error}`);
     if (useNow.inUse) continue;
     const cleanNow = await isClean(candidate.path);
-    if (cleanNow === "dirty") continue;
+    if (cleanNow !== "clean") continue;
 
     try {
       await remove(candidate.path);
@@ -355,4 +389,58 @@ export async function gcWorktrees(
 
 export async function runWorktreeGc(policy = worktreeGcPolicy()): Promise<WorktreeGcReport> {
   return gcWorktrees(policy);
+}
+
+export type WorktreeGcLoopDeps = {
+  runGc?: (policy: WorktreeGcPolicy) => Promise<WorktreeGcReport>;
+  setTimeout?: typeof setTimeout;
+  clearTimeout?: typeof clearTimeout;
+  onReport?: (report: WorktreeGcReport) => void;
+  onSkip?: (reason: string) => void;
+  onError?: (error: unknown) => void;
+};
+
+export type WorktreeGcLoopHandle = { stop: () => void };
+
+/** Run the GC on startup and every `policy.intervalMs`, guarded against overlapping runs.
+ *  The timer is unref'd so it never keeps the process alive on its own. */
+export function startWorktreeGcLoop(
+  policy: WorktreeGcPolicy,
+  deps: WorktreeGcLoopDeps = {},
+): WorktreeGcLoopHandle {
+  const runGc = deps.runGc ?? runWorktreeGc;
+  const setTimer = deps.setTimeout ?? setTimeout;
+  const clearTimer = deps.clearTimeout ?? clearTimeout;
+  let busy = false;
+  let timer: NodeJS.Timeout | undefined;
+  const tick = async (): Promise<void> => {
+    if (busy) {
+      deps.onSkip?.("previous run still in progress");
+      return;
+    }
+    busy = true;
+    try {
+      const report = await runGc(policy);
+      deps.onReport?.(report);
+    } catch (error) {
+      deps.onError?.(error);
+    } finally {
+      busy = false;
+    }
+  };
+  void tick();
+  const schedule = (): void => {
+    timer = setTimer(() => {
+      void tick().finally(schedule);
+    }, policy.intervalMs);
+    const handle = timer as unknown as { unref?: () => void };
+    if (typeof handle.unref === "function") handle.unref.call(timer);
+  };
+  schedule();
+  return {
+    stop: () => {
+      if (timer !== undefined) clearTimer(timer);
+      timer = undefined;
+    },
+  };
 }
