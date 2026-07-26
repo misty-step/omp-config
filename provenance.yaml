@@ -64,6 +64,12 @@
         "kind": "file",
         "origin": "local"
       },
+      "extension_herdr_sidebar": {
+        "source": "global/extensions/herdr-sidebar.ts",
+        "target": "extensions/herdr-sidebar.ts",
+        "kind": "file",
+        "origin": "local"
+      },
       "recipe_task_runner": {
         "source": "global/lib/recipe-task-runner.ts",
         "target": "lib/recipe-task-runner.ts",
