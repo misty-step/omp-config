@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   checkStatusSchema,
+  prBranchForCard,
   prRefSchema,
   type CheckStatus,
   type PrRef,
@@ -330,4 +331,29 @@ export function createGithubClient(exec: Exec = defaultExec): GithubClient {
       await run(exec, "gh", ["pr", "merge", String(pr), "--merge"], cwd);
     },
   };
+}
+
+/**
+ * The url of an open pull request already carrying this card's work, if one
+ * exists. Standalone rather than a client method: the reconciler asks this
+ * before deciding whether a card needs a run at all, long before it builds
+ * the machinery a run requires.
+ */
+export async function findOpenPullRequestForCard(
+  cardId: string,
+  branchPrefix: string,
+  cwd: string = process.cwd(),
+  exec: Exec = defaultExec,
+): Promise<string | undefined> {
+  const branch = prBranchForCard(cardId, branchPrefix);
+  const listed = parseJson(
+    await run(exec, "gh", ["pr", "list", "--head", branch, "--state", "open", "--json", "url", "--limit", "1"], cwd),
+    "gh pr list",
+  );
+  if (!Array.isArray(listed)) throw new Error("gh pr list returned an unexpected result");
+  const first = listed[0];
+  if (first === undefined) return undefined;
+  const url = asRecord(first, "gh pr list").url;
+  if (typeof url !== "string" || url.length === 0) throw new Error("gh pr list returned a pull request without a url");
+  return url;
 }
