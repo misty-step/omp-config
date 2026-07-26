@@ -436,6 +436,129 @@ def check_tree(contract: Contract) -> None:
                     f"{reference}"
                 )
 
+    check_external_registry()
+
+
+def _registry_unquote(value: str) -> str:
+    value = value.strip()
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        return value[1:-1]
+    return value
+
+
+def _registry_flow_list(raw: str) -> list[str]:
+    inner = raw.strip()
+    if inner.startswith("[") and inner.endswith("]"):
+        inner = inner[1:-1]
+    if not inner.strip():
+        return []
+    return [_registry_unquote(part) for part in inner.split(",") if part.strip()]
+
+
+def _registry_field_value(raw: str) -> object:
+    value = raw.strip()
+    if not value:
+        return None
+    if value.startswith("["):
+        return _registry_flow_list(value)
+    if value == "true":
+        return True
+    if value == "false":
+        return False
+    return _registry_unquote(value)
+
+
+def parse_registry_sources(path: Path) -> list[dict[str, object]]:
+    """Parse the `sources:` list from registry.yaml without a YAML dependency.
+
+    registry.yaml is a hand-edited ledger; this parser understands only the
+    shape it actually uses (a top-level ``sources:`` mapping of list items,
+    each a flat dict whose only nested value is an inline ``include: [...]``
+    flow sequence). It deliberately raises on anything else so a schema drift
+    in the registry surfaces here rather than silently passing the gate.
+    """
+    sources: list[dict[str, object]] = []
+    in_sources = False
+    current: dict[str, object] | None = None
+    item_indent = -1
+    for line in path.read_text().splitlines():
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        indent = len(line) - len(line.lstrip(" "))
+        stripped = line.strip()
+        if not in_sources:
+            if indent == 0 and stripped == "sources:":
+                in_sources = True
+            continue
+        if indent == 0:
+            break
+        if stripped.startswith("- "):
+            if current is not None:
+                sources.append(current)
+            current = {}
+            item_indent = indent
+            rest = stripped[2:].strip()
+            if ":" in rest:
+                key, raw = rest.split(":", 1)
+                current[key.strip()] = _registry_field_value(raw)
+            else:
+                fail(f"{relative(path)} has an unparseable source entry: {stripped!r}")
+        elif current is not None and indent > item_indent and ":" in stripped:
+            key, raw = stripped.split(":", 1)
+            current[key.strip()] = _registry_field_value(raw)
+    if current is not None:
+        sources.append(current)
+    return sources
+
+
+def check_external_registry() -> None:
+    """Assert registry.yaml pins and global/external/ directories stay 1:1.
+
+    Every non-default source must declare alias_prefix plus either skill_name
+    or include, which together name the vendored directory(ies) it owns. The
+    gate rejects drift in both directions: a pinned source whose directory was
+    deleted (missing_dirs) and a vendored directory with no pin (unpinned_dirs
+    — the "pin without a consumer is rot" invariant this registry enforces).
+    """
+    registry = ROOT / "global" / "external" / "registry.yaml"
+    if not registry.is_file():
+        fail(f"{relative(registry)} is missing")
+    external_dir = registry.parent
+    expected: set[str] = set()
+    for source in parse_registry_sources(registry):
+        if source.get("default") is True:
+            continue
+        repo = source.get("repo")
+        prefix = source.get("alias_prefix")
+        if not isinstance(prefix, str) or not prefix:
+            fail(f"{relative(registry)} source {repo!r} lacks required alias_prefix")
+        skill_name = source.get("skill_name")
+        include = source.get("include")
+        if isinstance(skill_name, str) and skill_name:
+            expected.add(prefix + skill_name)
+        elif isinstance(include, list) and include:
+            for name in include:
+                if not isinstance(name, str) or not name:
+                    fail(f"{relative(registry)} source {repo!r} has an empty include entry")
+                expected.add(prefix + name)
+        else:
+            fail(
+                f"{relative(registry)} source {repo!r} must declare skill_name or "
+                f"include so its vendored directory is discoverable"
+            )
+    actual = {
+        entry.name
+        for entry in external_dir.iterdir()
+        if entry.is_dir() and not entry.is_symlink()
+    }
+    missing = sorted(expected - actual)
+    extra = sorted(actual - expected)
+    if missing or extra:
+        fail(
+            f"{relative(registry)} drifts from {relative(external_dir)}: "
+            f"missing_dirs={missing}, unpinned_dirs={extra}"
+        )
+
 
 def split_csv(value: str) -> list[str]:
     return [part.strip() for part in value.split(",") if part.strip()]

@@ -2,6 +2,10 @@
 .env
 .env.*
 local/
+# Stage-output URIs written as literal paths leak a dir named `local:`. The
+# `local/` rule above does not match it (the trailing path component is the
+# colon). Cover both spellings; the colon form also breaks Windows checkouts.
+local:/
 state/
 *.db
 *.db-shm

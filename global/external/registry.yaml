@@ -4,7 +4,8 @@
 # the provenance ledger for third-party skills:
 # Each source is vendored into `global/external/<alias>/` at its pinned SHA.
 # The committed payload and `.sync-meta.json` receipt are the reviewable import;
-# `registry.yaml` and the payload must stay in lockstep.
+# `registry.yaml` and the payload must stay in lockstep; `bin/check` rejects
+# registry/directory drift (see check_external_registry).
 # Editing a vendored external makes it a fork — mark it here and stop
 # syncing it.
 #
