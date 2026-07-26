@@ -8,10 +8,9 @@ const valueAfter = (flag: string): string | undefined => {
 };
 
 const config = await readOperatorConfig(valueAfter("--config"));
-const result = await triggerConfiguredWorkflow(
+const result = await triggerConfiguredWorkflow({
   config,
-  "manual",
-  valueAfter("--head"),
-  valueAfter("--idempotency-key"),
-);
+  source: "manual",
+  ...(valueAfter("--head") ? { headSha: valueAfter("--head")! } : {}),
+});
 process.stdout.write(`${JSON.stringify(result)}\n`);

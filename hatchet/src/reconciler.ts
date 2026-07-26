@@ -9,21 +9,14 @@ import {
   type PowderCardReader,
   type PowderReadyQueueReader,
 } from "./powder-client.js";
-import { triggerConfiguredWorkflow, type CardOverride, type TriggerResult } from "./trigger-service.js";
+import { triggerConfiguredWorkflow, type CardOverride, type TriggerRequest, type TriggerResult } from "./trigger-service.js";
 import { defaultPrSettings, type TriggerSource } from "./contracts.js";
-import { findInFlightRun } from "./run-liveness.js";
+import { findInFlightRun, type LiveRun } from "./run-liveness.js";
 import { findOpenPullRequestForCard } from "./github.js";
 
-export type TriggerFn = (
-  config: OperatorConfig,
-  source: TriggerSource,
-  requestedHeadSha?: string,
-  requestedIdempotencyKey?: string,
-  cardOverride?: CardOverride,
-  readPowderCard?: PowderCardReader,
-) => Promise<TriggerResult>;
+export type TriggerFn = (request: TriggerRequest) => Promise<TriggerResult>;
 
-export type CheckInFlightFn = (cardId: string) => Promise<string | undefined>;
+export type CheckInFlightFn = (cardId: string) => Promise<LiveRun | undefined>;
 export type FindOpenPullRequestFn = (
   cardId: string,
   branchPrefix: string,
@@ -56,20 +49,9 @@ export function eligibleReadyCards(
   });
 }
 
-/**
- * The first eligible ready card, preserving the caller's ordering.
- */
-export function selectReadyCard(
-  cards: readonly PowderCard[],
-  readyStatus: string,
-  repositoryAllowlist?: readonly string[],
-): PowderCard | undefined {
-  return eligibleReadyCards(cards, readyStatus, repositoryAllowlist)[0];
-}
-
 type LivenessVerdict =
   | { kind: "clear" }
-  | { kind: "in_flight"; runId: string }
+  | { kind: "in_flight"; runId: string; headSha?: string }
   | { kind: "pr_open"; url: string }
   | { kind: "unknown"; reason: string };
 
@@ -81,8 +63,8 @@ async function inspectLiveness(
   const checkInFlight = deps.checkInFlight ?? findInFlightRun;
   const findOpenPr = deps.findOpenPullRequest ?? findOpenPullRequestForCard;
   try {
-    const runId = await checkInFlight(cardId);
-    if (runId) return { kind: "in_flight", runId };
+    const live = await checkInFlight(cardId);
+    if (live) return { kind: "in_flight", runId: live.runId, ...(live.headSha ? { headSha: live.headSha } : {}) };
     // A card whose work is already sitting in an open pull request is not
     // waiting for the factory - it is waiting for a human. Powder still calls
     // it ready because the factory never writes card status back, so without
@@ -143,7 +125,7 @@ async function reconcileSingle(
   }
   // The card was just read; hand it to the trigger so the trigger never has to
   // re-read the card and the card facts come from this exact card, not config.
-  const result = await trigger(config, "reconciler", undefined, undefined, { cardId: card.id, card }, readPowderCard);
+  const result = await trigger({ config, source: "reconciler", card: { cardId: card.id, card }, readPowderCard });
   return { mode: "single", cardId: card.id, status: card.status, triggered: !result.duplicate, ...result };
 }
 
@@ -223,7 +205,7 @@ async function reconcileReadyQueue(
   }
   // The selected card was just listed; hand it in so the trigger derives card
   // facts from it rather than re-reading by id.
-  const result = await trigger(config, "reconciler", undefined, undefined, { cardId: selected.id, repository, card: selected });
+  const result = await trigger({ config, source: "reconciler", card: { cardId: selected.id, repository, card: selected } });
   return {
     mode: "ready-queue",
     cardId: selected.id,

@@ -71,9 +71,7 @@ async function makeInput(
     cwd,
     task: `run ${scenario} canary`,
     card: { title: `card-${scenario} title`, body: "", criteria: [] },
-    idempotencyKey: key,
-    triggerSource: "fixture",
-    requestedAt: new Date().toISOString(),
+    triggerSource: "manual",
     pr,
   });
 }
@@ -141,13 +139,16 @@ function fakeDependencies(
   };
 }
 
+let runIdCounter = 0;
+const freshRunId = () => `test-run-${process.pid}-${++runIdCounter}`;
+
 describe("pr-workflow fixture scenarios", () => {
   it("happy path reaches awaiting_operator_approval", async () => {
     const cwd = `${fixtureRoot.pathname}runs/happy`;
     const headSha = await gitInit(cwd);
     const observedRecipes: string[] = [];
     const input = await makeInput(cwd, headSha, "happy", `happy-${headSha.slice(0, 8)}`);
-    const packet = await runPrWorkflow(input, new AbortController().signal, fakeDependencies(cwd, observedRecipes));
+    const packet = await runPrWorkflow(input, freshRunId(), new AbortController().signal, fakeDependencies(cwd, observedRecipes));
     expect(packet.state).toBe("awaiting_operator_approval");
     expect(packet.fixRounds).toBe(0);
     expect(packet.reviewRounds).toBe(1);
@@ -164,8 +165,10 @@ describe("pr-workflow fixture scenarios", () => {
     const cwd = `${fixtureRoot.pathname}runs/duplicate`;
     const headSha = await gitInit(cwd);
     const input = await makeInput(cwd, headSha, "happy", `duplicate-${headSha.slice(0, 8)}`);
-    const first = await runPrWorkflow(input, new AbortController().signal, fakeDependencies(cwd));
-    const second = await runPrWorkflow(input, new AbortController().signal, fakeDependencies(cwd));
+    const retriedRunId = freshRunId();
+    const first = await runPrWorkflow(input, retriedRunId, new AbortController().signal, fakeDependencies(cwd));
+    // Same run id: this is the engine retrying one run, which must resume.
+    const second = await runPrWorkflow(input, retriedRunId, new AbortController().signal, fakeDependencies(cwd));
     expect(second).toEqual(first);
   });
 
@@ -173,9 +176,10 @@ describe("pr-workflow fixture scenarios", () => {
     const cwd = `${fixtureRoot.pathname}runs/transient`;
     const headSha = await gitInit(cwd);
     const input = await makeInput(cwd, headSha, "transient", `transient-${headSha.slice(0, 8)}`);
-    const packet = await runPrWorkflow(input, new AbortController().signal, fakeDependencies(cwd));
+    const runId = freshRunId();
+    const packet = await runPrWorkflow(input, runId, new AbortController().signal, fakeDependencies(cwd));
     expect(packet.state).toBe("awaiting_operator_approval");
-    const state = await loadWorkflowState(input);
+    const state = await loadWorkflowState(runId);
     const implement = state.stages.find((s) => s.stage === "implement");
     expect(implement?.attempts).toBeGreaterThan(1);
   });
@@ -185,7 +189,7 @@ describe("pr-workflow fixture scenarios", () => {
     const headSha = await gitInit(cwd);
     const input = await makeInput(cwd, headSha, "cancellation", `cancellation-${headSha.slice(0, 8)}`);
     const controller = new AbortController();
-    const run = runPrWorkflow(input, controller.signal, fakeDependencies(cwd));
+    const run = runPrWorkflow(input, freshRunId(), controller.signal, fakeDependencies(cwd));
     await new Promise((resolve) => setTimeout(resolve, 100));
     controller.abort();
     await expect(run).rejects.toThrow();
@@ -196,7 +200,7 @@ describe("pr-workflow fixture scenarios", () => {
     const headSha = await gitInit(cwd);
     const input = await makeInput(cwd, headSha, "blocked-twice", `blocked-twice-${headSha.slice(0, 8)}`);
     const observedRecipes: string[] = [];
-    const packet = await runPrWorkflow(input, new AbortController().signal, fakeDependencies(cwd, observedRecipes));
+    const packet = await runPrWorkflow(input, freshRunId(), new AbortController().signal, fakeDependencies(cwd, observedRecipes));
     expect(packet.state).toBe("review_blocked");
     expect(packet.fixRounds).toBe(2);
     expect(packet.reviewRounds).toBe(3);
@@ -209,7 +213,7 @@ describe("pr-workflow fixture scenarios", () => {
     const headSha = await gitInit(cwd);
     const input = await makeInput(cwd, headSha, "happy", `pr-open-${headSha.slice(0, 8)}`);
     const github = fakeGithub();
-    const packet = await runPrWorkflow(input, new AbortController().signal, fakeDependencies(cwd, undefined, github.client));
+    const packet = await runPrWorkflow(input, freshRunId(), new AbortController().signal, fakeDependencies(cwd, undefined, github.client));
     expect(packet.pr?.number).toBe(42);
     expect(packet.pr?.branch).toBe(`hatchet/card-happy`);
     expect(github.calls.filter((call) => call.method === "ensurePullRequest")).toHaveLength(1);
@@ -224,7 +228,7 @@ describe("pr-workflow fixture scenarios", () => {
     const headSha = await gitInit(cwd);
     const input = await makeInput(cwd, headSha, "happy", `pr-marker-${headSha.slice(0, 8)}`);
     const github = fakeGithub();
-    await runPrWorkflow(input, new AbortController().signal, fakeDependencies(cwd, undefined, github.client));
+    await runPrWorkflow(input, freshRunId(), new AbortController().signal, fakeDependencies(cwd, undefined, github.client));
     const methods = github.calls.map((call) => call.method);
     methods.forEach((method, index) => {
       if (method !== "postComment") return;
@@ -237,7 +241,7 @@ describe("pr-workflow fixture scenarios", () => {
     const headSha = await gitInit(cwd);
     const input = await makeInput(cwd, headSha, "happy", `pr-nomerge-${headSha.slice(0, 8)}`);
     const github = fakeGithub({ conclusion: "green" });
-    const packet = await runPrWorkflow(input, new AbortController().signal, fakeDependencies(cwd, undefined, github.client));
+    const packet = await runPrWorkflow(input, freshRunId(), new AbortController().signal, fakeDependencies(cwd, undefined, github.client));
     expect(packet.state).toBe("awaiting_operator_approval");
     expect(packet.mergePerformed).toBe(false);
     expect(packet.operatorApprovalRequired).toBe(true);
@@ -249,7 +253,7 @@ describe("pr-workflow fixture scenarios", () => {
     const headSha = await gitInit(cwd);
     const input = await makeInput(cwd, headSha, "happy", `pr-merge-${headSha.slice(0, 8)}`, { autoMerge: true });
     const github = fakeGithub({ conclusion: "green" });
-    const packet = await runPrWorkflow(input, new AbortController().signal, fakeDependencies(cwd, undefined, github.client));
+    const packet = await runPrWorkflow(input, freshRunId(), new AbortController().signal, fakeDependencies(cwd, undefined, github.client));
     expect(packet.state).toBe("merged");
     expect(packet.mergePerformed).toBe(true);
     expect(packet.operatorApprovalRequired).toBe(false);
@@ -265,7 +269,7 @@ describe("pr-workflow fixture scenarios", () => {
     const headSha = await gitInit(cwd);
     const input = await makeInput(cwd, headSha, "happy", `pr-red-${headSha.slice(0, 8)}`, { autoMerge: true });
     const github = fakeGithub({ conclusion: "red", failing: [{ name: "typecheck", summary: "tsc failed" }] });
-    const packet = await runPrWorkflow(input, new AbortController().signal, fakeDependencies(cwd, undefined, github.client));
+    const packet = await runPrWorkflow(input, freshRunId(), new AbortController().signal, fakeDependencies(cwd, undefined, github.client));
     expect(packet.state).toBe("awaiting_operator_approval");
     expect(packet.mergePerformed).toBe(false);
     expect(github.calls.some((call) => call.method === "mergePullRequest")).toBe(false);
@@ -276,7 +280,7 @@ describe("pr-workflow fixture scenarios", () => {
     const headSha = await gitInit(cwd);
     const input = await makeInput(cwd, headSha, "happy", `pr-nochecks-${headSha.slice(0, 8)}`, { autoMerge: true });
     const github = fakeGithub({ conclusion: "none" });
-    const packet = await runPrWorkflow(input, new AbortController().signal, fakeDependencies(cwd, undefined, github.client));
+    const packet = await runPrWorkflow(input, freshRunId(), new AbortController().signal, fakeDependencies(cwd, undefined, github.client));
     expect(packet.state).toBe("awaiting_operator_approval");
     expect(github.calls.some((call) => call.method === "mergePullRequest")).toBe(false);
   });
@@ -287,7 +291,7 @@ describe("pr-workflow fixture scenarios", () => {
     const input = await makeInput(cwd, headSha, "blocked-twice", `pr-fixer-${headSha.slice(0, 8)}`);
     const github = fakeGithub();
     const observedStages: Array<{ stage: string; task: string }> = [];
-    await runPrWorkflow(input, new AbortController().signal, fakeDependencies(cwd, undefined, github.client, observedStages));
+    await runPrWorkflow(input, freshRunId(), new AbortController().signal, fakeDependencies(cwd, undefined, github.client, observedStages));
     const fixerTasks = observedStages.filter((entry) => entry.stage === "remediate").map((entry) => entry.task);
     expect(fixerTasks.length).toBeGreaterThan(0);
     expect(fixerTasks[0]).toContain("Pull request #42 context");
@@ -299,7 +303,7 @@ describe("pr-workflow fixture scenarios", () => {
     const headSha = await gitInit(cwd);
     const input = await makeInput(cwd, headSha, "blocked-twice", `pr-publish-${headSha.slice(0, 8)}`);
     const github = fakeGithub();
-    await runPrWorkflow(input, new AbortController().signal, fakeDependencies(cwd, undefined, github.client));
+    await runPrWorkflow(input, freshRunId(), new AbortController().signal, fakeDependencies(cwd, undefined, github.client));
     // implement, then one push per remediate round.
     expect(github.calls.filter((call) => call.method === "publishBranch")).toHaveLength(3);
     expect(github.calls[0]?.method).toBe("ensureBranch");
@@ -313,7 +317,7 @@ describe("pr-workflow fixture scenarios", () => {
     // The client throws; the run must surface that, not degrade to unmerged.
     const github = fakeGithub({ conclusion: "green", checkSha: "c".repeat(40) });
     await expect(
-      runPrWorkflow(input, new AbortController().signal, fakeDependencies(cwd, undefined, github.client)),
+      runPrWorkflow(input, freshRunId(), new AbortController().signal, fakeDependencies(cwd, undefined, github.client)),
     ).rejects.toThrow(/expected/);
     expect(github.calls.some((call) => call.method === "mergePullRequest")).toBe(false);
   });
