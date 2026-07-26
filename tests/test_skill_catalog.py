@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import dataclasses
 import importlib.util
 from importlib.machinery import SourceFileLoader
 import io
 import json
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -15,7 +17,6 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 BIN = ROOT / "bin"
-CATALOG = ROOT / "global" / "skill-catalog.json"
 SKILLS = ROOT / "global" / "skills"
 
 
@@ -105,7 +106,7 @@ def _run_gate(tmp: Path, catalog_doc: dict, skill_names: list[str]) -> None:
 
 
 class SkillCatalogGateTests(unittest.TestCase):
-    """Defend check_skill_catalog (bin/check:268-333): every rule has a test that
+    """Defend check_skill_catalog and check_presets: every rule has a test that
     fails if the rule is deleted, inverted, or unwired from check_tree."""
 
     def test_real_catalog_passes_the_real_gate(self) -> None:
@@ -115,23 +116,32 @@ class SkillCatalogGateTests(unittest.TestCase):
         check.check_skill_catalog(_FakeContract(SKILLS), declared)
 
     def test_bin_check_passes_and_rejects_a_corrupt_catalog(self) -> None:
-        # End-to-end defense of the callsite (bin/check check_tree -> 463).
-        healthy = subprocess.run(
-            [sys.executable, "bin/check"], capture_output=True, cwd=ROOT
-        )
-        self.assertEqual(healthy.returncode, 0, healthy.stderr.decode())
-        self.assertIn(b"OMP source configuration OK", healthy.stdout)
+        # End-to-end defense of the check_tree -> check_skill_catalog callsite.
+        # Runs against a tmpdir copy of the repo so the tracked catalog is never
+        # mutated in place: a crash or SIGKILL mid-test cannot corrupt the tree
+        # and parallel runs cannot race on the shared file.
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            shutil.copytree(ROOT / "bin", repo / "bin")
+            shutil.copytree(ROOT / "global", repo / "global")
+            shutil.copy2(ROOT / "provenance.yaml", repo / "provenance.yaml")
 
-        backup = CATALOG.read_bytes()
-        try:
-            CATALOG.write_text(
+            healthy = subprocess.run(
+                [sys.executable, str(repo / "bin" / "check")],
+                capture_output=True,
+                cwd=repo,
+            )
+            self.assertEqual(healthy.returncode, 0, healthy.stderr.decode())
+            self.assertIn(b"OMP source configuration OK", healthy.stdout)
+
+            (repo / "global" / "skill-catalog.json").write_text(
                 json.dumps({"schema_version": "not.the.schema", "skills": {}})
             )
             corrupt = subprocess.run(
-                [sys.executable, "bin/check"], capture_output=True, cwd=ROOT
+                [sys.executable, str(repo / "bin" / "check")],
+                capture_output=True,
+                cwd=repo,
             )
-        finally:
-            CATALOG.write_bytes(backup)
         self.assertNotEqual(corrupt.returncode, 0)
         self.assertIn(b"schema_version", corrupt.stderr)
 
@@ -203,6 +213,78 @@ class SkillCatalogGateTests(unittest.TestCase):
                 with self.assertRaises(SystemExit):
                     check.check_skill_catalog(contract, {"alpha", "beta"})
 
+
+    def test_workflow_without_sample_limits_is_rejected(self) -> None:
+        catalog = _valid_catalog()
+        catalog["skills"]["alpha"]["evidence"]["limits"] = "  "
+        with tempfile.TemporaryDirectory() as tmp, self.assertRaises(SystemExit):
+            _run_gate(Path(tmp), catalog, ["alpha", "beta"])
+
+    def test_workflow_with_invalid_trials_per_cell_is_rejected(self) -> None:
+        catalog = _valid_catalog()
+        catalog["skills"]["alpha"]["evidence"]["trials_per_cell"] = 0
+        with tempfile.TemporaryDirectory() as tmp, self.assertRaises(SystemExit):
+            _run_gate(Path(tmp), catalog, ["alpha", "beta"])
+
+    def test_missing_classification_key_is_rejected(self) -> None:
+        catalog = _valid_catalog()
+        del catalog["skills"]["beta"]["classification"]
+        with tempfile.TemporaryDirectory() as tmp, self.assertRaises(SystemExit):
+            _run_gate(Path(tmp), catalog, ["alpha", "beta"])
+
+    def test_catalog_missing_a_skill_dir_is_rejected(self) -> None:
+        # The mirror of test_catalog_skill_drift_is_rejected: a skill dir on
+        # disk that the catalog omits must also fail.
+        catalog = _valid_catalog()
+        with tempfile.TemporaryDirectory() as tmp, self.assertRaises(SystemExit):
+            _run_gate(Path(tmp), catalog, ["alpha", "beta", "gamma"])
+
+    def test_preset_naming_a_missing_skill_is_rejected(self) -> None:
+        # Defends the check_presets missing-skill rule (bin/check:208-212).
+        # Requires omp on PATH (CI installs it); the message assertion
+        # guarantees we reached the existence check rather than failing
+        # earlier at the omp subprocess. The callsite is defended separately
+        # by test_bin_check_rejects_a_preset_naming_a_missing_skill.
+        real_contract = check.load_contract(ROOT)
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            preset_dir = tmp / "presets"
+            preset_dir.mkdir()
+            (preset_dir / "bad.yml").write_text(
+                "skills:\n  includeSkills:\n    - this-skill-does-not-exist\n"
+            )
+            surfaces = tuple(
+                dataclasses.replace(surface, source=preset_dir)
+                if surface.name == "presets"
+                else surface
+                for surface in real_contract.surfaces
+            )
+            contract = dataclasses.replace(real_contract, surfaces=surfaces)
+            err = io.StringIO()
+            with redirect_stderr(err), self.assertRaises(SystemExit):
+                check.check_presets(contract)
+        self.assertIn("names missing skill", err.getvalue())
+
+    def test_bin_check_rejects_a_preset_naming_a_missing_skill(self) -> None:
+        # End-to-end defense of the check_tree -> check_presets callsite: if
+        # that callsite were removed, bin/check would skip preset validation
+        # and this bad-preset projection would pass. Runs against a tmpdir
+        # copy so no tracked preset is mutated.
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            shutil.copytree(ROOT / "bin", repo / "bin")
+            shutil.copytree(ROOT / "global", repo / "global")
+            shutil.copy2(ROOT / "provenance.yaml", repo / "provenance.yaml")
+            (repo / "global" / "presets" / "zzz-bad.yml").write_text(
+                "skills:\n  includeSkills:\n    - this-skill-does-not-exist\n"
+            )
+            result = subprocess.run(
+                [sys.executable, str(repo / "bin" / "check")],
+                capture_output=True,
+                cwd=repo,
+            )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn(b"names missing skill", result.stderr)
 
 if __name__ == "__main__":
     unittest.main()

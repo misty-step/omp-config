@@ -21,6 +21,9 @@ on:
       - "provenance.yaml"
       - ".github/workflows/omp-config.yml"
 
+permissions:
+  contents: read
+
 concurrency:
   group: omp-config-${{ github.ref }}
   cancel-in-progress: true
@@ -28,7 +31,7 @@ concurrency:
 jobs:
   gate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -36,8 +39,29 @@ jobs:
         with:
           python-version: "3.x"
 
+      # bin/check's check_tree and check_presets shell out to `omp` (built-in
+      # tool authority lookup and preset config merging). The catalog gate
+      # cannot run — and the gate's own tests cannot pass — without the omp
+      # executable on PATH, so provision a pinned copy of the harness.
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: install omp
+        run: bun add --global @oh-my-pi/pi-coding-agent@17.1.3
+
       - name: skill-catalog tests
         run: python3 -m unittest tests/test_skill_catalog.py
 
       - name: omp-config source gate
         run: python3 bin/check
+
+      # Acceptance criterion 4 names the installed gate too: install the
+      # projection into an isolated dir and verify the symlink/digest receipts
+      # and extension co-tenancy hold.
+      - name: omp-config installed gate
+        env:
+          PI_CODING_AGENT_DIR: ${{ runner.temp }}/omp-agent
+        run: |
+          python3 bin/install
+          python3 bin/check --installed
