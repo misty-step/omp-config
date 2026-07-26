@@ -517,8 +517,9 @@ def check_external_registry() -> None:
     Every non-default source must declare alias_prefix plus either skill_name
     or include, which together name the vendored directory(ies) it owns. The
     gate rejects drift in both directions: a pinned source whose directory was
-    deleted (missing_dirs) and a vendored directory with no pin (unpinned_dirs
-    — the "pin without a consumer is rot" invariant this registry enforces).
+    deleted (missing_dirs) and a vendored directory with no pin (unpinned_dirs).
+    Consumer presence (AC1: "a pin without a consumer is rot") is a human-review
+    invariant documented per-pin in registry.yaml comments, not enforced here.
     """
     registry = ROOT / "global" / "external" / "registry.yaml"
     if not registry.is_file():

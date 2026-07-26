@@ -48,7 +48,7 @@ build/codegen/sync step.
 | loop readiness / Mode B handoff | `../../shared/references/loop-readiness.md` |
 | verification system first | `../../shared/references/verification-system-first.md` |
 | delete-first simplification lens | `../../shared/references/delete-first.md` |
-| Ponytail anti-overengineering ladder | `../.external/dietrich-ponytail/SKILL.md` |
+| Ponytail anti-overengineering ladder | `global/external/dietrich-ponytail/SKILL.md` |
 
 Repo-local skills for consumer repos (bespoke QA drivers, deploy runbooks,
 persona probes) are written directly into that repo's `.agents/skills/`

@@ -24,6 +24,6 @@ for the convention and its prior art.
 ## mattpocock-writing-great-skills
 
 - Source: `mattpocock/skills` at `skills/productivity/writing-great-skills`
-- Pinned commit: `d574778f94cf620fcc8ce741584093bc650a61d3` (MIT)
+- Pinned commit: `66898f60e8c744e269f8ce06c2b2b99ce7660d5f` (MIT; `registry.yaml` is canonical)
 - Vendored 2026-07-07 (roster-926 phase A); also the judgment layer behind
   `global/references/skill-authoring-standard.md`.

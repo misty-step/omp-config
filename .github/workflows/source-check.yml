@@ -1,0 +1,36 @@
+name: source-check
+
+# bin/check (incl. check_external_registry pin<->dir parity) defends the
+# global/external registry contract. The hatchet workflow is path-scoped to
+# hatchet/** and never runs on global/**-only PRs, so a drift here would land
+# unreviewed. This job closes that gap.
+on:
+  pull_request:
+    paths:
+      - "global/**"
+      - "bin/check"
+      - ".github/workflows/source-check.yml"
+  push:
+    branches: [master]
+    paths:
+      - "global/**"
+      - "bin/check"
+      - ".github/workflows/source-check.yml"
+
+concurrency:
+  group: source-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bin-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: bin/check
+        run: python3 bin/check
