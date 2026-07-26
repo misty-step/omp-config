@@ -328,6 +328,21 @@ class OmpRecipeTests(unittest.TestCase):
         self.assertEqual(descriptor["runtimeRoot"], str(runtime_root.resolve()))
         self.assertEqual(descriptor["cwd"], str(workspace.resolve()))
 
+    def test_mint_alias_env_hook_is_documented(self) -> None:
+        docs = (ROOT / "docs" / "recipe-task.md").read_text()
+        self.assertIn("OMP_RECIPE_MINT_ALIAS", docs)
+        # The paragraph documenting the hook must carry every required fact:
+        # its default, that the value is a placeholder (never a credential),
+        # and that an unknown alias fails closed at the mint proxy with 403.
+        paragraph = next(
+            p for p in docs.split("\n\n") if "OMP_RECIPE_MINT_ALIAS" in p
+        )
+        self.assertIn("`default`", paragraph)
+        self.assertIn("placeholder", paragraph)
+        self.assertIn("never a credential", paragraph)
+        self.assertIn("fails closed", paragraph)
+        self.assertIn("403", paragraph)
+
 
 if __name__ == "__main__":
     unittest.main()

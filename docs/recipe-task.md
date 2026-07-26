@@ -78,6 +78,8 @@ PATH TMPDIR LANG LC_ALL TERM SSL_CERT_FILE SSL_CERT_DIR NO_PROXY
 
 It then sets isolated `HOME`, XDG, Codex, Claude, OMP agent, and OMP config values. The runner passes that exact descriptor to public `RpcClient` with `envMode: "replace"`. Ambient credentials and caller-only markers are not merged into a recipe process.
 
+The compiler defaults `OMP_RECIPE_MINT_ALIAS` to `default`; the value selects the mint alias segment baked into a compiled bundle's `models.yml` as the `OPENROUTER_API_KEY` placeholder. The value is a placeholder name, never a credential: the broker resolves it host-side, and an unknown alias fails closed at the mint proxy with 403.
+
 ## Extension and nesting
 
 The extension wire input is exactly:
