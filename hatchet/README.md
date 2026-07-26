@@ -44,6 +44,12 @@ a human-approval-required terminal state.
   or whether its own cleanup already ran — idempotent, and independent of the
   adapter completing gracefully.
 
+## Isolated worktree policy
+
+The Hatchet worker runs a bounded GC every five minutes for `~/.omp/wt` (overridable with `OMP_WORKTREE_ROOT`). Clean, unused worktrees older than 15 minutes are removed; the collector also enforces an eight-worktree or 20 GiB logical-size budget and reports any budget it cannot satisfy because a tree is dirty or in use. `OMP_WORKTREE_MAX_COUNT`, `OMP_WORKTREE_MAX_BYTES`, and `OMP_WORKTREE_GC_STALE_AFTER_MS` tune the limits.
+
+For large repositories, isolated lanes use a shallow clone (`--depth=1`) rather than sparse checkout. A shallow clone preserves the complete working tree needed by arbitrary agent tasks while bounding history transfer; sparse checkout would make file availability task-dependent and is therefore not the default. The checkout owner remains responsible for creating the shallow lane before OMP starts.
+
 ## Layout
 
 - `compose.yaml` — `postgres:15.6` + pinned
