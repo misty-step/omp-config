@@ -3,7 +3,7 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import { z } from "zod";
 import type { OperatorConfig } from "./config.js";
 import type { PowderCardReader } from "./powder-client.js";
-import { triggerConfiguredWorkflow, type TriggerResult } from "./trigger-service.js";
+import { triggerConfiguredWorkflow, type TriggerRequest, type TriggerResult } from "./trigger-service.js";
 
 export const powderWebhookPayloadSchema = z.object({
   schema_version: z.literal("powder.card_event.v1"),
@@ -25,12 +25,7 @@ export const powderWebhookPayloadSchema = z.object({
 }).passthrough();
 
 export type PowderWebhookPayload = z.infer<typeof powderWebhookPayloadSchema>;
-type TriggerWorkflow = (
-  config: OperatorConfig,
-  source: "webhook",
-  requestedHeadSha?: string,
-  requestedIdempotencyKey?: string,
-) => Promise<TriggerResult>;
+type TriggerWorkflow = (request: TriggerRequest) => Promise<TriggerResult>;
 
 export type PowderWebhookDependencies = {
   config: OperatorConfig;
@@ -120,11 +115,9 @@ export function createPowderWebhookServer(dependencies: PowderWebhookDependencie
         });
         return;
       }
-
-      // Powder events do not carry repository HEAD. Omitting both optional
-      // overrides makes triggerConfiguredWorkflow snapshot HEAD and derive the
-      // same card+HEAD admission key used by reconciliation.
-      const result = await triggerWorkflow(dependencies.config, "webhook");
+        // Powder events do not carry repository HEAD, so the trigger snapshots
+        // it. Admission belongs to the engine and is keyed on the card alone.
+        const result = await triggerWorkflow({ config: dependencies.config, source: "webhook" });
       send(response, 202, {
         accepted: true,
         triggered: !result.duplicate,

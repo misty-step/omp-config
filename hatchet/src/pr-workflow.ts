@@ -117,11 +117,15 @@ function requireOutcome(stage: StageName, terminal: RunnerTerminal, allowed: Run
 
 export async function runPrWorkflow(
   rawInput: PrWorkflowInput,
+  // The engine's run id. Stage checkpoints hang off this rather than off the
+  // input, so a Hatchet retry resumes the same run while a fresh trigger for
+  // the same card at the same commit starts clean.
+  runId: string,
   signal: globalThis.AbortSignal,
   dependencies: WorkflowDependencies = defaultDependencies,
 ): Promise<EvidencePacket> {
   const input = prWorkflowInputSchema.parse(rawInput);
-  const state = await loadWorkflowState(input);
+  const state = await loadWorkflowState(runId);
   if (state.final) return state.final;
 
   const execute = async (

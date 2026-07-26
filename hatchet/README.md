@@ -2,9 +2,15 @@
 
 Local, auth-disabled Hatchet engine that runs one durable workflow
 (`omp-pr-canary-v1`) as the coarse durable-stage layer above the opaque OMP
-runner. Hatchet owns stage sequencing and retry/cancel semantics; Powder
-remains the approval authority; the workflow never merges and always ends in
-a human-approval-required terminal state.
+runner. Hatchet owns stage sequencing and retry/cancel semantics. Every run
+opens a pull request right after `implement` completes and ends in one of
+four terminal states: `merged`, `awaiting_operator_approval`,
+`review_blocked`, or `verification_failed`. Merging is an explicit operator
+opt-in (`pr.autoMerge` plus a GitHub-reported green check status for the
+exact final commit) that defaults off; no operator config deployed today
+turns it on, so in practice every run still lands on human approval, a
+blocked review, or a failed verification. Powder remains the day-to-day
+approval authority.
 
 ## Contract
 
@@ -12,15 +18,19 @@ a human-approval-required terminal state.
 - Input carries five strict, distinct paths under `recipePaths`; each stage selects
   only its own compiled bundle. Remediation is capped at 2 rounds; a third
   block ends the run in `review_blocked`.
-- Terminal states are `awaiting_operator_approval`, `review_blocked`, or
-  `verification_failed`. Every evidence packet sets `mergePerformed: false`
-  and `operatorApprovalRequired: true`.
-- Idempotency is keyed by `cardId:headSha` or an explicit key. Admission is
-  serialized before mutable HEAD validation. Concurrent and completed-run
-  replays resolve the stored v2 input/run before reading HEAD. Lock owner
-  metadata recovers dead-process locks, never steals a live-owner lock, and
-  bounds active-lock waits instead of hanging an ingress request. Legacy
-  single-recipe checkpoints require a new key.
+- The workflow publishes the branch and opens (or reuses) the pull request for
+  a card itself, right after `implement` — a stage never pushes or runs `gh`
+  (`src/pr-workflow.ts`). Review and fix-round findings are posted to that
+  pull request as they happen. Terminal states are `merged`,
+  `awaiting_operator_approval`, `review_blocked`, or `verification_failed`
+  (`src/contracts.ts` `terminalStateSchema`). A packet is only allowed to
+  claim `merged` when `pr.autoMerge` is `true` and GitHub reports a green
+  check status for that exact commit; the schema (`evidencePacketSchema`)
+  refuses any packet that claims a merge without both.
+- Admission is one run per card at a time. The authority is the engine's live
+  run status, so a terminal run — including a failed one — releases its card
+  and the next trigger is admitted. A short local lock covers only the gap
+  between dispatch and the run becoming visible to that query.
 - `src/recipe-runner-adapter.ts` accepts the Hatchet runner flags and invokes
   the shared `startRecipeTask` API directly under Bun. It suppresses progress
   stdout, requires exactly one strict `runnerTerminalSchema` object in final
@@ -53,14 +63,15 @@ a human-approval-required terminal state.
   auth-cookie secret, and (since this build runs `hatchet-admin authdisabled`)
   a worker token, all under `local/hatchet-config/` (bind-mounted, gitignored).
   Suppresses upstream startup noise so container logs never carry secrets.
-- `scripts/start` | `stop` | `status` | `cancel-run` | `worker` | `trigger` |
-  `webhook` | `reconcile` — operator entry points. `stop` runs
+- `scripts/start` | `stop` | `status` | `cancel-run` | `replay-run` | `worker`
+  | `trigger` | `webhook` | `reconcile` — operator entry points. `stop` runs
   `docker compose down` **without** `--volumes`: the named Postgres volume
   (`omp-hatchet-postgres-v09410`) and `local/hatchet-config` survive a
   stop/start cycle, so workflow history is queryable again after restart.
 - `src/` — TypeScript SDK client, durable workflow and stage orchestrator,
-  Hatchet process runner, the direct shared-runner adapter, idempotency/state,
-  webhook/reconciler, and operator CLIs.
+  Hatchet process runner, the direct shared-runner adapter, the PR workflow
+  and GitHub client, run admission and durable execution state, webhook/
+  reconciler, and operator CLIs.
 - `scripts/recipe-runner` — Bun entry point for the adapter. The stage runner
   uses it by default; `OMP_RECIPE_RUNNER` remains an explicit test/operator
   override.
@@ -70,8 +81,8 @@ a human-approval-required terminal state.
 - `local/recipes/<stage>/` — gitignored compiled bundles used by the worker.
 - `fixtures/` + `tests/` — deterministic process fixtures plus focused
   contract, workflow, adapter, environment, cancellation, and replay tests.
-- `local/` — gitignored Hatchet configuration, execution/idempotency
-  checkpoints, compiled bundles, and operator configs. Never commit it.
+- `local/` — gitignored Hatchet configuration, execution checkpoints,
+  compiled bundles, and operator configs. Never commit it.
 
 ## Running it
 
@@ -81,6 +92,7 @@ scripts/worker                        # foreground managed worker; adapter is th
 npm run trigger -- --config local/operator.json
 npm run status -- --run-id <id>
 npm run cancel -- --run-id <id>
+npm run replay -- --run-id <id>       # resume a run from its last checkpoint (src/cli/replay.ts)
 scripts/stop                          # stop engine; preserve volumes/history
 ```
 
@@ -99,10 +111,14 @@ times. The receiver acknowledges unrelated cards without triggering so a
 global moved-to-ready subscription does not retry them.
 
 The configured card is re-read from Powder before admission. A delayed event
-for a card that has already left `ready` is acknowledged without a run. Powder
-events do not carry a repository HEAD, so webhook and reconciliation both let
-the shared trigger snapshot current HEAD and derive the same `cardId:headSha`
-key. Duplicate delivery returns the stored run; it never reruns completed work.
+for a card that has already left `ready` is acknowledged without a run.
+Powder events do not carry a repository HEAD, so webhook and reconciliation
+both let the shared trigger snapshot current HEAD; admission is then one run
+per card at a time, so a duplicate delivery returns the run already in flight
+rather than starting a second one.
+
+**This webhook path is currently non-functional in the deployed environment
+— see "Known-broken: the webhook daemon" below.**
 
 Runtime configuration stays under ignored `local/`:
 
@@ -120,22 +136,25 @@ See `FACTORY.md` for the end-to-end polling factory loop and what stays
 human-gated.
 
 - `"single"` (default, omit `powder.mode` for the existing behavior) polls
-  exactly the one card at `cardId`/`repository`, unchanged from the original
-  canary. `local/operator.json` and `local/operator-wildcard.json` are
-  single-card examples.
+  exactly the one card at `cardId`/`repository`. `local/operator.json` is a
+  single-card example.
 - `"ready-queue"` lists cards via `GET /api/v1/cards?status=<readyStatus>`
   instead of reading one fixed id. `cardId`/`repository` become optional at
   the top level (they still supply the shared `cwd`/`task`/`recipePaths`
   template and an optional fallback `repository` for cards that omit `repo`).
-  Each tick selects the first listed card whose status matches `readyStatus`
-  and, when `powder.repositoryAllowlist` is set, whose `repo` is in that
-  list, then attempts exactly one trigger — never more than one new run per
-  reconcile tick. Idempotency stays `cardId:headSha`; a duplicate selection
-  short-circuits inside the existing lock/mapping path exactly as it does in
-  single mode, it is simply not counted as newly `triggered`. A ready card
-  with no active/open run mapping is not otherwise distinguished from one
-  that already ran — reconciliation relies on that idempotency dedupe rather
-  than a separate open-run query.
+  `local/operator-wildcard.json` is the deployed ready-queue config.
+
+Both modes now check the same liveness signal before triggering
+(`src/reconciler.ts#inspectLiveness`): the engine for a run already in flight
+on that card (`src/run-liveness.ts#findInFlightRun`), then GitHub for an
+already-open pull request on the card's branch
+(`src/github.ts#findOpenPullRequestForCard`). Single mode skips the tick when
+either is true. Ready-queue mode walks its eligible cards
+(`src/reconciler.ts#eligibleReadyCards`) in listed order: a card parked on an
+open pull request is skipped over so it can't starve the rest of the queue; a
+card with a genuinely in-flight run, or one whose liveness lookup fails,
+consumes the tick instead of letting a later card jump ahead. At most one new
+run is triggered per reconcile tick either way.
 
 ```json
 {
@@ -188,6 +207,19 @@ working directory, PATH, ignored config paths, and log paths:
 - `com.misty-step.omp-hatchet-webhook`: `KeepAlive` loopback webhook.
 - `com.misty-step.omp-hatchet-reconcile`: `--once` every 300 seconds.
 
+**Known-broken: the webhook daemon.** All three agents are installed, but the
+webhook one is not usable today. `scripts/webhook` (`src/webhook-server.ts`)
+requires a `cardId` in its operator config (it calls
+`createPowderCardReader`, which throws without one —
+`src/powder-client.ts`). The deployed config it points at,
+`local/operator-wildcard.json`, is a ready-queue config with no `cardId`. A
+fresh start of the webhook process under that config fails immediately;
+whatever webhook instance is currently alive only survived because it was
+started before that config was switched to ready-queue mode, and there is no
+record anywhere under `local/` of it ever having triggered a run from a real
+Powder event. This is a known-broken state, not intended behavior — see
+`FACTORY.md` for detail; no fix or timeline is tracked here.
+
 Render and validate without loading anything:
 
 ```sh
@@ -209,7 +241,7 @@ Focused ingress checks:
 
 ```sh
 npm run build
-npx vitest run tests/powder-webhook.test.ts tests/idempotency.test.ts
+npx vitest run tests/powder-webhook.test.ts tests/reconciler.test.ts
 scripts/reconcile --once
 scripts/probe-powder-webhook.mjs http://127.0.0.1:8099/webhook/powder
 ```
