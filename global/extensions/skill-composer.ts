@@ -20,7 +20,10 @@ export interface CompositionResult {
 }
 
 const IDENTITY_PREFIX = "<!-- omp-composition-agent:";
-const IDENTITY_PATTERN = /<!-- omp-composition-agent: ([a-z][a-z0-9_-]*) -->/g;
+// Identity is a canonical standalone line emitted by declared-agent prompts.
+// Matching only that shape prevents prose or a skill description from becoming
+// an accidental identity seam.
+const IDENTITY_PATTERN = /^[ \t]*<!-- omp-composition-agent: ([a-z][a-z0-9_-]*) -->[ \t]*$/gm;
 const SKILL_NAME_PATTERN = /^[a-z][a-z0-9_-]*$/;
 
 /**
@@ -148,9 +151,20 @@ function parseSkillsBlock(
 	// Try custom template format first: <skill name="...">desc</skill>
 	const customMatches = [...blockContent.matchAll(CUSTOM_ENTRY_PATTERN)];
 	if (customMatches.length > 0) {
+		const defaultMatches = [...blockContent.matchAll(DEFAULT_ENTRY_START)];
+		if (defaultMatches.length > 0) {
+			return {
+				error:
+					"skill composer: prompt-shape drift: mixed custom and default skill entry formats",
+			};
+		}
 		const entries = new Map<string, string>();
 		for (const match of customMatches) {
 			const name = match[1];
+			if (entries.has(name))
+				return {
+					error: `skill composer: prompt-shape drift: duplicate skill entry ${name}`,
+				};
 			const description = match[2]?.trim() ?? "";
 			if (!description)
 				return {
@@ -173,6 +187,10 @@ function parseSkillsBlock(
 	for (let i = 0; i < starts.length; i++) {
 		const match = starts[i];
 		const name = match[1];
+		if (entries.has(name))
+			return {
+				error: `skill composer: prompt-shape drift: duplicate skill entry ${name}`,
+			};
 		const descStart = (match.index ?? 0) + match[0].length;
 		const descEnd =
 			i + 1 < starts.length
@@ -376,7 +394,7 @@ export function composeProviderRequest(
 	manifest: SkillComposerManifest | undefined,
 	catalog: SkillCatalog = {},
 ): CompositionResult {
-	if (!isRecord(payload) || !manifest || manifest.version !== 1) {
+	if (!isRecord(payload) || !isRecord(manifest) || manifest.version !== 1) {
 		let bytes: number | undefined;
 		try {
 			bytes = Buffer.byteLength(JSON.stringify(payload));
@@ -391,6 +409,15 @@ export function composeProviderRequest(
 	} catch {
 		// Cyclic or non-serializable payload: fail closed, preserve bytes.
 		return { payload, changed: false };
+	}
+	if (!isRecord(manifest.agents)) {
+		return {
+			payload,
+			changed: false,
+			error: "skill composer: invalid composition manifest: agents must be an object",
+			beforeBytes: originalBytes,
+			afterBytes: originalBytes,
+		};
 	}
 	const located = findCarrier(payload);
 	if (located.error)

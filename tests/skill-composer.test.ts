@@ -547,4 +547,40 @@ describe("strict per-agent skill composition", () => {
 		expect(Buffer.from(JSON.stringify(result.payload)).equals(before)).toBe(true);
 	});
 
+	test("inline identity marker is prompt-shape drift", () => {
+		const payload = {
+			instructions: `ROLE <!-- omp-composition-agent: orchestrator -->\n${fullSkillsBlock()}`,
+		};
+		const before = Buffer.from(JSON.stringify(payload));
+		const result = composeProviderRequest(payload, compositionManifest, catalog);
+		expect(result.changed).toBe(false);
+		expect(result.error).toContain("skill composer: prompt-shape drift");
+		expect(Buffer.from(JSON.stringify(result.payload)).equals(before)).toBe(true);
+	});
+
+	test("duplicate skill entries are prompt-shape drift", () => {
+		const payload = {
+			instructions:
+				`<!-- omp-composition-agent: orchestrator -->\n<skills>\n- research: first\n- research: second\n- dispatch: ${catalog.dispatch}\n</skills>`,
+		};
+		const before = Buffer.from(JSON.stringify(payload));
+		const result = composeProviderRequest(payload, compositionManifest, catalog);
+		expect(result.changed).toBe(false);
+		expect(result.error).toContain("duplicate skill entry research");
+		expect(Buffer.from(JSON.stringify(result.payload)).equals(before)).toBe(true);
+	});
+
+	test("malformed manifest preserves the provider request", () => {
+		const payload = request("orchestrator");
+		const before = Buffer.from(JSON.stringify(payload));
+		const result = composeProviderRequest(
+			payload,
+			{ version: 1, agents: null } as never,
+			catalog,
+		);
+		expect(result.changed).toBe(false);
+		expect(result.error).toContain("invalid composition manifest");
+		expect(Buffer.from(JSON.stringify(result.payload)).equals(before)).toBe(true);
+	});
+
 });
