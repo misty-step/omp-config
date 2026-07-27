@@ -21,10 +21,9 @@ proof, and the proof must be able to come back **no-skill won**.
 
 An eval is a *run with a grader*, never a directory shape. Structural eval
 trees were deleted as theater in the 2026-06 consolidation; do not rebuild
-them. The exemplar to copy is
-`examples/routing-eval.md` (retired from `/design`, run log intact): an answer key, an objective grader, a
-pass bar a no-op revision fails, a run log. The protocol contract is
-`global/skills/harness-engineering/references/mode-eval.md`.
+Start from the protocol contract at
+`global/skills/harness-engineering/references/mode-eval.md` and a current
+first-party eval rather than a frozen routing exemplar.
 
 ## The loop
 
@@ -128,7 +127,6 @@ A full pass is ~15–18 runs (paid, slow). Do not gate every edit on it.
 | blind grader prompt | `templates/grader-prompt.md` |
 | drive the A/B (smoke + serious) | `references/run-recipe.md` |
 | eval protocol contract | `global/skills/harness-engineering/references/mode-eval.md` |
-| canonical worked eval | `examples/routing-eval.md` |
 | current first instance | `global/skills/dispatch/evals/dispatch-eval.md` |
 
 ## Verification

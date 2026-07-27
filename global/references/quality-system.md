@@ -17,7 +17,7 @@ Every quality system names:
 
 Good systems are artifact-backed. Bad systems are vibes with more bullets.
 For the proof-loop contract, load
-`primitives/shared/references/verification-system-first.md`.
+`global/references/verification-system-first.md`.
 
 ## Proof Methods
 
@@ -40,7 +40,7 @@ are one proof method. A critic who inherited the author's reasoning is not fresh
 | Tiny | mechanical, single-file, low-blast-radius change | Structural gate or exact manual inspection; name why no fresh critic is needed. |
 | Substantive | product behavior, shared code, harness primitive, generated output, or multi-file diff | Live oracle + structural gate + one fresh-context critic aimed at the likely production embarrassment. |
 | High-stakes | security, data loss, auth, migrations, architecture boundary, public launch surface, or hard-to-rollback infra | Live oracle + structural gate + multiple distinct critic lenses or model families; re-review blocker fixes. |
-| Event-driven | PR-ready review, incident response, scheduled audits, or recurring production checks | Mode B / bitterblossom owns orchestration; Roster supplies the packet and lane contracts. |
+| Event-driven | PR-ready review, incident response, scheduled audits, or recurring production checks | Mode B / bitterblossom owns orchestration; OMP supplies the packet and lane contracts. |
 
 Scale down aggressively when the work is small. Scale up only when the failure
 would be expensive, public, irreversible, or hard to observe.
@@ -63,7 +63,7 @@ Do not simulate a council inside one context. Separate execution from critique.
 - **Artifact-only:** critics get the diff, plan, oracle, screenshots, logs, or
   rendered surface. They do not get the author's reasoning trail.
 - **Lens-specific:** one critic hunts one class of failure. Use
-  `primitives/shared/references/lenses.md` for compact rubrics.
+  `global/references/lenses.md` for compact rubrics.
 - **Decorrelated when it matters:** a different model family is most useful for
   adversarial review of substantive author-written work.
 - **Lead-owned synthesis:** reviewer output is evidence, not authority. The

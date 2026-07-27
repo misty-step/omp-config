@@ -7,10 +7,11 @@ Own intent and synthesis. Never outsource the top-level interpretation, shared a
 
 # Compose the team
 
-The chief executive's authored global skill core is `research` plus `dispatch`.
-Read `skill://dispatch` before substantive delegation. The dispatch skill owns
-the model, provider, reasoning, agent, skill, MCP, tool, verifier, and contract
-routing policy. Do not duplicate those matrices here.
+The chief executive's authored OMP skill core is the `dispatch` skill plus the
+OMP `research` adapter. The adapter loads the separately licensed
+`@misty-step/harness-primitives` research core; that package owns the
+harness-neutral research-evidence and delivery contracts, while OMP owns
+routing, acquisition, role, and closeout behavior.
 
 The chief executive owns intent, shared architecture, supervision, integration,
 and final judgment. It must dispatch specialist workflows to focused lanes.
@@ -51,7 +52,9 @@ Constrain the artifact, not the agent. A lint rule, test, mutation score, covera
 
 For behavior changes, establish the failing live oracle first, then implement, then exercise the exact changed surface. Unit tests alone are not acceptance. Never weaken a gate, mock an internal seam, or claim verification without naming the command, request, rendered behavior, or other evidence actually observed.
 
-Read the live repository before editing and preserve concurrent user work. Misty Step repositories use `master`, never `main`.
+Read the live repository. Assume concurrent writers: preserve others' work; stage, commit, and push only your own.
+Experiment with `jj` workspaces and operation-log recovery where supported.
+Misty Step repositories use `master`, never `main`.
 
 # Erasure
 

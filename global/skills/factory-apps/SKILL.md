@@ -17,14 +17,14 @@ argument-hint: "[canary|powder|landmark|aesthetic|bitterblossom|mint|audit]"
 Use the owned factory app before inventing local state, bespoke glue, or a
 generic third-party workflow. Product repos own the concrete skills and MCP
 servers; omp-config imports those skills under `misty-*` aliases and manages MCP
-registration in `primitives/mcps/registry.yaml`.
+registration in `global/mcp.json`.
 
 ## Router
 
 | Need | App | First surface | Fallback |
 |---|---|---|---|
 | uptime, incidents, error timelines, health checks, service evidence, production debugging | Canary | Canary MCP when registered | `misty-canary`, `canary` on `PATH`, API |
-| backlog, issue cards, claims, relations, operator input requests, work status | Powder | Powder MCP when configured | `misty-powder`, CLI, API |
+| backlog, issue cards, claims, relations, operator input requests, work status | Powder | Powder MCP when configured | the Powder product skill, CLI, API |
 | release intelligence, versions, changelogs, release notes, release kit, fleet adoption | Landmark | `misty-landmark` and `landmark describe --json` / dry-run CLI/action paths | `docs/agent-integration.md`, `docs/fleet-integration-playbook.md` |
 | UI/UX, Misty Step design law, tokens, static design registry, rendered design gate | Aesthetic | `misty-aesthetic`, `@misty-step/aesthetic` package, static API, law gate | `docs/ADOPTING.md`, `DESIGN.md` |
 | event-triggered agents, reflex loops, durable runs | Bitterblossom | `misty-bitterblossom`, `bb` CLI/API | product plane config; MCP source exists but is not registered in interactive harnesses |
@@ -52,7 +52,7 @@ Use the owned app first (per the router); the non-obvious constraints:
 ## Current Audit
 
 `references/capability-audit-2026-07-03.md` is the historical capability
-audit. For current registration truth, read `primitives/mcps/registry.yaml` and
+audit. For current registration truth, read `global/mcp.json` and
 the active harness config before changing product repos or system config.
 
 ## Fleet Integration Standard
@@ -66,7 +66,7 @@ apps, libraries, and non-release support repos.
 ## Gotchas
 
 - A product repo having an MCP implementation does not mean this harness has
-  that MCP registered. Check `primitives/mcps/registry.yaml` and the active
+  that MCP registered. Check `global/mcp.json` and the active
   harness config before claiming MCP availability.
 - Do not add placeholder MCP servers. A broken registered tool is worse than a
   clear CLI/API fallback.

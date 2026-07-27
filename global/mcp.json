@@ -16,7 +16,8 @@
     },
     "qmd": {
       "type": "http",
-      "url": "http://127.0.0.1:8103/mcp"
+      "url": "http://127.0.0.1:8103/mcp",
+      "timeout": 120000
     },
     "crucible": {
       "type": "http",
@@ -33,13 +34,6 @@
     "parallel-search": {
       "type": "http",
       "url": "https://search.parallel.ai/mcp"
-    },
-    "exa": {
-      "type": "http",
-      "url": "http://mint.tail5f5eb4.ts.net:4949/proxy/https/mcp.exa.ai/mcp",
-      "headers": {
-        "x-api-key": "__mint.exa.default__"
-      }
     },
     "openaiDeveloperDocs": {
       "type": "http",
@@ -75,9 +69,15 @@
   },
   "disabledServers": [
     "cairn",
+    "canary",
+    "chrome-devtools",
     "computer-use",
+    "crucible",
+    "monologue",
+    "node_repl",
+    "openaiDeveloperDocs",
     "openrouter",
     "pencil",
-    "todoist"
+    "qmd"
   ]
 }

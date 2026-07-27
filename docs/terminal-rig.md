@@ -29,20 +29,30 @@ The rig runs against stock OMP APIs. It does not patch the OMP package.
 
 ## Repository surfaces
 
+The table below is the complete 16-surface projection declared in `provenance.yaml`.
+
 |Surface|Authority|Purpose|
 |---|---|---|
-|global/extensions/promptspace.ts|~/.omp/agent/extensions/promptspace.ts|Prompt spacing, the bare prompt marker, the padded input panel, and the status line.|
+|global/config.yml|~/.omp/agent/config.yml|Promptspace settings, plain chrome, empty status segments, and active themes.|
+|global/models.yml|~/.omp/agent/models.yml|Provider and model declarations.|
+|global/AGENTS.md|~/.omp/agent/AGENTS.md|Projected operating context.|
+|global/RULES.md|~/.omp/agent/RULES.md|Projected sticky rules.|
+|global/mcp.json|~/.omp/agent/mcp.json|MCP server registrations.|
+|global/agents/|~/.omp/agent/agents/|Built-in agent prompt files.|
+|global/skills/|~/.omp/agent/skills/|Built-in skill files and references.|
 |global/extensions/agent-hub.ts|~/.omp/agent/extensions/agent-hub.ts|Read-only /agent-hub overlay with the subagent roster and live activity.|
+|global/extensions/promptspace.ts|~/.omp/agent/extensions/promptspace.ts|Prompt spacing, the bare prompt marker, the padded input panel, and the status line.|
 |global/extensions/recipe-task.ts|~/.omp/agent/extensions/recipe-task.ts|Temporary isolated `recipe_task` tool; native `task` remains unchanged.|
-|global/lib/recipe-task-runner.ts|~/.omp/agent/lib/recipe-task-runner.ts|Shared RPC recipe process runner used by the extension and CLI.|
-|global/themes/*.json|~/.omp/agent/themes/|Theme library. Kanagawa is the active dark theme. Kanagawa Lotus is the active light theme.|
-|global/presets/*.yml|~/.omp/agent/presets/|Launch overlays for lean, design, operations, and research work.|
-|global/config.yml|~/.omp/agent/config.yml|The promptspace settings contract, including plain chrome, custom empty status segments, and active themes.|
-|bin/install|Installation driver|Projects declared source surfaces and verifies links and digests.|
+|global/extensions/herdr-sidebar.ts|~/.omp/agent/extensions/herdr-sidebar.ts|Reports OMP model and repository identity to the Herdr sidebar.|
+|global/lib/|~/.omp/agent/lib/|Shared recipe-task runtime library used by the extension and CLI.|
+|global/themes/|~/.omp/agent/themes/|Theme library. Kanagawa is the active dark theme. Kanagawa Lotus is the active light theme.|
+|global/presets/|~/.omp/agent/presets/|Launch overlays for lean, design, operations, and research work.|
+|global/hooks/review-gate.py|~/.omp/agent/hooks/review-gate.py|Projected review-gate entrypoint used by managed project hooks.|
+|global/hooks/claude-safety.py|~/.omp/agent/hooks/claude-safety.py|Claude safety hook.|
 
-bin/install creates the live links. It may back up conflicting authority targets. It does not copy runtime state into this repository.
+`bin/install` creates all 16 live links, verifies their digests, and may back up conflicting authority targets. It does not copy runtime state into this repository. `bin/install --project PATH` additionally installs an idempotent managed `pre-push` hook at Git's active hooks path; that hook runs any backed-up foreign hook first and then the canonical projected review gate.
 
-The extensions directory is co-tenanted. herdr-omp-agent-state.ts remains a real, Herdr-managed file at ~/.omp/agent/extensions/herdr-omp-agent-state.ts. Its header states that Herdr overwrites it during integration updates. The provenance contract records this cotenant with owner herdr. The three OMP extension files are separate file links. The installed audit rejects every other extension entry. This prevents an invisible writer from entering the projected home. It also prevents Herdr from writing into the repository and prevents Git operations from rolling back the integration.
+The extensions directory is co-tenanted. `herdr-omp-agent-state.ts` remains a real, Herdr-managed file at ~/.omp/agent/extensions/herdr-omp-agent-state.ts. Its header states that Herdr overwrites it during integration updates. The provenance contract records this cotenant with owner herdr. The four OMP extension files are separate file links. The installed audit rejects every other extension entry. This prevents an invisible writer from entering the projected home. It also prevents Herdr from writing into the repository and prevents Git operations from rolling back the integration.
 
 The Herdr file was adopted as a runtime cotenant on 2026-07-21. It was not copied into this repository.
 

@@ -2,5 +2,10 @@
   "fetched_at": "2026-06-16T21:24:12Z",
   "repo": "DietrichGebert/ponytail",
   "sha": "adad50d9b393926b2dd5ed7225dcb1848b9df408",
-  "src_path_suffix": "ponytail"
+  "src_path_suffix": "ponytail",
+  "license_path": "LICENSE",
+  "license": "MIT",
+  "license_sha256": "fb1bc6909ac3ef82d5c22106e32ef682b0cff66788fa915fb9b53b15c9d2f3ab",
+  "payload": ["SKILL.md"],
+  "payload_sha256": {"SKILL.md": "1b9eaae4b639a2a6c311ad88a83e2bb0b38a612c17c84e8ac0b7603ec325604e"}
 }

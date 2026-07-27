@@ -2,7 +2,8 @@
 
 > Template. Copy to `global/skills/<skill>/evals/<skill>-eval.md` and fill. Delete this
 > line and the bracketed guidance. Keep it a run-with-a-grader, not a directory
-> shape (`global/skills/skill-eval/examples/routing-eval.md` is the worked exemplar).
+> shape; the protocol contract is
+> `global/skills/harness-engineering/references/mode-eval.md`.
 
 The one claim `<skill>` must earn: **[one falsifiable sentence — the thing the
 skill makes true that raw prompting does not]**.

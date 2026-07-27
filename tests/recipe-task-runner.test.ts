@@ -79,8 +79,8 @@ describe("recipe task runner", () => {
 					writeFileSync(join(descriptor.agentDir, "agents", "cerberus.md"), "cerberus");
 				},
 				hostTools: [{
-					name: "hatchet_terminal",
-					label: "Hatchet Terminal",
+					name: "terminal_capture",
+					label: "Terminal Capture",
 					description: "Capture one typed terminal.",
 					loadMode: "essential",
 					parameters: { type: "object" },
@@ -97,7 +97,7 @@ describe("recipe task runner", () => {
 			expect(progress).toContain("message_update");
 			const pid = Number(result.text.match(/^pid=(\d+)/)?.[1]);
 			expect(pidIsAlive(pid)).toBeFalse();
-			expect(result.text).toContain("hostTools=recipe_task,hatchet_terminal");
+			expect(result.text).toContain("hostTools=recipe_task,terminal_capture");
 			expect(result.text).toContain("agents=cerberus,hephaestus");
 			expect(result.text).toContain("ALPHA_INSTRUCTION_MARKER");
 			expect(handle.descriptor.model).toEqual(parentModel);
@@ -202,10 +202,10 @@ describe("recipe task runner", () => {
 	});
 
 	test("OMP_RECIPE_MINT_ALIAS survives the prepare env filter into models.yml", async () => {
-		// Billing evidence caught the regression this pins: the Hatchet factory
-		// set the variable at every hop and every run still billed the DEFAULT
-		// key, because SAFE_PREPARE_ENV - the third allowlist in the chain -
-		// dropped it before the compiler wrote the runtime's models.yml.
+		// Billing evidence caught the regression this pins: a workload set the
+		// variable at every hop and every run still billed the DEFAULT key,
+		// because SAFE_PREPARE_ENV - the third allowlist in the chain - dropped
+		// it before the compiler wrote the runtime's models.yml.
 		process.env.OMP_RECIPE_MINT_ALIAS = "prepare-env-proof";
 		// The alias only surfaces for openrouter models, and the shared alpha
 		// fixture deliberately uses a non-network fixture provider - so this

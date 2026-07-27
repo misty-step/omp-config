@@ -2,5 +2,20 @@
   "fetched_at": "2026-07-13T23:26:41Z",
   "repo": "mattpocock/skills",
   "sha": "66898f60e8c744e269f8ce06c2b2b99ce7660d5f",
-  "src_path_suffix": "skills/engineering/codebase-design"
+  "src_path_suffix": "skills/engineering/codebase-design",
+  "license_path": "LICENSE",
+  "license": "MIT",
+  "license_sha256": "0e7ac423bf2c6e223b7c5b156f8cf72da49d748e56a1641402c31f22ad07dbb5",
+  "payload": [
+    "DEEPENING.md",
+    "DESIGN-IT-TWICE.md",
+    "SKILL.md",
+    "agents/openai.yaml"
+  ],
+  "payload_sha256": {
+    "DEEPENING.md": "125e6b77413ad2bc7cf7a772bc74336d580a50f9e797db2178ed133d62333d06",
+    "DESIGN-IT-TWICE.md": "21c3264953bd30ee87b181a3ccaf0e70649f461e5ffd7dc654acee4ba1788b31",
+    "SKILL.md": "a8d50abac5a4018f60e1d911d4b6f4e36454ca14d6c390c0695a578c7de65dad",
+    "agents/openai.yaml": "edebc9e4fcfe102114012575eaa9600b9b5fd08c311664f389c36e7bc717740f"
+  }
 }

@@ -31,8 +31,8 @@ REASONING_LEVELS = {
 }
 OPENROUTER_BASE_URL = "http://100.108.0.89:4949/proxy/https/openrouter.ai/api/v1"
 # The mint alias whose credential every compiled bundle runs as. Overridable
-# so a workload (e.g. the Hatchet PR factory) can ride its own child key with
-# its own spend cap and its own audit trail, without forking the compiler.
+# so a workload can ride its own child key with its own spend cap and its own
+# audit trail, without forking the compiler.
 # The value is a PLACEHOLDER name, never a credential: the broker resolves it
 # host-side, and an invalid name fails closed at the proxy with 403.
 OPENROUTER_API_KEY = f"__mint.openrouter.{os.environ.get('OMP_RECIPE_MINT_ALIAS', 'default')}__"

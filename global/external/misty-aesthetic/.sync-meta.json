@@ -2,5 +2,10 @@
   "fetched_at": "2026-07-03T21:06:26Z",
   "repo": "misty-step/aesthetic",
   "sha": "0d4cf9a4a7b50fab5e00491daab35fa8cbef93ce",
-  "src_path_suffix": "aesthetic"
+  "src_path_suffix": "aesthetic",
+  "license_path": "LICENSE",
+  "license": "MIT",
+  "license_sha256": "8b3aca6af73ed9c49693c7f5ca1b2beb3e152a38c2ad0406a0dfa0e45b0d73a6",
+  "payload": ["SKILL.md"],
+  "payload_sha256": {"SKILL.md": "9bfdcc588ddd9c8ff89cefa4287ab4455769236ac2c4ae2c6e9bf543691d36c1"}
 }

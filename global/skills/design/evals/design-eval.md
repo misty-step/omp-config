@@ -29,4 +29,4 @@ because the skill costs context.
 comms-lab review app. Evidence:
 `~/Development/crucible/runs/local/design-rebuild/` (screenshots, sealed
 key, arm reports, verdict). Operator judgment recorded on Powder card
-`roster-design-skill-rebuild`.
+`design-skill-rebuild`.

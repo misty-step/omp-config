@@ -115,7 +115,7 @@ gate and report the exact failing command, path, and likely cause.
 
 ## Completion Gate
 
-See `primitives/shared/AGENTS.md` (Prove) for the shared core.
+See `global/AGENTS.md` (Prove) for the shared core.
 `/ci` adds:
 
 - **Audit:** gaps found, severity, substrate choice, what was strengthened or

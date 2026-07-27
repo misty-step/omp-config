@@ -15,4 +15,4 @@ or this waiver is renewed with a fresh reason and date. A stale, silently
 renewed waiver with no new reasoning is itself a finding for `/harness-engineering`'s
 next skill-health audit.
 
-No automated eval; origin Roster-era backlog (retired 2026-07-16); revisit when this skill changes. Per-skill proof runs through `/skill-eval`.
+No automated eval; revisit when this skill changes. Per-skill proof runs through `/skill-eval`.

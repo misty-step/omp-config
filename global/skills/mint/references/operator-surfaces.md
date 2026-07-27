@@ -19,6 +19,6 @@ inspection: `alias_list`, `policy_check`, `audit_tail`, and `mint_usage`
 (returns the proxy contract, so the server is self-documenting). It **never**
 exposes a tool that resolves or returns a secret value — that would defeat the
 broker's premise. Agents making vendor calls always use the HTTP proxy, not an
-MCP tool. Registered in `primitives/mcps/registry.yaml` with
+MCP tool. Registered in `global/mcp.json` with
 `status: available`; run locally with `cargo run -q -p mint-mcp` in the mint
 repo.

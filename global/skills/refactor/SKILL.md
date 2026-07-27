@@ -112,7 +112,7 @@ Stop and report instead of improvising when:
 
 ## Completion Gate
 
-See `primitives/shared/AGENTS.md` (Prove; Durable State and Closeout) for the
+See `global/AGENTS.md` (Prove; Durable State and Closeout) for the
 shared core. `/refactor` adds: the goal stop rule satisfied or explicitly
 blocked; a live-test receipt for every significant step; blocking review
 findings fixed or rejected with a reason; meaningful milestones committed; and

@@ -107,7 +107,7 @@ Critics get the artifact and oracle only — never the author's reasoning trail
 
 ## Completion Gate
 
-See `primitives/shared/AGENTS.md` (`Prove`) for the shared evidence core.
+See `global/AGENTS.md` (`Prove`) for the shared evidence core.
 Showcase adds:
 
 ```markdown

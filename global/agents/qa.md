@@ -5,7 +5,6 @@ model: anthropic/claude-sonnet-5:xhigh, google-antigravity/gemini-3.6-flash:high
 thinkingLevel: xhigh
 tools: read,grep,glob,bash,browser,web_search
 autoloadSkills: verify-live,ci,powder
-spawns: ''
 readSummarize: false
 ---
 

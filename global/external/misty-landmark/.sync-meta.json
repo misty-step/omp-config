@@ -2,5 +2,10 @@
   "fetched_at": "2026-07-03T21:18:49Z",
   "repo": "misty-step/landmark",
   "sha": "393e15c2f816036c1edd0985696ba4d2a64772d4",
-  "src_path_suffix": "landmark"
+  "src_path_suffix": "landmark",
+  "license_path": "LICENSE",
+  "license": "MIT",
+  "license_sha256": "8b3aca6af73ed9c49693c7f5ca1b2beb3e152a38c2ad0406a0dfa0e45b0d73a6",
+  "payload": ["SKILL.md"],
+  "payload_sha256": {"SKILL.md": "c65f2527bb250b697666bcef6d28e842f1bfcd9e5aeb2229f277b4ae500b6582"}
 }
