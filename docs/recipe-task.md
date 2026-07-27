@@ -95,7 +95,7 @@ Every recipe process receives one explicit host custom tool named `recipe_task`.
 Recipe skill paths use two different roots and resolution times:
 
 - `skills[].path` resolves at compile time against the directory containing the recipe spec. The compiler validates the source and copies it into the compiled bundle.
-- `taskSkills[].path` remains a raw path in `recipe.json` and resolves at run time against the target repository checkout.
+- `taskSkills[].path` remains a raw path in `recipe.json` and resolves at run time against the target repository checkout. The compiler also validates it under the spec root but leaves it uncopied.
 
 For a factory whose recipe spec is outside the target repository, one path string must name a directory under both roots: it must exist for compilation and at the same relative path in the checkout for execution. Stage task skills by mirroring the target layout under the spec root, such as `global/skills/` (typically gitignored), so both resolutions succeed.
 
