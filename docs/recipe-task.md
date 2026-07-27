@@ -90,6 +90,16 @@ A relative recipe path resolves against the active session cwd. The cwd is also 
 
 Every recipe process receives one explicit host custom tool named `recipe_task`. A nested call starts another fresh RPC process as a sibling under the runner host, with its own config and session roots. The host custom-tool list contains only `recipe_task`; it does not copy custom primitives from the parent process. The nested recipe controls its own instructions and skills. Nesting is capped at four levels; an attempt to exceed the cap fails before another process is prepared or spawned.
 
+## Skill path roots
+
+Recipe skill paths use two different roots and resolution times:
+
+- `skills[].path` resolves at compile time against the directory containing the recipe spec. The compiler validates the source and copies it into the compiled bundle.
+- `taskSkills[].path` remains a raw path in `recipe.json` and resolves at run time against the target repository checkout.
+
+For a factory whose recipe spec is outside the target repository, one path string must name a directory under both roots: it must exist for compilation and at the same relative path in the checkout for execution. Stage task skills by mirroring the target layout under the spec root, such as `global/skills/` (typically gitignored), so both resolutions succeed.
+
+
 The extension never registers `task`. Native OMP `task` remains a separate built-in tool.
 
 ## Shared runner and CLI

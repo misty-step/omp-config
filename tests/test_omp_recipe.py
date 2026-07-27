@@ -100,6 +100,12 @@ class OmpRecipeTests(unittest.TestCase):
         with self.assertRaisesRegex(omp_recipe.RecipeError, r"duplicate taskSkill source path at taskSkills\[1\]"):
             omp_recipe.validate_recipe(recipe)
 
+    def test_skill_path_roots_are_documented(self) -> None:
+        documentation = (ROOT / "docs" / "recipe-task.md").read_text()
+        self.assertIn("`skills[].path` resolves at compile time against the directory containing the recipe spec", documentation)
+        self.assertIn("`taskSkills[].path` remains a raw path in `recipe.json` and resolves at run time against the target repository checkout", documentation)
+        self.assertIn("mirroring the target layout under the spec root, such as `global/skills/` (typically gitignored)", documentation)
+
     def test_task_skills_rejects_missing_skill_md_at_compile(self) -> None:
         recipe = self.recipe()
         recipe["taskSkills"] = [{"name": "no-skill-md", "path": "source-skills/no-skill-md"}]
