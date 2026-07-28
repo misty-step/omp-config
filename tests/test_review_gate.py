@@ -400,7 +400,7 @@ class ReviewGateTests(unittest.TestCase):
         }
         packet = self.repo / review_runner.PACKET_DIR
         packet.mkdir()
-        for name in ("freeze.json", "evidence.json", "bundle.review.000.diff"):
+        for name in ("freeze.json", "evidence.json", "bundle.diff", "bundle.review.000.diff"):
             (packet / name).write_text("{}\n", encoding="utf-8")
         def run_thermo(command: list[str], cwd: Path, timeout: int) -> tuple[int, str, str]:
             staged = cwd / review_runner.PACKET_DIR
@@ -408,6 +408,7 @@ class ReviewGateTests(unittest.TestCase):
             self.assertTrue((staged / "review-skill.md").is_file())
             self.assertEqual(staged.stat().st_mode & 0o777, 0o555)
             self.assertEqual((staged / "review-skill.md").stat().st_mode & 0o777, 0o444)
+            self.assertFalse((staged / "bundle.diff").exists())
             self.assertFalse((cwd / "app.py").exists())
             return 0, '{"findings":[]}', ""
 
@@ -814,6 +815,18 @@ class ReviewGateTests(unittest.TestCase):
                 'expected="credentials:directory:entries"; api_token=' + f'"{synthetic}"'
             )
         )
+        # The descriptor mask must be length-preserving: repeatable secret
+        # spans are computed on masked text but applied to the original, so
+        # any length drift would misalign redaction offsets.
+        descriptor = "credentials:directory:entries"
+        masked = scanner.mask_safe_structural_descriptors(descriptor)
+        self.assertNotEqual(masked, descriptor)
+        self.assertEqual(len(masked), len(descriptor))
+        mixed = 'x="credentials:directory:entries"; api_token=' + f'"{synthetic}"'
+        spans = scanner.review_repeatable_secret_spans(mixed)
+        self.assertTrue(spans)
+        for start, end in spans:
+            self.assertEqual(mixed[start:end], synthetic)
 
 
 if __name__ == "__main__":

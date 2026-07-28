@@ -645,7 +645,13 @@ def _thermo_pass(
     with tempfile.TemporaryDirectory(prefix="omp-thermo-packet-") as packet_temp:
         packet_root = Path(packet_temp)
         packet = packet_root / PACKET_DIR
-        shutil.copytree(worktree / PACKET_DIR, packet)
+        # Thermo workers are external models; give them only the redacted
+        # review datasets, never the raw committed bundle.diff.
+        shutil.copytree(
+            worktree / PACKET_DIR,
+            packet,
+            ignore=shutil.ignore_patterns("bundle.diff"),
+        )
         packet.chmod(0o755)
         skill_path = packet / "review-skill.md"
         shutil.copy2(THERMO_SKILLS[reviewer], skill_path)
