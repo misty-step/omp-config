@@ -216,6 +216,19 @@ SECRET_ASSIGNMENT_PREFIX_PATTERN = re.compile(
     rf"(?i){SECRET_ASSIGNMENT_KEY_PATTERN}"
     r"\s*(?:=(?!=|>)|:(?![:=]))\s*"
 )
+# Structural retirement manifests name protected data without containing it.
+# Mask only the complete descriptor grammar; ordinary credential assignments
+# still follow the fail-closed scanner path.
+SAFE_STRUCTURAL_DESCRIPTOR_PATTERN = re.compile(
+    r"\bcredentials:(?:file|directory):(?:bytes|entries)\b"
+)
+
+
+def mask_safe_structural_descriptors(text: str) -> str:
+    return SAFE_STRUCTURAL_DESCRIPTOR_PATTERN.sub(
+        lambda match: "componentxx" + match.group(0)[len("credentials") :],
+        text,
+    )
 SECRET_BOOLEAN_DECLARATION_PATTERN = re.compile(
     r"(?im)^[ \t]*(?:(?:abstract|const|declare|export|final|internal|lateinit|"
     r"open|override|private|protected|public|readonly|static)\s+)*"
@@ -6256,6 +6269,7 @@ def secret_text_risk(
     *,
     javascript_dialect: str | None = None,
 ) -> bool:
+    text = mask_safe_structural_descriptors(text)
     text = MINT_ALIAS_PATTERN.sub("placeholder", text)
     text = MINT_ALIAS_SCHEME_PATTERN.sub("mint-ref:", text)
     text = MINT_PLACEHOLDER_PATTERN.sub("placeholder", text)
@@ -6867,6 +6881,7 @@ def review_repeatable_secret_spans(
     *,
     javascript_dialect: str | None = None,
 ) -> list[tuple[int, int]]:
+    text = mask_safe_structural_descriptors(text)
     boolean_declarations = tuple(SECRET_BOOLEAN_DECLARATION_PATTERN.finditer(text))
     boolean_declaration_positions = {
         match.start("boolean_key") for match in boolean_declarations
