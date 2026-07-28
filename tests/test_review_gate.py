@@ -1,39 +1,31 @@
 from __future__ import annotations
 
-import io
 import json
 import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
-from argparse import Namespace
-from unittest.mock import patch
 from pathlib import Path
-
-if str(Path(__file__).resolve().parents[1] / "bin") not in sys.path:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "bin"))
-import review_gate
-import review_runner
-import review_common
-import review_receipt
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
+BIN = ROOT / "bin"
+if str(BIN) not in sys.path:
+    sys.path.insert(0, str(BIN))
+
+import review_bundle
+import review_common
+import review_packet
+import review_receipt
+import review_runner
+
 FIXTURE = ROOT / "tests" / "fixtures" / "review-gate"
 GATE = ROOT / "bin" / "review_gate.py"
-ZERO_OID = "0" * 40
-TEST_WORKER = {
-    "principal": "test-worker",
-    "harness": "test-harness",
-    "model": "test-model",
-    "executable": "test-worker",
-    "executable_sha256": "sha256:" + "0" * 64,
-    "payload": "test-payload",
-    "payload_sha256": "sha256:" + "1" * 64,
-}
+REVIEWERS = tuple(review_common.REVIEWERS)
 
 
-class ReviewGateTests(unittest.TestCase):
+class ReviewGateProtocolTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory(prefix="review-gate-test-")
         self.repo = Path(self.temp.name) / "repo"
@@ -59,6 +51,9 @@ class ReviewGateTests(unittest.TestCase):
             check=False,
         )
 
+    def run_gate(self, *arguments: str) -> subprocess.CompletedProcess[str]:
+        return self.run_command(sys.executable, str(GATE), *arguments)
+
     def git_oid(self, revision: str) -> str:
         result = self.run_command("git", "rev-parse", revision)
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -70,983 +65,561 @@ class ReviewGateTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         return self.git_oid("HEAD")
 
-    def freeze(self, old_oid: str, new_oid: str) -> subprocess.CompletedProcess[str]:
-        return self.run_command(
-            sys.executable,
-            str(GATE),
+    def freeze_and_prepare(self) -> dict[str, object]:
+        (self.repo / "app.py").write_text('def result():\n    return "reviewed"\n', encoding="utf-8")
+        new_oid = self.commit("reviewed change", "app.py")
+        frozen = self.run_gate(
             "freeze",
+            "--repo",
+            str(self.repo),
             "--old-oid",
-            old_oid,
+            self.base_oid,
             "--new-oid",
             new_oid,
         )
+        self.assertEqual(frozen.returncode, 0, frozen.stderr)
+        prepared = self.run_gate("prepare", "--repo", str(self.repo))
+        self.assertEqual(prepared.returncode, 0, prepared.stderr)
+        return json.loads((self.repo / ".omp" / "review-freeze.json").read_text(encoding="utf-8"))
+
+    def packet(self) -> dict[str, object]:
+        return review_packet.load_packet(self.repo, self.identity())
 
     def identity(self) -> dict[str, object]:
-        return json.loads((self.repo / ".omp" / "review-freeze.json").read_text())
+        return json.loads((self.repo / ".omp" / "review-freeze.json").read_text(encoding="utf-8"))
 
-    def worker_for(self, reviewer: str) -> dict[str, str]:
-        executable, payload = review_gate.PINNED_WORKERS[reviewer]
-        executable = executable.resolve(strict=True)
-        payload = payload.resolve(strict=True)
-        return {
-            "principal": reviewer,
-            "harness": "test-harness",
-            "model": "test-model",
-            "executable": str(executable),
-            "executable_sha256": review_common.sha256_bytes(executable.read_bytes()),
-            "payload": str(payload),
-            "payload_sha256": review_common.directory_digest(payload),
-        }
-    def write_pass(self, identity: dict[str, object], reviewer: str, *, status: str = "clean", findings: int = 0) -> Path:
-        path = self.repo / ".omp" / "review-passes" / f"{reviewer}.json"
-        path.parent.mkdir(parents=True, exist_ok=True)
-        raw_report: dict[str, object] = {"findings": []}
-        if reviewer == "autoreview":
-            raw_report["overall_correctness"] = "patch is correct"
-            raw_report["overall_explanation"] = "synthetic internal receipt fixture"
-            raw_report["overall_confidence"] = "high"
-        worker = self.worker_for(reviewer)
-        path.write_text(
-            json.dumps(
-                {
-                    "schema": "omp.review-pass.v2",
-                    "repository": identity["repository"],
-                    "old_oid": identity["old_oid"],
-                    "new_oid": identity["new_oid"],
-                    "commits": identity["commits"],
-                    "paths": identity["paths"],
-                    "bundle_digest": identity["bundle_digest"],
-                    "reviewer": reviewer,
-                    "status": status,
-                    "actionable_findings": findings,
-                    "exit_code": 0 if status == "clean" else 1,
-                    "worker": worker,
-                    "raw_report": raw_report,
-                }
-            )
-        )
-        return path
-
-    def record_clean(self, identity: dict[str, object] | None = None) -> subprocess.CompletedProcess[str]:
-        identity = identity or self.identity()
-        autoreview = self.write_pass(identity, "autoreview")
-        correctness = self.write_pass(identity, "thermo-nuclear-review")
-        quality = self.write_pass(identity, "thermo-nuclear-code-quality-review")
-        try:
-            code = review_gate.record(
-                Namespace(
-                    repo=str(self.repo),
-                    freeze=str(self.repo / ".omp" / "review-freeze.json"),
-                    output=None,
-                    scope="substantive",
-                    autoreview_json=autoreview,
-                    autoreview_exit=0,
-                    thermo_correctness_json=correctness,
-                    thermo_quality_json=quality,
-                )
-            )
-            return subprocess.CompletedProcess([], code, "", "")
-        except (review_gate.GateError, OSError, ValueError) as error:
-            return subprocess.CompletedProcess([], 1, "", str(error))
-
-
-    def protected_update(self, old_oid: str, new_oid: str) -> str:
-        return f"refs/heads/feature {new_oid} refs/heads/master {old_oid}\n"
-
-    def test_exact_clean_range_success(self) -> None:
-        (self.repo / "app.py").write_text('def result():\n    return "reviewed"\n')
-        new_oid = self.commit("reviewed change", "app.py")
-        frozen = self.freeze(self.base_oid, new_oid)
-        self.assertEqual(frozen.returncode, 0, frozen.stderr)
-        recorded = self.record_clean()
-        self.assertEqual(recorded.returncode, 0, recorded.stderr)
-        verified = self.run_command(sys.executable, str(GATE), "hook", input_text=self.protected_update(self.base_oid, new_oid))
-        self.assertEqual(verified.returncode, 0, verified.stderr)
-        self.assertIn("frozen Git range", verified.stdout)
-
-    def test_verify_requires_gate_owned_pass_artifacts(self) -> None:
-        (self.repo / "app.py").write_text("result = 1\n")
-        new_oid = self.commit("reviewed change", "app.py")
-        self.assertEqual(self.freeze(self.base_oid, new_oid).returncode, 0)
+    def result_for(
+        self,
+        reviewer: str,
+        *,
+        status: str = "clean",
+        findings: list[dict[str, object]] | None = None,
+        packet_digest: str | None = None,
+        skill_sha256: str | None = None,
+        schema: str = review_common.RESULT_SCHEMA,
+    ) -> dict[str, object]:
         identity = self.identity()
-        autoreview = self.write_pass(identity, "autoreview")
-        outside = self.repo / "autoreview-copy.json"
-        outside.write_bytes(autoreview.read_bytes())
-        with self.assertRaisesRegex(review_gate.GateError, "gate-owned"):
-            review_gate.record(
-                Namespace(
-                    repo=str(self.repo),
-                    freeze=str(self.repo / ".omp" / "review-freeze.json"),
-                    output=None,
-                    scope="substantive",
-                    autoreview_json=outside,
-                    autoreview_exit=0,
-                    thermo_correctness_json=self.write_pass(identity, "thermo-nuclear-review"),
-                    thermo_quality_json=self.write_pass(identity, "thermo-nuclear-code-quality-review"),
-                )
-            )
-
-    def test_verify_rejects_pass_artifact_drift(self) -> None:
-        (self.repo / "app.py").write_text("result = 1\n")
-        new_oid = self.commit("reviewed change", "app.py")
-        self.assertEqual(self.freeze(self.base_oid, new_oid).returncode, 0)
-        self.assertEqual(self.record_clean().returncode, 0)
-        pass_path = self.repo / ".omp" / "review-passes" / "autoreview.json"
-        pass_path.write_text(pass_path.read_text() + "\n", encoding="utf-8")
-        blocked = self.run_command(sys.executable, str(GATE), "verify", "--old-oid", self.base_oid, "--new-oid", new_oid)
-        self.assertNotEqual(blocked.returncode, 0)
-        self.assertIn("pass artifact changed", blocked.stderr)
-
-    def rewrite_pass_worker_digest(self, reviewer: str, field: str) -> None:
-        pass_path = self.repo / ".omp" / "review-passes" / f"{reviewer}.json"
-        pass_document = json.loads(pass_path.read_text(encoding="utf-8"))
-        pass_document["worker"][field] = "sha256:" + "0" * 64
-        pass_path.write_text(json.dumps(pass_document), encoding="utf-8")
-        receipt_path = self.repo / ".omp" / "review-receipt.json"
-        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
-        index = next(index for index, item in enumerate(receipt["reviewers"]) if item["reviewer"] == reviewer)
-        receipt["reviewers"][index] = {
-            **pass_document,
-            "pass_artifact": {
-                "path": f".omp/review-passes/{reviewer}.json",
-                "sha256": review_common.sha256_bytes(pass_path.read_bytes()),
-            },
-        }
-        receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
-
-    def test_verify_rehashes_worker_executable_and_payload(self) -> None:
-        (self.repo / "app.py").write_text("result = 1\n")
-        new_oid = self.commit("reviewed change", "app.py")
-        self.assertEqual(self.freeze(self.base_oid, new_oid).returncode, 0)
-        self.assertEqual(self.record_clean().returncode, 0)
-        self.rewrite_pass_worker_digest("autoreview", "executable_sha256")
-        blocked_executable = self.run_command(sys.executable, str(GATE), "verify", "--old-oid", self.base_oid, "--new-oid", new_oid)
-        self.assertNotEqual(blocked_executable.returncode, 0)
-        self.assertIn("executable_sha256", blocked_executable.stderr)
-        self.assertEqual(self.record_clean().returncode, 0)
-        self.rewrite_pass_worker_digest("thermo-nuclear-review", "payload_sha256")
-        blocked_payload = self.run_command(sys.executable, str(GATE), "verify", "--old-oid", self.base_oid, "--new-oid", new_oid)
-        self.assertNotEqual(blocked_payload.returncode, 0)
-        self.assertIn("payload_sha256", blocked_payload.stderr)
-
-    def test_external_repo_resolves_workers_at_gate_root(self) -> None:
-        worker = self.worker_for("autoreview")
-        document = {"worker": worker, "raw_report": {}}
-        audited, _ = review_receipt.audit_worker(
-            document,
-            "external review pass",
-            self.repo / "external-repo",
-            "autoreview",
-        )
-        self.assertEqual(audited["executable"], worker["executable"])
-        self.assertEqual(audited["payload"], worker["payload"])
-
-    def test_public_record_and_worker_overrides_are_rejected(self) -> None:
-        record = self.run_command(sys.executable, str(GATE), "record")
-        self.assertNotEqual(record.returncode, 0)
-        self.assertIn("invalid choice", record.stderr)
-        run = self.run_command(sys.executable, str(GATE), "run", "--autoreview-bin", "/tmp/fake")
-        self.assertNotEqual(run.returncode, 0)
-        self.assertIn("unrecognized arguments", run.stderr)
-
-    def test_pathspec_magic_filename_cannot_hide_dirty_frozen_path(self) -> None:
-        (self.repo / "app.py").write_text("value = 1\n", encoding="utf-8")
-        (self.repo / ":(exclude)app.py").write_text("literal path\n", encoding="utf-8")
-        self.assertEqual(self.run_command("git", "add", "-A").returncode, 0)
-        committed = self.run_command("git", "commit", "--quiet", "-m", "literal pathspec")
-        self.assertEqual(committed.returncode, 0, committed.stderr)
-        new_oid = self.git_oid("HEAD")
-        (self.repo / "app.py").write_text("value = 2\n", encoding="utf-8")
-        blocked = self.freeze(self.base_oid, new_oid)
-        self.assertNotEqual(blocked.returncode, 0)
-        self.assertIn("clean worktree", blocked.stderr)
-
-    def test_ignored_gate_runtime_output_does_not_dirty_a_deleted_runtime_path(self) -> None:
-        receipt = self.repo / ".omp" / "review-receipt.json"
-        receipt.parent.mkdir()
-        receipt.write_text('{"historical": true}\n', encoding="utf-8")
-        old_oid = self.commit("track historical receipt", ".omp/review-receipt.json")
-        receipt.unlink()
-        (self.repo / ".gitignore").write_text(".omp/\n", encoding="utf-8")
-        new_oid = self.commit("stop tracking review output", ".gitignore", ".omp/review-receipt.json")
-        receipt.write_text('{"runtime": true}\n', encoding="utf-8")
-
-        frozen = self.freeze(old_oid, new_oid)
-
-        self.assertEqual(frozen.returncode, 0, frozen.stderr)
-
-    def test_autoreview_security_api_is_a_normal_import(self) -> None:
-        self.assertEqual(review_runner.autoreview_security.__name__, "openclaw_autoreview")
-        self.assertTrue(callable(review_runner.autoreview_security.secret_text_risk))
-
-    def test_autoreview_import_and_executable_do_not_write_vendor_bytecode(self) -> None:
-        fork_root = ROOT / "global" / "external" / "openclaw-autoreview"
-        cache = fork_root / "__pycache__"
-        if cache.exists():
-            shutil.rmtree(cache)
-        result = self.run_command(sys.executable, str(fork_root / "scripts" / "autoreview"), "--help")
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertFalse(cache.exists())
-
-    def test_autoreview_reducer_owns_status_and_exit_semantics(self) -> None:
-        identity = {
-            "repository": "test/repository",
-            "old_oid": ZERO_OID,
-            "new_oid": self.base_oid,
-            "commits": [self.base_oid],
-            "paths": ["README.md"],
-            "bundle_digest": "sha256:" + "0" * 64,
-        }
-        chunks = {
-            "review_names": ["bundle.review.000.diff"],
-            "reports": [{"dataset": "bundle.review.000.diff", "report": {}}],
-            "entries": [],
-            "findings": [{"title": "bug", "dataset": "bundle.review.000.diff"}],
-            "actionable_findings": 1,
-            "exit_codes": [0],
-            "unavailable": False,
-            "failed": False,
-        }
-        integration = {
-            "integration": {"dataset": "autoreview.integration.json", "report": {}},
-            "findings": [],
-            "actionable_findings": 0,
-
-            "exit_codes": [2],
-            "failed": True,
-        }
-        result = review_runner.reduce_autoreview_results(identity, TEST_WORKER, chunks, integration)
-        self.assertEqual(result["status"], "findings")
-        self.assertEqual(result["actionable_findings"], 1)
-        self.assertEqual(result["exit_code"], 2)
-        self.assertEqual(result["raw_report"]["findings"], chunks["findings"])
-
-    def test_runner_command_sets_workers_before_review_wave(self) -> None:
-        (self.repo / "app.py").write_text("value = 1\n", encoding="utf-8")
-        new_oid = self.commit("reviewed change", "app.py")
-        self.assertEqual(self.freeze(self.base_oid, new_oid).returncode, 0)
-        identity = self.identity()
-
-        def envelope(reviewer: str) -> dict[str, object]:
-            return {
-                "schema": "omp.review-pass.v2",
-                **identity,
-                "reviewer": reviewer,
-                "status": "clean",
-                "actionable_findings": 0,
-                "exit_code": 0,
-                "worker": TEST_WORKER,
-                "raw_report": {"findings": []},
-            }
-
-        with (
-            patch.object(review_runner, "worker_identity", return_value=TEST_WORKER) as worker_identity,
-            patch.object(review_runner, "unresolved_worker", return_value=TEST_WORKER),
-            patch.object(review_runner, "_packet", return_value={}),
-            patch.object(review_runner, "_worktree_status", return_value=""),
-            patch.object(review_runner, "_assert_packet_unchanged"),
-            patch.object(review_runner, "_autoreview_pass", return_value=envelope("autoreview")) as autoreview_pass,
-            patch.object(
-                review_runner,
-                "_thermo_pass",
-                side_effect=[envelope("thermo-nuclear-review"), envelope("thermo-nuclear-code-quality-review")],
-            ),
-            patch.object(review_runner, "record_receipt"),
-        ):
-            result = review_runner.run_command(
-                Namespace(repo=str(self.repo), freeze=None, output_dir=None, timeout=30)
-            )
-        self.assertEqual(result, 0)
-        self.assertTrue(worker_identity.called)
-        worker_names = {call.args[0] for call in worker_identity.call_args_list}
-        self.assertEqual(
-            worker_names,
-            {"autoreview", "thermo-nuclear-review", "thermo-nuclear-code-quality-review"},
-        )
-        self.assertTrue(
-            any(call.args[0] == "autoreview" and call.args[2] == "codex" for call in worker_identity.call_args_list)
-        )
-        self.assertTrue(
-            all(
-                call.args[2] == review_runner.THERMO_MODEL
-                for call in worker_identity.call_args_list
-                if call.args[0] in {"thermo-nuclear-review", "thermo-nuclear-code-quality-review"}
-            )
-        )
-        thermo_calls = [
-            call for call in worker_identity.call_args_list if call.args[0] in {"thermo-nuclear-review", "thermo-nuclear-code-quality-review"}
-        ]
-        self.assertTrue(all(call.args[1] == review_runner.AUTOREVIEW_DEFAULT for call in thermo_calls))
-        self.assertNotIn("cursor-agent", str(worker_identity.call_args_list))
-        self.assertTrue(autoreview_pass.called)
-
-    def test_autoreview_uses_only_immutable_packet_datasets(self) -> None:
-        identity = {
-            "repository": "test/repository",
-            "old_oid": ZERO_OID,
-            "new_oid": self.base_oid,
-            "commits": [self.base_oid],
-            "paths": ["README.md"],
-            "bundle_digest": "sha256:" + "0" * 64,
-        }
-        packet = self.repo / review_runner.PACKET_DIR
-        packet.mkdir()
-        for name in ("freeze.json", "evidence.json", "bundle.review.000.diff"):
-            (packet / name).write_text("{}\n", encoding="utf-8")
-        report = (
-            '{"findings":[],"actionable_findings":0,"overall_correctness":"patch is correct",'
-            '"change_summary":"no change","interface_effects":[]}'
-        )
-        with patch.object(
-            review_runner,
-            "_run_process",
-            side_effect=[
-                (0, report, ""),
-                (0, '{"findings":[],"actionable_findings":0,"overall_correctness":"patch is correct"}', ""),
-            ],
-        ) as run_process:
-            result = review_runner._autoreview_pass(identity, self.repo, 30, self.repo, TEST_WORKER)
-        chunk_command = run_process.call_args_list[0].args[0]
-        integration_command = run_process.call_args_list[1].args[0]
-        self.assertEqual(result["status"], "clean")
-        self.assertEqual(run_process.call_count, 2)
-        self.assertEqual(chunk_command[chunk_command.index("--mode") + 1], "local")
-        self.assertEqual(chunk_command[chunk_command.index("--engine") + 1], "codex")
-        self.assertNotIn("--model", chunk_command)
-        self.assertNotIn("--thinking", chunk_command)
-        self.assertEqual(result["worker"]["model"], TEST_WORKER["model"])
-        self.assertNotIn("--base", chunk_command)
-        self.assertNotIn("--commit", chunk_command)
-        self.assertIn(f"{review_runner.PACKET_DIR}/bundle.review.000.diff", chunk_command)
-        self.assertNotIn(f"{review_runner.PACKET_DIR}/bundle.diff", chunk_command)
-        self.assertIn(f"{review_runner.PACKET_DIR}/autoreview.integration.json", integration_command)
-
-    def test_autoreview_runs_each_bounded_dataset_and_aggregates_findings(self) -> None:
-        identity = {
-            "repository": "test/repository",
-            "old_oid": ZERO_OID,
-            "new_oid": self.base_oid,
-            "commits": [self.base_oid],
-            "paths": ["README.md"],
-            "bundle_digest": "sha256:" + "0" * 64,
-        }
-        packet = self.repo / review_runner.PACKET_DIR
-        packet.mkdir()
-        for name in ("freeze.json", "evidence.json", "bundle.review.000.diff", "bundle.review.001.diff"):
-            (packet / name).write_text("{}\n", encoding="utf-8")
-        clean = (
-            '{"findings":[],"actionable_findings":0,"overall_correctness":"patch is correct",'
-            '"change_summary":"no change","interface_effects":[]}'
-        )
-        finding = (
-            '{"findings":[{"title":"bug"}],"actionable_findings":1,'
-            '"overall_correctness":"patch is incorrect","change_summary":"changed API",'
-            '"interface_effects":["caller contract"]}'
-        )
-        integration = '{"findings":[],"actionable_findings":0,"overall_correctness":"patch is correct"}'
-        with patch.object(
-            review_runner,
-            "_run_process",
-            side_effect=[(0, clean, ""), (1, finding, ""), (0, integration, "")],
-        ) as run_process:
-            result = review_runner._autoreview_pass(identity, self.repo, 30, self.repo, TEST_WORKER)
-        self.assertEqual(run_process.call_count, 3)
-        self.assertEqual(result["status"], "findings")
-        self.assertEqual(result["actionable_findings"], 1)
-        self.assertEqual(result["raw_report"]["findings"][0]["dataset"], "bundle.review.001.diff")
-        self.assertEqual(result["raw_report"]["integration"]["report"]["findings"], [])
-
-
-    def test_autoreview_datasets_compact_deletions_and_bound_large_files(self) -> None:
-        deleted = (
-            b"diff --git a/removed.txt b/removed.txt\n"
-            b"deleted file mode 100644\n"
-            b"index 1111111..0000000\n"
-            b"--- a/removed.txt\n"
-            b"+++ /dev/null\n"
-            b"@@ -1,2 +0,0 @@\n"
-            b"-secret body one\n"
-            b"-secret body two\n"
-        )
-        large_header = (
-            b"diff --git a/large.txt b/large.txt\n"
-            b"new file mode 100644\n"
-            b"index 0000000..2222222\n"
-            b"--- /dev/null\n"
-            b"+++ b/large.txt\n"
-            b"@@ -0,0 +1,4000 @@\n"
-        )
-        chunks = review_runner._dataset_chunks(deleted + large_header + (b"+bounded review line\n" * 10_000))
-        self.assertGreater(len(chunks), 1)
-        self.assertTrue(all(len(chunk) <= review_runner.AUTOREVIEW_DATASET_BYTES for chunk in chunks))
-        combined = b"".join(chunks)
-        self.assertNotIn(b"secret body", combined)
-        self.assertIn(b"Entire file deleted; 2 removed lines omitted", combined)
-        self.assertTrue(all(chunk.startswith(b"diff --git ") for chunk in chunks))
-
-    def test_autoreview_datasets_redact_values_without_hiding_safe_code(self) -> None:
-        diff = (
-            b"diff --git a/activity.ts b/activity.ts\n"
-            b"index 1111111..2222222 100644\n"
-            b"--- a/activity.ts\n"
-            b"+++ b/activity.ts\n"
-            b"@@ -1 +1,2 @@\n"
-            b'-const value = "before";\n'
-            b'+const safe = summarizeToolActivity("fetch", "https://example.com/path");\n'
-            b'+const privateValue = "https://user:pass@example.com/path?token=secret";\n'
-        )
-        combined = b"".join(review_runner._dataset_chunks(diff))
-        self.assertIn(b"summarizeToolActivity", combined)
-        self.assertIn(b"https://user:redacted@example.com/path?token=secret", combined)
-        self.assertNotIn(b"user:pass", combined)
-        scanner = review_runner.autoreview_security
-        self.assertFalse(scanner.secret_text_risk(combined.decode("utf-8"), javascript_dialect="typescript"))
-
-    def test_autoreview_datasets_remove_secret_values_before_annotation(self) -> None:
-        secret = b"ghp_" + (b"A" * 40)
-        diff = (
-            b"diff --git a/example.env b/example.env\n"
-            b"new file mode 100644\n"
-            b"--- /dev/null\n"
-            b"+++ b/example.env\n"
-            b"@@ -0,0 +1 @@\n"
-            b"+GITHUB_TOKEN="
-            + secret
-            + b"\n"
-        )
-        combined = b"".join(review_runner._dataset_chunks(diff))
-        self.assertNotIn(secret, combined)
-        self.assertIn(b"GITHUB_TOKEN=redacted", combined)
-
-    def test_thermo_worker_runs_through_public_review_harness_with_read_only_datasets(self) -> None:
-        identity = {
-            "repository": "test/repository",
-            "old_oid": self.base_oid,
-            "new_oid": self.base_oid,
-            "commits": [],
-            "paths": [],
-            "bundle_digest": "sha256:" + "0" * 64,
-        }
-        packet = self.repo / review_runner.PACKET_DIR
-        packet.mkdir()
-        for name in ("freeze.json", "evidence.json", "bundle.diff", "bundle.review.000.diff", "bundle.review.001.diff"):
-            (packet / name).write_text("{}\n", encoding="utf-8")
-        packet.chmod(0o555)
-        seen_datasets: list[str] = []
-
-        def run_thermo(command: list[str], cwd: Path, timeout: int) -> tuple[int, str, str]:
-            staged = cwd / review_runner.PACKET_DIR
-            self.assertNotEqual(cwd, self.repo)
-            self.assertTrue((staged / "review-skill.md").is_file())
-            chunks = sorted(path.name for path in staged.glob("bundle.review.*.diff"))
-            self.assertEqual(len(chunks), 1)
-            seen_datasets.extend(chunks)
-            self.assertTrue((cwd / ".git").is_dir())
-            tracked = subprocess.run(
-                ["git", "ls-files", review_runner.PACKET_DIR],
-                cwd=cwd,
-                text=True,
-                stdout=subprocess.PIPE,
-                check=True,
-            ).stdout.splitlines()
-            self.assertIn(f"{review_runner.PACKET_DIR}/review-skill.md", tracked)
-            self.assertEqual(staged.stat().st_mode & 0o777, 0o555)
-            self.assertEqual((staged / "review-skill.md").stat().st_mode & 0o777, 0o444)
-            self.assertFalse((staged / "bundle.diff").exists())
-            self.assertFalse((cwd / "app.py").exists())
-            return 0, '{"findings":[]}', ""
-
-        with patch.object(
-            review_runner,
-            "_run_process",
-            side_effect=run_thermo,
-        ) as run_process:
-            result = review_runner._thermo_pass(
-                identity,
-                "thermo-nuclear-review",
-                Path("/usr/bin/true"),
-                self.repo,
-                30,
-                TEST_WORKER,
-            )
-        command = run_process.call_args_list[-1].args[0]
-        self.assertEqual(result["status"], "clean")
-        self.assertEqual(run_process.call_count, 2)
-        self.assertEqual(seen_datasets, ["bundle.review.000.diff", "bundle.review.001.diff"])
-        self.assertEqual(command[command.index("--mode") + 1], "local")
-        self.assertEqual(command[command.index("--engine") + 1], review_runner.THERMO_ENGINE)
-        self.assertEqual(command[command.index("--model") + 1], review_runner.THERMO_MODEL)
-        self.assertNotIn("cursor-agent", command)
-        self.assertIn(f"{review_runner.PACKET_DIR}/review-skill.md", command)
-        self.assertNotIn("--trust", command)
-        report_path = Path(command[command.index("--json-output") + 1])
-        self.assertFalse(report_path.is_relative_to(run_process.call_args.args[1]))
-
-    def test_thermo_parse_failure_preserves_bounded_worker_output(self) -> None:
-        identity = {
-            "repository": "test/repository",
-            "old_oid": self.base_oid,
-            "new_oid": self.base_oid,
-            "commits": [],
-            "paths": [],
-            "bundle_digest": "sha256:" + "0" * 64,
-        }
-        packet = self.repo / review_runner.PACKET_DIR
-        packet.mkdir()
-        for name in ("freeze.json", "evidence.json", "bundle.review.000.diff"):
-            (packet / name).write_text("{}\n", encoding="utf-8")
-        with patch.object(review_runner, "_run_process", return_value=(0, "not-json", "worker warning")):
-            result = review_runner._thermo_pass(
-                identity,
-                "thermo-nuclear-review",
-                Path("/usr/bin/true"),
-                self.repo,
-                30,
-                TEST_WORKER,
-            )
-        self.assertEqual(result["status"], "findings")
-        self.assertEqual(result["raw_report"]["stdout"], "not-json")
-        self.assertEqual(result["raw_report"]["stderr"], "worker warning")
-
-    def test_missing_old_object_fails_closed(self) -> None:
-        (self.repo / "app.py").write_text('def result():\n    return "changed"\n')
-        new_oid = self.commit("change", "app.py")
-        missing_old = "1" * 40
-        blocked = self.run_command(sys.executable, str(GATE), "hook", input_text=self.protected_update(missing_old, new_oid))
-        self.assertNotEqual(blocked.returncode, 0)
-        self.assertIn("git", blocked.stderr)
-
-
-    def test_hook_trivial_range_fails_before_expensive_review_with_waiver_command(self) -> None:
-        (self.repo / "README.md").write_text("# revised documentation\n", encoding="utf-8")
-        new_oid = self.commit("docs", "README.md")
-        blocked = self.run_command(
-            sys.executable,
-            str(GATE),
-            "hook",
-            input_text=self.protected_update(self.base_oid, new_oid),
-        )
-        self.assertNotEqual(blocked.returncode, 0)
-        self.assertIn("trivial review range", blocked.stderr)
-        self.assertIn("waive", blocked.stderr)
-        self.assertIn("--actor review-gate@example.test", blocked.stderr)
-        self.assertIn("--reason", blocked.stderr)
-
-    def test_pushed_tree_differs_from_reviewed_range(self) -> None:
-        (self.repo / "app.py").write_text('def result():\n    return "reviewed"\n')
-        reviewed_oid = self.commit("reviewed change", "app.py")
-        self.assertEqual(self.freeze(self.base_oid, reviewed_oid).returncode, 0)
-        self.assertEqual(self.record_clean().returncode, 0)
-
-        blob = self.run_command("git", "hash-object", "-w", "--stdin", input_text='def result():\n    return "backdoor"\n').stdout.strip()
-        self.assertEqual(len(blob), 40)
-        tree_lines = self.run_command("git", "ls-tree", self.base_oid).stdout.splitlines()
-        tree_lines = [f"100644 blob {blob}\tapp.py" if line.endswith("\tapp.py") else line for line in tree_lines]
-        tree = self.run_command("git", "mktree", input_text="\n".join(tree_lines) + "\n").stdout.strip()
-        pushed_oid = self.run_command(
-            "git",
-            "commit-tree",
-            tree,
-            "-p",
-            self.base_oid,
-            "-m",
-            "unreviewed tree",
-        ).stdout.strip()
-        self.assertEqual(len(pushed_oid), 40)
-        blocked = self.run_command(sys.executable, str(GATE), "hook", input_text=self.protected_update(self.base_oid, pushed_oid))
-        self.assertNotEqual(blocked.returncode, 0)
-        self.assertIn("clean worktree", blocked.stderr)
-
-    def test_edit_after_review_before_record_fails_closed(self) -> None:
-        (self.repo / "app.py").write_text('def result():\n    return "reviewed"\n')
-        new_oid = self.commit("reviewed change", "app.py")
-        self.assertEqual(self.freeze(self.base_oid, new_oid).returncode, 0)
-        identity = self.identity()
-        self.write_pass(identity, "thermo-nuclear-review")
-        self.write_pass(identity, "thermo-nuclear-code-quality-review")
-        (self.repo / "app.py").write_text('def result():\n    return "edited after review"\n')
-        recorded = self.record_clean(identity)
-        self.assertNotEqual(recorded.returncode, 0)
-        self.assertIn("clean worktree", recorded.stderr)
-
-    # "testing_" stays discoverable without matching TruffleHog's Lob test-key detector.
-    def testing_bundle_digest_tampering_is_rejected(self) -> None:
-        (self.repo / "README.md").write_text("# Revised documentation\n", encoding="utf-8")
-        new_oid = self.commit("documentation", "README.md")
-        self.assertEqual(self.freeze(self.base_oid, new_oid).returncode, 0)
-        freeze_path = self.repo / ".omp" / "review-freeze.json"
-        document = json.loads(freeze_path.read_text(encoding="utf-8"))
-        document["bundle_digest"] = "sha256:" + "0" * 64
-        freeze_path.write_text(json.dumps(document), encoding="utf-8")
-
-        blocked = self.record_clean()
-        self.assertNotEqual(blocked.returncode, 0)
-        self.assertIn("bundle_digest", blocked.stderr)
-
-    def test_frozen_identity_rejects_mismatched_reviewer_envelope(self) -> None:
-        (self.repo / "app.py").write_text('def result():\n    return "first"\n', encoding="utf-8")
-        first = self.commit("first reviewed change", "app.py")
-        self.assertEqual(self.freeze(self.base_oid, first).returncode, 0)
-        first_identity = self.identity()
-
-        (self.repo / "settings.yaml").write_text("mode: second\n", encoding="utf-8")
-        second = self.commit("second unreviewed change", "settings.yaml")
-        second_freeze = self.repo / ".omp" / "second-freeze.json"
-        frozen = self.run_command(
-            sys.executable,
-            str(GATE),
-            "freeze",
-            "--output",
-            str(second_freeze),
-            "--old-oid",
-            first,
-            "--new-oid",
-            second,
-        )
-        self.assertEqual(frozen.returncode, 0, frozen.stderr)
-        second_identity = json.loads(second_freeze.read_text(encoding="utf-8"))
-
-        autoreview = self.write_pass(first_identity, "autoreview")
-        correctness = self.write_pass(second_identity, "thermo-nuclear-review")
-        quality = self.write_pass(first_identity, "thermo-nuclear-code-quality-review")
-        with self.assertRaises(review_gate.GateError) as error:
-            review_gate.record(
-                Namespace(
-                    repo=str(self.repo),
-                    freeze=str(self.repo / ".omp" / "review-freeze.json"),
-                    output=None,
-                    scope="substantive",
-                    autoreview_json=autoreview,
-                    autoreview_exit=0,
-                    thermo_correctness_json=correctness,
-                    thermo_quality_json=quality,
-                )
-            )
-        self.assertIn("review pass", str(error.exception))
-        self.assertIn("match", str(error.exception))
-
-    def test_receipt_for_one_git_range_cannot_authorize_another(self) -> None:
-        (self.repo / "app.py").write_text('def result():\n    return "first"\n', encoding="utf-8")
-        first = self.commit("first reviewed change", "app.py")
-        self.assertEqual(self.freeze(self.base_oid, first).returncode, 0)
-        self.assertEqual(self.record_clean().returncode, 0)
-
-        (self.repo / "settings.yaml").write_text("mode: second\n", encoding="utf-8")
-        second = self.commit("second change", "settings.yaml")
-        blocked = self.run_command(
-            sys.executable,
-            str(GATE),
-            "verify",
-            "--old-oid",
-            first,
-            "--new-oid",
-            second,
-        )
-        self.assertNotEqual(blocked.returncode, 0)
-        self.assertIn("review receipt", blocked.stderr)
-        self.assertIn("committed-range bundle", blocked.stderr)
-
-    def test_add_then_delete_secret_remains_in_bundle(self) -> None:
-        (self.repo / "secret.env").write_text("TOKEN=never-release\n")
-        added_oid = self.commit("add secret", "secret.env")
-        (self.repo / "secret.env").unlink()
-        deleted_oid = self.commit("remove secret", "secret.env")
-        frozen = self.freeze(self.base_oid, deleted_oid)
-        self.assertEqual(frozen.returncode, 0, frozen.stderr)
-        identity = self.identity()
-        self.assertIn("secret.env", identity["paths"])
-        self.assertIn(added_oid, identity["commits"])
-        self.assertIn(deleted_oid, identity["commits"])
-        self.assertEqual(self.record_clean(identity).returncode, 0)
-        verified = self.run_command(sys.executable, str(GATE), "hook", input_text=self.protected_update(self.base_oid, deleted_oid))
-        self.assertEqual(verified.returncode, 0, verified.stderr)
-
-    def test_new_protected_ref_traverses_complete_history(self) -> None:
-        (self.repo / "app.py").write_text('def result():\n    return "first"\n')
-        first = self.commit("first introduced commit", "app.py")
-        (self.repo / "README.md").write_text("# second\n")
-        tip = self.commit("second introduced commit", "README.md")
-        frozen = self.freeze(ZERO_OID, tip)
-        self.assertEqual(frozen.returncode, 0, frozen.stderr)
-        identity = self.identity()
-        self.assertIn(first, identity["commits"])
-        self.assertIn("app.py", identity["paths"])
-        self.assertNotIn(first, identity["paths"])
-        self.assertEqual(self.record_clean(identity).returncode, 0)
-        verified = self.run_command(sys.executable, str(GATE), "hook", input_text=self.protected_update(ZERO_OID, tip))
-        self.assertEqual(verified.returncode, 0, verified.stderr)
-
-    def test_policy_roots_cannot_use_trivial_waiver(self) -> None:
-        previous = self.base_oid
-        policy_paths = (
-            ("global/skills/local/guide.md", "# Skill policy\n"),
-            ("global/references/quality.md", "# Reference policy\n"),
-            ("global/agents/reviewer.md", "# Agent policy\n"),
-            ("AGENTS.md", "# Root agent policy\n"),
-            ("RULES.md", "# Root rules\n"),
-            ("docs/agents.md", "# Case-folded agent policy\n"),
-            ("docs/skill.md", "# Case-folded skill policy\n"),
-        )
-        for relative, content in policy_paths:
-            path = self.repo / relative
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(content, encoding="utf-8")
-            new_oid = self.commit(f"policy change: {relative}", relative)
-            frozen = self.freeze(previous, new_oid)
-            self.assertEqual(frozen.returncode, 0, frozen.stderr)
-            waived = self.run_command(
-                sys.executable,
-                str(GATE),
-                "waive",
-                "--actor",
-                "review-gate@example.test",
-                "--reason",
-                "Documentation-only prose change; no executable behavior changed.",
-            )
-            self.assertNotEqual(waived.returncode, 0)
-            self.assertIn("inert prose", waived.stderr)
-            previous = new_oid
-
-    def test_trivial_waiver_requires_explicit_receipt(self) -> None:
-        (self.repo / "README.md").write_text("# Revised documentation\n", encoding="utf-8")
-        new_oid = self.commit("documentation", "README.md")
-        self.assertEqual(self.freeze(self.base_oid, new_oid).returncode, 0)
-        waived = self.run_command(
-            sys.executable,
-            str(GATE),
-            "waive",
-            "--actor",
-            "review-gate@example.test",
-            "--reason",
-            "Documentation-only prose change; no executable behavior changed.",
-        )
-        self.assertEqual(waived.returncode, 0, waived.stderr)
-        verified = self.run_command(sys.executable, str(GATE), "verify")
-        self.assertEqual(verified.returncode, 0, verified.stderr)
-
-    def test_trivial_freeze_cannot_run_or_use_forged_review_receipt(self) -> None:
-        (self.repo / "README.md").write_text("# Revised documentation\n", encoding="utf-8")
-        new_oid = self.commit("documentation", "README.md")
-        self.assertEqual(self.freeze(self.base_oid, new_oid).returncode, 0)
-        run = self.run_command(sys.executable, str(GATE), "run")
-        self.assertNotEqual(run.returncode, 0)
-        self.assertIn("actor-attributed waiver", run.stderr)
-        identity = self.identity()
-        forged = {
-            "schema": "omp.review-receipt.v2",
-            "kind": "review",
-            "repository": identity["repository"],
+        packet = self.packet()
+        finding_list = findings or []
+        result: dict[str, object] = {
+            "schema": schema,
+            "reviewer": reviewer,
             "old_oid": identity["old_oid"],
             "new_oid": identity["new_oid"],
-            "commits": identity["commits"],
-            "paths": identity["paths"],
             "bundle_digest": identity["bundle_digest"],
-            "scope": "substantive",
-            "reviewers": [],
+            "packet_digest": packet_digest or packet["packet_digest"],
+            "skill_sha256": skill_sha256 or review_common.skill_identity(reviewer)["sha256"],
+            "status": status,
+            "actionable_findings": len(finding_list),
+            "findings": finding_list,
         }
-        receipt = self.repo / ".omp" / "review-receipt.json"
-        receipt.write_text(json.dumps(forged), encoding="utf-8")
-        hook = self.run_command(
-            sys.executable,
-            str(GATE),
-            "hook",
-            input_text=self.protected_update(self.base_oid, new_oid),
-        )
-        self.assertNotEqual(hook.returncode, 0)
-        self.assertIn("actor-attributed waiver", hook.stderr)
+        if status in {"failed", "unavailable"}:
+            result["error"] = "synthetic failure"
+        return result
 
-    def test_committed_range_verification_ignores_uncommitted_worktree_edits(self) -> None:
-        (self.repo / "README.md").write_text("# Revised documentation\n", encoding="utf-8")
-        new_oid = self.commit("documentation", "README.md")
-        self.assertEqual(self.freeze(self.base_oid, new_oid).returncode, 0)
-        waived = self.run_command(
-            sys.executable,
-            str(GATE),
-            "waive",
-            "--actor",
-            "review-gate@example.test",
-            "--reason",
-            "Documentation-only prose change; no executable behavior changed.",
+    def attribution(self, reviewer: str, *, harness: str | None = None, run_id: str | None = None) -> dict[str, str]:
+        return {
+            "actor": f"actor-{reviewer}",
+            "harness": harness or f"harness-{reviewer}",
+            "model": f"model-{reviewer}",
+            "run_id": run_id or f"run-{reviewer}",
+        }
+
+    def adapter(self) -> dict[str, str]:
+        executable = BIN / "review_runner.py"
+        return {
+            "name": "test-adapter",
+            "executable": str(executable),
+            "executable_sha256": review_common.sha256_bytes(executable.read_bytes()),
+            "engine": "test-engine",
+        }
+
+    def submit(
+        self,
+        reviewer: str,
+        *,
+        result: dict[str, object] | None = None,
+        attribution: dict[str, str] | None = None,
+        adapter: dict[str, str] | None = None,
+    ) -> Path:
+        return review_receipt.submit_result(
+            self.repo,
+            self.repo / ".omp" / "review-freeze.json",
+            reviewer,
+            attribution or self.attribution(reviewer),
+            result or self.result_for(reviewer),
+            adapter=adapter,
         )
-        self.assertEqual(waived.returncode, 0, waived.stderr)
-        (self.repo / "README.md").write_text("# Changed after commit\n", encoding="utf-8")
-        verified = self.run_command(sys.executable, str(GATE), "verify")
+
+    def submit_all(self, *, duplicate_identity: bool = False) -> list[Path]:
+        paths: list[Path] = []
+        for reviewer in REVIEWERS:
+            attribution = self.attribution(
+                reviewer,
+                harness="same-harness" if duplicate_identity else None,
+                run_id="same-run" if duplicate_identity else None,
+            )
+            paths.append(
+                self.submit(
+                    reviewer,
+                    attribution=attribution,
+                    adapter=self.adapter() if reviewer == "autoreview" else None,
+                )
+            )
+        return paths
+
+    def record(self) -> Path:
+        return review_receipt.record_receipt(
+            self.repo,
+            self.repo / ".omp" / "review-freeze.json",
+        )
+
+    def verify(self) -> None:
+        receipt, identity = review_receipt.load_receipt(
+            self.repo,
+            self.repo / ".omp" / "review-receipt.json",
+        )
+        review_receipt.verify_receipt(self.repo, receipt, identity, review_common.review_scope)
+
+    def test_cli_freeze_prepare_record_verify_with_direct_submissions(self) -> None:
+        identity = self.freeze_and_prepare()
+        self.submit_all()
+
+        recorded = self.run_gate("record", "--repo", str(self.repo))
+        self.assertEqual(recorded.returncode, 0, recorded.stderr)
+        verified = self.run_gate(
+            "verify",
+            "--repo",
+            str(self.repo),
+            "--old-oid",
+            str(identity["old_oid"]),
+            "--new-oid",
+            str(identity["new_oid"]),
+        )
         self.assertEqual(verified.returncode, 0, verified.stderr)
 
-    def test_standalone_verify_rejects_stale_head(self) -> None:
-        (self.repo / "README.md").write_text("# Reviewed\n", encoding="utf-8")
-        reviewed = self.commit("reviewed documentation", "README.md")
-        self.assertEqual(self.freeze(self.base_oid, reviewed).returncode, 0)
-        waived = self.run_command(
-            sys.executable,
-            str(GATE),
-            "waive",
-            "--actor",
-            "review-gate@example.test",
-            "--reason",
-            "Documentation-only prose change; no executable behavior changed.",
+        receipt = json.loads((self.repo / ".omp" / "review-receipt.json").read_text(encoding="utf-8"))
+        self.assertEqual(receipt["schema"], review_common.RECEIPT_SCHEMA)
+        self.assertEqual([item["reviewer"] for item in receipt["reviewers"]], list(REVIEWERS))
+        self.assertIn("adapter", receipt["reviewers"][0])
+        self.assertNotIn("adapter", receipt["reviewers"][1])
+        self.assertNotIn("adapter", receipt["reviewers"][2])
+        for item in receipt["reviewers"]:
+            self.assertEqual(item["schema"], review_common.PASS_SCHEMA)
+            self.assertEqual(set(item["worker"]), {"actor", "harness", "model", "run_id"})
+
+    def test_prepare_rejects_stale_frozen_range(self) -> None:
+        (self.repo / "app.py").write_text("value = 1\n", encoding="utf-8")
+        new_oid = self.commit("initial reviewed change", "app.py")
+        frozen = self.run_gate(
+            "freeze",
+            "--repo",
+            str(self.repo),
+            "--old-oid",
+            self.base_oid,
+            "--new-oid",
+            new_oid,
         )
-        self.assertEqual(waived.returncode, 0, waived.stderr)
-        (self.repo / "settings.yaml").write_text("mode: stale\n", encoding="utf-8")
-        self.commit("unreviewed follow-up", "settings.yaml")
-        stale = self.run_command(sys.executable, str(GATE), "verify")
-        self.assertNotEqual(stale.returncode, 0)
-        self.assertIn("stale", stale.stderr)
-
-    def test_gitattributes_is_substantive_for_waiver_classification(self) -> None:
-        (self.repo / ".gitattributes").write_text("*.py -diff\n", encoding="utf-8")
-        new_oid = self.commit("change diff policy", ".gitattributes")
-        self.assertEqual(self.freeze(self.base_oid, new_oid).returncode, 0)
-        waived = self.run_command(
-            sys.executable,
-            str(GATE),
-            "waive",
-            "--actor",
-            "review-gate@example.test",
-            "--reason",
-            "Configuration-only change with no executable behavior changed.",
-        )
-        self.assertNotEqual(waived.returncode, 0)
-        self.assertIn("inert prose", waived.stderr)
-
-    def test_identical_protected_ranges_are_deduplicated(self) -> None:
-        (self.repo / "app.py").write_text("result = 1\n", encoding="utf-8")
-        new_oid = self.commit("reviewed change", "app.py")
-        self.assertEqual(self.freeze(self.base_oid, new_oid).returncode, 0)
-        self.assertEqual(self.record_clean().returncode, 0)
-        updates = (
-            f"refs/heads/feature {new_oid} refs/heads/master {self.base_oid}\n"
-            f"refs/heads/feature {new_oid} refs/heads/main {self.base_oid}\n"
-        )
-        verified = self.run_command(sys.executable, str(GATE), "hook", input_text=updates)
-        self.assertEqual(verified.returncode, 0, verified.stderr)
-
-    def test_first_feature_push_runs_from_local_default_without_remote_head(self) -> None:
-        self.run_command("git", "branch", "main", self.base_oid)
-        (self.repo / "app.py").write_text("result = 1\n", encoding="utf-8")
-        new_oid = self.commit("feature change", "app.py")
-        called: list[tuple[str, str]] = []
-
-        def ensure(_args: Namespace, _repo: Path, old_oid: str, tip: str) -> None:
-            called.append((old_oid, tip))
-
-        with patch.object(review_gate, "_ensure_review", side_effect=ensure), patch.object(
-            review_gate, "verify", return_value=0
-        ), patch("sys.stdin", io.StringIO(f"refs/heads/feature {new_oid} refs/heads/feature {ZERO_OID}\n")):
-            result = review_gate.hook(
-                Namespace(repo=str(self.repo), receipt=None, old_oid=None, new_oid=None, remote="origin")
-            )
-        self.assertEqual(result, 0)
-        self.assertEqual(called, [(self.base_oid, new_oid)])
-
-    def test_tag_only_create_uses_peeled_commit_and_full_history(self) -> None:
-        (self.repo / "app.py").write_text('def result():\n    return "tagged"\n', encoding="utf-8")
-        new_oid = self.commit("tagged commit", "app.py")
-        called: list[tuple[str, str]] = []
-
-        def ensure(_args: Namespace, _repo: Path, old_oid: str, tip: str) -> None:
-            called.append((old_oid, tip))
-
-        update = f"refs/tags/v-create {new_oid} refs/tags/v-create {ZERO_OID}\n"
-        with patch.object(review_gate, "_ensure_review", side_effect=ensure), patch.object(
-            review_gate, "verify", return_value=0
-        ), patch("sys.stdin", io.StringIO(update)):
-            result = review_gate.hook(
-                Namespace(repo=str(self.repo), receipt=None, old_oid=None, new_oid=None, remote="origin")
-            )
-        self.assertEqual(result, 0)
-        self.assertEqual(called, [(ZERO_OID, new_oid)])
-
-    def test_tag_only_update_peels_annotated_old_and_new_objects(self) -> None:
-        old_tag = self.run_command("git", "tag", "-a", "v-update", "-m", "old", self.base_oid)
-        self.assertEqual(old_tag.returncode, 0, old_tag.stderr)
-        old_tag_oid = self.run_command("git", "rev-parse", "refs/tags/v-update").stdout.strip()
-        (self.repo / "app.py").write_text('def result():\n    return "updated tag"\n', encoding="utf-8")
-        new_oid = self.commit("updated tag commit", "app.py")
-        new_tag = self.run_command("git", "tag", "-fa", "v-update", "-m", "new", new_oid)
-        self.assertEqual(new_tag.returncode, 0, new_tag.stderr)
-        new_tag_oid = self.run_command("git", "rev-parse", "refs/tags/v-update").stdout.strip()
-        called: list[tuple[str, str]] = []
-
-        def ensure(_args: Namespace, _repo: Path, old_oid: str, tip: str) -> None:
-            called.append((old_oid, tip))
-
-        update = f"refs/tags/v-update {new_tag_oid} refs/tags/v-update {old_tag_oid}\n"
-        with patch.object(review_gate, "_ensure_review", side_effect=ensure), patch.object(
-            review_gate, "verify", return_value=0
-        ), patch("sys.stdin", io.StringIO(update)):
-            result = review_gate.hook(
-                Namespace(repo=str(self.repo), receipt=None, old_oid=None, new_oid=None, remote="origin")
-            )
-        self.assertEqual(result, 0)
-        self.assertEqual(called, [(self.base_oid, new_oid)])
-
-    def test_malformed_input_feature_skip_and_protected_delete(self) -> None:
-        tag = self.run_command(
-            sys.executable,
-            str(GATE),
-            "hook",
-            input_text="refs/heads/feature not-an-oid refs/tags/v1 not-an-oid\n",
-        )
-        self.assertEqual(tag.returncode, 0, tag.stderr)
-        feature_delete = self.run_command(
-            sys.executable,
-            str(GATE),
-            "hook",
-            input_text=f"refs/heads/feature {ZERO_OID} refs/heads/feature {self.base_oid}\n",
-        )
-        self.assertEqual(feature_delete.returncode, 0, feature_delete.stderr)
-        malformed = self.run_command(
-            sys.executable,
-            str(GATE),
-            "hook",
-            input_text="refs/heads/feature 1111111111111111111111111111111111111111 refs/heads/master\n",
-        )
-        self.assertNotEqual(malformed.returncode, 0)
-        protected_delete = self.run_command(
-            sys.executable,
-            str(GATE),
-            "hook",
-            input_text=f"refs/heads/feature {ZERO_OID} refs/heads/master {self.base_oid}\n",
-        )
-        self.assertNotEqual(protected_delete.returncode, 0)
-        self.assertIn("delete", protected_delete.stderr)
-
-    # Placement note: this test's fixture embeds raw diff headers, and the
-    # security scanner's forward suffix scan makes bare `KEY=value` fixture
-    # lines (e.g. GITHUB_TOKEN=redacted) in the same review hunk flip risky
-    # when followed by diff-shaped text. Keep this test away from tests whose
-    # bodies contain bare secret-key assignments so a review diff of this file
-    # never pairs the two in one hunk.
-    def test_autoreview_preserves_safe_structural_credential_descriptors(self) -> None:
+        self.assertEqual(frozen.returncode, 0, frozen.stderr)
+        (self.repo / "app.py").write_text("value = 2\n", encoding="utf-8")
+        self.commit("unfrozen change", "app.py")
+        with self.assertRaises(review_common.GateError):
+            review_packet.prepare_packet(self.repo, self.repo / ".omp" / "review-freeze.json")
+    def test_oversized_png_binary_patch_is_compacted_with_identity_metadata(self) -> None:
+        encoded_body = b"z" * 170_000
         diff = (
-            b"diff --git a/driver.sh b/driver.sh\n"
-            b"index 1111111..2222222 100755\n"
-            b"--- a/driver.sh\n"
-            b"+++ b/driver.sh\n"
-            b"@@ -1 +1 @@\n"
-            b'-expected="credentials:file:bytes"\n'
-            b'+expected="credentials:directory:entries"\n'
+            b"diff --git a/docs/pr-evidence/after.png b/docs/pr-evidence/after.png\n"
+            b"new file mode 100644\n"
+            b"index 0000000..c11fdde\n"
+            b"GIT binary patch\n"
+            b"literal 170000\n"
+            + encoded_body
+            + b"\n"
         )
-        # The structural descriptor must not hard-fail the gate as
-        # credential-shaped evidence; lossy line omission is acceptable.
-        redacted = review_runner._redact_secret_like_values(diff)
-        self.assertTrue(redacted.startswith(b"diff --git a/driver.sh"))
-        scanner = review_runner.autoreview_security
-        self.assertFalse(scanner.secret_text_risk('expected="credentials:directory:entries"'))
-        synthetic = "ghp_" + "A" * 40
-        self.assertTrue(
-            scanner.secret_text_risk(
-                'expected="credentials:directory:entries"; api_token=' + f'"{synthetic}"'
+
+        chunks = review_packet._dataset_chunks(diff)
+        evidence = b"".join(chunks)
+
+        self.assertGreater(len(diff), review_packet.DATASET_BYTES)
+        self.assertTrue(chunks)
+        self.assertTrue(all(len(chunk) <= review_packet.DATASET_BYTES for chunk in chunks))
+        self.assertIn(b"docs/pr-evidence/after.png", evidence)
+        self.assertIn(b"GIT binary patch", evidence)
+        self.assertIn(b"Binary patch body omitted", evidence)
+        self.assertIn(b"Binary literal sizes: 170000", evidence)
+        self.assertNotIn(encoded_body, evidence)
+        modified_body = b"y" * 180_000
+        modified_diff = (
+            b"diff --git a/docs/pr-evidence/updated.png b/docs/pr-evidence/updated.png\n"
+            b"index 1111111..2222222 100644\n"
+            b"GIT binary patch\n"
+            b"delta 180000\n"
+            + modified_body
+            + b"\n"
+        )
+        modified_evidence = b"".join(review_packet._dataset_chunks(modified_diff))
+        self.assertIn(b"docs/pr-evidence/updated.png", modified_evidence)
+        self.assertIn(b"Binary delta payload sizes: 180000", modified_evidence)
+        self.assertNotIn(modified_body, modified_evidence)
+
+    def test_packet_chunks_reset_after_flushing_multiple_large_sections(self) -> None:
+        payload = b"+" + (b"x" * 100_000) + b"\n"
+        first = b"diff --git a/first.txt b/first.txt\n--- a/first.txt\n+++ b/first.txt\n@@ -0,0 +1 @@\n" + payload
+        second = b"diff --git a/second.txt b/second.txt\n--- a/second.txt\n+++ b/second.txt\n@@ -0,0 +1 @@\n" + payload
+
+        chunks = review_packet._dataset_chunks(first + second)
+
+        self.assertEqual(len(chunks), 2)
+        self.assertTrue(all(len(chunk) <= review_packet.DATASET_BYTES for chunk in chunks))
+        self.assertIn(b"first.txt", chunks[0])
+        self.assertNotIn(b"first.txt", chunks[1])
+        self.assertIn(b"second.txt", chunks[1])
+
+    def test_packet_dataset_mutation_is_rejected(self) -> None:
+        self.freeze_and_prepare()
+        dataset = self.repo / ".omp" / "review-packet" / "bundle.review.000.diff"
+        dataset.chmod(0o644)
+        dataset.write_bytes(dataset.read_bytes() + b"\nmutated\n")
+        with self.assertRaises(review_common.GateError):
+            review_packet.load_packet(self.repo, self.identity())
+
+    def test_packet_extra_file_is_rejected(self) -> None:
+        self.freeze_and_prepare()
+        (self.repo / ".omp" / "review-packet" / "extra.txt").write_text("unexpected\n", encoding="utf-8")
+        with self.assertRaises(review_common.GateError):
+            review_packet.load_packet(self.repo, self.identity())
+
+    def test_wrong_packet_digest_is_rejected_at_submission(self) -> None:
+        self.freeze_and_prepare()
+        result = self.result_for("thermo-nuclear-review", packet_digest="sha256:" + "0" * 64)
+        with self.assertRaises(review_common.GateError):
+            self.submit("thermo-nuclear-review", result=result)
+
+    def test_wrong_skill_digest_is_rejected_at_submission(self) -> None:
+        self.freeze_and_prepare()
+        result = self.result_for("thermo-nuclear-review", skill_sha256="sha256:" + "0" * 64)
+        with self.assertRaises(review_common.GateError):
+            self.submit("thermo-nuclear-review", result=result)
+
+    def test_forged_v2_result_is_rejected(self) -> None:
+        self.freeze_and_prepare()
+        result = self.result_for("thermo-nuclear-review", schema="omp.review-result.v2")
+        with self.assertRaises(review_common.GateError):
+            self.submit("thermo-nuclear-review", result=result)
+
+    def test_malformed_finding_locations_are_rejected(self) -> None:
+        self.freeze_and_prepare()
+        malformed = (
+            {"path": "/absolute.py"},
+            {"path": "../outside.py"},
+            {"path": "./app.py"},
+            {"path": "app.py", "line_start": 3, "line_end": 2},
+        )
+        for location in malformed:
+            finding = {
+                "severity": "medium",
+                "title": "bad location",
+                "evidence": "synthetic malformed location",
+                "locations": [location],
+            }
+            with self.subTest(location=location), self.assertRaises(review_common.GateError):
+                self.submit(
+                    "thermo-nuclear-review",
+                    result=self.result_for("thermo-nuclear-review", status="findings", findings=[finding]),
+                )
+
+    def test_worker_attribution_is_explicit_and_actor_syntax_is_checked(self) -> None:
+        self.freeze_and_prepare()
+        with self.assertRaises(review_common.GateError):
+            self.submit(
+                "thermo-nuclear-review",
+                attribution={"actor": "bad actor", "harness": "h", "model": "m", "run_id": "r"},
             )
+        with self.assertRaises(review_common.GateError):
+            self.submit(
+                "thermo-nuclear-review",
+                attribution={"actor": "actor", "harness": "h", "model": "m"},
+            )
+        path = self.submit("thermo-nuclear-review")
+        document = json.loads(path.read_text(encoding="utf-8"))
+        self.assertEqual(document["worker"], self.attribution("thermo-nuclear-review"))
+        self.assertNotIn("executable", document["worker"])
+        self.assertNotIn("provider", document["worker"])
+
+    def test_identical_resubmission_is_idempotent_but_drift_rejected(self) -> None:
+        self.freeze_and_prepare()
+        result = self.result_for("thermo-nuclear-review")
+        attribution = self.attribution("thermo-nuclear-review")
+        with mock.patch.object(
+            review_receipt,
+            "now",
+            side_effect=("2026-07-28T00:00:00Z", "2026-07-28T00:00:01Z"),
+        ):
+            path = self.submit("thermo-nuclear-review", result=result, attribution=attribution)
+            original_bytes = path.read_bytes()
+            original_submitted_at = json.loads(original_bytes)["submitted_at"]
+            resubmitted = self.submit("thermo-nuclear-review", result=result, attribution=attribution)
+        self.assertEqual(resubmitted, path)
+        self.assertEqual(path.read_bytes(), original_bytes)
+        self.assertEqual(json.loads(path.read_text(encoding="utf-8"))["submitted_at"], original_submitted_at)
+
+        changed_result = dict(result)
+        changed_result.update({"status": "failed", "error": "changed result"})
+        with self.assertRaises(review_common.GateError):
+            self.submit("thermo-nuclear-review", result=changed_result, attribution=attribution)
+        changed_attribution = dict(attribution)
+        changed_attribution["run_id"] = "different-run"
+        with self.assertRaises(review_common.GateError):
+            self.submit("thermo-nuclear-review", result=result, attribution=changed_attribution)
+
+    def test_status_and_findings_must_agree(self) -> None:
+        self.freeze_and_prepare()
+        finding = {
+            "severity": "low",
+            "title": "finding",
+            "evidence": "synthetic finding",
+            "locations": [{"path": "app.py", "line_start": 1}],
+        }
+        with self.assertRaises(review_common.GateError):
+            self.submit(
+                "thermo-nuclear-review",
+                result=self.result_for("thermo-nuclear-review", status="clean", findings=[finding]),
+            )
+        with self.assertRaises(review_common.GateError):
+            self.submit(
+                "thermo-nuclear-review",
+                result=self.result_for("thermo-nuclear-review", status="findings"),
+            )
+
+    def test_forged_pass_schema_is_rejected_at_record(self) -> None:
+        self.freeze_and_prepare()
+        path = self.submit("thermo-nuclear-review")
+        document = json.loads(path.read_text(encoding="utf-8"))
+        document["schema"] = "omp.review-pass.v2"
+        path.write_text(json.dumps(document), encoding="utf-8")
+        self.submit_all_for_remaining("thermo-nuclear-review")
+        with self.assertRaises(review_common.GateError):
+            self.record()
+
+    def submit_all_for_remaining(self, already_submitted: str) -> None:
+        for reviewer in REVIEWERS:
+            if reviewer == already_submitted:
+                continue
+            self.submit(reviewer, adapter=self.adapter() if reviewer == "autoreview" else None)
+
+    def test_duplicate_harness_run_identity_is_rejected(self) -> None:
+        self.freeze_and_prepare()
+        self.submit_all(duplicate_identity=True)
+        with self.assertRaises(review_common.GateError):
+            self.record()
+
+    def test_pass_status_drift_is_rejected_at_record(self) -> None:
+        self.freeze_and_prepare()
+        path = self.submit("thermo-nuclear-review")
+        document = json.loads(path.read_text(encoding="utf-8"))
+        document["status"] = "findings"
+        path.write_text(json.dumps(document), encoding="utf-8")
+        self.submit_all_for_remaining("thermo-nuclear-review")
+        with self.assertRaises(review_common.GateError):
+            self.record()
+
+    def test_post_record_pass_drift_is_rejected_at_verify(self) -> None:
+        self.freeze_and_prepare()
+        self.submit_all()
+        self.record()
+        path = self.repo / ".omp" / "review-passes" / "autoreview.json"
+        path.write_text(path.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+        with self.assertRaises(review_common.GateError):
+            self.verify()
+
+    def test_post_record_skill_drift_is_rejected_at_verify(self) -> None:
+        self.freeze_and_prepare()
+        self.submit_all()
+        self.record()
+        receipt_path = self.repo / ".omp" / "review-receipt.json"
+        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+        receipt["reviewers"][1]["skill"]["sha256"] = "sha256:" + "0" * 64
+        receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+        with self.assertRaises(review_common.GateError):
+            self.verify()
+
+    def test_post_record_packet_drift_is_rejected_at_verify(self) -> None:
+        self.freeze_and_prepare()
+        self.submit_all()
+        self.record()
+        dataset = self.repo / ".omp" / "review-packet" / "bundle.review.000.diff"
+        dataset.chmod(0o644)
+        dataset.write_bytes(dataset.read_bytes() + b"\npost-record mutation\n")
+        with self.assertRaises(review_common.GateError):
+            self.verify()
+
+    def test_direct_leaf_submissions_need_no_coordinator(self) -> None:
+        self.freeze_and_prepare()
+        for reviewer in REVIEWERS[1:]:
+            path = self.submit(reviewer)
+            document = json.loads(path.read_text(encoding="utf-8"))
+            self.assertNotIn("adapter", document)
+        self.submit("autoreview", adapter=self.adapter())
+        self.assertEqual(self.record().name, "review-receipt.json")
+
+    def test_run_one_invokes_explicit_leaf_and_preserves_non_clean_exit(self) -> None:
+        self.freeze_and_prepare()
+        helper = Path(self.temp.name) / "review-helper.py"
+        helper.write_text(
+            "#!/usr/bin/env python3\n"
+            "import json, sys\n"
+            "args = sys.argv[1:]\n"
+            "output = args[args.index('--json-output') + 1]\n"
+            "model = args[args.index('--model') + 1]\n"
+            "findings = [] if model == 'test-clean' else ["
+            "{'severity':'medium','title':'Synthetic finding','evidence':'Observable test evidence','locations':[]}]\n"
+            "json.dump({'findings': findings, 'actionable_findings': len(findings)}, open(output, 'w'))\n"
+            "raise SystemExit(1 if findings else 0)\n",
+            encoding="utf-8",
         )
-        # Descriptors are excluded at the classifier layer, so span
-        # coordinates always refer to the original, unmodified text.
-        mixed = 'x="credentials:directory:entries"; api_token=' + f'"{synthetic}"'
-        spans = scanner.review_repeatable_secret_spans(mixed)
-        self.assertTrue(spans)
-        for start, end in spans:
-            self.assertEqual(mixed[start:end], synthetic)
+        helper.chmod(0o755)
+        for reviewer, model, expected in (
+            ("thermo-nuclear-review", "test-clean", 0),
+            ("thermo-nuclear-code-quality-review", "test-findings", 1),
+        ):
+            result = self.run_command(
+                sys.executable,
+                str(BIN / "review_runner.py"),
+                "run-one",
+                "--repo",
+                str(self.repo),
+                "--reviewer",
+                reviewer,
+                "--actor",
+                "test-actor",
+                "--harness",
+                "test-harness",
+                "--engine",
+                "test-engine",
+                "--model",
+                model,
+                "--run-id",
+                f"run-{reviewer}",
+                "--executable",
+                str(helper),
+            )
+            self.assertEqual(result.returncode, expected, result.stderr)
+            passed = json.loads(
+                (self.repo / ".omp" / "review-passes" / f"{reviewer}.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(passed["worker"]["harness"], "test-harness")
+            self.assertEqual(passed["status"], "clean" if expected == 0 else "findings")
+
+    def test_run_one_autoreview_uses_current_harness_command_shape(self) -> None:
+        self.freeze_and_prepare()
+        helper = Path(self.temp.name) / "review-helper.py"
+        helper.write_text(
+            "#!/usr/bin/env python3\n"
+            "import json, sys\n"
+            "args = sys.argv[1:]\n"
+            "if '--allow-empty' in args:\n"
+            "    raise SystemExit(91)\n"
+            "output = args[args.index('--json-output') + 1]\n"
+            "datasets = [args[index + 1] for index, value in enumerate(args) if value == '--dataset']\n"
+            "report = {'findings': [], 'actionable_findings': 0, 'overall_correctness': 'patch is correct'}\n"
+            "if any('bundle.review.' in dataset for dataset in datasets):\n"
+            "    report.update({'change_summary': 'Synthetic clean review', 'interface_effects': []})\n"
+            "with open(output, 'w', encoding='utf-8') as handle:\n"
+            "    json.dump(report, handle)\n",
+            encoding="utf-8",
+        )
+        helper.chmod(0o755)
+
+        result = self.run_command(
+            sys.executable,
+            str(BIN / "review_runner.py"),
+            "run-one",
+            "--repo",
+            str(self.repo),
+            "--reviewer",
+            "autoreview",
+            "--actor",
+            "test-actor",
+            "--harness",
+            "test-harness",
+            "--engine",
+            "test-engine",
+            "--model",
+            "test-model",
+            "--run-id",
+            "run-autoreview",
+            "--executable",
+            str(helper),
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        passed = json.loads((self.repo / ".omp" / "review-passes" / "autoreview.json").read_text(encoding="utf-8"))
+        self.assertEqual(passed["status"], "clean")
+        self.assertEqual(passed["worker"]["harness"], "test-harness")
+
+    def test_autoreview_worker_isolated_from_repo_and_tools(self) -> None:
+        self.freeze_and_prepare()
+        sentinel = self.repo / "review-author-sentinel.txt"
+        sentinel.write_text("untouched\n", encoding="utf-8")
+        helper = Path(self.temp.name) / "adversarial-review-helper.py"
+        helper.write_text(
+            "#!/usr/bin/env python3\n"
+            "import json, os, sys\n"
+            "from pathlib import Path\n"
+            "args = sys.argv[1:]\n"
+            "if '--no-tools' not in args:\n"
+            "    raise SystemExit(92)\n"
+            "if '--allow-empty' in args:\n"
+            "    raise SystemExit(91)\n"
+            "Path('review-author-sentinel.txt').write_text('mutated\\n', encoding='utf-8')\n"
+            "output = args[args.index('--json-output') + 1]\n"
+            "json.dump({'findings': [], 'actionable_findings': 0, 'overall_correctness': 'patch is correct', "
+            "'change_summary': 'Synthetic clean review', 'interface_effects': [], 'worker_cwd': os.getcwd()}, "
+            "open(output, 'w', encoding='utf-8'))\n",
+            encoding="utf-8",
+        )
+        helper.chmod(0o755)
+        with tempfile.TemporaryDirectory(prefix="review-runner-report-") as report_dir:
+            result = review_runner.run_autoreview_chunks(
+                self.identity(),
+                self.repo,
+                self.packet(),
+                30,
+                Path(report_dir),
+                helper,
+                "test-engine",
+                "test-model",
+                None,
+            )
+
+        self.assertEqual(result["actionable_findings"], 0)
+        self.assertEqual(sentinel.read_text(encoding="utf-8"), "untouched\n")
+        worker_cwd = result["reports"][0]["report"]["worker_cwd"]
+        self.assertNotEqual(worker_cwd, str(self.repo))
+        self.assertFalse(Path(worker_cwd).exists())
+
+    def test_failed_adapter_result_does_not_forge_missing_findings(self) -> None:
+        self.freeze_and_prepare()
+        _, identity = review_bundle.load_freeze(self.repo, self.repo / ".omp" / "review-freeze.json")
+        result = review_runner._result_document(
+            identity,
+            self.packet(),
+            "autoreview",
+            {"findings": [], "actionable_findings": 1},
+            exit_code=2,
+            status="failed",
+            error="worker failed before returning structured findings",
+        )
+        self.assertEqual(result["status"], "failed")
+        self.assertEqual(result["actionable_findings"], 0)
+        self.assertEqual(result["findings"], [])
+        self.assertIn("worker failed", result["error"])
+
+    def test_autoreview_report_count_without_details_is_rejected(self) -> None:
+        report = {"findings": [], "actionable_findings": 1}
+
+        with self.assertRaisesRegex(review_common.GateError, "does not match normalized"):
+            review_runner._validated_findings(report, "autoreview")
 
 
 if __name__ == "__main__":

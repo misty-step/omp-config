@@ -13,36 +13,51 @@ from typing import Any
 GATE_ROOT = Path(__file__).resolve().parents[1]
 BUNDLE_SCHEMA = "omp.review-bundle.v2"
 FREEZE_SCHEMA = "omp.review-freeze.v2"
-PASS_SCHEMA = "omp.review-pass.v2"
-RECEIPT_SCHEMA = "omp.review-receipt.v2"
+PACKET_SCHEMA = "omp.review-packet.v1"
+RESULT_SCHEMA = "omp.review-result.v1"
+PASS_SCHEMA = "omp.review-pass.v3"
+RECEIPT_SCHEMA = "omp.review-receipt.v3"
 SCHEMA = RECEIPT_SCHEMA
 PASS_DIRECTORY = Path(".omp/review-passes")
+PACKET_RELATIVE = Path(".omp/review-packet")
 RECEIPT_RELATIVE = Path(".omp/review-receipt.json")
 FREEZE_RELATIVE = Path(".omp/review-freeze.json")
 PROTECTED_BRANCHES = {"main", "master"}
 ZERO_OID = "0" * 40
 OID_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
-AUTOREVIEW_EXECUTABLE = GATE_ROOT / "global" / "skills" / "autoreview" / "scripts" / "autoreview"
+ACTOR_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9_.@+-]{1,127}$")
 REVIEWERS = (
     "autoreview",
     "thermo-nuclear-review",
     "thermo-nuclear-code-quality-review",
 )
-PINNED_WORKERS = {
-    "autoreview": (
-        AUTOREVIEW_EXECUTABLE,
-        GATE_ROOT / "global" / "external" / "openclaw-autoreview",
-    ),
-    "thermo-nuclear-review": (
-        AUTOREVIEW_EXECUTABLE,
-        GATE_ROOT / "global" / "external" / "cursor-thermos",
-    ),
-    "thermo-nuclear-code-quality-review": (
-        AUTOREVIEW_EXECUTABLE,
-        GATE_ROOT / "global" / "external" / "cursor-thermos",
-    ),
+SKILL_RELATIVE = Path("SKILL.md")
+
+REVIEW_SPECS: dict[str, dict[str, Any]] = {
+    "autoreview": {
+        "skill_path": Path("global/skills/autoreview/SKILL.md"),
+        "vendor_path": Path("global/external/openclaw-autoreview/SKILL.md"),
+        "payload_key": "SKILL.md",
+        "direct_submission": False,
+    },
+    "thermo-nuclear-review": {
+        "skill_path": Path("global/skills/thermo-nuclear-review/SKILL.md"),
+        "vendor_path": Path("global/external/cursor-thermos/thermo-nuclear-review/SKILL.md"),
+        "payload_key": "thermo-nuclear-review/SKILL.md",
+        "direct_submission": True,
+    },
+    "thermo-nuclear-code-quality-review": {
+        "skill_path": Path("global/skills/thermo-nuclear-code-quality-review/SKILL.md"),
+        "vendor_path": Path("global/external/cursor-thermos/thermo-nuclear-code-quality-review/SKILL.md"),
+        "payload_key": "thermo-nuclear-code-quality-review/SKILL.md",
+        "direct_submission": True,
+    },
 }
+
+OBSOLETE_SCHEMA_MESSAGE = (
+    "obsolete review receipt/pass schema; run freeze, prepare, submit all three passes, record, then verify"
+)
 
 
 class GateError(ValueError):
@@ -104,17 +119,6 @@ def sha256_bytes(value: bytes) -> str:
     return f"sha256:{hashlib.sha256(value).hexdigest()}"
 
 
-def directory_digest(path: Path) -> str:
-    digest = hashlib.sha256()
-    entries = sorted(
-        (entry for entry in path.rglob("*") if entry.is_file()),
-        key=lambda entry: entry.relative_to(path).as_posix(),
-    )
-    for entry in entries:
-        digest.update(entry.relative_to(path).as_posix().encode("utf-8"))
-        digest.update(b"\0")
-        digest.update(entry.read_bytes())
-    return f"sha256:{digest.hexdigest()}"
 
 
 def now() -> str:
@@ -145,62 +149,72 @@ def confined_path(repo: Path, value: str | None, default: Path, label: str) -> P
     return path
 
 
-def worker_display_path(path: Path) -> str:
-    resolved = path.resolve(strict=False)
-    try:
-        return resolved.relative_to(GATE_ROOT.resolve()).as_posix()
-    except ValueError:
-        return str(resolved)
+def canonical_json(value: object) -> bytes:
+    return json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
 
 
-def worker_path(value: str, label: str, reviewer: str, *, directory: bool) -> Path:
-    candidate = Path(value).expanduser()
-    if not candidate.is_absolute():
-        candidate = GATE_ROOT / candidate
-    try:
-        resolved = candidate.resolve(strict=True)
-    except (OSError, RuntimeError) as error:
-        raise GateError(f"{label} worker path is unavailable: {candidate}") from error
-    expected = PINNED_WORKERS.get(reviewer)
-    if expected is None:
-        raise GateError(f"{label} has no pinned worker registry entry for {reviewer}")
-    expected_path = expected[1 if directory else 0].resolve(strict=True)
-    if resolved != expected_path:
-        raise GateError(f"{label} worker path is not the pinned registry path: {resolved}")
-    if directory:
-        if not resolved.is_dir():
-            raise GateError(f"{label} worker payload is not a directory: {resolved}")
-    elif not resolved.is_file():
-        raise GateError(f"{label} worker executable is not a regular file: {resolved}")
-    return resolved
+def _identity_string(value: object, label: str, *, maximum: int = 256) -> str:
+    if not isinstance(value, str) or not value or len(value) > maximum:
+        raise GateError(f"{label} must be a non-empty string of at most {maximum} characters")
+    if any(ord(character) < 0x20 or ord(character) == 0x7F for character in value):
+        raise GateError(f"{label} must not contain control characters")
+    return value
 
 
-def worker_identity(reviewer: str, executable: Path, model: str, payload: Path) -> dict[str, Any]:
-    executable = executable.resolve(strict=True)
-    payload = payload.resolve(strict=True)
-    if not executable.is_file():
-        raise GateError(f"{reviewer} executable is not a regular file: {executable}")
-    if not payload.is_dir():
-        raise GateError(f"{reviewer} payload is not a directory: {payload}")
+def _review_spec(reviewer: str) -> dict[str, Any]:
+    if reviewer not in REVIEW_SPECS:
+        raise GateError(f"unknown canonical reviewer {reviewer!r}")
+    return REVIEW_SPECS[reviewer]
+
+
+def skill_identity(reviewer: str) -> dict[str, str]:
+    """Resolve and attest one projected immutable leaf skill."""
+    spec = _review_spec(reviewer)
+    projected = (GATE_ROOT / Path(spec["skill_path"])).resolve(strict=True)
+    vendor = (GATE_ROOT / Path(spec["vendor_path"])).resolve(strict=True)
+    if not projected.is_file() or not vendor.is_file():
+        raise GateError(f"canonical skill for {reviewer} is not a regular file")
+    if projected != vendor:
+        raise GateError(f"canonical skill for {reviewer} does not resolve to its declared vendor leaf")
+    sync_path = next(
+        (
+            candidate / ".sync-meta.json"
+            for candidate in (vendor.parent, vendor.parent.parent, vendor.parent.parent.parent)
+            if (candidate / ".sync-meta.json").is_file()
+        ),
+        None,
+    )
+    if sync_path is None:
+        raise GateError(f"{reviewer} canonical skill has no .sync-meta.json receipt")
+    metadata = read_json(sync_path, f"{reviewer} skill sync metadata")
+    payload_sha256 = mapping(metadata.get("payload_sha256"), f"{reviewer} skill payload_sha256")
+    payload_key = str(spec["payload_key"])
+    expected_hex = payload_sha256.get(payload_key)
+    if not isinstance(expected_hex, str) or not re.fullmatch(r"[0-9a-f]{64}", expected_hex):
+        raise GateError(f"{reviewer} skill sync metadata has no valid payload digest for {payload_key}")
+    actual = hashlib.sha256(projected.read_bytes()).hexdigest()
+    if actual != expected_hex:
+        raise GateError(f"{reviewer} canonical skill bytes do not match its pinned payload digest")
+    source_repo = _identity_string(metadata.get("repo"), f"{reviewer} skill source repo")
+    source_commit = _identity_string(metadata.get("sha"), f"{reviewer} skill source commit", maximum=64)
+    source_path = Path(spec["vendor_path"]).as_posix()
     return {
-        "principal": reviewer,
-        "harness": "openclaw-autoreview",
-        "model": model,
-        "executable": worker_display_path(executable),
-        "executable_sha256": sha256_bytes(executable.read_bytes()),
-        "payload": worker_display_path(payload),
-        "payload_sha256": directory_digest(payload),
+        "name": reviewer,
+        "path": Path(spec["skill_path"]).as_posix(),
+        "sha256": f"sha256:{actual}",
+        "source_repo": source_repo,
+        "source_commit": source_commit,
+        "source_path": source_path,
     }
 
 
-def unresolved_worker(reviewer: str, model: str, executable: str, payload: Path) -> dict[str, Any]:
-    marker = f"unresolved:{reviewer}:{executable}".encode("utf-8")
+def worker_attribution(actor: object, harness: object, model: object, run_id: object) -> dict[str, str]:
+    """Validate explicit worker identity without choosing a provider or harness."""
+    if not isinstance(actor, str) or not ACTOR_PATTERN.fullmatch(actor):
+        raise GateError("worker actor must match the bounded actor syntax")
     return {
-        "principal": reviewer,
-        "harness": "openclaw-autoreview",
-        "model": model,
-        "executable": executable,
-        "executable_sha256": sha256_bytes(marker),
-        "payload": worker_display_path(payload),
-        "payload_sha256": sha256_bytes(f"unresolved:{payload}".encode("utf-8")),
+        "actor": actor,
+        "harness": _identity_string(harness, "worker harness"),
+        "model": _identity_string(model, "worker model"),
+        "run_id": _identity_string(run_id, "worker run_id"),
     }

@@ -11,18 +11,35 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT / "bin") not in sys.path:
     sys.path.insert(0, str(ROOT / "bin"))
 
-from config_contract import load_contract
+from config_contract import load_contract, require_projection
 
 
 class ProjectionContractTests(unittest.TestCase):
-    def test_review_gate_binaries_are_declared_projection_surfaces(self) -> None:
+    def test_review_runtime_surfaces_include_all_six_python_modules(self) -> None:
         with tempfile.TemporaryDirectory(prefix="omp-projection-") as temporary:
             contract = load_contract(ROOT, projection_root=Path(temporary) / "agent")
-        self.assertEqual(len(contract.surfaces), 18)
-        self.assertEqual(contract.surface("review_gate_binary").target_rel, Path("bin/review_gate.py"))
-        self.assertEqual(contract.surface("review_runner_binary").target_rel, Path("bin/review_runner.py"))
-        self.assertEqual(contract.surface("review_gate_hook").target_rel, Path("hooks/review-gate.py"))
+            for surface in contract.surfaces:
+                surface.target.parent.mkdir(parents=True, exist_ok=True)
+                surface.target.symlink_to(surface.source, target_is_directory=surface.kind == "directory")
+            require_projection(contract)
+            expected = {
+                "review_gate_binary": "bin/review_gate.py",
+                "review_runner_binary": "bin/review_runner.py",
+                "review_common_binary": "bin/review_common.py",
+                "review_bundle_binary": "bin/review_bundle.py",
+                "review_packet_binary": "bin/review_packet.py",
+                "review_receipt_binary": "bin/review_receipt.py",
+            }
+            self.assertEqual(len(contract.surfaces), 24)
+            for name, relative in expected.items():
+                surface = contract.surface(name)
+                self.assertEqual(surface.source, ROOT / relative)
+                self.assertEqual(surface.target_rel, Path(relative))
+                self.assertTrue(surface.target.is_file())
+                self.assertEqual(surface.target.resolve(), surface.source)
         self.assertIn(Path("bin"), contract.excluded_runtime_state)
+
+
 
     def test_projected_hook_imports_sibling_bin_surface(self) -> None:
         with tempfile.TemporaryDirectory(prefix="omp-hook-projection-") as temporary:

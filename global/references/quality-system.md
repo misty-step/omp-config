@@ -1,8 +1,8 @@
 # Quality System
 
-Use a quality system when the work is too meaningful for "do the task" to be
-the whole prompt. The point is not ceremony; it is to make "good enough" visible
-before execution and to keep proof independent of the author's confidence.
+Use a quality system when work needs more than "do the task".
+Make "good enough" visible before execution.
+Keep proof independent of the author's confidence.
 
 ## Shape
 
@@ -15,7 +15,7 @@ Every quality system names:
   risk tier.
 - **Stop rules:** conditions that halt execution instead of improvising.
 
-Good systems are artifact-backed. Bad systems are vibes with more bullets.
+Good systems use artifacts. Bad systems add bullets without evidence.
 For the proof-loop contract, load
 `global/references/verification-system-first.md`.
 
@@ -28,22 +28,22 @@ Prefer independent proof families for substantive work:
 | Live oracle | Does the changed behavior work in reality? | browser walk, CLI run, request replay, migration dry run, consumer build |
 | Structural gate | Did repo-owned automation catch regressions? | tests, lint, typecheck, harness gate, generated-doc drift check |
 | Eval / benchmark | Does the agent/model/performance claim survive held-out tasks or workload pressure? | skill eval, raw-vs-harness comparison, latency/throughput benchmark |
-| Fresh critic | Did a cold reviewer refute the claim? | diff + oracle review, design critique, security lens, architecture lens |
+| Fresh critic | Did a fresh reviewer refute the claim? | diff + oracle review, design critique, security lens, architecture lens |
 
-Independence matters. Three commands that exercise the same unit test boundary
-are one proof method. A critic who inherited the author's reasoning is not fresh.
+Independence matters. Three commands that exercise the same unit boundary form one proof method.
+A critic that inherits the author's reasoning is not fresh.
 
 ## Risk Tiers
 
 | tier | when | minimum quality system |
 |---|---|---|
 | Tiny | mechanical, single-file, low-blast-radius change | Structural gate or exact manual inspection; name why no fresh critic is needed. |
-| Substantive | product behavior, shared code, harness primitive, generated output, or multi-file diff | Live oracle + structural gate + one fresh-context critic aimed at the likely production embarrassment. |
+| Substantive | product behavior, shared code, harness primitive, generated output, or multi-file diff | Live oracle + structural gate + one fresh-context critic aimed at the likely production failure. |
 | High-stakes | security, data loss, auth, migrations, architecture boundary, public launch surface, or hard-to-rollback infra | Live oracle + structural gate + multiple distinct critic lenses or model families; re-review blocker fixes. |
-| Event-driven | PR-ready review, incident response, scheduled audits, or recurring production checks | Mode B / bitterblossom owns orchestration; OMP supplies the packet and lane contracts. |
+| Event-driven | PR-ready review, incident response, scheduled audits, or recurring production checks | Mode B is currently unavailable; keep this work in Mode A until a future event-plane product is explicitly named. |
 
-Scale down aggressively when the work is small. Scale up only when the failure
-would be expensive, public, irreversible, or hard to observe.
+Scale down for small work.
+Scale up only when failure would be expensive, public, irreversible, or hard to observe.
 
 Fast examples:
 
@@ -58,13 +58,13 @@ Fast examples:
 
 ## Critic Topology
 
-Do not simulate a council inside one context. Separate execution from critique.
+Do not perform independent review in one context. Separate execution from critique.
 
 - **Artifact-only:** critics get the diff, plan, oracle, screenshots, logs, or
   rendered surface. They do not get the author's reasoning trail.
-- **Lens-specific:** one critic hunts one class of failure. Use
+- **Lens-specific:** one critic checks one class of failure. Use
   `global/references/lenses.md` for compact rubrics.
-- **Decorrelated when it matters:** a different model family is most useful for
+- **Decorrelated when it matters:** a different model family helps most with
   adversarial review of substantive author-written work.
 - **Lead-owned synthesis:** reviewer output is evidence, not authority. The
   lead fixes, rejects with reason, tickets, or escalates.
@@ -84,8 +84,8 @@ communication cadence, risks, and reviewer instructions.
 
 ## Failure Modes
 
-- **Checklist theater:** fields filled plausibly but no live path exercised.
-- **Monoculture:** several same-context reviewers agreeing with the author.
-- **Over-review:** wide benches for tiny diffs, wasting tokens and attention.
-- **Late review:** foundational mistakes found only after a big-bang build.
-- **Vendor myth:** encoding a model brand instead of the capability needed.
+- **Checklist without live path:** fields look complete, but no live path runs.
+- **Same-context review:** several reviewers in one context agree with the author.
+- **Over-review:** wide reviewer sets for tiny diffs waste tokens and attention.
+- **Late review:** foundational mistakes appear only after a large build.
+- **Vendor branding:** encode a model brand instead of the needed capability.

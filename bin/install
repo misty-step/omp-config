@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from config_contract import ContractError, load_contract, require_projection
+from optmem_contract import OptMemError, ensure_verified, paths
 
 ROOT = Path(__file__).resolve().parent.parent
 MANAGED_MARKER = "# omp-config managed review gate v1"
@@ -167,6 +168,13 @@ def main(argv: list[str] | None = None) -> int:
         contract = load_contract(ROOT)
     except ContractError as error:
         die(str(error))
+    try:
+        optmem = ensure_verified()
+    except OptMemError as error:
+        die(f"OptMem dependency verification failed: {error}")
+    optmem_paths = paths()
+    print(f"OptMem receipt: {optmem['receipt']}")
+    print(f"OptMem backup root: {optmem_paths.backups}")
     agent_dir = contract.projection_root
     agent_dir.mkdir(parents=True, exist_ok=True)
 

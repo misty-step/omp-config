@@ -1,8 +1,9 @@
 # Loop Readiness
 
-OMP designs loop handoffs. Bitterblossom or another Mode B event plane
-runs unattended schedules, webhooks, queues, and recurring workers. The
-canonical Mode A / Mode B boundary remains `meta/CONTRACTS.md`.
+OMP designs loop handoffs. Mode B is currently unavailable: no active event
+plane owns unattended schedules, webhooks, queues, or recurring workers. Keep
+this work in Mode A until a future product is explicitly named. The canonical
+Mode A / Mode B boundary remains `meta/CONTRACTS.md`.
 
 ## Strategic Test
 

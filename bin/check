@@ -23,6 +23,7 @@ from external_registry import (
     check_external_registry_inventory as validate_external_registry_inventory,
     check_external_skills as validate_external_skills,
 )
+from optmem_contract import OptMemError, verify_installation
 
 ROOT = Path(__file__).resolve().parent.parent
 SECRET_PATTERNS = {
@@ -457,6 +458,18 @@ def check_tree(contract: Contract) -> None:
                     f"{reference}"
                 )
 
+def check_optmem_dependency() -> None:
+    try:
+        result = verify_installation()
+    except OptMemError as error:
+        fail(f"OptMem dependency is not verified: {error}")
+    print(
+        "OptMem dependency OK "
+        f"(commit {result['commit']}, sha256 {result['sha256']}; "
+        f"receipt {result['receipt']})"
+    )
+
+
 
 def split_csv(value: str) -> list[str]:
     return [part.strip() for part in value.split(",") if part.strip()]
@@ -477,6 +490,7 @@ def main(argv: list[str]) -> int:
         check_promptspace_config(contract, effective)
     except ContractError as error:
         fail(str(error))
+    check_optmem_dependency()
     if argv:
         try:
             receipts = require_projection(contract)

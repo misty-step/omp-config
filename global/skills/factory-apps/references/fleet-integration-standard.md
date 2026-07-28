@@ -1,52 +1,52 @@
 # Misty Step Factory Fleet Integration Standard
 
-This standard applies to active `misty-step` organization projects. This repo
-owns the routing doctrine; the product repos own their actual Canary, Powder,
-and Landmark integration surfaces.
+This standard applies to active `misty-step` organization projects.
+This repo owns the routing doctrine.
+Product repos own their actual Canary, Powder, and Landmark integration surfaces.
 
 ## Required Evidence
 
-Every active project must have a Powder representation:
+Add a Powder representation to every active project:
 
-- Repository-local ticket and Kanban ledgers are forbidden. Misty Step work
-  lives in Powder under the full repo label, for example
-  `misty-step/canary`; R90 work lives in Habitat.
-- Repos without an existing Powder card get a seed card titled
+- Forbid repository-local ticket and Kanban ledgers.
+  Put Misty Step work in Powder under the full repo label, such as
+  `misty-step/canary`. Put R90 work in Habitat.
+- Give a repo without an existing Powder card a seed card titled
   `Adopt Canary, Powder, and Landmark factory stack`.
-- Open GitHub issues are imported or mirrored as Powder cards so agents do not
-  have to discover durable work from GitHub alone.
+- Import or mirror open GitHub issues as Powder cards.
+  Then agents can find durable work without searching GitHub alone.
 
-Runtime projects must have Canary evidence:
+Give runtime projects Canary evidence:
 
-- A stable Canary service name. If the runtime service differs from the repo
-  name, record the service mapping in `.canary/integration.json`.
-- HTTP runtimes expose or identify one production health URL and have live
-  Canary target readback.
-- Worker, scheduler, CLI, or event-plane runtimes use Canary check-in
-  monitors.
-- Application error paths report to Canary or carry an explicit gap card in
+- Set a stable Canary service name.
+  If it differs from the repo name, record the mapping in
+  `.canary/integration.json`.
+- Expose or identify one production health URL for each HTTP runtime.
+  Add live Canary target readback.
+- Use Canary check-in monitors for worker, scheduler, CLI, or event-plane
+  runtimes.
+- Report application error paths to Canary, or add an explicit gap card in
   Powder. Sentry-only coverage is not enough for Factory operation.
 
-Release-managed projects must have Landmark evidence:
+Give release-managed projects Landmark evidence:
 
-- Repos with existing release tooling or an existing release surface keep
-  Landmark in manifest-only or synthesis-only mode unless the Landmark fleet
-  plan recommends full release ownership.
-- Repos without release automation start with a `.landmark.yml` manifest and
-  backfill-first plan. Do not add release mutation before operator-approved
-  initial version/tag policy exists.
-- If `fleet plan` reports missing secret metadata, do not add a broken
-  workflow. Track the secret gap in Powder and use manifest-only adoption until
-  the secret policy is fixed.
+- Keep Landmark in manifest-only or synthesis-only mode for repos with release
+  tooling or an existing release surface, unless the Landmark fleet plan
+  recommends full release ownership.
+- Start a repo without release automation with a `.landmark.yml` manifest and a
+  backfill-first plan. Do not add release mutation before an operator approves
+  the initial version/tag policy.
+- When `fleet plan` reports missing secret metadata, do not add a broken
+  workflow. Track the secret gap in Powder.
+  Use manifest-only adoption until the secret policy is fixed.
 
 ## Service Names
 
-Use the Canary service name from live readback, not the repo name guessed from
-the path:
+Use the Canary service name from live readback.
+Do not guess it from the repo path:
 
 | Repo | Canary service |
 |---|---|
-| `misty-step/bitterblossom` | `bitterblossom-plane` |
 | `misty-step/brainrot` | `brainrot-publishing-house` |
 | `misty-step/chrondle` | `chrondle` |
 | `misty-step/linejam` | `linejam` |
@@ -58,8 +58,8 @@ the path:
 
 ## Verification Commands
 
-Use these commands from local checkouts with credentials supplied by the
-environment or the Agents vault:
+Run these commands from local checkouts.
+Get credentials from the environment or the Agents vault:
 
 ```sh
 canary integrate status /path/to/repo \
@@ -78,20 +78,18 @@ curl -fsS -H "Authorization: Bearer $POWDER_API_KEY" \
   "$POWDER_API_BASE_URL/api/v1/cards?repo=misty-step%2F<repo>&limit=100"
 ```
 
-Set `$POWDER_API_BASE_URL` through the operator's private environment to the
-canonical deployed instance. Public doctrine names the environment contract,
-not one operator's host. Retired instance URLs and local proxies must not be
-kept as fallbacks.
+Set `$POWDER_API_BASE_URL` through the operator's private environment.
+Use the canonical deployed instance.
+Public doctrine names the environment contract, not one operator's host.
+Do not keep retired instance URLs or local proxies as fallbacks.
 
 ## Waivers
 
-A waiver is allowed only when the project is not an active runtime or release
-surface. The waiver must live as a Powder card or repo file and say:
-
-- why Canary uptime/health/error logging does not apply;
-- where work state lives in Powder;
-- how Landmark release intelligence is intentionally deferred or not
-  applicable.
+Allow a waiver only when the project is not an active runtime or release
+surface. Store the waiver in a Powder card or repo file.
+State why Canary uptime, health, or error logging does not apply.
+State where work state lives in Powder.
+State how Landmark release intelligence is deferred or not applicable.
 
 Do not call a project integrated because it has one of the three surfaces.
-Factory integration means all applicable surfaces are present and queryable.
+Call it integrated only when all applicable surfaces are present and queryable.

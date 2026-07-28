@@ -1,8 +1,9 @@
 # Factory App Capability Audit - 2026-07-03
 
-Scope: live local checkouts for Canary, Powder, Landmark, Aesthetic,
-Bitterblossom, plus Harness Kit and the local Codex config. This is an audit
-snapshot, not a product status source.
+Scope: This snapshot covers live local checkouts for Canary, Powder, Landmark,
+Aesthetic, Harness Kit, and the local Codex config.
+Use it as an audit snapshot, not as a product status source. A former
+event-plane capability is intentionally omitted; Mode B has no active owner.
 
 ## Summary Matrix
 
@@ -12,7 +13,6 @@ snapshot, not a product status source.
 | Powder | backlog, issues/cards, claims, relations, operator input | root product `SKILL.md`, imported as the Powder product skill; repo-local `powder-qa` | implemented in `crates/powder-mcp`; historically profile-gated for non-Adminifi/non-r90 repos | no SDK observed | trusted project path exists; the global MCP catalog and launcher are authoritative | SDK absent; 2026-07-11 retired profile materializer is out of contract |
 | Landmark | release intelligence, versions, changelogs, release kit, fleet adoption | product root `SKILL.md`, imported as `misty-landmark`; dogfood skill remains contributor-facing | no MCP observed | no SDK observed | trusted project path exists; Harness preferred stack now says Landmark | no MCP/SDK; current product-owned surface is skill + CLI/action |
 | Aesthetic | UI/UX system, Misty Step law, tokens, static registry | product root `SKILL.md`, imported as `misty-aesthetic` | no MCP observed | package/static API via `@misty-step/aesthetic` | trusted project path exists; Harness Kit imports product skill | CLI/MCP intentionally later per local vision |
-| Bitterblossom | ad-hoc supervised dispatch, Mode B reflex loops, durable runs | portable product skill in `global/external/misty-bitterblossom`, imported as `misty-bitterblossom`; repo-local dogfood skill | read-only MCP via `bb --config <plane> mcp serve`; registered in factory MCP `factory-ops` profile | no SDK observed | trusted project path exists; Harness Kit imports product skill and installs factory MCP registry | mutating MCP tools remain intentionally absent |
 
 ## Evidence Read
 
@@ -41,12 +41,6 @@ snapshot, not a product status source.
   - `$HOME/Development/aesthetic/law/README.md`
   - `$HOME/Development/aesthetic/package.json`
   - `$HOME/Development/aesthetic/DESIGN.md`
-- Bitterblossom:
-  - `$HOME/Development/bitterblossom/skills/bitterblossom/SKILL.md`
-  - `$HOME/Development/bitterblossom/README.md`
-  - `$HOME/Development/bitterblossom/AGENTS.md`
-  - `$HOME/Development/bitterblossom/docs/spine.md`
-  - `$HOME/Development/bitterblossom/.agents/skills/bb-dogfood/SKILL.md`
 - Harness/system:
   - `$HOME/Development/harness-kit/skills/harness-engineering/references/preferred-stack.md`
   - `$HOME/.codex/config.toml` server names only; credential values were not copied
@@ -54,12 +48,12 @@ snapshot, not a product status source.
 
 ## System Configuration Finding
 
-The local Codex config trusts the five app checkout paths. The former Harness
-The legacy MCP registry was later retired in favor of the single
+The local Codex config trusts the five app checkout paths.
+The legacy MCP registry was retired in favor of the single
 `global/mcp.json` catalog.
 
-Do not register placeholder MCPs. Register only when the real instance and
-auth source are known:
+Do not register placeholder MCPs.
+Register an MCP only when you know the real instance and auth source:
 
 - Canary: command `bin/canary mcp-server`; registered in the `global` profile
   through a secret-free launcher that inherits env or reads
@@ -69,39 +63,38 @@ auth source are known:
   configured from the Agents vault with `POWDER_API_BASE_URL` from
   `op://Agents/POWDER_ENDPOINT/URL` and `POWDER_API_KEY` from
   `op://Agents/POWDER_API_KEY__bridge/credential`.
-- Bitterblossom: `bb --config <plane> mcp serve`; registered for the
-  `factory-ops` profile using the local plane. The audited MCP is read-only.
 - Landmark: no MCP server observed; use CLI/action until the product exposes
   one.
 - Aesthetic: no MCP server observed; use package/static API/law gate until the
   product exposes one.
 
-## Remediated In Harness Kit
+## Remediated in Harness Kit
 
-- Added first-party `factory-apps` skill so future agents have an app-visible
-  router for Canary, Powder, Landmark, Aesthetic, and Bitterblossom.
+- Added the first-party `factory-apps` skill so future agents have an app-visible
+  router for Canary, Powder, Landmark, and Aesthetic.
 - Added product-owned external skill imports in `registry.yaml`:
-  `misty-canary`, the Powder product skill, `misty-landmark`, `misty-aesthetic`, and
-  `misty-bitterblossom`.
-- Added the former factory MCP registry plus `check-mcp-registry` so MCP
-  policy was data, validated, and bootstrapped; the global MCP catalog now owns the single
-  catalog.
+  `misty-canary`, the Powder product skill, `misty-landmark`, and
+  `misty-aesthetic`.
+- Added the former factory MCP registry and `check-mcp-registry` so MCP policy
+  becomes data, validation, and bootstrap. The global MCP catalog now owns the
+  single catalog.
 - Updated Harness Engineering preferred stack defaults:
-  - Powder is the default backlog/work-state system.
-  - Landmark replaces stale Landfall naming for release intelligence.
-  - Canary production-debugging and consumer integration expectations are
+  - Set Powder as the default backlog/work-state system.
+  - Landmark replaced stale Landfall naming for release intelligence.
+  - Made Canary production-debugging and consumer integration expectations
     explicit.
-  - Aesthetic default references package/static API/law, not just prose taste.
+  - Set the Aesthetic default to package/static API/law, not only prose taste.
 
 ## Remaining Product Gaps
 
-These require clean product-repo branches or concrete deployment credentials:
+Resolve these gaps on clean product-repo branches or with concrete deployment
+credentials:
 
-- Decide whether Powder needs a small SDK or if API/CLI/MCP is sufficient.
+- Decide whether Powder needs a small SDK or whether API/CLI/MCP is sufficient.
 - Decide whether Landmark earns an MCP or whether CLI/action remains the right
   agent surface.
-- Decide whether Aesthetic earns an MCP after repeated adoption work proves it
-  needs one beyond skill/package/static API.
-- Keep complete launcher MCPs distinct from `external` bindings that
-  a consumer runtime supplies. Direct role references remain the only binding
-  layer; the retired profile materializer is not part of the product contract.
+- Decide whether Aesthetic earns an MCP after repeated adoption work shows that
+  it needs one beyond skill/package/static API.
+- Keep complete launcher MCPs distinct from `external` bindings supplied by a
+  consumer runtime. Direct role references remain the only binding layer.
+  The retired profile materializer is not part of the product contract.

@@ -130,7 +130,7 @@ advisor:
   enabled: true
   subagents: false
 memory: 
-  backend: mnemopi
+  backend: off
 compaction: 
   strategy: snapcompact
   idleEnabled: true
@@ -194,10 +194,12 @@ task:
 checkpoint: 
   enabled: true
 autolearn: 
-  enabled: true
+  enabled: false
 bash: 
   autoBackground: 
     enabled: true
 github: 
   enabled: true
 autoResume: true
+dev: 
+  autoqaConsent: granted

@@ -5,46 +5,64 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import shlex
 import sys
+from contextlib import contextmanager
 from pathlib import Path
+from typing import Any, Iterator
 
 from review_bundle import (
     assert_same_identity,
     bundle_from_git,
     feature_base,
-    freeze_path,
     load_freeze,
     oid,
     peel_commit,
     probe_git,
     protected_refs,
-    receipt_path,
     repo_root,
     run_git,
 )
 from review_common import (
-    BUNDLE_SCHEMA,
+    ACTOR_PATTERN,
+    FREEZE_RELATIVE,
     FREEZE_SCHEMA,
-    GATE_ROOT,
-    PASS_DIRECTORY,
-    PASS_SCHEMA,
-    PINNED_WORKERS,
+    RECEIPT_RELATIVE,
     RECEIPT_SCHEMA,
-    REVIEWERS,
-    SCHEMA,
-    ZERO_OID,
+    REVIEW_SPECS,
     GateError,
+    ZERO_OID,
     mapping,
     now,
     review_scope,
     write_json,
 )
-from review_receipt import load_receipt, verify_receipt, record_receipt
-from review_runner import run_command
+from review_packet import prepare_packet
+from review_receipt import load_receipt, record_receipt, submit_result, verify_receipt
 
-NAME_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9_.@+-]{1,127}$")
+REVIEW_SEQUENCE = "freeze -> prepare -> submit -> record -> verify"
+EXIT_CLEAN = 0
+EXIT_NON_CLEAN = 1
+EXIT_PROTOCOL = 2
+
+
+def _freeze_file(repo: Path) -> Path:
+    return repo / FREEZE_RELATIVE
+
+
+def _receipt_file(repo: Path) -> Path:
+    return repo / RECEIPT_RELATIVE
+
+
+@contextmanager
+def _gate_owned_packet() -> Iterator[None]:
+    """Prevent a caller environment from relocating the packet authority."""
+    override = os.environ.pop("OMP_REVIEW_PACKET", None)
+    try:
+        yield
+    finally:
+        if override is not None:
+            os.environ["OMP_REVIEW_PACKET"] = override
 
 
 def _scope(paths: list[str]) -> str:
@@ -53,7 +71,7 @@ def _scope(paths: list[str]) -> str:
 
 def freeze(args: argparse.Namespace) -> int:
     repo = repo_root(args.repo)
-    output = freeze_path(repo, args.output)
+    output = _freeze_file(repo)
     identity = bundle_from_git(repo, args.old_oid, args.new_oid, check_worktree=True)
     document = {
         "schema": FREEZE_SCHEMA,
@@ -64,35 +82,72 @@ def freeze(args: argparse.Namespace) -> int:
     }
     write_json(output, document)
     print(f"review freeze written: {output}")
-    return 0
+    return EXIT_CLEAN
+
+
+def prepare(args: argparse.Namespace) -> int:
+    repo = repo_root(args.repo)
+    freeze_file = _freeze_file(repo)
+    with _gate_owned_packet():
+        prepare_packet(repo, freeze_file)
+    print(f"review packet prepared: {repo / '.omp' / 'review-packet' / 'manifest.json'}")
+    return EXIT_CLEAN
+
+
+def _read_result(args: argparse.Namespace) -> dict[str, Any]:
+    source = args.result
+    if source is None or source == "-":
+        raw = sys.stdin.read()
+        label = "review result from stdin"
+    else:
+        path = Path(source).expanduser()
+        try:
+            raw = path.read_text(encoding="utf-8")
+        except OSError as error:
+            raise GateError(f"cannot read review result {path}: {error}") from error
+        label = f"review result {path}"
+    try:
+        return mapping(json.loads(raw), label)
+    except json.JSONDecodeError as error:
+        raise GateError(f"{label} is not JSON: {error}") from error
+
+
+def submit(args: argparse.Namespace) -> int:
+    repo = repo_root(args.repo)
+    reviewer = args.reviewer
+    spec = REVIEW_SPECS.get(reviewer)
+    if spec is None or not spec.get("direct_submission"):
+        raise GateError("submit accepts only the two direct canonical leaf reviewers")
+    result = _read_result(args)
+    attribution = {
+        "actor": args.actor,
+        "harness": args.harness,
+        "model": args.model,
+        "run_id": args.run_id,
+    }
+    freeze_file = _freeze_file(repo)
+    with _gate_owned_packet():
+        output = submit_result(repo, freeze_file, reviewer, attribution, result)
+    status = result.get("status")
+    print(f"review pass submitted: {output}")
+    if status != "clean":
+        return EXIT_NON_CLEAN
+    return EXIT_CLEAN
 
 
 def record(args: argparse.Namespace) -> int:
     repo = repo_root(args.repo)
-    freeze_file = freeze_path(repo, args.freeze)
-    _, frozen = load_freeze(repo, freeze_file)
-    current = bundle_from_git(repo, frozen["old_oid"], frozen["new_oid"], check_worktree=True)
-    assert_same_identity(frozen, current, "review freeze")
-    if args.autoreview_json is None or args.autoreview_exit is None:
-        raise GateError("record requires --autoreview-json and --autoreview-exit")
-    output = receipt_path(repo, args.output)
-    record_receipt(
-        repo,
-        freeze_file,
-        output,
-        args.scope,
-        args.autoreview_json,
-        args.autoreview_exit,
-        args.thermo_correctness_json,
-        args.thermo_quality_json,
-    )
+    freeze_file = _freeze_file(repo)
+    output = _receipt_file(repo)
+    with _gate_owned_packet():
+        record_receipt(repo, freeze_file, output)
     print(f"review receipt written: {output}")
-    return 0
+    return EXIT_CLEAN
 
 
 def waive(args: argparse.Namespace) -> int:
     repo = repo_root(args.repo)
-    freeze_file = freeze_path(repo, args.freeze)
+    freeze_file = _freeze_file(repo)
     _, frozen = load_freeze(repo, freeze_file)
     current = bundle_from_git(repo, frozen["old_oid"], frozen["new_oid"], check_worktree=True)
     assert_same_identity(frozen, current, "review freeze")
@@ -102,9 +157,9 @@ def waive(args: argparse.Namespace) -> int:
     actor = args.actor.strip()
     if len(reason) < 12 or not any(word in reason.lower() for word in ("prose", "config", "documentation")):
         raise GateError("waiver reason must explain why the prose/config change is trivial")
-    if not NAME_PATTERN.fullmatch(actor):
+    if not ACTOR_PATTERN.fullmatch(actor):
         raise GateError("waiver actor must be a stable name or email-like identifier")
-    output = receipt_path(repo, args.output)
+    output = _receipt_file(repo)
     document = {
         "schema": RECEIPT_SCHEMA,
         "kind": "waiver",
@@ -117,7 +172,7 @@ def waive(args: argparse.Namespace) -> int:
     }
     write_json(output, document)
     print(f"trivial review waiver written: {output}")
-    return 0
+    return EXIT_CLEAN
 
 
 def verify(
@@ -127,13 +182,13 @@ def verify(
     push_ranges: list[tuple[str, str]] | None = None,
 ) -> int:
     repo = repo_root(args.repo)
-    output = receipt_path(repo, getattr(args, "receipt", None))
+    output = _receipt_file(repo)
     if push_ranges is None:
         if (args.old_oid is None) != (args.new_oid is None):
             raise GateError("verify requires both --old-oid and --new-oid when either is supplied")
         if args.old_oid is None:
             if not output.is_file():
-                raise GateError(f"missing final review receipt {output}; run review_gate.py freeze, run, then verify")
+                raise GateError(f"missing final review receipt {output}; run {REVIEW_SEQUENCE}")
             receipt, receipt_identity = load_receipt(repo, output)
             head = run_git(repo, "rev-parse", "HEAD").strip()
             oid(head, "current HEAD")
@@ -148,17 +203,18 @@ def verify(
     old_oid, new_oid = unique_ranges[0]
     identity = bundle_from_git(repo, old_oid, new_oid, check_worktree=False)
     if not output.is_file():
-        raise GateError(f"missing final review receipt {output}; run review_gate.py freeze, run, then verify")
+        raise GateError(f"missing final review receipt {output}; run {REVIEW_SEQUENCE}")
     document, receipt_identity = load_receipt(repo, output)
     assert_same_identity(receipt_identity, identity, "review receipt")
-    verify_receipt(repo, document, identity, _scope)
+    with _gate_owned_packet():
+        verify_receipt(repo, document, identity, _scope)
     if not quiet:
         if document.get("kind") == "waiver":
             actor = mapping(document.get("waiver"), "review receipt waiver").get("actor")
             print(f"review gate clean: explicit trivial waiver by {actor}")
         else:
-            print("review gate clean: autoreview and both independent Thermos passes for the frozen Git range")
-    return 0
+            print("review gate clean: three canonical review passes verified for the frozen Git range")
+    return EXIT_CLEAN
 
 
 def _waiver_actor(repo: Path) -> str:
@@ -168,7 +224,6 @@ def _waiver_actor(repo: Path) -> str:
             return actor
     return "<actor>"
 
-
 def _waiver_command(repo: Path, freeze_file: Path, actor: str) -> str:
     return shlex.join(
         [
@@ -177,8 +232,6 @@ def _waiver_command(repo: Path, freeze_file: Path, actor: str) -> str:
             "waive",
             "--repo",
             str(repo),
-            "--freeze",
-            str(freeze_file),
             "--actor",
             actor,
             "--reason",
@@ -188,7 +241,7 @@ def _waiver_command(repo: Path, freeze_file: Path, actor: str) -> str:
 
 
 def _ensure_review(args: argparse.Namespace, repo: Path, old_oid: str, new_oid: str) -> None:
-    output = receipt_path(repo)
+    output = _receipt_file(repo)
     range_pair = [(old_oid, new_oid)]
     if output.is_file():
         try:
@@ -197,24 +250,25 @@ def _ensure_review(args: argparse.Namespace, repo: Path, old_oid: str, new_oid: 
         except GateError:
             pass
     identity = bundle_from_git(repo, old_oid, new_oid, check_worktree=True)
-    freeze_args = argparse.Namespace(repo=str(repo), output=None, old_oid=old_oid, new_oid=new_oid)
+    freeze_args = argparse.Namespace(repo=str(repo), old_oid=old_oid, new_oid=new_oid)
     freeze(freeze_args)
     if _scope(identity["paths"]) == "trivial":
-        freeze_file = freeze_path(repo, None)
+        freeze_file = _freeze_file(repo)
         actor = _waiver_actor(repo)
         raise GateError(
             "trivial review range requires an explicit, actor-attributed waiver; "
             f"run: {_waiver_command(repo, freeze_file, actor)}"
         )
-    run_command(argparse.Namespace(repo=str(repo), freeze=None, output_dir=None, timeout=1800))
-    verify(args, quiet=True, push_ranges=range_pair)
+    raise GateError(
+        f"review gate has no clean receipt for this range; complete {REVIEW_SEQUENCE}"
+    )
 
 
 def hook(args: argparse.Namespace) -> int:
     repo = repo_root(args.repo)
     updates = [line.split() for line in sys.stdin.read().splitlines() if line.split()]
     if not updates:
-        return 0
+        return EXIT_CLEAN
     if any(len(update) != 4 for update in updates):
         raise GateError("pre-push hook received a malformed ref update; reinstall the hook and retry the push")
     protected = protected_refs(repo, getattr(args, "remote", None))
@@ -247,7 +301,7 @@ def hook(args: argparse.Namespace) -> int:
     unique_ranges = list(dict.fromkeys(push_ranges))
     if not unique_ranges:
         print("review gate skipped: push contains no non-deletion branch updates")
-        return 0
+        return EXIT_CLEAN
     if len(unique_ranges) != 1:
         raise GateError("pre-push review requires one unique old/new object range")
     _ensure_review(args, repo, *unique_ranges[0])
@@ -258,40 +312,51 @@ def classify_command(args: argparse.Namespace) -> int:
     repo = repo_root(args.repo)
     identity = bundle_from_git(repo, args.old_oid, args.new_oid, check_worktree=True)
     print(json.dumps({"scope": _scope(identity["paths"]), **identity}, indent=2, sort_keys=True))
-    return 0
+    return EXIT_CLEAN
 
 
 def parser() -> argparse.ArgumentParser:
-    root = argparse.ArgumentParser(description="Verify immutable committed-range review receipts before protected pushes.")
+    root = argparse.ArgumentParser(description="Manage the immutable committed-range review gate.")
     sub = root.add_subparsers(dest="command", required=True)
-    verify_parser = sub.add_parser("verify")
-    verify_parser.add_argument("--repo", default=".")
-    verify_parser.add_argument("--receipt")
-    verify_parser.add_argument("--old-oid")
-    verify_parser.add_argument("--new-oid")
-    hook_parser = sub.add_parser("hook")
-    hook_parser.add_argument("--repo", default=".")
-    hook_parser.add_argument("--remote")
-    classify_parser = sub.add_parser("classify")
+
+    classify_parser = sub.add_parser("classify", help="classify a committed range")
     classify_parser.add_argument("--repo", default=".")
     classify_parser.add_argument("--old-oid", required=True)
     classify_parser.add_argument("--new-oid", required=True)
-    freeze_parser = sub.add_parser("freeze")
+
+    freeze_parser = sub.add_parser("freeze", help="freeze a committed range")
     freeze_parser.add_argument("--repo", default=".")
-    freeze_parser.add_argument("--output")
     freeze_parser.add_argument("--old-oid", required=True)
     freeze_parser.add_argument("--new-oid", required=True)
-    run_parser = sub.add_parser("run", help="run all reviewers for a frozen range and record gate-owned pass envelopes")
-    run_parser.add_argument("--repo", default=".")
-    run_parser.add_argument("--freeze")
-    run_parser.add_argument("--output-dir")
-    run_parser.add_argument("--timeout", type=int, default=1800)
-    waive_parser = sub.add_parser("waive")
+
+    prepare_parser = sub.add_parser("prepare", help="prepare the gate-owned review packet")
+    prepare_parser.add_argument("--repo", default=".")
+
+    submit_parser = sub.add_parser("submit", help="submit one direct leaf review result")
+    submit_parser.add_argument("--repo", default=".")
+    submit_parser.add_argument("--reviewer", choices=tuple(name for name, spec in REVIEW_SPECS.items() if spec.get("direct_submission")), required=True)
+    submit_parser.add_argument("--actor", required=True)
+    submit_parser.add_argument("--harness", required=True)
+    submit_parser.add_argument("--model", required=True)
+    submit_parser.add_argument("--run-id", required=True)
+    submit_parser.add_argument("--result", help="JSON result file; use - or omit to read stdin")
+
+    record_parser = sub.add_parser("record", help="record the three gate-owned review passes")
+    record_parser.add_argument("--repo", default=".")
+
+    verify_parser = sub.add_parser("verify", help="verify the final receipt for a committed range")
+    verify_parser.add_argument("--repo", default=".")
+    verify_parser.add_argument("--old-oid")
+    verify_parser.add_argument("--new-oid")
+
+    waive_parser = sub.add_parser("waive", help="record an explicit trivial-change waiver")
     waive_parser.add_argument("--repo", default=".")
-    waive_parser.add_argument("--output")
-    waive_parser.add_argument("--freeze")
     waive_parser.add_argument("--actor", required=True)
     waive_parser.add_argument("--reason", required=True)
+
+    hook_parser = sub.add_parser("hook", help="verify a protected push from pre-push input")
+    hook_parser.add_argument("--repo", default=".")
+    hook_parser.add_argument("--remote")
     return root
 
 
@@ -300,19 +365,24 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.command == "freeze":
             return freeze(args)
+        if args.command == "prepare":
+            return prepare(args)
+        if args.command == "submit":
+            return submit(args)
+        if args.command == "record":
+            return record(args)
         if args.command == "classify":
             return classify_command(args)
-        if args.command == "run":
-            return run_command(args)
         if args.command == "waive":
             return waive(args)
         if args.command == "hook":
             return hook(args)
-        return verify(args)
+        if args.command == "verify":
+            return verify(args)
+        raise GateError(f"unsupported review-gate command {args.command!r}")
     except (GateError, OSError, ValueError) as error:
         print(f"review-gate: {error}", file=sys.stderr)
-        return 1
-
+        return EXIT_PROTOCOL
 
 if __name__ == "__main__":
     raise SystemExit(main())

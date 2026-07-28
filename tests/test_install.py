@@ -335,7 +335,6 @@ class ProvenanceTests(unittest.TestCase):
         skills.mkdir(parents=True)
         projections = {
             "autoreview": external / "openclaw-autoreview",
-            "thermos": external / "cursor-thermos" / "thermos",
             "thermo-nuclear-review": external / "cursor-thermos" / "thermo-nuclear-review",
             "thermo-nuclear-code-quality-review": external / "cursor-thermos" / "thermo-nuclear-code-quality-review",
         }
@@ -377,7 +376,7 @@ class ProvenanceTests(unittest.TestCase):
         self._reject()
 
     def test_symlinked_payload_is_rejected(self) -> None:
-        payload = self.root / "global" / "external" / "cursor-thermos" / "thermos" / "SKILL.md"
+        payload = self.root / "global" / "external" / "cursor-thermos" / "thermo-nuclear-review" / "SKILL.md"
         payload.unlink()
         payload.symlink_to(self.root / "outside-skill.md")
         (self.root / "outside-skill.md").write_text("MIT License", encoding="utf-8")
@@ -387,7 +386,7 @@ class ProvenanceTests(unittest.TestCase):
     def test_projected_skill_wrong_vendor_target_is_rejected(self) -> None:
         projected = self.root / "global" / "skills" / "autoreview"
         projected.unlink()
-        projected.symlink_to(self.root / "global" / "external" / "cursor-thermos" / "thermos", target_is_directory=True)
+        projected.symlink_to(self.root / "global" / "external" / "cursor-thermos" / "thermo-nuclear-review", target_is_directory=True)
         self._reject()
 
     def test_projected_skill_outside_target_is_rejected(self) -> None:

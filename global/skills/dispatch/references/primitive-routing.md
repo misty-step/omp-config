@@ -1,7 +1,9 @@
 # Primitive Routing Table
 
-Route by outcome. The chief executive must not load specialist workflows to do
-the work itself. Give the skill to the lane that owns the outcome.
+Route by outcome.
+The chief executive must not load specialist workflows to do the work itself.
+Give each skill to the lane that owns its outcome.
+
 
 ## Declared and bundled roles
 
@@ -12,7 +14,7 @@ the work itself. Give the skill to the lane that owns the outcome.
 | remediate a ranked findings packet | `fixer` | `refactor`, `ci`, `review-tests` | `qa`; two-round cap, then report what remains |
 | full-board or full-backlog grooming | `curator` | `groom`, `research`, `vision`, `grilling`, ledger skill | operator approves destructive backlog changes |
 | broad research and repository sweep | `magellan` | `research`; add `peer-harnesses` for model or harness facts | `scout` source spot-check when risk is medium or higher |
-| code-review program | `reviewer` | `code-review`, `peer-harnesses`, `dispatch` | its own bench: cross-family `code-critic` lanes plus `qa` for live claims |
+| code-review program | `reviewer` | `code-review` for the gate-owned freeze/packet/submission/receipt protocol; `peer-harnesses` only for optional critics | its own bench: cross-family `code-critic` lanes plus `qa` for live claims |
 | one static critique lane | `code-critic` | exactly one injected review lens; carries no standing doctrine | another model family if its finding decides release |
 | live verification | `qa` | `verify-live`, `ci`; add surface-specific skills | a different model family from the author |
 | persona-driven QA user coordination | `qa-user` | `qa-users`, `dispatch` | no-read coordinator dispatches browser-only `qa-user-leaf`; OMP root owns triage, suppression, RCA, and serialized tracker read-back |
@@ -23,12 +25,18 @@ the work itself. Give the skill to the lane that owns the outcome.
 | external library or API source research | bundled `librarian` | `research`; add vendor documentation MCP | parent checks the primary source |
 | mechanical inventory or collection | bundled `sonic` | none unless the task names one | parent checks count or set difference |
 
-Use an ad-hoc task lane when no declared role fits. Name its hidden skills in
-the brief. Do not create a permanent agent for one unusual task.
+Use an ad-hoc task lane when no declared role fits.
+Name its hidden skills in the brief.
+Do not create a permanent agent for one unusual task.
+
 
 ## Agent tool envelopes
 
-An agent that omits `tools` receives OMP's full built-in tool catalog. Restricted agents must declare an explicit comma-separated list. Every explicit tool name is validated against OMP's existing built-in tool authority; `*` is not a supported representation.
+An agent that omits `tools` receives OMP's full built-in tool catalog.
+Restricted agents must declare an explicit comma-separated list.
+Validate every explicit tool name against OMP's existing built-in tool authority.
+`*` is not a supported representation.
+
 
 ## Skill routes
 
@@ -36,7 +44,7 @@ An agent that omits `tools` receives OMP's full built-in tool catalog. Restricte
 |---|---|---|
 | build one accepted ticket | `deliver` (loads `deliver-core`); add `refactor` only for an explicit architecture refactor | `builder` |
 | run or strengthen gates | `ci`, `project-engineering` | `builder` authoring; `qa` verification |
-| review a meaningful change | `code-review`, which runs `autoreview`, `thermos`, `thermo-nuclear-review`, and `thermo-nuclear-code-quality-review`; add `peer-harnesses` only for optional extra critics | `reviewer` |
+| review a meaningful change | `code-review` for `freeze -> prepare -> submit -> record -> verify`; `autoreview`, `thermo-nuclear-review`, and `thermo-nuclear-code-quality-review` are ordinary skills loaded explicitly by the caller; add `peer-harnesses` only for optional extra critics | `reviewer` |
 | capture a durable solved pattern | `compound` | the implementing lane after verification |
 | groom, prioritize, rethink, or find ambitious work | `groom`, `vision`, `grilling`, `research` | `curator`; never use a one-ticket shape workflow |
 | settle project identity or long-term direction | `vision`, `grilling`, `research` | `curator` with `solomon` for a contested decision |
@@ -68,7 +76,9 @@ An agent that omits `tools` receives OMP's full built-in tool catalog. Restricte
 ## MCP and tool routes
 
 Disabled-server policy and CLI replacements are recorded in
-`mcp-pruning.md`; a disabled MCP name is never a route.
+`mcp-pruning.md`.
+A disabled MCP name is never a route.
+
 
 | Need | Primitive |
 |---|---|
@@ -89,20 +99,23 @@ Disabled-server policy and CLI replacements are recorded in
 
 - Low-risk S work uses one lane and no verifier.
 - Medium-risk M+ work uses one author and one independent verifier.
-- High-risk work always uses an independent verifier. High-risk implementation
-  also uses `reviewer` before integration.
+- High-risk work always uses an independent verifier.
+  High-risk implementation also uses `reviewer` before integration.
 - Unknown estimate or risk uses the medium-risk floor.
-- XL architecture, implementation, or design starts with `daedalus`, then fans
-  out by independent dependency or surface.
-- Never pad a team. One lane per real independent bottleneck is sufficient.
+- XL architecture, implementation, or design starts with `daedalus`.
+  Then fan out by independent dependency or surface.
+- Never pad a team.
+  One lane per real independent constraint is sufficient.
+
 
 ## Hidden-skill mechanics
 
 `disable-model-invocation: true` removes a skill description from the model's
-visible catalog. It does not remove the skill from the session. A declared
-agent's `autoloadSkills` bundle preloads its recurring specialist guidance.
+visible catalog.
+It does not remove the skill from the session.
+A declared agent's `autoloadSkills` bundle preloads its recurring specialist guidance.
 For an ad-hoc lane, write `Read skill://<name> first` in the brief.
-
-Do not use `skills.includeSkills` to implement the chief boundary. That filter
-removes skills globally before child sessions and prevents the desired bundles.
 True per-agent catalogs require the composer extension.
+
+Do not use `skills.includeSkills` to implement the chief boundary.
+That filter removes skills globally before child sessions and prevents the desired bundles.

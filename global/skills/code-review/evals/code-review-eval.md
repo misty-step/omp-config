@@ -39,7 +39,7 @@ fails it regardless of fixtures 1–2.
       question that would surface it (e.g. "what happens when both sources
       share a backlog_ref?") — a generic "looks fine" does not count.
 - [ ] Fixture 3: review output contains zero blocking-severity findings.
-- [ ] Findings are ranked (blocking / important / advisory), not a flat list.
+- [ ] Findings use the canonical ranked severities (blocking / high / medium / low), not a flat list.
 - [ ] At least one reviewer/lens is explicitly named as decorrelated from the
       authoring model family (fixtures 1–2 only; single-model monoculture on a
       substantive diff is itself a finding this eval should catch).
@@ -50,7 +50,7 @@ fails it regardless of fixtures 1–2.
 | Dimension | 5 | 1 |
 |---|---|---|
 | Defect detection | names the seeded defect precisely, with the failure scenario | misses it entirely or hand-waves ("consider edge cases") |
-| Severity discipline | blocking/important/advisory correctly separates the seeded bug from nitpicks | flat wall of undifferentiated comments |
+| Severity discipline | blocking/high/medium/low correctly separates seeded bugs from bounded cleanup | flat wall of undifferentiated comments |
 | False-positive control (fixture 3) | zero invented findings on the clean diff | invents a "blocking" issue that isn't real |
 | Scope discipline | stays on the diff, doesn't wander into unrelated repo critique | reviews the whole repo instead of the change |
 

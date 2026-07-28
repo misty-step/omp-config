@@ -60,19 +60,6 @@ sources:
     consumers:
       - global/skills/factory-apps/SKILL.md
 
-  - repo: misty-step/bitterblossom
-    ref: 87f69912b1c5646b6f0353ed5f2fcfe271e038ac
-    pin: 87f69912b1c5646b6f0353ed5f2fcfe271e038ac
-    vendor_dir: misty-bitterblossom
-    layout: flat
-    skills_path: skills
-    alias_prefix: "misty-"
-    include: [bitterblossom]
-    license: MIT
-    license_path: LICENSE
-    consumers:
-      - global/skills/factory-apps/SKILL.md
-      - global/skills/factory-apps/references/capability-audit-2026-07-03.md
 
   - repo: anthropics/skills
     ref: main
@@ -130,9 +117,9 @@ sources:
       - global/skills/refactor/SKILL.md
       - global/references/skill-authoring-standard.md
 
-  # Cursor's current Thermos receipt contains the complete three-skill family.
-  # Keep the vendor directory grouped so one receipt pins all three projected
-  # links and one MIT license.
+# The pinned receipt contains the two preserved, harness-neutral review leaves.
+# Keep the vendor directory grouped so one receipt pins both projected leaves
+# and one MIT license.
   - repo: cursor/plugins
     ref: main
     pin: ba7b5907843e1e21ec692418c180e1f912cbf7d3
@@ -140,13 +127,10 @@ sources:
     layout: flat
     skills_path: thermos/skills
     alias_prefix: "cursor-"
-    include: [thermos, thermo-nuclear-review, thermo-nuclear-code-quality-review]
+    include: [thermo-nuclear-review, thermo-nuclear-code-quality-review]
     license: MIT
     license_path: LICENSE
     consumers:
-      - global/skills/code-review/SKILL.md
-      - global/skills/refactor/SKILL.md
-      - global/skills/thermos
       - global/skills/thermo-nuclear-review
       - global/skills/thermo-nuclear-code-quality-review
 

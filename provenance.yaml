@@ -70,10 +70,22 @@
         "kind": "file",
         "origin": "local"
       },
+      "extension_optmem": {
+        "source": "global/extensions/optmem.ts",
+        "target": "extensions/optmem.ts",
+        "kind": "file",
+        "origin": "local"
+      },
       "runtime_recipe_lib": {
         "source": "global/lib",
         "target": "lib",
         "kind": "directory",
+        "origin": "local"
+      },
+      "optmem_policy": {
+        "source": "global/optmem-policy.json",
+        "target": "optmem-policy.json",
+        "kind": "file",
         "origin": "local"
       },
       "themes": {
@@ -109,6 +121,30 @@
       "review_runner_binary": {
         "source": "bin/review_runner.py",
         "target": "bin/review_runner.py",
+        "kind": "file",
+        "origin": "local"
+      },
+      "review_common_binary": {
+        "source": "bin/review_common.py",
+        "target": "bin/review_common.py",
+        "kind": "file",
+        "origin": "local"
+      },
+      "review_bundle_binary": {
+        "source": "bin/review_bundle.py",
+        "target": "bin/review_bundle.py",
+        "kind": "file",
+        "origin": "local"
+      },
+      "review_packet_binary": {
+        "source": "bin/review_packet.py",
+        "target": "bin/review_packet.py",
+        "kind": "file",
+        "origin": "local"
+      },
+      "review_receipt_binary": {
+        "source": "bin/review_receipt.py",
+        "target": "bin/review_receipt.py",
         "kind": "file",
         "origin": "local"
       }

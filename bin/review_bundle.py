@@ -11,6 +11,7 @@ from review_common import (
     BUNDLE_SCHEMA,
     DIGEST_PATTERN,
     FREEZE_SCHEMA,
+    PACKET_RELATIVE,
     PASS_DIRECTORY,
     FREEZE_RELATIVE,
     GateError,
@@ -74,9 +75,12 @@ def repo_root(path: str | Path | None) -> Path:
     return resolved
 
 
+def packet_path(repo: Path, value: str | None = None) -> Path:
+    return confined_path(repo, value, PACKET_RELATIVE, "packet")
+
+
 def freeze_path(repo: Path, value: str | None = None) -> Path:
     return confined_path(repo, value, FREEZE_RELATIVE, "freeze")
-
 
 def receipt_path(repo: Path, value: str | None = None) -> Path:
     return confined_path(repo, value, RECEIPT_RELATIVE, "receipt")
@@ -225,6 +229,7 @@ def worktree_is_dirty_for_paths(repo: Path, new_oid: str, paths: list[Path]) -> 
 
 
 def bundle_from_git(repo: Path, old_oid: str, new_oid: str, *, check_worktree: bool) -> dict[str, Any]:
+    repo = repo.resolve()
     old_oid = oid(old_oid, "old_oid", allow_zero=True)
     new_oid = oid(new_oid, "new_oid")
     if old_oid == new_oid:
@@ -301,6 +306,7 @@ def assert_same_identity(expected: dict[str, Any], actual: dict[str, Any], label
 
 def load_freeze(repo: Path, path: Path) -> tuple[dict[str, Any], dict[str, Any]]:
 
+    repo = repo.resolve()
     document = read_json(path, f"review freeze {path}")
     if document.get("schema") != FREEZE_SCHEMA or document.get("kind") != "freeze":
         raise GateError(f"review freeze must declare schema {FREEZE_SCHEMA}")

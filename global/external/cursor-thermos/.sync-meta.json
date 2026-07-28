@@ -7,12 +7,10 @@
   "license": "MIT",
   "license_sha256": "702f5f331b56aff0e33d8c7826df5202559f894145eb70355c6477b55b5bb8a0",
   "payload": [
-    "thermos/SKILL.md",
     "thermo-nuclear-review/SKILL.md",
     "thermo-nuclear-code-quality-review/SKILL.md"
   ],
   "payload_sha256": {
-    "thermos/SKILL.md": "c272effc404b126d34464e8a1dacec30f6757638db39088ca5afc58dd2c1f472",
     "thermo-nuclear-review/SKILL.md": "5091011c4490932d40658ae958fb55b9aaca8e2bba5196860295ab945180e434",
     "thermo-nuclear-code-quality-review/SKILL.md": "7faca08b51b643b2ddd0836f92af15574444024685dcc1e677dbbb39ae8c9e8f"
   }
