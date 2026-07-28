@@ -261,6 +261,20 @@ class ReviewGateTests(unittest.TestCase):
         self.assertNotEqual(blocked.returncode, 0)
         self.assertIn("clean worktree", blocked.stderr)
 
+    def test_ignored_gate_runtime_output_does_not_dirty_a_deleted_runtime_path(self) -> None:
+        receipt = self.repo / ".omp" / "review-receipt.json"
+        receipt.parent.mkdir()
+        receipt.write_text('{"historical": true}\n', encoding="utf-8")
+        old_oid = self.commit("track historical receipt", ".omp/review-receipt.json")
+        receipt.unlink()
+        (self.repo / ".gitignore").write_text(".omp/\n", encoding="utf-8")
+        new_oid = self.commit("stop tracking review output", ".gitignore", ".omp/review-receipt.json")
+        receipt.write_text('{"runtime": true}\n', encoding="utf-8")
+
+        frozen = self.freeze(old_oid, new_oid)
+
+        self.assertEqual(frozen.returncode, 0, frozen.stderr)
+
     def test_autoreview_security_api_is_a_normal_import(self) -> None:
         self.assertEqual(review_runner.autoreview_security.__name__, "openclaw_autoreview")
         self.assertTrue(callable(review_runner.autoreview_security.secret_text_risk))
@@ -352,6 +366,18 @@ class ReviewGateTests(unittest.TestCase):
         self.assertTrue(
             any(call.args[0] == "autoreview" and call.args[2] == "codex" for call in worker_identity.call_args_list)
         )
+        self.assertTrue(
+            all(
+                call.args[2] == review_runner.THERMO_MODEL
+                for call in worker_identity.call_args_list
+                if call.args[0] in {"thermo-nuclear-review", "thermo-nuclear-code-quality-review"}
+            )
+        )
+        thermo_calls = [
+            call for call in worker_identity.call_args_list if call.args[0] in {"thermo-nuclear-review", "thermo-nuclear-code-quality-review"}
+        ]
+        self.assertTrue(all(call.args[1] == review_runner.AUTOREVIEW_DEFAULT for call in thermo_calls))
+        self.assertNotIn("cursor-agent", str(worker_identity.call_args_list))
         self.assertTrue(autoreview_pass.called)
 
     def test_autoreview_uses_only_immutable_packet_datasets(self) -> None:
@@ -374,7 +400,10 @@ class ReviewGateTests(unittest.TestCase):
         with patch.object(
             review_runner,
             "_run_process",
-            side_effect=[(0, report, ""), (0, '{"findings":[],"actionable_findings":0,"overall_correctness":"patch is correct"}', "")],
+            side_effect=[
+                (0, report, ""),
+                (0, '{"findings":[],"actionable_findings":0,"overall_correctness":"patch is correct"}', ""),
+            ],
         ) as run_process:
             result = review_runner._autoreview_pass(identity, self.repo, 30, self.repo, TEST_WORKER)
         chunk_command = run_process.call_args_list[0].args[0]
@@ -382,6 +411,10 @@ class ReviewGateTests(unittest.TestCase):
         self.assertEqual(result["status"], "clean")
         self.assertEqual(run_process.call_count, 2)
         self.assertEqual(chunk_command[chunk_command.index("--mode") + 1], "local")
+        self.assertEqual(chunk_command[chunk_command.index("--engine") + 1], "codex")
+        self.assertNotIn("--model", chunk_command)
+        self.assertNotIn("--thinking", chunk_command)
+        self.assertEqual(result["worker"]["model"], TEST_WORKER["model"])
         self.assertNotIn("--base", chunk_command)
         self.assertNotIn("--commit", chunk_command)
         self.assertIn(f"{review_runner.PACKET_DIR}/bundle.review.000.diff", chunk_command)
@@ -422,6 +455,7 @@ class ReviewGateTests(unittest.TestCase):
         self.assertEqual(result["actionable_findings"], 1)
         self.assertEqual(result["raw_report"]["findings"][0]["dataset"], "bundle.review.001.diff")
         self.assertEqual(result["raw_report"]["integration"]["report"]["findings"], [])
+
 
     def test_autoreview_datasets_compact_deletions_and_bound_large_files(self) -> None:
         deleted = (
@@ -484,7 +518,7 @@ class ReviewGateTests(unittest.TestCase):
         self.assertNotIn(secret, combined)
         self.assertIn(b"GITHUB_TOKEN=redacted", combined)
 
-    def test_thermo_worker_runs_headless_and_read_only(self) -> None:
+    def test_thermo_worker_runs_through_public_review_harness_with_read_only_datasets(self) -> None:
         identity = {
             "repository": "test/repository",
             "old_oid": self.base_oid,
@@ -495,12 +529,27 @@ class ReviewGateTests(unittest.TestCase):
         }
         packet = self.repo / review_runner.PACKET_DIR
         packet.mkdir()
-        for name in ("freeze.json", "evidence.json", "bundle.diff", "bundle.review.000.diff"):
+        for name in ("freeze.json", "evidence.json", "bundle.diff", "bundle.review.000.diff", "bundle.review.001.diff"):
             (packet / name).write_text("{}\n", encoding="utf-8")
+        packet.chmod(0o555)
+        seen_datasets: list[str] = []
+
         def run_thermo(command: list[str], cwd: Path, timeout: int) -> tuple[int, str, str]:
             staged = cwd / review_runner.PACKET_DIR
             self.assertNotEqual(cwd, self.repo)
             self.assertTrue((staged / "review-skill.md").is_file())
+            chunks = sorted(path.name for path in staged.glob("bundle.review.*.diff"))
+            self.assertEqual(len(chunks), 1)
+            seen_datasets.extend(chunks)
+            self.assertTrue((cwd / ".git").is_dir())
+            tracked = subprocess.run(
+                ["git", "ls-files", review_runner.PACKET_DIR],
+                cwd=cwd,
+                text=True,
+                stdout=subprocess.PIPE,
+                check=True,
+            ).stdout.splitlines()
+            self.assertIn(f"{review_runner.PACKET_DIR}/review-skill.md", tracked)
             self.assertEqual(staged.stat().st_mode & 0o777, 0o555)
             self.assertEqual((staged / "review-skill.md").stat().st_mode & 0o777, 0o444)
             self.assertFalse((staged / "bundle.diff").exists())
@@ -520,10 +569,18 @@ class ReviewGateTests(unittest.TestCase):
                 30,
                 TEST_WORKER,
             )
-        command = run_process.call_args.args[0]
+        command = run_process.call_args_list[-1].args[0]
         self.assertEqual(result["status"], "clean")
-        self.assertIn("--trust", command)
-        self.assertEqual(command[command.index("--mode") + 1], "ask")
+        self.assertEqual(run_process.call_count, 2)
+        self.assertEqual(seen_datasets, ["bundle.review.000.diff", "bundle.review.001.diff"])
+        self.assertEqual(command[command.index("--mode") + 1], "local")
+        self.assertEqual(command[command.index("--engine") + 1], review_runner.THERMO_ENGINE)
+        self.assertEqual(command[command.index("--model") + 1], review_runner.THERMO_MODEL)
+        self.assertNotIn("cursor-agent", command)
+        self.assertIn(f"{review_runner.PACKET_DIR}/review-skill.md", command)
+        self.assertNotIn("--trust", command)
+        report_path = Path(command[command.index("--json-output") + 1])
+        self.assertFalse(report_path.is_relative_to(run_process.call_args.args[1]))
 
     def test_thermo_parse_failure_preserves_bounded_worker_output(self) -> None:
         identity = {

@@ -23,6 +23,7 @@ PROTECTED_BRANCHES = {"main", "master"}
 ZERO_OID = "0" * 40
 OID_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
+AUTOREVIEW_EXECUTABLE = GATE_ROOT / "global" / "skills" / "autoreview" / "scripts" / "autoreview"
 REVIEWERS = (
     "autoreview",
     "thermo-nuclear-review",
@@ -30,15 +31,15 @@ REVIEWERS = (
 )
 PINNED_WORKERS = {
     "autoreview": (
-        GATE_ROOT / "global" / "skills" / "autoreview" / "scripts" / "autoreview",
+        AUTOREVIEW_EXECUTABLE,
         GATE_ROOT / "global" / "external" / "openclaw-autoreview",
     ),
     "thermo-nuclear-review": (
-        Path.home() / ".local" / "bin" / "cursor-agent",
+        AUTOREVIEW_EXECUTABLE,
         GATE_ROOT / "global" / "external" / "cursor-thermos",
     ),
     "thermo-nuclear-code-quality-review": (
-        Path.home() / ".local" / "bin" / "cursor-agent",
+        AUTOREVIEW_EXECUTABLE,
         GATE_ROOT / "global" / "external" / "cursor-thermos",
     ),
 }
@@ -183,7 +184,7 @@ def worker_identity(reviewer: str, executable: Path, model: str, payload: Path) 
         raise GateError(f"{reviewer} payload is not a directory: {payload}")
     return {
         "principal": reviewer,
-        "harness": "openclaw-autoreview" if reviewer == "autoreview" else "cursor-agent",
+        "harness": "openclaw-autoreview",
         "model": model,
         "executable": worker_display_path(executable),
         "executable_sha256": sha256_bytes(executable.read_bytes()),
@@ -196,7 +197,7 @@ def unresolved_worker(reviewer: str, model: str, executable: str, payload: Path)
     marker = f"unresolved:{reviewer}:{executable}".encode("utf-8")
     return {
         "principal": reviewer,
-        "harness": "openclaw-autoreview" if reviewer == "autoreview" else "cursor-agent",
+        "harness": "openclaw-autoreview",
         "model": model,
         "executable": executable,
         "executable_sha256": sha256_bytes(marker),

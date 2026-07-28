@@ -39,11 +39,14 @@ try:
 finally:
     sys.dont_write_bytecode = _prior_bytecode_policy
 AUTOREVIEW_DEFAULT = PROJECT_ROOT / "global" / "skills" / "autoreview" / "scripts" / "autoreview"
-CURSOR_AGENT_DEFAULT = Path.home() / ".local" / "bin" / "cursor-agent"
 THERMO_SKILLS = {
     "thermo-nuclear-review": PROJECT_ROOT / "global" / "skills" / "thermo-nuclear-review" / "SKILL.md",
     "thermo-nuclear-code-quality-review": PROJECT_ROOT / "global" / "skills" / "thermo-nuclear-code-quality-review" / "SKILL.md",
 }
+# Thermos skills are public payloads. Pi carries them through the authenticated
+# openai-codex subscription; neither Cursor nor Anthropic OAuth is required.
+THERMO_ENGINE = "pi"
+THERMO_MODEL = "openai-codex/gpt-5.6-sol"
 THERMO_VENDOR = PROJECT_ROOT / "global" / "external" / "cursor-thermos"
 PACKET_DIR = ".omp-review-packet"
 TARGET_PREFIX = ".omp-review-target-"
@@ -590,6 +593,97 @@ def _worker_report(output: str, reviewer: str) -> dict[str, Any]:
     return report
 
 
+def _initialize_packet_repo(packet_root: Path) -> None:
+    commands = (
+        ["git", "init", "--quiet"],
+        ["git", "add", "--force", PACKET_DIR],
+        [
+            "git",
+            "-c",
+            "user.name=OMP Review Gate",
+            "-c",
+            "user.email=review-gate@localhost",
+            "-c",
+            "commit.gpgsign=false",
+            "commit",
+            "--no-verify",
+            "--quiet",
+            "-m",
+            "immutable review packet",
+        ],
+    )
+    for command in commands:
+        result = subprocess.run(
+            command,
+            cwd=packet_root,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=False,
+        )
+        if result.returncode:
+            detail = result.stderr.strip() or result.stdout.strip()
+            raise GateError(f"cannot initialize isolated review packet repository: {detail}")
+
+
+def _run_thermo_dataset(
+    reviewer: str,
+    executable: Path,
+    worktree: Path,
+    dataset: Path,
+    timeout: int,
+) -> tuple[int, dict[str, Any] | None, str, str]:
+    with (
+        tempfile.TemporaryDirectory(prefix="omp-thermo-packet-") as packet_temp,
+        tempfile.TemporaryDirectory(prefix="omp-thermo-report-") as report_temp,
+    ):
+        packet_root = Path(packet_temp)
+        packet = packet_root / PACKET_DIR
+        shutil.copytree(
+            worktree / PACKET_DIR,
+            packet,
+            ignore=shutil.ignore_patterns("bundle.diff", "bundle.review.*.diff"),
+        )
+        packet.chmod(0o755)
+        shutil.copy2(dataset, packet / dataset.name)
+        shutil.copy2(THERMO_SKILLS[reviewer], packet / "review-skill.md")
+        _initialize_packet_repo(packet_root)
+        for item in packet.rglob("*"):
+            if item.is_file():
+                item.chmod(0o444)
+        packet.chmod(0o555)
+        prompt = (
+            f"Read only the immutable packet datasets. Apply the public review skill in {PACKET_DIR}/review-skill.md "
+            f"to the change chunk in {PACKET_DIR}/{dataset.name}. Do not access files outside this packet workspace, "
+            "do not modify packet files, and return only JSON with a findings array or actionable_findings integer. "
+            "Do not return an omp.review-pass.v2 envelope."
+        )
+        report_path = Path(report_temp) / f"{reviewer}.{dataset.stem}.json"
+        dataset_names = ("freeze.json", "evidence.json", "review-skill.md", dataset.name)
+        dataset_args = [
+            argument
+            for name in dataset_names
+            for argument in ("--dataset", f"{PACKET_DIR}/{name}")
+        ]
+        command = [
+            str(executable),
+            "--mode",
+            "local",
+            "--engine",
+            THERMO_ENGINE,
+            "--model",
+            THERMO_MODEL,
+            "--prompt",
+            prompt,
+            *dataset_args,
+            "--json-output",
+            str(report_path),
+        ]
+        exit_code, stdout, stderr = _run_process(command, packet_root, timeout)
+        report = _load_autoreview_report(report_path, stdout, f"{reviewer} worker report for {dataset.name}")
+        return exit_code, report, stdout, stderr
+
+
 def _thermo_pass(
     identity: dict[str, Any],
     reviewer: str,
@@ -606,46 +700,101 @@ def _thermo_pass(
             1,
             127,
             worker,
-            {"error": f"cursor-agent was not found at {CURSOR_AGENT_DEFAULT}"},
+            {"error": f"review harness was not found at {AUTOREVIEW_DEFAULT}"},
         )
-    with tempfile.TemporaryDirectory(prefix="omp-thermo-packet-") as packet_temp:
-        packet_root = Path(packet_temp)
-        packet = packet_root / PACKET_DIR
-        # Thermo workers are external models; give them only the redacted
-        # review datasets, never the raw committed bundle.diff.
-        shutil.copytree(
-            worktree / PACKET_DIR,
-            packet,
-            ignore=shutil.ignore_patterns("bundle.diff"),
+    datasets = sorted((worktree / PACKET_DIR).glob("bundle.review.*.diff"))
+    if not datasets:
+        return _result_envelope(
+            identity,
+            reviewer,
+            "failed",
+            1,
+            2,
+            worker,
+            {"error": "immutable review packet contains no change chunks"},
         )
-        packet.chmod(0o755)
-        skill_path = packet / "review-skill.md"
-        shutil.copy2(THERMO_SKILLS[reviewer], skill_path)
-        for item in packet.rglob("*"):
-            if item.is_file():
-                item.chmod(0o444)
-        packet.chmod(0o555)
-        prompt = (
-            f"Read only the immutable packet files under {packet}. Use the review instructions in {skill_path}. "
-            "Do not access files outside this packet workspace, do not modify packet files, and return only JSON "
-            "with a findings array or actionable_findings integer. Do not return an omp.review-pass.v2 envelope."
+
+    chunk_reports: list[dict[str, Any]] = []
+    findings: list[Any] = []
+    count_without_details = 0
+    for dataset in datasets:
+        exit_code, report, stdout, stderr = _run_thermo_dataset(
+            reviewer,
+            executable,
+            worktree,
+            dataset,
+            timeout,
         )
-        command = [str(executable), "-p", "--trust", "--mode", "ask", "--model", "composer-2.5", prompt]
-        exit_code, stdout, stderr = _run_process(command, packet_root, timeout)
-    try:
-        report = _worker_report(stdout, reviewer) if exit_code == 0 else {"error": stderr.strip() or "worker failed"}
-        findings = _report_finding_count(report, reviewer)
-    except GateError as error:
-        report = {
-            "error": str(error),
-            "stdout": _bounded_output(stdout),
-            "stderr": _bounded_output(stderr),
-        }
-        findings = 1
-        if exit_code == 0:
-            exit_code = 2
-    status = "clean" if exit_code == 0 and findings == 0 else ("unavailable" if exit_code == 127 else "findings" if findings else "failed")
-    return _result_envelope(identity, reviewer, status, findings, exit_code, worker, report)
+        try:
+            if report is None:
+                raise GateError(stderr.strip() or f"{reviewer} worker returned no structured result for {dataset.name}")
+            finding_count = _report_finding_count(report, f"{reviewer} worker report for {dataset.name}")
+        except GateError as error:
+            return _result_envelope(
+                identity,
+                reviewer,
+                "unavailable" if exit_code == 127 else "findings",
+                1,
+                exit_code if exit_code != 0 else 2,
+                worker,
+                {
+                    "error": str(error),
+                    "dataset": dataset.name,
+                    "stdout": _bounded_output(stdout),
+                    "stderr": _bounded_output(stderr),
+                    "chunk_reports": chunk_reports,
+                },
+            )
+
+        detailed = report.get("findings")
+        if isinstance(detailed, list):
+            for finding in detailed:
+                if isinstance(finding, dict):
+                    findings.append({"evidence_dataset": dataset.name, **finding})
+                else:
+                    findings.append(finding)
+            count_without_details += max(0, finding_count - len(detailed))
+        else:
+            count_without_details += finding_count
+        chunk_reports.append(
+            {
+                "dataset": dataset.name,
+                "actionable_findings": finding_count,
+                "report": report,
+            }
+        )
+        if exit_code != 0:
+            total = len(findings) + count_without_details
+            return _result_envelope(
+                identity,
+                reviewer,
+                "findings" if total else "failed",
+                total,
+                exit_code,
+                worker,
+                {
+                    "findings": findings,
+                    "actionable_findings": total,
+                    "chunk_reports": chunk_reports,
+                    "stderr": _bounded_output(stderr),
+                },
+            )
+
+    total = len(findings) + count_without_details
+    report = {
+        "findings": findings,
+        "actionable_findings": total,
+        "chunk_reports": chunk_reports,
+    }
+    return _result_envelope(
+        identity,
+        reviewer,
+        "clean" if total == 0 else "findings",
+        total,
+        0,
+        worker,
+        report,
+    )
 
 
 def _output_root(repo: Path, raw: str | None) -> Path:
@@ -751,18 +900,18 @@ def run_command(args: Namespace) -> int:
         )
     output_root = _output_root(repo, getattr(args, "output_dir", None))
     timeout = getattr(args, "timeout", 1800)
-    autoreview_path = AUTOREVIEW_DEFAULT.resolve(strict=False)
+    autoreview_path = AUTOREVIEW_DEFAULT
     autoreview_worker = (
         worker_identity("autoreview", autoreview_path, "codex", PROJECT_ROOT / "global" / "external" / "openclaw-autoreview")
         if autoreview_path.is_file()
         else unresolved_worker("autoreview", "codex", str(autoreview_path), PROJECT_ROOT / "global" / "external" / "openclaw-autoreview")
     )
-    cursor_path = CURSOR_AGENT_DEFAULT.resolve(strict=True) if CURSOR_AGENT_DEFAULT.is_file() else None
+    thermo_path = autoreview_path if autoreview_path.is_file() else None
     thermo_workers = {
         reviewer: (
-            worker_identity(reviewer, cursor_path, "composer-2.5", THERMO_VENDOR)
-            if cursor_path is not None
-            else unresolved_worker(reviewer, "composer-2.5", str(CURSOR_AGENT_DEFAULT), THERMO_VENDOR)
+            worker_identity(reviewer, thermo_path, THERMO_MODEL, THERMO_VENDOR)
+            if thermo_path is not None
+            else unresolved_worker(reviewer, THERMO_MODEL, str(AUTOREVIEW_DEFAULT), THERMO_VENDOR)
         )
         for reviewer in THERMO_SKILLS
     }
@@ -787,12 +936,12 @@ def run_command(args: Namespace) -> int:
             jobs = {
                 "autoreview": lambda: _autoreview_pass(frozen, worktree, timeout, report_dir, autoreview_worker),
                 "thermo-nuclear-review": lambda: _thermo_pass(
-                    frozen, "thermo-nuclear-review", cursor_path, worktree, timeout, thermo_workers["thermo-nuclear-review"]
+                    frozen, "thermo-nuclear-review", thermo_path, worktree, timeout, thermo_workers["thermo-nuclear-review"]
                 ),
                 "thermo-nuclear-code-quality-review": lambda: _thermo_pass(
                     frozen,
                     "thermo-nuclear-code-quality-review",
-                    cursor_path,
+                    thermo_path,
                     worktree,
                     timeout,
                     thermo_workers["thermo-nuclear-code-quality-review"],

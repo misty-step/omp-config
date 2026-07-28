@@ -23,13 +23,19 @@ Use repository-pinned paths, not a home-directory or stale external path:
 - `python3 bin/review_gate.py run` runs the pinned three-pass wave and writes the
   receipt. It is the only public substantive receipt-creation command.
 - `python3 bin/review_gate.py verify` checks the receipt against the exact range.
-- `global/skills/autoreview/scripts/autoreview` is the projected OpenClaw helper;
-  its executable and payload are pinned and the runner forces `--engine codex`.
+- `global/skills/autoreview/scripts/autoreview` is the projected OpenClaw helper.
+  Its executable and payload are pinned. The functional autoreview pass uses
+  its pinned Codex engine. Both Thermos passes use the same generic helper with
+  Pi and fixed model `openai-codex/gpt-5.6-sol`; neither pass depends on a
+  Cursor executable, Cursor authentication, or Anthropic OAuth.
 - `global/skills/thermos/SKILL.md` is the projected Thermos coordinator.
-- `global/skills/thermo-nuclear-review/SKILL.md` is the correctness/security leaf.
+- `global/skills/thermo-nuclear-review/SKILL.md` is the correctness and security leaf.
 - `global/skills/thermo-nuclear-code-quality-review/SKILL.md` is the
-  maintainability/code-quality leaf.
-These projected skills are pinned from the `cursor-thermos` external source.
+  maintainability and code-quality leaf. Prompts can call this Cursor-published
+  skill `cursor-thermo-nuclear-code-quality-review`. The projected path keeps
+  the upstream frontmatter name.
+These projected skills come from Cursor's public `cursor-thermos` source.
+They do not require Cursor authentication or a Cursor executable.
 The canonical external payloads behind those projections are:
 
 - `global/external/openclaw-autoreview/scripts/autoreview`, pinned by
@@ -78,20 +84,21 @@ The freeze contains the canonical repository, `old_oid`, `new_oid`, ordered
 introduced commits, sorted changed paths, and `bundle_digest` (`sha256:` plus 64
 lowercase hexadecimal characters).
 
-`run` creates one read-only evidence packet containing the freeze JSON, bundle
-digest, and exact committed diff. OpenClaw reviews each bounded dataset view of
-that packet independently; the runner aggregates all chunk findings. A
-digest-named read-only local marker only selects the dataset review. Entirely
-deleted file bodies become path and removed-line
-metadata. Credential-shaped values become explicit `redacted` placeholders.
-After each old/new hunk passes path-dialect secret scanning, its diff prefixes
-become comment-prefixed added/removed/context labels, and lines naming
-credential primitives become explicit omission markers in OpenClaw's dataset
-transport. Both projected Cursor workers receive the exact packet with fixed
-model `composer-2.5`. The runner checks that the packet,
-frozen worktree, and Git range did not change before it records the receipt.
-For OpenClaw chunking, preserve a structured summary for every bounded
-dataset, then run one final bounded cross-chunk pass over those summaries.
+`run` creates one read-only evidence packet. The packet contains the freeze
+JSON, bundle digest, and exact committed diff. Autoreview checks each bounded
+dataset view separately. The runner combines all chunk findings. A read-only
+local marker with the digest only selects the dataset review. For deleted files,
+the packet keeps the path and removed-line count but omits the body. It replaces
+credential-shaped values with explicit `redacted` placeholders. After
+path-dialect secret scanning, it changes diff prefixes to comment-prefixed
+added, removed, and context labels. It replaces lines that name credential
+primitives with explicit omission markers. Each Thermos skill independently
+reviews every bounded change chunk through the pinned OpenClaw helper with Pi
+and fixed model `openai-codex/gpt-5.6-sol`; the gate preserves every chunk
+report and combines all findings. The runner checks that the frozen worktree
+and Git range did not change before it records the receipt.
+For the functional autoreview pass, preserve a structured summary for every
+bounded dataset, then run one final bounded cross-chunk pass over those summaries.
 The final pass is mandatory and remains bounded; a clean individual dataset
 pass cannot stand in for the final cross-chunk pass, and no dataset summary
 may be dropped. Keep each per-dataset report and the final report in the raw
@@ -119,11 +126,12 @@ repository or a mutable worktree.
 
 
 
-The receipt preserves each raw report and findings separately. Every reviewer
-entry records its principal, harness, fixed model, resolved executable and
-SHA-256 digest, resolved payload and SHA-256 digest, status, actionable finding
-count, exit code, and raw report path/content. A clean pass requires status
-`clean`, zero actionable findings, and exit code `0` for all three reviewers.
+The receipt preserves each raw report and each finding. Every reviewer entry
+records its principal, pinned harness, selected model, pinned helper executable
+and SHA-256 digest, skill payload and SHA-256 digest, status, actionable finding
+count, exit code, and raw report path and content. The Autoreview raw report
+also records the ordered model attempts and their outcome. A clean pass needs
+status `clean`, zero actionable findings, and exit code `0` for all three reviewers.
 The run owns normalization; callers cannot select reviewer commands or submit
 pass envelopes through the public CLI.
 When normalizing a report, `actionable_findings` is a declared non-negative

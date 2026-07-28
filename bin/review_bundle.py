@@ -11,6 +11,7 @@ from review_common import (
     BUNDLE_SCHEMA,
     DIGEST_PATTERN,
     FREEZE_SCHEMA,
+    PASS_DIRECTORY,
     FREEZE_RELATIVE,
     GateError,
     OID_PATTERN,
@@ -194,6 +195,10 @@ def bundle_digest(identity: dict[str, Any]) -> str:
     return f"sha256:{hashlib.sha256(canonical).hexdigest()}"
 
 
+def _is_gate_runtime_path(path: Path) -> bool:
+    return path in {FREEZE_RELATIVE, RECEIPT_RELATIVE} or path.is_relative_to(PASS_DIRECTORY)
+
+
 def worktree_is_dirty_for_paths(repo: Path, new_oid: str, paths: list[Path]) -> None:
     if not paths:
         return
@@ -201,6 +206,10 @@ def worktree_is_dirty_for_paths(repo: Path, new_oid: str, paths: list[Path]) -> 
     changed = run_git(repo, "diff", "--no-ext-diff", "--name-only", "-z", new_oid, "--", *path_args)
     if changed:
         raise GateError("review freeze requires a clean worktree for every frozen path")
+    status_paths = [path for path in paths if not _is_gate_runtime_path(path)]
+    if not status_paths:
+        return
+    status_args = [f":(literal){path.as_posix()}" for path in status_paths]
     status = run_git(
         repo,
         "status",
@@ -209,7 +218,7 @@ def worktree_is_dirty_for_paths(repo: Path, new_oid: str, paths: list[Path]) -> 
         "--untracked-files=all",
         "--ignored=matching",
         "--",
-        *path_args,
+        *status_args,
     )
     if status:
         raise GateError("review freeze requires a clean worktree for every frozen path")
