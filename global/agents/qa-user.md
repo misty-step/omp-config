@@ -14,6 +14,7 @@ containing the validated `input.v1`, semantic resolution, and versioned schemas.
 Use that artifact as the only coordinator input; you have no raw read, edit,
 write, or tracker authority. Validate the supplied plan, freeze and report all
 execution overrides, and return raw persona evidence to the OMP root.
+The OMP root must call `validateInputSemantics(input, { cli, harnessDefaults })` once before constructing this artifact; use its returned `execution_overrides`, effective entrypoints, and threshold as the canonical plan.
 
 Dispatch one dedicated `qa-user-leaf` per configured persona, bounded by the
 input concurrency and session-length ceilings. A leaf receives only its named

@@ -11,6 +11,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 HOOK = ROOT / "global" / "hooks" / "claude-safety.py"
 
+LIB = ROOT / "global" / "lib"
+if str(LIB) not in sys.path:
+    sys.path.insert(0, str(LIB))
+
+from claude_safety.bash_policy import destructive_command_reason, is_safe_bash
+from claude_safety.redaction import redact, secret_path_mentioned
+from claude_safety.skill_audit import build_skill_invocation_entry
+
 
 def run_hook(name: str, payload: object, *, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
     merged = os.environ.copy()
@@ -31,6 +39,21 @@ def hook_json(result: subprocess.CompletedProcess[str]) -> dict[str, object]:
 
 
 class ClaudeSafetyHookTests(unittest.TestCase):
+    def test_public_policy_units_cover_bash_redaction_and_skill_audit(self) -> None:
+        self.assertTrue(is_safe_bash("git status --short"))
+        self.assertEqual(
+            destructive_command_reason("git branch -D master", Path("/tmp")),
+            "Force-deleting master is blocked. Protected branch.",
+        )
+        secret = "-".join(("sk", "or", "v1", "ABCDEF1234567890"))
+        self.assertNotIn(secret, redact(f"token={secret}"))
+        self.assertTrue(secret_path_mentioned("cat ~/.secrets", Path.home()))
+        entry = build_skill_invocation_entry(
+            {"tool_name": "Skill", "tool_input": {"skill": "oracle", "args": ""}, "cwd": "/tmp/project"}
+        )
+        self.assertIsNotNone(entry)
+        self.assertEqual(entry["invocation_kind"], "unknown")
+
     def test_permission_allows_reads_and_safe_bash_but_not_mutation(self) -> None:
         read = run_hook("permission-auto-approve", {"tool_name": "Read", "tool_input": {"file_path": "README.md"}})
         self.assertEqual(hook_json(read)["hookSpecificOutput"]["permissionDecision"], "allow")

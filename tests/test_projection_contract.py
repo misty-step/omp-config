@@ -49,6 +49,25 @@ class ProjectionContractTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(marker.read_text(encoding="utf-8"), "sibling")
 
+    def test_projected_claude_hook_imports_sibling_safety_package(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="omp-claude-hook-projection-") as temporary:
+            agent = Path(temporary) / "agent"
+            hooks = agent / "hooks"
+            hooks.mkdir(parents=True)
+            shutil.copy2(ROOT / "global" / "hooks" / "claude-safety.py", hooks / "claude-safety.py")
+            shutil.copytree(ROOT / "global" / "lib" / "claude_safety", agent / "lib" / "claude_safety")
+            result = subprocess.run(
+                [sys.executable, str(hooks / "claude-safety.py"), "claude-hook", "time-context"],
+                cwd=temporary,
+                input="{}",
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn('"result":"continue"', result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

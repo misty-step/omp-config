@@ -13,7 +13,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "bin"))
 
 from config_contract import ContractError  # noqa: E402
-from launch_contract import compile_bundle, run_bundle, verify_bundle  # noqa: E402
+from launch_compile import compile_bundle  # noqa: E402
+from launch_run import run_bundle  # noqa: E402
+from launch_verify import verify_bundle  # noqa: E402
 
 FIXTURE = ROOT / "tests" / "fixtures" / "launch-contract"
 

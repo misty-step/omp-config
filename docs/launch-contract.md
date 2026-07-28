@@ -62,19 +62,26 @@ Composition sources resolve from repository-local declarations first and the liv
 ## Commands
 
 ```bash
-bin/launch-contract compile path/to/contract.json --out /tmp/my-launch
-bin/launch-contract verify /tmp/my-launch
-bin/launch-contract run /tmp/my-launch --prompt 'Perform the bounded task.'
+python3 bin/launch_contract.py compile path/to/contract.json --out /tmp/my-launch
+python3 bin/launch_contract.py verify /tmp/my-launch
+python3 bin/launch_contract.py run /tmp/my-launch --prompt 'Perform the bounded task.'
 ```
+
+The Python entrypoint in `bin/launch_contract.py` dispatches these commands; the implementation lives in focused modules:
+
+- `bin/launch_compile.py`: `resolve_contract` and `compile_bundle`;
+- `bin/launch_verify.py`: `verify_bundle`;
+- `bin/launch_run.py`: `run_bundle` and auth-broker lifecycle;
+- `bin/contract_utils.py`: shared strict JSON and digest primitives.
 
 `run` verifies every bundle receipt, the canonical manifest digest, the current repository receipt, and the nearest project-agent directory before launch. It creates a temporary `PI_CODING_AGENT_DIR`, exposes only the compiled agent configuration, starts or reuses the OMP auth broker without copying credential bytes into the bundle, invokes stock OMP in print/no-session mode, passes the declared timeout to OMP, enforces a parent-side timeout with a ten-second shutdown grace, and removes the temporary runtime directory afterward.
 
 The permanent fixture is `tests/fixtures/launch-contract`. Its live acceptance path is:
 
 ```bash
-bin/launch-contract compile tests/fixtures/launch-contract/contract.json \
+python3 bin/launch_contract.py compile tests/fixtures/launch-contract/contract.json \
   --out /tmp/omp-launch-proof --force
-bin/launch-contract run /tmp/omp-launch-proof --mode json \
+python3 bin/launch_contract.py run /tmp/omp-launch-proof --mode json \
   --prompt 'Use the task tool exactly once with agent pico. Tell pico to read marker.txt and return it exactly. Then print only pico output.'
 ```
 

@@ -2,8 +2,6 @@
 """Run the pinned three-pass review wave over one immutable evidence packet."""
 from __future__ import annotations
 
-import hashlib
-import importlib.util
 import json
 import re
 import shutil
@@ -12,25 +10,34 @@ import sys
 import tempfile
 from argparse import Namespace
 from concurrent.futures import ThreadPoolExecutor
-from importlib.machinery import SourceFileLoader
 from pathlib import Path
 from typing import Any
 
-from review_gate import (
+from review_bundle import bundle_from_git, freeze_path, load_freeze, receipt_path, repo_root
+from review_common import (
     GateError,
     PASS_DIRECTORY,
     PASS_SCHEMA,
-    _bundle_from_git,
-    _load_freeze,
-    _mapping,
-    _nonnegative_int,
-    freeze_path,
-    record,
-    repo_root,
+    mapping,
+    nonnegative_int,
+    sha256_bytes,
+    unresolved_worker,
+    worker_identity,
+    review_scope,
     write_json,
 )
+from review_receipt import record_receipt
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+AUTOREVIEW_FORK = PROJECT_ROOT / "global" / "external" / "openclaw-autoreview"
+if str(AUTOREVIEW_FORK) not in sys.path:
+    sys.path.insert(0, str(AUTOREVIEW_FORK))
+_prior_bytecode_policy = sys.dont_write_bytecode
+sys.dont_write_bytecode = True
+try:
+    import openclaw_autoreview as autoreview_security
+finally:
+    sys.dont_write_bytecode = _prior_bytecode_policy
 AUTOREVIEW_DEFAULT = PROJECT_ROOT / "global" / "skills" / "autoreview" / "scripts" / "autoreview"
 CURSOR_AGENT_DEFAULT = Path.home() / ".local" / "bin" / "cursor-agent"
 THERMO_SKILLS = {
@@ -47,41 +54,7 @@ AUTOREVIEW_TRANSPORT_RISK_HINT = re.compile(
     r"(?:access|refresh|oauth|bearer|session|auth)[_ -]?token|api[_ -]?key)"
 )
 AUTOREVIEW_REDACTED_VALUE = re.compile(r"(?i)(?:=|:\s*)[\"']?redacted\b")
-_AUTOREVIEW_SECURITY: Any | None = None
 
-
-def _autoreview_security() -> Any:
-    global _AUTOREVIEW_SECURITY
-    if _AUTOREVIEW_SECURITY is None:
-        try:
-            loader = SourceFileLoader("_omp_autoreview_security", str(AUTOREVIEW_DEFAULT.resolve()))
-            spec = importlib.util.spec_from_loader(loader.name, loader)
-            if spec is None:
-                raise RuntimeError("module specification is unavailable")
-            module = importlib.util.module_from_spec(spec)
-            prior_bytecode_policy = sys.dont_write_bytecode
-            sys.dont_write_bytecode = True
-            try:
-                loader.exec_module(module)
-            finally:
-                sys.dont_write_bytecode = prior_bytecode_policy
-            required = (
-                "diff_section_paths",
-                "javascript_review_dialect",
-                "redact_review_patch_metadata",
-                "redact_review_spans",
-                "review_bundle_units",
-                "review_repeatable_secret_spans",
-                "secret_text_risk",
-                "unified_diff_contents",
-            )
-            missing = [name for name in required if not callable(getattr(module, name, None))]
-            if missing:
-                raise RuntimeError(f"missing helpers: {', '.join(missing)}")
-        except Exception as error:
-            raise GateError(f"pinned autoreview security scanner API changed: {error}") from error
-        _AUTOREVIEW_SECURITY = module
-    return _AUTOREVIEW_SECURITY
 
 
 def _comment_frame_diff_hunks(unit: str) -> str:
@@ -120,7 +93,7 @@ def _omit_transport_risk_lines(unit: str, scanner: Any) -> str:
 
 
 def _redact_secret_like_values(diff: bytes) -> bytes:
-    scanner = _autoreview_security()
+    scanner = autoreview_security
     redacted: list[str] = []
     for unit in scanner.review_bundle_units(diff.decode("utf-8", errors="replace")):
         old_path, new_path = scanner.diff_section_paths(unit)
@@ -221,7 +194,7 @@ def _dataset_chunks(diff: bytes) -> list[bytes]:
 
     chunks: list[bytes] = []
     current = bytearray()
-    scanner = _autoreview_security()
+    scanner = autoreview_security
     for section in sections:
         for piece in _split_oversized_section(section):
             candidate = bytes(current) + piece
@@ -239,62 +212,8 @@ def _dataset_chunks(diff: bytes) -> list[bytes]:
     return chunks or [b"# Committed range has no textual diff.\n"]
 
 
-def _sha256_bytes(value: bytes) -> str:
-    return f"sha256:{hashlib.sha256(value).hexdigest()}"
 
 
-def _directory_digest(path: Path) -> str:
-    digest = hashlib.sha256()
-    for item in sorted((entry for entry in path.rglob("*") if entry.is_file()), key=lambda entry: entry.relative_to(path).as_posix()):
-        relative = item.relative_to(path).as_posix().encode("utf-8")
-        digest.update(relative)
-        digest.update(b"\0")
-        digest.update(item.read_bytes())
-    return f"sha256:{digest.hexdigest()}"
-
-
-def _display_path(path: Path) -> str:
-    resolved = path.resolve(strict=False)
-    try:
-        return resolved.relative_to(PROJECT_ROOT.resolve()).as_posix()
-    except ValueError:
-        return str(resolved)
-
-
-def _worker_identity(
-    reviewer: str,
-    executable: Path,
-    model: str,
-    payload: Path,
-) -> dict[str, Any]:
-    executable = executable.resolve(strict=True)
-    payload = payload.resolve(strict=True)
-    if not executable.is_file():
-        raise GateError(f"{reviewer} executable is not a regular file: {executable}")
-    if not payload.is_dir():
-        raise GateError(f"{reviewer} payload is not a directory: {payload}")
-    return {
-        "principal": reviewer,
-        "harness": "openclaw-autoreview" if reviewer == "autoreview" else "cursor-agent",
-        "model": model,
-        "executable": _display_path(executable),
-        "executable_sha256": _sha256_bytes(executable.read_bytes()),
-        "payload": _display_path(payload),
-        "payload_sha256": _directory_digest(payload),
-    }
-
-
-def _unresolved_worker(reviewer: str, model: str, executable: str, payload: Path) -> dict[str, Any]:
-    marker = f"unresolved:{reviewer}:{executable}".encode("utf-8")
-    return {
-        "principal": reviewer,
-        "harness": "openclaw-autoreview" if reviewer == "autoreview" else "cursor-agent",
-        "model": model,
-        "executable": executable,
-        "executable_sha256": _sha256_bytes(marker),
-        "payload": _display_path(payload),
-        "payload_sha256": _sha256_bytes(f"unresolved:{payload}".encode("utf-8")),
-    }
 
 
 def _result_envelope(
@@ -350,7 +269,7 @@ def _read_report(path: Path) -> dict[str, Any]:
         value = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as error:
         raise GateError(f"review worker did not produce valid JSON: {error}") from error
-    return _mapping(value, f"review worker report {path}")
+    return mapping(value, f"review worker report {path}")
 
 SUMMARY_LIMIT = 4_096
 
@@ -366,7 +285,7 @@ def _report_finding_count(report: dict[str, Any], reviewer: str) -> int:
             raise GateError(f"{reviewer} worker must report findings or actionable_findings")
         declared = 0
     else:
-        declared = _nonnegative_int(declared_value, f"{reviewer} worker actionable_findings")
+        declared = nonnegative_int(declared_value, f"{reviewer} worker actionable_findings")
     return max(declared, listed)
 
 
@@ -399,13 +318,28 @@ def _write_packet_file(packet: Path, name: str, content: bytes) -> Path:
     return path
 
 
-def _autoreview_pass(
+def _load_autoreview_report(path: Path, stdout: str, label: str) -> dict[str, Any] | None:
+    if path.is_file():
+        try:
+            return _read_report(path)
+        except GateError:
+            pass
+    if stdout.strip():
+        try:
+            return mapping(json.loads(stdout), label)
+        except (json.JSONDecodeError, GateError):
+            pass
+    return None
+
+
+def run_autoreview_chunks(
     identity: dict[str, Any],
     worktree: Path,
     timeout: int,
     report_temp: Path,
     worker: dict[str, Any],
 ) -> dict[str, Any]:
+    """Run and parse each bounded dataset; no integration or status reduction."""
     packet = worktree / PACKET_DIR
     review_names = sorted(path.name for path in packet.glob("bundle.review.*.diff"))
     executable = (
@@ -414,18 +348,17 @@ def _autoreview_pass(
         else worker["executable"]
     )
     reports: list[dict[str, Any]] = []
-    combined_findings: list[Any] = []
-    integration_entries: list[dict[str, Any]] = []
-    actionable_findings = 0
+    entries: list[dict[str, Any]] = []
+    findings: list[Any] = []
     exit_codes: list[int] = []
+    actionable_findings = 0
     unavailable = False
     failed = False
     for index, review_name in enumerate(review_names):
         report_path = report_temp / f"autoreview.{index:03d}.raw.json"
-        dataset_names = ["freeze.json", "evidence.json", review_name]
         dataset_args = [
             argument
-            for name in dataset_names
+            for name in ("freeze.json", "evidence.json", review_name)
             for argument in ("--dataset", f"{PACKET_DIR}/{name}")
         ]
         command = [
@@ -448,17 +381,7 @@ def _autoreview_pass(
         ]
         exit_code, stdout, stderr = _run_process(command, worktree, timeout)
         exit_codes.append(exit_code)
-        report: dict[str, Any] | None = None
-        if report_path.is_file():
-            try:
-                report = _read_report(report_path)
-            except GateError:
-                report = None
-        if report is None and stdout.strip():
-            try:
-                report = _mapping(json.loads(stdout), "autoreview worker report")
-            except (json.JSONDecodeError, GateError):
-                report = None
+        report = _load_autoreview_report(report_path, stdout, "autoreview worker report")
         if report is None:
             reports.append({"dataset": review_name, "error": stderr.strip() or "missing structured report"})
             actionable_findings += 1
@@ -476,12 +399,9 @@ def _autoreview_pass(
         reports.append({"dataset": review_name, "report": report, **summary})
         raw_findings = report.get("findings")
         if isinstance(raw_findings, list):
-            combined_findings.extend(
-                {**finding, "dataset": review_name} if isinstance(finding, dict) else finding
-                for finding in raw_findings
-            )
+            findings.extend({**finding, "dataset": review_name} if isinstance(finding, dict) else finding for finding in raw_findings)
         actionable_findings += count
-        integration_entries.append(
+        entries.append(
             {
                 "dataset": review_name,
                 **summary,
@@ -489,106 +409,135 @@ def _autoreview_pass(
                 "actionable_findings": count,
             }
         )
-        if (
-            exit_code != 0
-            and count == 0
-        ) or report.get("overall_correctness") not in {"patch is correct", "patch is incorrect"}:
+        if (exit_code != 0 and count == 0) or report.get("overall_correctness") not in {"patch is correct", "patch is incorrect"}:
             failed = True
-
-    integration: dict[str, Any] | None = None
-    if len(integration_entries) == len(review_names) and not unavailable:
-        integration_name = "autoreview.integration.json"
-        integration_bytes = (
-            json.dumps(
-                {
-                    "schema": "omp.review-integration.v1",
-                    "bundle_digest": identity["bundle_digest"],
-                    "chunks": integration_entries,
-                },
-                indent=2,
-                sort_keys=True,
-            )
-            + "\n"
-        ).encode("utf-8")
-        if len(integration_bytes) > AUTOREVIEW_DATASET_BYTES:
-            integration = {"error": "cross-chunk integration evidence exceeded the bounded dataset size"}
-            actionable_findings += 1
-            failed = True
-        else:
-            integration_path = _write_packet_file(packet, integration_name, integration_bytes)
-            report_path = report_temp / "autoreview.integration.raw.json"
-            command = [
-                executable,
-                "--mode",
-                "local",
-                "--engine",
-                "codex",
-                "--prompt",
-                (
-                    f"{_target_name(identity)} only selects this final integration review. Read the immutable "
-                    "packet freeze/evidence and all bounded chunk summaries/findings. Review cross-file, "
-                    "cross-config, and interface interactions. Return only findings, actionable_findings, "
-                    "and overall_correctness; do not return an omp.review-pass.v2 envelope."
-                ),
-                "--dataset",
-                f"{PACKET_DIR}/freeze.json",
-                "--dataset",
-                f"{PACKET_DIR}/evidence.json",
-                "--dataset",
-                f"{PACKET_DIR}/{integration_path.name}",
-                "--json-output",
-                str(report_path),
-            ]
-            exit_code, stdout, stderr = _run_process(command, worktree, timeout)
-            exit_codes.append(exit_code)
-            final_report: dict[str, Any] | None = None
-            if report_path.is_file():
-                try:
-                    final_report = _read_report(report_path)
-                except GateError:
-                    final_report = None
-            if final_report is None and stdout.strip():
-                try:
-                    final_report = _mapping(json.loads(stdout), "autoreview integration report")
-                except (json.JSONDecodeError, GateError):
-                    final_report = None
-            if final_report is None:
-                integration = {"error": stderr.strip() or "missing structured integration report"}
-                actionable_findings += 1
-                failed = True
-            else:
-                try:
-                    final_count = _report_finding_count(final_report, "autoreview integration")
-                except GateError as error:
-                    integration = {"report": final_report, "error": str(error)}
-                    actionable_findings += 1
-                    failed = True
-                else:
-                    integration = {"dataset": integration_path.name, "report": final_report}
-                    raw_findings = final_report.get("findings")
-                    if isinstance(raw_findings, list):
-                        combined_findings.extend(
-                            {**finding, "dataset": "integration"} if isinstance(finding, dict) else finding
-                            for finding in raw_findings
-                        )
-                    actionable_findings += final_count
-                    if (
-                        exit_code != 0
-                        and final_count == 0
-                    ) or final_report.get("overall_correctness") not in {"patch is correct", "patch is incorrect"}:
-                        failed = True
-    else:
-        integration = {"error": "cross-chunk integration skipped because a dataset pass was unavailable or invalid"}
-        failed = True
-
-    raw_report = {
-        "findings": combined_findings,
-        "overall_correctness": "patch is correct" if actionable_findings == 0 and not failed else "patch is incorrect",
-        "chunks": reports,
-        "integration": integration,
+    return {
+        "review_names": review_names,
+        "reports": reports,
+        "entries": entries,
+        "findings": findings,
+        "actionable_findings": actionable_findings,
+        "exit_codes": exit_codes,
+        "unavailable": unavailable,
+        "failed": failed,
     }
-    exit_code = next((code for code in exit_codes if code != 0), 0)
-    if unavailable:
+
+
+def run_autoreview_integration(
+    identity: dict[str, Any],
+    worktree: Path,
+    timeout: int,
+    report_temp: Path,
+    executable: str,
+    chunks: dict[str, Any],
+) -> dict[str, Any]:
+    """Optionally run the cross-chunk pass and return only integration data."""
+    packet = worktree / PACKET_DIR
+    review_names = chunks["review_names"]
+    entries = chunks["entries"]
+    if len(entries) != len(review_names) or chunks["unavailable"]:
+        return {
+            "integration": {"error": "cross-chunk integration skipped because a dataset pass was unavailable or invalid"},
+            "findings": [],
+            "actionable_findings": 0,
+            "exit_codes": [],
+            "failed": True,
+        }
+    integration_name = "autoreview.integration.json"
+    integration_bytes = (
+        json.dumps(
+            {"schema": "omp.review-integration.v1", "bundle_digest": identity["bundle_digest"], "chunks": entries},
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    ).encode("utf-8")
+    if len(integration_bytes) > AUTOREVIEW_DATASET_BYTES:
+        return {
+            "integration": {"error": "cross-chunk integration evidence exceeded the bounded dataset size"},
+            "findings": [],
+            "actionable_findings": 1,
+            "exit_codes": [],
+            "failed": True,
+        }
+    integration_path = _write_packet_file(packet, integration_name, integration_bytes)
+    report_path = report_temp / "autoreview.integration.raw.json"
+    command = [
+        executable,
+        "--mode",
+        "local",
+        "--engine",
+        "codex",
+        "--prompt",
+        (
+            f"{_target_name(identity)} only selects this final integration review. Read the immutable "
+            "packet freeze/evidence and all bounded chunk summaries/findings. Review cross-file, "
+            "cross-config, and interface interactions. Return only findings, actionable_findings, "
+            "and overall_correctness; do not return an omp.review-pass.v2 envelope."
+        ),
+        "--dataset",
+        f"{PACKET_DIR}/freeze.json",
+        "--dataset",
+        f"{PACKET_DIR}/evidence.json",
+        "--dataset",
+        f"{PACKET_DIR}/{integration_path.name}",
+        "--json-output",
+        str(report_path),
+    ]
+    exit_code, stdout, stderr = _run_process(command, worktree, timeout)
+    report = _load_autoreview_report(report_path, stdout, "autoreview integration report")
+    if report is None:
+        return {
+            "integration": {"error": stderr.strip() or "missing structured integration report"},
+            "findings": [],
+            "actionable_findings": 1,
+            "exit_codes": [exit_code],
+            "failed": True,
+        }
+    try:
+        count = _report_finding_count(report, "autoreview integration")
+    except GateError as error:
+        return {
+            "integration": {"report": report, "error": str(error)},
+            "findings": [],
+            "actionable_findings": 1,
+            "exit_codes": [exit_code],
+            "failed": True,
+        }
+    raw_findings = report.get("findings")
+    findings = (
+        [{**finding, "dataset": "integration"} if isinstance(finding, dict) else finding for finding in raw_findings]
+        if isinstance(raw_findings, list)
+        else []
+    )
+    failed = (exit_code != 0 and count == 0) or report.get("overall_correctness") not in {"patch is correct", "patch is incorrect"}
+    return {
+        "integration": {"dataset": integration_path.name, "report": report},
+        "findings": findings,
+        "actionable_findings": count,
+        "exit_codes": [exit_code],
+        "failed": failed,
+    }
+
+
+def reduce_autoreview_results(
+    identity: dict[str, Any],
+    worker: dict[str, Any],
+    chunks: dict[str, Any],
+    integration: dict[str, Any],
+) -> dict[str, Any]:
+    """Purely reduce parsed chunk/integration results into the pass envelope."""
+    actionable_findings = chunks["actionable_findings"] + integration["actionable_findings"]
+    failed = chunks["failed"] or integration["failed"]
+    findings = [*chunks["findings"], *integration["findings"]]
+    raw_report = {
+        "findings": findings,
+        "overall_correctness": "patch is correct" if actionable_findings == 0 and not failed else "patch is incorrect",
+        "chunks": chunks["reports"],
+        "integration": integration["integration"],
+    }
+    exit_code = next((code for code in [*chunks["exit_codes"], *integration["exit_codes"]] if code != 0), 0)
+    if chunks["unavailable"]:
         status = "unavailable"
     elif actionable_findings > 0:
         status = "findings"
@@ -597,6 +546,23 @@ def _autoreview_pass(
     else:
         status = "clean"
     return _result_envelope(identity, "autoreview", status, actionable_findings, exit_code, worker, raw_report)
+
+
+def _autoreview_pass(
+    identity: dict[str, Any],
+    worktree: Path,
+    timeout: int,
+    report_temp: Path,
+    worker: dict[str, Any],
+) -> dict[str, Any]:
+    executable = (
+        str((PROJECT_ROOT / worker["executable"]).resolve())
+        if not Path(worker["executable"]).is_absolute()
+        else worker["executable"]
+    )
+    chunks = run_autoreview_chunks(identity, worktree, timeout, report_temp, worker)
+    integration = run_autoreview_integration(identity, worktree, timeout, report_temp, executable, chunks)
+    return reduce_autoreview_results(identity, worker, chunks, integration)
 
 
 def _strip_code_fence(text: str) -> str:
@@ -615,12 +581,12 @@ def _worker_report(output: str, reviewer: str) -> dict[str, Any]:
         value = json.loads(_strip_code_fence(output))
     except json.JSONDecodeError as error:
         raise GateError(f"{reviewer} worker result is not JSON: {error}") from error
-    report = _mapping(value, f"{reviewer} worker result")
+    report = mapping(value, f"{reviewer} worker result")
     if report.get("schema") == PASS_SCHEMA:
         raise GateError(f"{reviewer} worker attempted to hand-author an {PASS_SCHEMA} envelope")
     if isinstance(report.get("findings"), list):
         return report
-    report["actionable_findings"] = _nonnegative_int(report.get("actionable_findings"), f"{reviewer} worker actionable_findings")
+    report["actionable_findings"] = nonnegative_int(report.get("actionable_findings"), f"{reviewer} worker actionable_findings")
     return report
 
 
@@ -721,7 +687,7 @@ def _packet(
         "freeze": freeze_document,
         "bundle_digest": identity["bundle_digest"],
         "committed_diff": "bundle.diff",
-        "committed_diff_sha256": _sha256_bytes(diff_bytes),
+        "committed_diff_sha256": sha256_bytes(diff_bytes),
         "autoreview_datasets": review_names,
         "autoreview_evidence_policy": "non-deleted diff with credential values redacted; deletion metadata without removed file bodies",
     }
@@ -775,24 +741,28 @@ def _assert_packet_unchanged(snapshot: dict[str, bytes], status: str, worktree: 
 def run_command(args: Namespace) -> int:
     repo = repo_root(args.repo)
     freeze_file = freeze_path(repo, args.freeze)
-    freeze_document, frozen = _load_freeze(repo, freeze_file)
-    current = _bundle_from_git(repo, frozen["old_oid"], frozen["new_oid"], check_worktree=True)
+    freeze_document, frozen = load_freeze(repo, freeze_file)
+    current = bundle_from_git(repo, frozen["old_oid"], frozen["new_oid"], check_worktree=True)
     if current != frozen:
         raise GateError("review freeze does not match the recomputed committed range")
+    if review_scope(frozen["paths"]) == "trivial":
+        raise GateError(
+            "trivial review range requires an explicit, actor-attributed waiver; run review_gate.py waive"
+        )
     output_root = _output_root(repo, getattr(args, "output_dir", None))
     timeout = getattr(args, "timeout", 1800)
     autoreview_path = AUTOREVIEW_DEFAULT.resolve(strict=False)
     autoreview_worker = (
-        _worker_identity("autoreview", autoreview_path, "codex", PROJECT_ROOT / "global" / "external" / "openclaw-autoreview")
+        worker_identity("autoreview", autoreview_path, "codex", PROJECT_ROOT / "global" / "external" / "openclaw-autoreview")
         if autoreview_path.is_file()
-        else _unresolved_worker("autoreview", "codex", str(autoreview_path), PROJECT_ROOT / "global" / "external" / "openclaw-autoreview")
+        else unresolved_worker("autoreview", "codex", str(autoreview_path), PROJECT_ROOT / "global" / "external" / "openclaw-autoreview")
     )
     cursor_path = CURSOR_AGENT_DEFAULT.resolve(strict=True) if CURSOR_AGENT_DEFAULT.is_file() else None
     thermo_workers = {
         reviewer: (
-            _worker_identity(reviewer, cursor_path, "composer-2.5", THERMO_VENDOR)
+            worker_identity(reviewer, cursor_path, "composer-2.5", THERMO_VENDOR)
             if cursor_path is not None
-            else _unresolved_worker(reviewer, "composer-2.5", str(CURSOR_AGENT_DEFAULT), THERMO_VENDOR)
+            else unresolved_worker(reviewer, "composer-2.5", str(CURSOR_AGENT_DEFAULT), THERMO_VENDOR)
         )
         for reviewer in THERMO_SKILLS
     }
@@ -836,7 +806,7 @@ def run_command(args: Namespace) -> int:
                 packet_snapshot[str(integration_path)] = integration_path.read_bytes()
                 packet_status = _worktree_status(worktree)
             _assert_packet_unchanged(packet_snapshot, packet_status, worktree)
-            if _bundle_from_git(repo, frozen["old_oid"], frozen["new_oid"], check_worktree=True) != frozen:
+            if bundle_from_git(repo, frozen["old_oid"], frozen["new_oid"], check_worktree=True) != frozen:
                 raise GateError("reviewed committed range changed while reviewers ran")
         pass_paths: dict[str, Path] = {}
         for envelope in passes:
@@ -847,17 +817,19 @@ def run_command(args: Namespace) -> int:
             pass_path = output_root / f"{reviewer}.json"
             write_json(pass_path, envelope)
             pass_paths[reviewer] = pass_path
-        record_args = Namespace(
-            repo=str(repo),
-            freeze=str(freeze_file),
-            output=None,
-            scope="substantive",
-            autoreview_json=pass_paths["autoreview"],
-            autoreview_exit=passes[0]["exit_code"],
-            thermo_correctness_json=pass_paths["thermo-nuclear-review"],
-            thermo_quality_json=pass_paths["thermo-nuclear-code-quality-review"],
+        output = receipt_path(repo)
+        record_receipt(
+            repo,
+            freeze_file,
+            output,
+            "substantive",
+            pass_paths["autoreview"],
+            passes[0]["exit_code"],
+            pass_paths["thermo-nuclear-review"],
+            pass_paths["thermo-nuclear-code-quality-review"],
         )
-        return record(record_args)
+        print(f"review receipt written: {output}")
+        return 0
     finally:
         subprocess.run(
             ["git", "worktree", "remove", "--force", str(worktree)],

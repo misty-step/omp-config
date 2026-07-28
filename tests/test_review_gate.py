@@ -15,6 +15,8 @@ if str(Path(__file__).resolve().parents[1] / "bin") not in sys.path:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "bin"))
 import review_gate
 import review_runner
+import review_common
+import review_receipt
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests" / "fixtures" / "review-gate"
@@ -91,9 +93,9 @@ class ReviewGateTests(unittest.TestCase):
             "harness": "test-harness",
             "model": "test-model",
             "executable": str(executable),
-            "executable_sha256": review_gate._sha256_bytes(executable.read_bytes()),
+            "executable_sha256": review_common.sha256_bytes(executable.read_bytes()),
             "payload": str(payload),
-            "payload_sha256": review_gate._directory_digest(payload),
+            "payload_sha256": review_common.directory_digest(payload),
         }
     def write_pass(self, identity: dict[str, object], reviewer: str, *, status: str = "clean", findings: int = 0) -> Path:
         path = self.repo / ".omp" / "review-passes" / f"{reviewer}.json"
@@ -207,7 +209,7 @@ class ReviewGateTests(unittest.TestCase):
             **pass_document,
             "pass_artifact": {
                 "path": f".omp/review-passes/{reviewer}.json",
-                "sha256": review_gate._sha256_bytes(pass_path.read_bytes()),
+                "sha256": review_common.sha256_bytes(pass_path.read_bytes()),
             },
         }
         receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
@@ -230,7 +232,7 @@ class ReviewGateTests(unittest.TestCase):
     def test_external_repo_resolves_workers_at_gate_root(self) -> None:
         worker = self.worker_for("autoreview")
         document = {"worker": worker, "raw_report": {}}
-        audited, _ = review_gate._audit_worker(
+        audited, _ = review_receipt.audit_worker(
             document,
             "external review pass",
             self.repo / "external-repo",
@@ -258,6 +260,99 @@ class ReviewGateTests(unittest.TestCase):
         blocked = self.freeze(self.base_oid, new_oid)
         self.assertNotEqual(blocked.returncode, 0)
         self.assertIn("clean worktree", blocked.stderr)
+
+    def test_autoreview_security_api_is_a_normal_import(self) -> None:
+        self.assertEqual(review_runner.autoreview_security.__name__, "openclaw_autoreview")
+        self.assertTrue(callable(review_runner.autoreview_security.secret_text_risk))
+
+    def test_autoreview_import_and_executable_do_not_write_vendor_bytecode(self) -> None:
+        fork_root = ROOT / "global" / "external" / "openclaw-autoreview"
+        cache = fork_root / "__pycache__"
+        if cache.exists():
+            shutil.rmtree(cache)
+        result = self.run_command(sys.executable, str(fork_root / "scripts" / "autoreview"), "--help")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(cache.exists())
+
+    def test_autoreview_reducer_owns_status_and_exit_semantics(self) -> None:
+        identity = {
+            "repository": "test/repository",
+            "old_oid": ZERO_OID,
+            "new_oid": self.base_oid,
+            "commits": [self.base_oid],
+            "paths": ["README.md"],
+            "bundle_digest": "sha256:" + "0" * 64,
+        }
+        chunks = {
+            "review_names": ["bundle.review.000.diff"],
+            "reports": [{"dataset": "bundle.review.000.diff", "report": {}}],
+            "entries": [],
+            "findings": [{"title": "bug", "dataset": "bundle.review.000.diff"}],
+            "actionable_findings": 1,
+            "exit_codes": [0],
+            "unavailable": False,
+            "failed": False,
+        }
+        integration = {
+            "integration": {"dataset": "autoreview.integration.json", "report": {}},
+            "findings": [],
+            "actionable_findings": 0,
+
+            "exit_codes": [2],
+            "failed": True,
+        }
+        result = review_runner.reduce_autoreview_results(identity, TEST_WORKER, chunks, integration)
+        self.assertEqual(result["status"], "findings")
+        self.assertEqual(result["actionable_findings"], 1)
+        self.assertEqual(result["exit_code"], 2)
+        self.assertEqual(result["raw_report"]["findings"], chunks["findings"])
+
+    def test_runner_command_sets_workers_before_review_wave(self) -> None:
+        (self.repo / "app.py").write_text("value = 1\n", encoding="utf-8")
+        new_oid = self.commit("reviewed change", "app.py")
+        self.assertEqual(self.freeze(self.base_oid, new_oid).returncode, 0)
+        identity = self.identity()
+
+        def envelope(reviewer: str) -> dict[str, object]:
+            return {
+                "schema": "omp.review-pass.v2",
+                **identity,
+                "reviewer": reviewer,
+                "status": "clean",
+                "actionable_findings": 0,
+                "exit_code": 0,
+                "worker": TEST_WORKER,
+                "raw_report": {"findings": []},
+            }
+
+        with (
+            patch.object(review_runner, "worker_identity", return_value=TEST_WORKER) as worker_identity,
+            patch.object(review_runner, "unresolved_worker", return_value=TEST_WORKER),
+            patch.object(review_runner, "_packet", return_value={}),
+            patch.object(review_runner, "_worktree_status", return_value=""),
+            patch.object(review_runner, "_assert_packet_unchanged"),
+            patch.object(review_runner, "_autoreview_pass", return_value=envelope("autoreview")) as autoreview_pass,
+            patch.object(
+                review_runner,
+                "_thermo_pass",
+                side_effect=[envelope("thermo-nuclear-review"), envelope("thermo-nuclear-code-quality-review")],
+            ),
+            patch.object(review_runner, "record_receipt"),
+        ):
+            result = review_runner.run_command(
+                Namespace(repo=str(self.repo), freeze=None, output_dir=None, timeout=30)
+            )
+        self.assertEqual(result, 0)
+        self.assertTrue(worker_identity.called)
+        worker_names = {call.args[0] for call in worker_identity.call_args_list}
+        self.assertEqual(
+            worker_names,
+            {"autoreview", "thermo-nuclear-review", "thermo-nuclear-code-quality-review"},
+        )
+        self.assertTrue(
+            any(call.args[0] == "autoreview" and call.args[2] == "codex" for call in worker_identity.call_args_list)
+        )
+        self.assertTrue(autoreview_pass.called)
 
     def test_autoreview_uses_only_immutable_packet_datasets(self) -> None:
         identity = {
@@ -370,7 +465,7 @@ class ReviewGateTests(unittest.TestCase):
         self.assertIn(b"summarizeToolActivity", combined)
         self.assertIn(b"https://user:redacted@example.com/path?token=secret", combined)
         self.assertNotIn(b"user:pass", combined)
-        scanner = review_runner._autoreview_security()
+        scanner = review_runner.autoreview_security
         self.assertFalse(scanner.secret_text_risk(combined.decode("utf-8"), javascript_dialect="typescript"))
 
     def test_autoreview_datasets_remove_secret_values_before_annotation(self) -> None:
@@ -672,6 +767,37 @@ class ReviewGateTests(unittest.TestCase):
         verified = self.run_command(sys.executable, str(GATE), "verify")
         self.assertEqual(verified.returncode, 0, verified.stderr)
 
+    def test_trivial_freeze_cannot_run_or_use_forged_review_receipt(self) -> None:
+        (self.repo / "README.md").write_text("# Revised documentation\n", encoding="utf-8")
+        new_oid = self.commit("documentation", "README.md")
+        self.assertEqual(self.freeze(self.base_oid, new_oid).returncode, 0)
+        run = self.run_command(sys.executable, str(GATE), "run")
+        self.assertNotEqual(run.returncode, 0)
+        self.assertIn("actor-attributed waiver", run.stderr)
+        identity = self.identity()
+        forged = {
+            "schema": "omp.review-receipt.v2",
+            "kind": "review",
+            "repository": identity["repository"],
+            "old_oid": identity["old_oid"],
+            "new_oid": identity["new_oid"],
+            "commits": identity["commits"],
+            "paths": identity["paths"],
+            "bundle_digest": identity["bundle_digest"],
+            "scope": "substantive",
+            "reviewers": [],
+        }
+        receipt = self.repo / ".omp" / "review-receipt.json"
+        receipt.write_text(json.dumps(forged), encoding="utf-8")
+        hook = self.run_command(
+            sys.executable,
+            str(GATE),
+            "hook",
+            input_text=self.protected_update(self.base_oid, new_oid),
+        )
+        self.assertNotEqual(hook.returncode, 0)
+        self.assertIn("actor-attributed waiver", hook.stderr)
+
     def test_committed_range_verification_ignores_uncommitted_worktree_edits(self) -> None:
         (self.repo / "README.md").write_text("# Revised documentation\n", encoding="utf-8")
         new_oid = self.commit("documentation", "README.md")
@@ -756,6 +882,48 @@ class ReviewGateTests(unittest.TestCase):
         self.assertEqual(result, 0)
         self.assertEqual(called, [(self.base_oid, new_oid)])
 
+    def test_tag_only_create_uses_peeled_commit_and_full_history(self) -> None:
+        (self.repo / "app.py").write_text('def result():\n    return "tagged"\n', encoding="utf-8")
+        new_oid = self.commit("tagged commit", "app.py")
+        called: list[tuple[str, str]] = []
+
+        def ensure(_args: Namespace, _repo: Path, old_oid: str, tip: str) -> None:
+            called.append((old_oid, tip))
+
+        update = f"refs/tags/v-create {new_oid} refs/tags/v-create {ZERO_OID}\n"
+        with patch.object(review_gate, "_ensure_review", side_effect=ensure), patch.object(
+            review_gate, "verify", return_value=0
+        ), patch("sys.stdin", io.StringIO(update)):
+            result = review_gate.hook(
+                Namespace(repo=str(self.repo), receipt=None, old_oid=None, new_oid=None, remote="origin")
+            )
+        self.assertEqual(result, 0)
+        self.assertEqual(called, [(ZERO_OID, new_oid)])
+
+    def test_tag_only_update_peels_annotated_old_and_new_objects(self) -> None:
+        old_tag = self.run_command("git", "tag", "-a", "v-update", "-m", "old", self.base_oid)
+        self.assertEqual(old_tag.returncode, 0, old_tag.stderr)
+        old_tag_oid = self.run_command("git", "rev-parse", "refs/tags/v-update").stdout.strip()
+        (self.repo / "app.py").write_text('def result():\n    return "updated tag"\n', encoding="utf-8")
+        new_oid = self.commit("updated tag commit", "app.py")
+        new_tag = self.run_command("git", "tag", "-fa", "v-update", "-m", "new", new_oid)
+        self.assertEqual(new_tag.returncode, 0, new_tag.stderr)
+        new_tag_oid = self.run_command("git", "rev-parse", "refs/tags/v-update").stdout.strip()
+        called: list[tuple[str, str]] = []
+
+        def ensure(_args: Namespace, _repo: Path, old_oid: str, tip: str) -> None:
+            called.append((old_oid, tip))
+
+        update = f"refs/tags/v-update {new_tag_oid} refs/tags/v-update {old_tag_oid}\n"
+        with patch.object(review_gate, "_ensure_review", side_effect=ensure), patch.object(
+            review_gate, "verify", return_value=0
+        ), patch("sys.stdin", io.StringIO(update)):
+            result = review_gate.hook(
+                Namespace(repo=str(self.repo), receipt=None, old_oid=None, new_oid=None, remote="origin")
+            )
+        self.assertEqual(result, 0)
+        self.assertEqual(called, [(self.base_oid, new_oid)])
+
     def test_malformed_input_feature_skip_and_protected_delete(self) -> None:
         tag = self.run_command(
             sys.executable,
@@ -807,7 +975,7 @@ class ReviewGateTests(unittest.TestCase):
         # credential-shaped evidence; lossy line omission is acceptable.
         redacted = review_runner._redact_secret_like_values(diff)
         self.assertTrue(redacted.startswith(b"diff --git a/driver.sh"))
-        scanner = review_runner._autoreview_security()
+        scanner = review_runner.autoreview_security
         self.assertFalse(scanner.secret_text_risk('expected="credentials:directory:entries"'))
         synthetic = "ghp_" + "A" * 40
         self.assertTrue(
@@ -815,13 +983,8 @@ class ReviewGateTests(unittest.TestCase):
                 'expected="credentials:directory:entries"; api_token=' + f'"{synthetic}"'
             )
         )
-        # The descriptor mask must be length-preserving: repeatable secret
-        # spans are computed on masked text but applied to the original, so
-        # any length drift would misalign redaction offsets.
-        descriptor = "credentials:directory:entries"
-        masked = scanner.mask_safe_structural_descriptors(descriptor)
-        self.assertNotEqual(masked, descriptor)
-        self.assertEqual(len(masked), len(descriptor))
+        # Descriptors are excluded at the classifier layer, so span
+        # coordinates always refer to the original, unmodified text.
         mixed = 'x="credentials:directory:entries"; api_token=' + f'"{synthetic}"'
         spans = scanner.review_repeatable_secret_spans(mixed)
         self.assertTrue(spans)
