@@ -389,9 +389,10 @@ class ReviewGateTests(unittest.TestCase):
         self.assertTrue(redacted.startswith(b"diff --git a/driver.sh"))
         scanner = review_runner._autoreview_security()
         self.assertFalse(scanner.secret_text_risk('expected="credentials:directory:entries"'))
+        synthetic = "ghp_" + "A" * 40
         self.assertTrue(
             scanner.secret_text_risk(
-                'expected="credentials:directory:entries"; api_token="ghp_' + "A" * 40 + '"'
+                'expected="credentials:directory:entries"; api_token=' + f'"{synthetic}"'
             )
         )
 
