@@ -29,7 +29,7 @@ The rig runs against stock OMP APIs. It does not patch the OMP package.
 
 ## Repository surfaces
 
-The table below is the complete 16-surface projection declared in `provenance.yaml`.
+The table below is the complete 18-surface projection declared in `provenance.yaml`.
 
 |Surface|Authority|Purpose|
 |---|---|---|
@@ -48,9 +48,25 @@ The table below is the complete 16-surface projection declared in `provenance.ya
 |global/themes/|~/.omp/agent/themes/|Theme library. Kanagawa is the active dark theme. Kanagawa Lotus is the active light theme.|
 |global/presets/|~/.omp/agent/presets/|Launch overlays for lean, design, operations, and research work.|
 |global/hooks/review-gate.py|~/.omp/agent/hooks/review-gate.py|Projected review-gate entrypoint used by managed project hooks.|
+|bin/review_gate.py|~/.omp/agent/bin/review_gate.py|Canonical review-gate implementation used by the projected hook.|
+|bin/review_runner.py|~/.omp/agent/bin/review_runner.py|Canonical multi-review runner used by the gate.|
 |global/hooks/claude-safety.py|~/.omp/agent/hooks/claude-safety.py|Claude safety hook.|
 
-`bin/install` creates all 16 live links, verifies their digests, and may back up conflicting authority targets. It does not copy runtime state into this repository. `bin/install --project PATH` additionally installs an idempotent managed `pre-push` hook at Git's active hooks path; that hook runs any backed-up foreign hook first and then the canonical projected review gate.
+`bin/install` creates all 18 live links, verifies their digests, and may back up conflicting authority targets. It does not copy runtime state into this repository. `bin/install --project PATH` additionally installs an idempotent managed `pre-push` hook at Git's active hooks path; that hook runs any backed-up foreign hook first and then the projected review gate, whose sibling `../bin/review_gate.py` is the declared canonical implementation.
+
+The projected `bin/` directory is a runtime cotenant. Only the declared
+`review_gate.py` and `review_runner.py` links are owned by this repository;
+other installed bin entries remain untouched.
+
+## Standalone checkout prerequisite
+
+`omp-config` owns the OMP projection but does not vendor the first-party
+`@misty-step/harness-primitives` or `@misty-step/qa-users` packages. Before
+running `npm install` from a standalone clone, run `python3 bin/preflight.py`
+and bootstrap those sibling repositories at `../harness-primitives` and
+`../qa-users`. The npm `preinstall` hook repeats the check and names every
+missing package and its required path; do not replace sibling packages with
+copies or broken symlinks.
 
 The extensions directory is co-tenanted. `herdr-omp-agent-state.ts` remains a real, Herdr-managed file at ~/.omp/agent/extensions/herdr-omp-agent-state.ts. Its header states that Herdr overwrites it during integration updates. The provenance contract records this cotenant with owner herdr. The four OMP extension files are separate file links. The installed audit rejects every other extension entry. This prevents an invisible writer from entering the projected home. It also prevents Herdr from writing into the repository and prevents Git operations from rolling back the integration.
 

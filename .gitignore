@@ -17,6 +17,7 @@ managed-skills/
 # Generated validation artifacts.
 .tmp/
 dist/
+.omp/
 node_modules/
 .DS_Store
 __pycache__/

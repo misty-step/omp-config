@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "scripts": {
+    "preinstall": "python3 bin/preflight.py"
+  },
   "dependencies": {
     "@misty-step/harness-primitives": "file:../harness-primitives",
     "@misty-step/qa-users": "file:../qa-users"

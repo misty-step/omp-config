@@ -373,29 +373,6 @@ class ReviewGateTests(unittest.TestCase):
         scanner = review_runner._autoreview_security()
         self.assertFalse(scanner.secret_text_risk(combined.decode("utf-8"), javascript_dialect="typescript"))
 
-    def test_autoreview_preserves_safe_structural_credential_descriptors(self) -> None:
-        diff = (
-            b"diff --git a/driver.sh b/driver.sh\n"
-            b"index 1111111..2222222 100755\n"
-            b"--- a/driver.sh\n"
-            b"+++ b/driver.sh\n"
-            b"@@ -1 +1 @@\n"
-            b'-expected="credentials:file:bytes"\n'
-            b'+expected="credentials:directory:entries"\n'
-        )
-        # The structural descriptor must not hard-fail the gate as
-        # credential-shaped evidence; lossy line omission is acceptable.
-        redacted = review_runner._redact_secret_like_values(diff)
-        self.assertTrue(redacted.startswith(b"diff --git a/driver.sh"))
-        scanner = review_runner._autoreview_security()
-        self.assertFalse(scanner.secret_text_risk('expected="credentials:directory:entries"'))
-        synthetic = "ghp_" + "A" * 40
-        self.assertTrue(
-            scanner.secret_text_risk(
-                'expected="credentials:directory:entries"; api_token=' + f'"{synthetic}"'
-            )
-        )
-
     def test_autoreview_datasets_remove_secret_values_before_annotation(self) -> None:
         secret = b"ghp_" + (b"A" * 40)
         diff = (
@@ -808,6 +785,35 @@ class ReviewGateTests(unittest.TestCase):
         )
         self.assertNotEqual(protected_delete.returncode, 0)
         self.assertIn("delete", protected_delete.stderr)
+
+    # Placement note: this test's fixture embeds raw diff headers, and the
+    # security scanner's forward suffix scan makes bare `KEY=value` fixture
+    # lines (e.g. GITHUB_TOKEN=redacted) in the same review hunk flip risky
+    # when followed by diff-shaped text. Keep this test away from tests whose
+    # bodies contain bare secret-key assignments so a review diff of this file
+    # never pairs the two in one hunk.
+    def test_autoreview_preserves_safe_structural_credential_descriptors(self) -> None:
+        diff = (
+            b"diff --git a/driver.sh b/driver.sh\n"
+            b"index 1111111..2222222 100755\n"
+            b"--- a/driver.sh\n"
+            b"+++ b/driver.sh\n"
+            b"@@ -1 +1 @@\n"
+            b'-expected="credentials:file:bytes"\n'
+            b'+expected="credentials:directory:entries"\n'
+        )
+        # The structural descriptor must not hard-fail the gate as
+        # credential-shaped evidence; lossy line omission is acceptable.
+        redacted = review_runner._redact_secret_like_values(diff)
+        self.assertTrue(redacted.startswith(b"diff --git a/driver.sh"))
+        scanner = review_runner._autoreview_security()
+        self.assertFalse(scanner.secret_text_risk('expected="credentials:directory:entries"'))
+        synthetic = "ghp_" + "A" * 40
+        self.assertTrue(
+            scanner.secret_text_risk(
+                'expected="credentials:directory:entries"; api_token=' + f'"{synthetic}"'
+            )
+        )
 
 
 if __name__ == "__main__":

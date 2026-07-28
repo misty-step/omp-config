@@ -67,16 +67,19 @@ An agent that omits `tools` receives OMP's full built-in tool catalog. Restricte
 
 ## MCP and tool routes
 
+Disabled-server policy and CLI replacements are recorded in
+`mcp-pruning.md`; a disabled MCP name is never a route.
+
 | Need | Primitive |
 |---|---|
 | repository code intelligence | LSP before text search for symbols |
 | bounded repository search | `scout`, `grep`, `glob`, `read` |
 | current external facts | `web_search`; use `librarian` for API and library source |
-| broad local knowledge search | QMD MCP |
-| browser behavior or visual proof | builtin `browser` first, then the `agent-browser` CLI, then the `chrome-devtools` CLI; add Gemini vision. The Chrome DevTools MCP stays disabled |
+| broad local knowledge search | `grep`, `glob`, `read`, or the local search CLI |
+| browser behavior or visual proof | builtin `browser` first, then the `agent-browser` CLI, then the `chrome-devtools` CLI for scored audits/traces/heap work; the Chrome DevTools MCP stays disabled |
 | Powder work ledger | Powder MCP; claim one card before mutation |
 | R90 work ledger | Habitat MCP only; never Powder |
-| production health and incidents | Canary MCP through `factory-apps` |
+| production health and incidents | Canary CLI/API through `factory-apps`; the Canary MCP stays disabled |
 | vendor credentials | Mint broker; no local secret bytes |
 | GitHub repository operations | GitHub device tool; use repository URLs as evidence |
 | model or harness second opinion | `peer-harnesses`, `council`, or `oracle` according to the required surface |

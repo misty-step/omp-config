@@ -2,7 +2,7 @@
   "schema_version": "omp-config.provenance.v3",
   "authority": {
     "repository": ".",
-    "source_root": "global",
+    "source_root": ".",
     "surfaces": {
       "settings": {
         "source": "global/config.yml",
@@ -99,6 +99,18 @@
         "target": "hooks/claude-safety.py",
         "kind": "file",
         "origin": "local"
+      },
+      "review_gate_binary": {
+        "source": "bin/review_gate.py",
+        "target": "bin/review_gate.py",
+        "kind": "file",
+        "origin": "local"
+      },
+      "review_runner_binary": {
+        "source": "bin/review_runner.py",
+        "target": "bin/review_runner.py",
+        "kind": "file",
+        "origin": "local"
       }
     }
   },
@@ -143,7 +155,8 @@
     "terminal-sessions",
     "managed-skills",
     "extensions",
-    "hooks"
+    "hooks",
+    "bin"
   ],
   "migration": {
     "agents": "rewritten for OMP task-agent frontmatter and prompt bodies",

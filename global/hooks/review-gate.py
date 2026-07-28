@@ -5,8 +5,10 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-SOURCE_ROOT = Path(__file__).resolve().parents[2]
-BIN_ROOT = SOURCE_ROOT / "bin"
+AGENT_ROOT = Path(__file__).resolve().parents[1]
+BIN_ROOT = AGENT_ROOT / "bin"
+if not (BIN_ROOT / "review_gate.py").is_file():
+    BIN_ROOT = Path(__file__).resolve().parents[2] / "bin"
 if str(BIN_ROOT) not in sys.path:
     sys.path.insert(0, str(BIN_ROOT))
 

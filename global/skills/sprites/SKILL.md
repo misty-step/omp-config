@@ -63,6 +63,13 @@ A non-secret ownership record lands in
 exactly match the remote marker and one checkpoint comment. This local witness
 prevents an arbitrary or recycled Sprite from declaring itself owned.
 
+On first use after the path move, the helper atomically migrates legacy
+`~/.roster/receipts/sprite-lane` and `~/.roster/state/sprite-lane` directories
+to these destinations only when each destination is absent. A destination
+collision stops the command and leaves the legacy directory untouched; resolve
+the collision explicitly before retrying. Explicit `SPRITE_LANE_RECEIPTS` or
+`SPRITE_LANE_OWNERS` overrides disable this default migration.
+
 ## Ownership and isolation
 
 `bake` works only on a newly created Sprite or one already proven to have an
