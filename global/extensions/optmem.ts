@@ -1,18 +1,8 @@
 import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent";
 import { OPTMEM_ENTRY_BYTES, OptMemRuntime, type OptMemAction } from "../lib/optmem-runtime.ts";
 
-const CHILD_BOUNDARY = "You are a subagent. Don't run memo.";
-
-function isTaskChild(pi: Pick<ExtensionAPI, "getActiveTools">): boolean {
-	return pi.getActiveTools().includes("yield") || process.env.PI_SUBAGENT_CHILD === "1";
-}
-
 
 export default function (pi: ExtensionAPI): void {
-	// Native OMP task sessions carry the task-only `yield` contract. They do not
-	// register this extension, invoke memo, or touch the shared store.
-	if (isTaskChild(pi)) return;
-
 	const { z } = pi.zod;
 	const memoText = z
 		.string()
@@ -23,6 +13,7 @@ export default function (pi: ExtensionAPI): void {
 			`OptMem entries must be at most ${OPTMEM_ENTRY_BYTES} UTF-8 bytes`,
 		);
 	const runtime = new OptMemRuntime();
+	let taskChild = false;
 	const parameters = z.discriminatedUnion("action", [
 		z.object({ action: z.literal("note"), text: memoText }),
 		z.object({ action: z.literal("recall"), regex: z.string().min(1).max(4096) }),
@@ -40,6 +31,13 @@ export default function (pi: ExtensionAPI): void {
 			"Use the one durable OptMem identity. Actions: note, recall, zoom, nap (only when required), and status. Never use this from a subagent.",
 		parameters,
 		async execute(_toolCallId, params, signal, _onUpdate, _ctx: ExtensionContext) {
+			if (taskChild) {
+				return {
+					content: [{ type: "text" as const, text: "OptMem is unavailable in task children." }],
+					isError: true,
+					details: {},
+				};
+			}
 			const result = await runtime.execute(params as OptMemAction, signal);
 			return {
 				content: [{ type: "text" as const, text: result.text }],
@@ -50,11 +48,20 @@ export default function (pi: ExtensionAPI): void {
 	});
 
 	pi.on("session_start", async () => {
+		const activeTools = pi.getActiveTools();
+		taskChild = activeTools.includes("yield");
+		if (taskChild) {
+			if (activeTools.includes("optmem")) {
+				await pi.setActiveTools(activeTools.filter(name => name !== "optmem"));
+			}
+			return;
+		}
 		runtime.reset();
 		await runtime.start();
 	});
 
 	pi.on("before_agent_start", async event => {
+		if (taskChild) return;
 		await runtime.start();
 		const material = runtime.wakePrompt();
 		if (!material) return;
@@ -62,6 +69,7 @@ export default function (pi: ExtensionAPI): void {
 	});
 
 	pi.on("tool_call", async event => {
+		if (taskChild) return;
 		if (event.toolName === "optmem") return;
 		await runtime.start();
 		if (runtime.state === "ready") return;
@@ -72,5 +80,3 @@ export default function (pi: ExtensionAPI): void {
 		return { block: true, reason };
 	});
 }
-
-export { CHILD_BOUNDARY, isTaskChild };

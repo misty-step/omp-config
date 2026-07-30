@@ -126,6 +126,8 @@ interface MemoRun {
 	stderr: string;
 }
 
+type MemoSpawn = typeof Bun.spawn;
+
 interface BlockRange {
 	lo: number;
 	hi: number;
@@ -366,6 +368,11 @@ export class OptMemRuntime {
 	#wakeMaterial = "";
 	#startPromise: Promise<void> | undefined;
 	#receipt: OptMemReceipt | undefined;
+	#spawnProcess: MemoSpawn;
+
+	constructor(spawnProcess: MemoSpawn = Bun.spawn) {
+		this.#spawnProcess = spawnProcess;
+	}
 
 	get state(): OptMemState {
 		return this.#state;
@@ -546,8 +553,12 @@ export class OptMemRuntime {
 	private async #spawn(args: string[], write: boolean, signal?: AbortSignal): Promise<MemoRun> {
 		let child: ReturnType<typeof Bun.spawn>;
 		try {
-			child = Bun.spawn([...RESTRICTED_LAUNCH, OPTMEM_EXECUTABLE, ...args], {
-				env: { ...process.env, MEMORY_DIR: OPTMEM_STORE },
+			child = this.#spawnProcess([...RESTRICTED_LAUNCH, OPTMEM_EXECUTABLE, ...args], {
+				env: {
+					HOME: process.env.HOME ?? homedir(),
+					MEMORY_DIR: OPTMEM_STORE,
+					PATH: process.env.PATH ?? "",
+				},
 				stdout: "pipe",
 				stderr: "pipe",
 			});
