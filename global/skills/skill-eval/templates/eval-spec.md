@@ -1,8 +1,8 @@
 # /<skill> eval
 
-> Template. Copy to `global/skills/<skill>/evals/<skill>-eval.md` and fill. Delete this
-> line and the bracketed guidance. Keep it a run-with-a-grader, not a directory
-> shape; the protocol contract is
+> Template. Copy this file to `global/skills/<skill>/evals/<skill>-eval.md` and
+> fill it. Delete this line and the bracketed guidance. Keep a run-with-a-grader,
+> not a directory shape. Use the protocol contract at
 > `global/skills/harness-engineering/references/mode-eval.md`.
 
 The one claim `<skill>` must earn: **[one falsifiable sentence — the thing the
@@ -41,9 +41,9 @@ to the claim. Drop any dimension a strong B-arm couldn't lose.]
 
 ## Pass condition
 
-A beats B paired on [the claim metric] across ≥2 of [N] fixtures, AND
-ties-or-wins every objective check. [State the bar a no-op skill fails — what
-the raw arm reliably omits.]
+A beats B paired on [the claim metric] across ≥2 of [N] fixtures and ties or wins
+every objective check. [State the bar a no-op skill fails — what the raw arm
+reliably omits.]
 
 ## Human anchor
 

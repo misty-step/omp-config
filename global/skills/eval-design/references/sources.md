@@ -1,107 +1,119 @@
 # Eval-design source canon
 
-Annotated primary sources behind this skill, ranked by fit for our context
-(agentic software-engineering workflows, model+harness comparison under budget,
-Crucible as the enforcement engine). Load this file when you need to justify a
-methodology choice or go deeper than the skill's distillation. Research date
-2026-07-07; every entry carries its own date — re-verify anything load-bearing
-that has aged.
+This file annotates the primary sources behind this skill.
+It ranks them by fit for agentic software-engineering workflows,
+model+harness comparison under budget, and Crucible as the enforcement engine.
+Load it to justify a methodology choice or go deeper than the skill's distillation.
+Research date: 2026-07-07. Re-verify each load-bearing entry that has aged.
 
 ## The three to read first
 
 ### Anthropic — "Demystifying evals for AI agents" (2026-01-09)
 anthropic.com/engineering/demystifying-evals-for-ai-agents
 
-The agentic design front-end. What to take:
-- Grade **outcomes + transcripts, not trajectories**: verify the final
-  environment state (the reservation exists in the DB; the patch fixes the bug),
-  never a prescribed step sequence — "agents regularly find valid approaches."
-- **`pass@k` vs `pass^k`** is a product decision: any-of-k succeeds (coding) vs
-  all-k succeed (customer-facing). At k=10 they tell opposite stories.
-- **20–50 tasks from real failures** (bug tracker, support queue) is a strong
-  start; a good task is one where **two domain experts independently reach the
-  same pass/fail verdict**.
-- Attach a **reference solution** per task — proves solvability and verifies the
-  grader. "A 0% pass rate… is most often a signal of a broken task."
-- **Class-balance** ("test where a behavior should occur and where it
-  shouldn't"); give the judge an "Unknown" exit; isolate trials in clean
-  environments; read transcripts.
+The agentic design front end. Take these points:
+- Grade **outcomes + transcripts, not trajectories**.
+  Verify the final environment state, such as the reservation in the DB or the
+  patch that fixes the bug. Do not prescribe a step sequence.
+  "Agents regularly find valid approaches."
+- Treat **`pass@k` vs `pass^k`** as a product decision.
+  Any-of-k succeeds in coding; all-k succeeds for customer-facing consistency.
+  At k=10, the measures tell opposite stories.
+- Start with **20–50 tasks from real failures** in the bug tracker or support queue.
+  A good task lets **two domain experts independently reach the same pass/fail verdict**.
+- Attach a **reference solution** to each task.
+  It proves solvability and verifies the grader.
+  "A 0% pass rate… is most often a signal of a broken task."
+- **Class-balance** the corpus.
+  Test where behavior should occur and where it should not.
+  Give the judge an "Unknown" exit, isolate trials in clean environments, and
+  read transcripts.
 
 ### Hamel Husain — "Your AI Product Needs Evals" (2024-03-29)
 hamel.dev/blog/posts/evals/
 
-The eval-driven-development frame. What to take:
-- Three levels: L1 unit-test assertions (cheap, CI), L2 human & model eval,
-  L3 A/B. Climb only as needed.
-- **"You are doing it wrong if you aren't looking at lots of data"** — read
-  traces until you stop learning; grader bugs and broken tasks only surface
-  there.
-- The **critique-align judge loop**: powerful model emits pass/fail + critique,
-  human labels the same items, measure agreement, iterate the judge prompt.
+The eval-driven-development frame. Take these points:
+- Use three levels: L1 unit-test assertions (cheap, CI), L2 human and model eval,
+  and L3 A/B. Climb only as needed.
+- **"You are doing it wrong if you aren't looking at lots of data."**
+  Read traces until you stop learning. Grader bugs and broken tasks surface there.
+- Use the **critique-align judge loop**.
+  Have a powerful model emit pass/fail plus critique.
+  Have a human label the same items, measure agreement, and iterate the judge prompt.
   Use **precision/recall, not raw agreement, on imbalanced data**.
-- The data flywheel: eval infra is what turns a demo into a product.
+- The data flywheel turns a demo into a product through eval infrastructure.
 
 ### Evan Miller — "Adding Error Bars to Evals" (arXiv:2411.00640, 2024-11)
 Also: aievals.co/cookbook/adding-error-bars
 
-The statistics behind Crucible's whole thesis. Five recommendations:
-1. Report SE of the mean + CIs; treat questions as an i.i.d. sample from a
-   super-population; binary `SE = sqrt(p(1-p)/n)`.
-2. **Clustered standard errors for grouped questions — can be >3× naive.**
-   (Crucible does not yet compute these; flag grouped corpora.)
-3. Reduce variance by resampling / next-token probs; **don't tune temperature
-   for variance**.
-4. **Paired analysis when comparing two models** — "a free reduction in
-   estimator variance": `Var(paired) = Var(unpaired) − 2·Cov(A,B)/n`.
-5. Power-analyze n; "new evals should contain at least 1,000 questions" to
-   detect 3% at 80% power — most bespoke evals resolve only larger effects, so
-   declare the resolvable effect.
+The statistics behind Crucible's thesis. Apply these five recommendations:
+1. Report SE of the mean and CIs. Treat questions as an i.i.d. sample from a
+   super-population. Use binary `SE = sqrt(p(1-p)/n)`.
+2. **Cluster standard errors for grouped questions.** They can exceed naive
+   errors by >3×. Crucible does not compute them yet, so flag grouped corpora.
+3. Reduce variance through resampling or next-token probabilities.
+   **Do not tune temperature for variance.**
+4. **Use paired analysis when comparing two models.**
+   This gives "a free reduction in estimator variance":
+   `Var(paired) = Var(unpaired) − 2·Cov(A,B)/n`.
+5. Power-analyze n. "New evals should contain at least 1,000 questions" to
+   detect 3% at 80% power. Most bespoke evals resolve only larger effects.
+   Declare the resolvable effect.
 
 ## Judge-bias literature
 
 ### MT-Bench — Zheng et al. (arXiv:2306.05685, 2023-06)
-Canonical judge biases: **position, verbosity, self-enhancement/self-preference,
-limited reasoning**. Mitigations: swap answer positions and require both-order
-agreement; a strong judge reaches >80% agreement with humans (≈ inter-human
-agreement). Pairwise / single-answer / reference-guided judging modes.
+Canonical judge biases include **position, verbosity,
+self-enhancement/self-preference, and limited reasoning**.
+Mitigate them by swapping answer positions and requiring both-order agreement.
+A strong judge reaches >80% agreement with humans (≈ inter-human agreement).
+Use pairwise, single-answer, or reference-guided judging modes.
 
 ### G-Eval — Liu et al. (arXiv:2303.16634, 2023)
-Chain-of-thought + form-filling judge, now standard (promptfoo `g-eval`).
-Known **bias toward fluent LLM-generated text** — watch it when candidates mix
+Use a chain-of-thought and form-filling judge, now standard (promptfoo `g-eval`).
+Watch the known **bias toward fluent LLM-generated text** when candidates mix
 human and model authorship.
 
 ### Braintrust — "What is an LLM-as-a-judge?" (braintrust.dev)
-Practitioner consolidation: deterministic checks own format/schema, judges own
-only subjective dimensions; randomize order both directions; run multiple times
-and average; calibrate against a **100–200-example human-labeled set** and
-report the correlation. Convergent finding across promptfoo/Databricks/
-Anthropic examples: **binary or ≤5-point scales beat 1–10**.
+Use deterministic checks for format and schema.
+Use judges only for subjective dimensions.
+Randomize order in both directions, run multiple times, and average.
+Calibrate against a **100–200-example human-labeled set** and report correlation.
+Across promptfoo, Databricks, and Anthropic examples, **binary or ≤5-point scales
+beat 1–10**.
 
 ## Reference architectures & tools (borrow, don't rebuild)
 
 ### UK AISI Inspect — inspect.aisi.org.uk
-Highest architectural fit. `Task` · `Dataset/Sample` · `Solver` · `Scorer`
-mirrors Crucible's EvalSpec + runner + grader. **Epochs + reducers** are the
-repeated-trials mechanism that makes `pass@k`/`pass^k` and variance reduction
-computable — the model to borrow. First-class agentic: tools, sandboxing,
-200+ pre-built evals.
+Inspect has the highest architectural fit.
+`Task` · `Dataset/Sample` · `Solver` · `Scorer` mirror Crucible's EvalSpec,
+runner, and grader.
+**Epochs + reducers** implement repeated trials for `pass@k`, `pass^k`, and
+variance reduction. Borrow this model.
+Inspect supports agentic tools, sandboxing, and 200+ pre-built evals.
 
 ### promptfoo — promptfoo.dev
-providers × prompts × tests × assertions; deterministic (`equals`/`contains`/
-`is-json`/regex) vs model-graded (`llm-rubric`/`g-eval`/`factuality`);
-trajectory assertions for agents. Already Crucible's first import adapter.
+promptfoo provides providers × prompts × tests × assertions.
+It supports deterministic (`equals`/`contains`/`is-json`/regex) and
+model-graded (`llm-rubric`/`g-eval`/`factuality`) checks.
+It also supports trajectory assertions for agents.
+Crucible already uses it as the first import adapter.
 
 ### OpenAI Evals — github.com/openai/evals
-JSONL + YAML, no-code for basic/model-graded template families; **grade with a
-different model than completed**. Good second import-adapter candidate.
+JSONL + YAML support no-code basic and model-graded template families.
+**Grade with a different model than completed.**
+OpenAI Evals is a good second import-adapter candidate.
 
 ### Also scanned
-Braintrust `Eval()` + autoevals (weak on published significance math — Crucible
-is ahead); LangSmith evals (commodity); Ragas (RAG metric decomposition, not an
-agentic-SWE fit); Anthropic platform docs "Define success criteria and build
-evaluations" (SMART criteria, grader ladder, reasoning-first judging — validates
-Crucible's tail-anchored verdict parsing); Anthropic cookbook
-`misc/building_evals.ipynb`; Matt Pocock's Evalite + aihero.dev (same
-dataset+task+scorers frame, TS/Vitest runner). Skill registries (skills.sh,
-Anthropic, Pocock's 50): **no eval-design skill exists anywhere** — this skill
-was authored fresh from the sources above.
+Braintrust `Eval()` + autoevals have weak published significance math;
+Crucible is ahead.
+LangSmith evals are commodity.
+Ragas provides RAG metric decomposition, not an agentic-SWE fit.
+Anthropic platform docs, "Define success criteria and build evaluations,"
+cover SMART criteria, the grader ladder, and reasoning-first judging.
+They validate Crucible's tail-anchored verdict parsing.
+Also scanned: Anthropic cookbook `misc/building_evals.ipynb`, Matt Pocock's
+Evalite, and aihero.dev. They use the same dataset+task+scorers frame with a
+TS/Vitest runner.
+Skill registries (skills.sh, Anthropic, Pocock's 50) show **no eval-design skill
+exists anywhere**. This skill was authored fresh from the sources above.

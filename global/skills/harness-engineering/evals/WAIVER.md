@@ -4,15 +4,20 @@ expires: 2026-08-30
 
 ## Reason
 
-Self-referential: this is the meta-skill used to build and audit the skill catalog's own eval coverage (this waiver pass included). Fixtures need to be authored from outside its own working session to avoid circularity.
+This self-referential meta-skill builds and audits the skill catalog's own eval
+coverage, including this waiver pass.
+Author fixtures outside the working session to avoid circularity.
 
 ## Disposition
 
-Not exempt from the eval-coverage contract — this waiver is a time-boxed
-deferral, not a permanent opt-out. When it expires, either an eval spec lands
-at `global/skills/harness-engineering/evals/harness-engineering-eval.md` (see `global/skills/skill-eval/templates/eval-spec.md`)
-or this waiver is renewed with a fresh reason and date. A stale, silently
-renewed waiver with no new reasoning is itself a finding for `/harness-engineering`'s
-next skill-health audit.
+This waiver is not exempt from the eval-coverage contract.
+It is a time-boxed deferral, not a permanent opt-out.
+Before it expires, add an eval spec at
+`global/skills/harness-engineering/evals/harness-engineering-eval.md`.
+Use `global/skills/skill-eval/templates/eval-spec.md`.
+Otherwise, renew this waiver with a fresh reason and date.
+A stale waiver that renews silently without new reasoning is itself a finding
+for `/harness-engineering`'s next skill-health audit.
 
-No automated eval; revisit when this skill changes. Per-skill proof runs through `/skill-eval`.
+No automated eval exists; revisit this when the skill changes.
+Per-skill proof runs through `/skill-eval`.

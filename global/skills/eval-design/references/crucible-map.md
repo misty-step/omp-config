@@ -1,10 +1,10 @@
-# eval-design: how the design plugs into Crucible
+# eval-design: how the design connects to Crucible
 
-The skill is the design front-end; Crucible is the enforcement + evidence
+This skill is the design front end. Crucible is the enforcement and evidence
 engine. This skill decides *what* to measure and *how* to grade and align the
-judge; Crucible enforces the statistics and persists the evidence. Never
-re-implement the statistics in prose; point into Crucible. Read Crucible's
-`SKILL.md` for the exact command contract.
+judge. Crucible enforces the statistics and persists the evidence.
+Never re-implement the statistics in prose. Point into Crucible.
+Read Crucible's `SKILL.md` for the exact command contract.
 
 | Design step | Crucible surface |
 |---|---|
@@ -18,7 +18,7 @@ re-implement the statistics in prose; point into Crucible. Read Crucible's
 | interval + paired noise-floor + attribution | `crucible runs compare` — `paired`, `resolution` (q + MDE), `diagnosis`, attribution label (`model_delta`/`harness_delta`/`config_delta`), `--strict` |
 | durable ledger + trace | `crucible runs list/show/compare/history/pivot`; `trace_path` for judge runs |
 
-The runnable proof of a finished design is the Crucible loop: `crucible
-validate` clean → `crucible run` produces persisted records → `crucible runs
-compare` returns a paired `resolution` that can actually detect the effect you
-care about, or honestly reports it can't.
+The runnable proof of a finished design is the Crucible loop:
+`crucible validate` runs clean, then `crucible run` produces persisted records.
+Next, `crucible runs compare` returns a paired `resolution`.
+The resolution must detect the effect you care about or report that it cannot.
