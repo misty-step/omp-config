@@ -1,71 +1,125 @@
 ---
-disable-model-invocation: true
 name: simplified-technical-english
-description: Apply ASD-STE100 writing rules to explicitly requested text.
+description: Audit or rewrite operator, agent, prompt, tool, and technical prose with ASD-STE100 language and action-first structure.
 ---
 
-# Simplified Technical English (ASD-STE100)
+# Simplified Technical English
 
-Apply these ASD-STE100 writing rules to the text named by the operator.
+Use this skill to write, audit, or revise natural-language communication.
+The universal rules in `RULES.md` apply even when a model does not invoke this skill.
 
-## Writing rules
+## Scope
+
+Use this skill for these communication surfaces:
+
+- operator replies;
+- agent and subagent briefs;
+- handoffs and findings;
+- status updates and comments;
+- prompts and tool descriptions;
+- issue, pull-request, and work-ledger text.
+
+Use it for root agents, declared agents, temporary agents, subagents, and nested
+subagents.
+
+## Meaning first
+
+Understand the required meaning before you write or revise the text.
+Preserve every fact, condition, number, scope limit, safety requirement, and
+uncertainty statement.
+Do not shorten text when the shorter form removes necessary meaning.
+
+Use one term for one concept.
+Define a necessary domain term once, then keep that term.
+
+## ASD-STE100 language rules
 
 ### Sentences
-- Use a maximum of 20 words in an instruction (procedural sentence).
-- Use a maximum of 25 words in a description (descriptive sentence).
-- Give one instruction in one sentence. Two actions in one sentence are
-  permitted only when they occur at the same time.
-- Do not omit words to make a sentence shorter ("telegraphic style").
-  Keep articles ("the", "a") and verbs.
+
+- Use a maximum of 20 words in an instruction.
+- Use a maximum of 25 words in a description.
+- Give one instruction in one sentence.
+- Write one fact, decision, action, reason, risk, or evidence item in each sentence.
+- Do not omit articles, subjects, or verbs to make a sentence shorter.
 
 ### Verbs
-- Use the active voice. Make the agent of the action the subject.
-- Use the imperative for instructions: "Run the build."
-- Use only these tenses: past simple, present simple, future simple.
-- Do not use the verb "to be" plus a past participle as a passive
-  instruction: write "Remove the file", not "The file should be removed".
-- Do not use "-ing" forms of verbs as nouns or adjectives when a simpler
-  structure is available.
+
+- Use active voice. Make the actor the subject.
+- Use the imperative for instructions.
+- Use simple present, simple past, or simple future tense.
+- Do not use the verb "to be" plus a past participle in an instruction.
+- Do not use an "-ing" form when a simpler form gives the same meaning.
 
 ### Words
-- Use one approved meaning for each word. Example: "follow" means only
-  "come after", not "obey".
-- Prefer these approved verbs: start, stop, do, make, use, show, remove,
-  install, set, get, apply, examine, make sure, find, keep, give.
-- Do not use idioms, metaphors, humor-dependent phrasing, or decorative
-  language in technical statements.
-- Do not use different words for the same thing. Choose one term and
-  keep it.
-- Do not use clusters of more than three nouns. Break the cluster with
-  a preposition: "the calibration of the sensor circuit", not "the
-  sensor circuit calibration procedure record".
+
+- Use one clear meaning for each word.
+- Use one part of speech for each word.
+- Use plain, common words.
+- Use one term for one concept. Do not rotate synonyms.
+- Do not use idioms, metaphors, jokes, or decorative language.
+- Do not use a cluster of more than three nouns.
 
 ### Paragraphs
-- Give each paragraph one topic. Start with the topic sentence.
+
+- Give each paragraph one topic.
+- Start each paragraph with its point.
 - Use a maximum of six sentences in one paragraph.
-- Do not write one-sentence paragraphs more than necessary.
 
-### Warnings, cautions, notes
-- Put the command first: "WARNING: Do not touch the terminal before you
-  disconnect the power."
-- A note gives information, not a command.
+## Action-first structure
 
-## Boundaries
+- Start with the answer, required action, or observed result.
+- Do not use a preamble.
+- Number multi-step procedures.
+- Put one bounded action in each step.
+- Keep one active subject.
+- Put unrelated information under a separate optional heading.
+- State errors as cause, evidence, and repair.
+- Show completed work with concrete proof.
+- Restate each decision, current state, and required next action.
+- Make each reply sufficient without conversation recall.
+- Split long lists into named groups that preserve priority and completeness.
+- End with the result or one required next action.
+- Do not add a recap, invitation, or closing pleasantry.
 
-- Verbatim material is exempt: code identifiers, commands, quoted
-  output, error text, mathematics, file paths, citations, and proper
-  names. Do not change them.
-- Tables, lists, and headings follow the word rules but not the
-  sentence-length rules.
-- Internal reasoning and subagent briefs are not operator-facing.
-  Clarity there outranks STE compliance.
-- When the exact STE dictionary word is unknown, use the simplest
-  common word with one clear meaning.
+## Warnings, cautions, and notes
 
-## Quick self-check before you send
+- Put the command first in a warning or caution.
+- Keep the condition and consequence with the command.
+- Use a note only for information.
 
-1. Is each sentence at or under the length limit?
-2. Is each instruction imperative and active?
-3. Does each word keep one meaning through the text?
-4. Are there noun clusters of four or more nouns? Break them.
-5. Are there idioms or metaphors? Remove them.
+## Output contracts and verbatim text
+
+Exempt verbatim text, code, commands, paths, identifiers, citations,
+mathematics, schemas, and required machine-readable fields.
+
+If an output contract conflicts with these style rules, preserve the contract.
+Apply these rules to all free text in that output.
+
+## Rewrite audit
+
+When the operator requests an explicit rewrite audit:
+
+1. Identify each rule violation.
+2. Preserve the original meaning.
+3. Rewrite only the text that violates a rule.
+4. Show the original and revised text.
+5. Name each required term or condition that you did not simplify.
+
+If the input follows the rules, say so and do not force a change.
+
+## Pre-send gate
+
+1. Read only the first line. It must give the answer, action, or result.
+2. Read only the last line. It must give the result or required next action.
+3. Remove each sentence that adds no fact, decision, action, reason, risk, or evidence.
+4. Check sentence length, active voice, stable terms, list grouping, and noun clusters.
+5. Check that the revision preserves every required fact and condition.
+
+## Sources
+
+- ASD Simplified Technical English Maintenance Group,
+  [ASD-STE100 Issue 9](https://www.asd-ste100.org/), January 2025.
+- Dustin Yuchen Teng,
+  [asd-ste100-skill](https://github.com/danyuchn/asd-ste100-skill), MIT.
+- ayghri,
+  [i-have-adhd](https://github.com/ayghri/i-have-adhd), MIT.

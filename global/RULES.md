@@ -10,15 +10,47 @@
 - Erasure is part of every change: delete obsolete code, comments, tests, docs, and rules.
 - Misty Step repositories use `master`, never `main`.
 
-## Operator communication: plain and action-first
+## Universal model communication
 
-- Write operator-facing prose in plain language. Use active voice, concrete verbs, common words, and short sentences with one idea each.
-- Put the most important fact first. Open each paragraph with its point.
-- Make every sentence add a fact, decision, action, reason, risk, or item of evidence.
-- Restate every decision and required next step. Make the reply sufficient without conversation recall.
-- For multi-part work, open with **Do first:** and one action. Put one later action per numbered line and separate optional work.
-- Answer a simple yes/no or factual question in one sentence. Use structure for multi-step or decision-bearing replies.
-- Pre-send gate: read only the opening and closing lines. The opening gives the answer; the closing gives the result or required next action.
-- Write all operator-facing prose in ASD-STE100 Simplified Technical English.
-- Keep each sentence to one fact or action.
-- Use active voice: name the actor before the action.
+- Apply these rules to every model-generated natural-language output.
+- Apply the rules to operator replies, subagent briefs, handoffs, findings, status updates, comments, prompts, and tool descriptions.
+- Apply the rules to root agents, declared agents, temporary agents, subagents, and nested subagents.
+- Exempt only verbatim text, code, commands, paths, identifiers, citations, mathematics, schemas, and required machine-readable fields.
+- Preserve every fact, condition, number, scope limit, safety requirement, and uncertainty statement.
+- If an output contract conflicts with the style rules, preserve the contract. Apply the style rules to all free text.
+
+### Language
+
+- Use ASD-STE100 Simplified Technical English.
+- Use plain words with one stable meaning.
+- Use one term for one concept. Do not rotate synonyms.
+- Use active voice. Name the actor before the action.
+- Use simple present, simple past, or simple future tense.
+- Use the imperative for instructions.
+- Write one fact, decision, action, reason, risk, or evidence item in each sentence.
+- Use a maximum of 20 words in an instruction.
+- Use a maximum of 25 words in a description.
+- Do not omit articles, subjects, or verbs to make a sentence shorter.
+- Do not use idioms, metaphors, jokes, decorative language, or clusters of more than three nouns.
+
+### Structure
+
+- Start with the answer, required action, or observed result.
+- Do not use a preamble.
+- Put the most important fact first. Start each paragraph with its point.
+- Number multi-step procedures. Put one bounded action in each step.
+- Keep one active subject. Put unrelated information under a separate optional heading.
+- State errors as cause, evidence, and repair.
+- Show completed work with concrete proof.
+- Restate each decision, current state, and required next action.
+- Make each reply sufficient without conversation recall.
+- Split long lists into named groups that preserve priority and completeness.
+- End with the result or one required next action.
+- Do not add a recap, invitation, or closing pleasantry.
+
+### Pre-send gate
+
+- Read only the first line. It must give the answer, action, or result.
+- Read only the last line. It must give the result or required next action.
+- Remove each sentence that does not add a fact, decision, action, reason, risk, or evidence item.
+- Check the sentence limits, active voice, stable terms, list grouping, and noun clusters.
