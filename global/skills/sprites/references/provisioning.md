@@ -2,26 +2,26 @@
 
 This primitive owns one narrow boundary: restore a dedicated clean checkpoint,
 clone one public GitHub repository into a new directory, stream one lane card,
-and emit a truthful local handoff receipt. Launch and workflow authority belong
-to another system.
+and emit a truthful local handoff receipt. Another system owns launch and
+workflow authority.
 
 ## Trust boundaries
 
 - The local `sprite` client uses its existing HOME/XDG-owned provider session.
-  `sprite-lane` snapshots one descriptor-opened regular provider executable,
-  serves that immutable descriptor through a nonce-bound authenticated broker,
-  starts it with an allowlisted environment and exact host
-  `PATH=/usr/bin:/bin`, and never reads or copies the session. The broker secret
-  is not sent over its reconnectable socket. Replacement of the installation,
+  `sprite-lane` snapshots one descriptor-opened regular provider executable.
+  It serves that immutable descriptor through a nonce-bound authenticated
+  broker. It starts the executable with an allowlisted environment and exact
+  host `PATH=/usr/bin:/bin`. It never reads or copies the session. The broker
+  secret never crosses its reconnectable socket. Replacing the installation,
   published snapshot, broker root, or socket pathname cannot supply provider
   bytes or forge a successful response.
-- Existing remote state is usable only when an exact v3 marker, one uniquely
-  matching checkpoint, and the caller's local non-secret ownership record all
-  contain the same nonce.
-- The remote clone is public and unauthenticated. Private Git access and GitHub
-  tokens are unsupported.
-- No Harness or model credential enters this helper. An external launch owner
-  consumes the handoff and owns short-lived injection, process isolation,
+- Use existing remote state only when an exact v3 marker, one uniquely matching
+  checkpoint, and the caller's local non-secret ownership record contain the
+  same nonce.
+- Keep the remote clone public and unauthenticated. Do not support private Git
+  access or GitHub tokens.
+- Do not put a Harness or model credential in this helper. An external launch
+  owner consumes the handoff and owns short-lived injection, process isolation,
   signals, output, completion observation, and credential expiry.
 
 ## Bake contract (version 3)
@@ -39,30 +39,30 @@ A clean bake contains:
 6. A mode-0600 local record at
    `~/.omp/agent/state/sprite-lane/<sprite>.owner` containing that marker.
 
-Replacement keeps the prior checkpoint until the new checkpoint exists, its
-identity is verified, and the local witness is durably replaced through a held
-no-follow directory descriptor. The new bytes are fsynced in an anonymous
-inode, the old inode receives a descriptor-created recovery link, and the new
-inode is installed from its descriptor before the directory commit. A failed
-replacement attempts to restore the prior checkpoint while preserving the
-primary failure code. If restoration itself fails, the old checkpoint and
-local witness are retained as recovery evidence, ownership checks fail closed,
-and an explicit operator-recovery error is emitted. Failure to retire the old
-checkpoint or recovery link is reported as cleanup debt but does not invalidate
-the newly committed exact marker tuple.
+Keep the prior checkpoint until the new checkpoint exists, its identity is
+verified, and the local witness is durably replaced through a held no-follow
+directory descriptor. Fsync the new bytes in an anonymous inode. Give the old
+inode a descriptor-created recovery link. Install the new inode from its
+descriptor before the directory commit. If replacement fails, attempt to
+restore the prior checkpoint while preserving the primary failure code. If
+restoration fails, retain the old checkpoint and local witness as recovery
+evidence, fail ownership checks closed, and emit an explicit
+operator-recovery error. Report failure to retire the old checkpoint or
+recovery link as cleanup debt. Do not invalidate the newly committed exact
+marker tuple.
 
-An observed HUP, INT, or TERM before the new marker/checkpoint/witness tuple is
-verified follows the same rollback path, with further termination signals
-ignored until cleanup finishes. The verified tuple is the commit boundary. A
-signal observed after it does not turn a committed direct bake into a reported
-failure; prior-checkpoint retirement completes as best-effort cleanup. If a
-provider interruption prevents a pre-commit rollback, the prior checkpoint and
-witness remain available and normal ownership checks refuse the divergent live
+Before verifying the new marker/checkpoint/witness tuple, treat an observed
+HUP, INT, or TERM as the same rollback path. Ignore further termination
+signals until cleanup finishes. Treat the verified tuple as the commit boundary.
+A signal after that boundary does not turn a committed direct bake into a
+reported failure. Retire the prior checkpoint as best-effort cleanup. If a
+provider interruption prevents pre-commit rollback, keep the prior checkpoint
+and witness available. Normal ownership checks must refuse the divergent live
 state.
 
-The primitive never converts legacy state and never cleans an arbitrary
-existing Sprite. Use a new name or recreate it outside this command. After an
-external destroy, remove the stale local witness before reusing the name.
+Never convert legacy state or clean an arbitrary existing Sprite. Use a new
+name or recreate it outside this command. After an external destroy, remove
+the stale local witness before reusing the name.
 
 ## Prepare contract
 
@@ -84,21 +84,21 @@ external destroy, remove the stale local witness before reusing the name.
    askpass disabled, and no proxy, SSH agent, GitHub token, or Harness key.
 7. Durably finish the receipt as `prepared` with the remote work/card paths.
 
-Every preparation uses a new checkout after a whole-Sprite restore. The caller
-must hold exclusive use of that Sprite for the preparation; leasing belongs to
-the external infrastructure owner.
+After restoring the whole Sprite, use a new checkout for every preparation.
+The caller must hold exclusive use of that Sprite during preparation. The
+external infrastructure owner manages leasing.
 
 ## Failure handling
 
 - Local validation failures occur before the receipt and before remote mutation.
-- Once `preparing` exists, every observed setup failure finishes it as
-  `setup_failed` without replacing the primary exit code if receipt persistence
-  itself fails. A terminal retry preserves the exact intended state, exit code,
-  finish time, and successful `prepared` outcome; it never synthesizes a setup
-  failure after remote preparation committed. The receipt remains active until
-  a terminal write succeeds or reports a typed committed outcome. Cleanup
-  retries once and emits the lane identifier as explicit recovery evidence if
-  persistence is still unavailable.
-- Signals finish it as `interrupted`; no claim is made about a Harness because
-  this helper never launches one.
-- Unknown Sprite state is evidence to stop, not permission to delete.
+- After `preparing` exists, finish every observed setup failure as
+  `setup_failed`. If receipt persistence itself fails, do not replace the
+  primary exit code. A terminal retry preserves the exact intended state, exit
+  code, finish time, and successful `prepared` outcome. Never synthesize a
+  setup failure after remote preparation commits. Keep the receipt active until
+  a terminal write succeeds or reports a typed committed outcome. Retry cleanup
+  once. If persistence remains unavailable, emit the lane identifier as
+  explicit recovery evidence.
+- Finish signals as `interrupted`. Make no claim about a Harness because this
+  helper never launches one.
+- Treat unknown Sprite state as evidence to stop, not permission to delete.

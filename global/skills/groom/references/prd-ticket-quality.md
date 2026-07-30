@@ -1,13 +1,14 @@
 # PRD Ticket Quality
 
-Use this reference when grooming M+ backlog items or any epic that will feed
-`/deliver`. A world-class card is a compact PRD plus technical design. It is
-not a diary, a brainstorm dump, or an implementation transcript.
+Use this reference when grooming M+ backlog items or any epic that feeds
+`/deliver`.
+Make each card a compact PRD and technical design.
+Do not write a diary, brainstorming notes, or an implementation transcript.
 
 ## Required Top Blocks
 
-Every M+ shaped ticket needs these blocks near the top, before repo anchors and
-oracles:
+Place these blocks near the top of every M+ shaped ticket, before repo anchors
+and oracles:
 
 ```markdown
 ## PRD Summary
@@ -61,38 +62,38 @@ oracles:
 - Put the deliverable type in the first screen of the ticket. Do not make the
   implementer infer whether the output is code, research, a report, or a
   doctrine decision.
-- Name the user. "Agents" can be a user only when the behavior is directly for
-  agent operation; otherwise name the human operator, reviewer, maintainer, or
+- Name the user. "Agents" can be a user only when the behavior directly serves
+  agent operation. Otherwise name the human operator, reviewer, maintainer, or
   reader.
-- Alternatives must be structurally different. Cosmetic variants do not count.
-- Every alternative needs a verdict. Undecided alternatives are open product
-  work, not background context.
-- Acceptance must have a pass/fail surface. If no executable command exists,
-  define the report/artifact shape and the reviewer action that accepts it.
-- Architecture decisions must state the selected boundary and the rejected
-  boundary. "Use existing patterns" is not enough.
-- ADR decisions must include an escalation trigger. "Not required" is valid only
+- Make alternatives structurally different. Cosmetic variants do not count.
+- Give every alternative a verdict. Treat undecided alternatives as open
+  product work, not background context.
+- Give acceptance a pass/fail surface. If no executable command exists, define
+  the report or artifact shape and the reviewer action that accepts it.
+- State the selected boundary and the rejected boundary for architecture
+  decisions. "Use existing patterns" is not enough.
+- Include an escalation trigger in ADR decisions. "Not required" is valid only
   when the slice stays inside an existing architecture.
-- Runtime-visible changes need a dogfood artifact or an explicit no-running-
+- Give runtime-visible changes a dogfood artifact or an explicit no-running-
   surface waiver in the evidence plan.
 
 ## Failure Modes
 
 - **Hidden user:** the ticket describes a system change but never says who gets
   a better workflow.
-- **Buried deliverable:** the actual output appears only in an implementation
+- **Missing deliverable:** the actual output appears only in an implementation
   sequence or oracle.
 - **Mechanism goal:** the goal names the tool or architecture instead of the
   user outcome.
 - **Ready-but-vague:** `Status: ready` with "preferably", "confirm later", or
   an unspecified first target.
-- **Architecture fog:** fields are listed, but schema shape, ownership, or
-  build/check responsibilities are not decided.
-- **ADR theater:** an ADR is required for every small choice, or never required
-  for cross-cutting policy.
+- **Architecture ambiguity:** fields are listed, but schema shape, ownership,
+  or build/check responsibilities are not decided.
+- **ADR overuse:** an ADR is required for every small choice, or never
+  required for cross-cutting policy.
 - **Subagent-only understanding:** the packet cites summaries but does not name
   the source files, ADRs, tests, commands, or rendered artifacts the lead read.
 - **Checkbox oracle:** acceptance is a prose list without commands, artifacts,
   hashes, screenshots, or a named reviewer action.
 - **Transcript bulk:** delegation history overwhelms the product and technical
-  decision. Summarize accepted/rejected evidence instead.
+  decision. Summarize accepted and rejected evidence instead.

@@ -12,29 +12,28 @@ argument-hint: "[plan|decision|idea]"
 
 # /grill
 
-Interview the operator until shared understanding is reached, batching every
-currently-open question into one round rather than trickling them out one at
-a time. He dictates by voice; a wall he can ramble at beats a call-and-response
-he has to sit through.
+Interview the operator until you reach shared understanding. Batch every open
+question into one round instead of asking questions one at a time. The operator
+dictates by voice. Let the operator speak freely instead of requiring
+call-and-response.
 
 ## Contract
 
-- **Batch every round.** Present ALL currently-open questions at once, grouped
-  by theme. For each: your recommended answer and a one-line why. Never ask a
-  single question and wait — that produces "I agree" turn after turn and is
-  bewildering read back.
-- **He answers however he wants.** Any subset, any order, rambling voice
-  dictation included. Do not require the batch to be answered in full or in
-  sequence.
-- **Absorb, then re-batch.** Resolve decision dependencies his answers settle,
-  drop what's now decided, and return the next full batch: unanswered
-  carry-overs + newly-surfaced questions + follow-ups where an answer was
-  ambiguous. Loop until nothing is open.
-- **Facts get looked up, not asked.** If the environment (filesystem, tools,
-  repo, prior decisions) can answer it, resolve it yourself. Only decisions
-  belong in the batch.
-- **Do not act until confirmed.** Even a fully-answered batch is not a green
-  light — state the resulting shared understanding and get explicit
+- **Batch every round.** Present ALL currently-open questions at once. Group them
+  by theme. Give a recommended answer and a one-line reason for each. Never ask
+  one question and wait. That pattern creates repeated "I agree" turns and
+  confusing readback.
+- **The operator answers freely.** The operator may answer in any subset or order,
+  including rambling voice dictation. Do not require a full or sequential answer.
+- **Absorb, then re-batch.** Resolve decision dependencies that the answers
+  settle. Drop decided questions. Return the next full batch with unanswered
+  carry-overs, new questions, and follow-ups for ambiguous answers. Repeat until
+  no question remains open.
+- **Look up facts, not decisions.** If the filesystem, tools, repository, or prior
+  decisions can answer a fact, resolve it yourself. Put only decisions in the
+  batch.
+- **Do not act before confirmation.** A fully answered batch is not approval to
+  act. State the resulting shared understanding in full. Get explicit
   confirmation before acting on it.
 
 ## Batch format
@@ -52,13 +51,13 @@ he has to sit through.
 
 ## Completion Gate
 
-Apply the Shared Operating Spine (`Prove`; `Durable State and Closeout`). Add:
-shared understanding stated back in full and confirmed by the operator before
-any action starts.
+Apply the Shared Operating Spine (`Prove`; `Durable State and Closeout`). Add
+shared understanding stated in full and confirmed by the operator before any
+action starts.
 
 ## Gotchas
 
-- **Reflexive one-at-a-time:** defaulting to a single question out of habit
-  defeats the point — always batch what's open right now.
-- **Re-asking answered questions:** re-litigating something he already settled
-  reads as not having listened; only re-ask when his answer was ambiguous.
+- **Reflexive one-at-a-time:** A single-question default defeats this skill. Always
+  batch all questions that are open now.
+- **Re-asking answered questions:** Asking a settled question again shows that you
+  did not listen. Ask again only when the answer was ambiguous.

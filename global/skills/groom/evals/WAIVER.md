@@ -4,15 +4,20 @@ expires: 2026-08-30
 
 ## Reason
 
-Backlog scope is nondeterministic by design (whatever the live backlog looks like). Needs a frozen backlog fixture with a known-good target diff authored before an objective grader can score it.
+Backlog scope is nondeterministic by design because it follows the live backlog.
+An objective grader needs a frozen backlog fixture with a known-good target diff.
+Author the fixture and diff before grading.
 
 ## Disposition
 
-Not exempt from the eval-coverage contract — this waiver is a time-boxed
-deferral, not a permanent opt-out. When it expires, either an eval spec lands
-at `global/skills/groom/evals/groom-eval.md` (see `global/skills/skill-eval/templates/eval-spec.md`)
-or this waiver is renewed with a fresh reason and date. A stale, silently
-renewed waiver with no new reasoning is itself a finding for `/harness-engineering`'s
-next skill-health audit.
+This waiver remains subject to the eval-coverage contract.
+Treat it as a time-boxed deferral, not a permanent opt-out.
+When it expires, add an eval spec at
+`global/skills/groom/evals/groom-eval.md` (see
+`global/skills/skill-eval/templates/eval-spec.md`) or renew this waiver with a
+fresh reason and date.
+Treat a waiver that is stale, silently renewed, and lacks new reasoning as a
+finding for `/harness-engineering`'s next skill-health audit.
 
-No automated eval; revisit when this skill changes. Per-skill proof runs through `/skill-eval`.
+Do not run an automated eval. Revisit when this skill changes.
+Run per-skill proof through `/skill-eval`.

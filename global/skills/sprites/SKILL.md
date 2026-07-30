@@ -13,9 +13,9 @@ argument-hint: "[prepare|bake|status|reset] [sprite] [--repo <owner/name>] [--ca
 
 # /sprites
 
-`scripts/sprite-lane` prepares one clean public checkout and writes a local
-handoff receipt. It does not launch a Harness, handle a model or Git credential,
-manage a detached session, or report work it cannot observe.
+Use `scripts/sprite-lane` to prepare one clean public checkout and write a local
+handoff receipt. Do not use it to launch a Harness, handle a model or Git
+credential, manage a detached session, or report work it cannot observe.
 
 ## Route a lane
 
@@ -39,74 +39,75 @@ scripts/sprite-lane status <sprite>
 scripts/sprite-lane reset <sprite>
 ```
 
-The helper resolves `sprite` only from fixed installation paths. Pass
+Resolve `sprite` only from fixed installation paths. Pass
 `--provider-cli <absolute-path>` before the command for a different explicit,
-regular, no-symlink installation. It descriptor-opens and snapshots the chosen
-executable once. An authenticated local broker holds that snapshot descriptor,
-signs nonce-bound requests and responses without sending its secret over the
-socket, and refuses replacement snapshot leaves. Replacing either the original
-installation path or the published broker path cannot select provider bytes.
+regular, no-symlink installation. The helper descriptor-opens and snapshots
+the chosen executable once. An authenticated local broker holds that snapshot
+descriptor. It signs nonce-bound requests and responses without sending its
+secret over the socket. It refuses replacement snapshot leaves. Replacing the
+original installation path or published broker path cannot select provider
+bytes.
 
-Preparation receipts land in
-`~/.omp/agent/receipts/sprite-lane/<lane-id>.json`. The initial `preparing`
-receipt exists before any remote mutation. Its terminal state is `prepared`,
+Write preparation receipts to
+`~/.omp/agent/receipts/sprite-lane/<lane-id>.json`. Write the initial
+`preparing` receipt before any remote mutation. Use terminal state `prepared`,
 `setup_failed`, or `interrupted`, with the exact observed setup exit code.
-It records the remote work and card paths for the external launch owner and
-contains no raw remote log or launch credential. Preparing and terminal writes
-use descriptor-relative no-follow traversal and anonymous-descriptor installs
-with file and directory fsync. A post-commit sync failure is reported as
-durability-unknown; recovery-link cleanup debt remains distinct from failure
+Record remote work and card paths for the external launch owner. Do not include
+raw remote logs or launch credentials. Use descriptor-relative no-follow
+traversal and anonymous-descriptor installs for preparing and terminal writes.
+Fsync files and directories. Report a post-commit sync failure as
+durability-unknown. Keep recovery-link cleanup debt distinct from failure
 before commit.
 
-A non-secret ownership record lands in
-`~/.omp/agent/state/sprite-lane/<sprite>.owner`. Its version and random nonce must
-exactly match the remote marker and one checkpoint comment. This local witness
-prevents an arbitrary or recycled Sprite from declaring itself owned.
+Write a non-secret ownership record to
+`~/.omp/agent/state/sprite-lane/<sprite>.owner`. Match its version and random
+nonce exactly to the remote marker and one checkpoint comment. Use this local
+witness to prevent an arbitrary or recycled Sprite from declaring ownership.
 
-On first use after the path move, the helper atomically migrates legacy
+On first use after the path move, atomically migrate legacy
 `~/.roster/receipts/sprite-lane` and `~/.roster/state/sprite-lane` directories
-to these destinations only when each destination is absent. A destination
-collision stops the command and leaves the legacy directory untouched; resolve
+to these destinations only when each destination is absent. If a destination
+collides, stop the command and leave the legacy directory untouched. Resolve
 the collision explicitly before retrying. Explicit `SPRITE_LANE_RECEIPTS` or
 `SPRITE_LANE_OWNERS` overrides disable this default migration.
 
 ## Ownership and isolation
 
-`bake` works only on a newly created Sprite or one already proven to have an
-exact owned marker/checkpoint/witness tuple. It refuses legacy, arbitrary, or
-ambiguous state. Replacement is transactional: the known-good checkpoint stays
-available until the new checkpoint and local witness are committed.
+Run `bake` only on a newly created Sprite or on one proven to have an exact
+owned marker/checkpoint/witness tuple. Reject legacy, arbitrary, or ambiguous
+state. Replace transactionally. Keep the known-good checkpoint available until
+you commit the new checkpoint and local witness.
 
-Every preparation restores the whole owned checkpoint, creates a unique
-`/home/sprite/lanes/<lane-id>/work` clone, and streams only the staged lane
-card on standard input. Lane creation, card write, and the relative `work`
-clone run in one Python process physically anchored to held, no-follow remote
-directory descriptors.
-The baseline has Git plus a neutral identity and rejects known Harness,
-GitHub CLI, SSH, netrc, XDG Git, proxy, and Git credential state. Public clones
-run under an empty environment with system/global Git configuration disabled.
-Only a public GitHub `owner/name` slug or credential-free HTTPS URL is accepted.
+For every preparation, restore the whole owned checkpoint. Create a unique
+`/home/sprite/lanes/<lane-id>/work` clone. Stream only the staged lane card on
+standard input. Run lane creation, card write, and the relative `work` clone
+in one Python process. Physically anchor that process to held, no-follow
+remote directory descriptors.
+Keep Git and a neutral identity in the baseline. Reject known Harness, GitHub
+CLI, SSH, netrc, XDG Git, proxy, and Git credential state. Run public clones
+under an empty environment with system/global Git configuration disabled.
+Accept only a public GitHub `owner/name` slug or credential-free HTTPS URL.
 
-The local `sprite` client's existing provider session remains in its
-HOME/XDG-owned store; the helper neither reads nor copies it. The external
-launch owner must inject short-lived authority at its own isolated process
-boundary and own termination, redaction, expiry, and completion proof.
+Keep the local `sprite` client's existing provider session in its
+HOME/XDG-owned store. The helper must not read or copy it. The external launch
+owner must inject short-lived authority at its isolated process boundary. That
+owner must handle termination, redaction, expiry, and completion proof.
 
 See `references/provisioning.md` for the exact handoff and failure contract.
 
 ## Lane cards
 
 A card states the end state, executable acceptance oracle, boundaries,
-verification surface, and expected output. Use `templates/lane-card.md`. The
-prepared checkout receives only the card and public repository, so include all
-task context the later launch needs.
+verification surface, and expected output. Use `templates/lane-card.md`. Give
+the prepared checkout only the card and public repository. Include all task
+context that the later launch needs.
 
 ## Gotchas
 
-- `prepared` means only that the checkout exists; it never means an agent ran.
-- A caller must hold exclusive use of the dedicated Sprite while restoring and
-  preparing it. Cross-client leasing belongs to the infrastructure owner.
+- `prepared` means only that the checkout exists. It never means an agent ran.
+- Hold exclusive use of the dedicated Sprite while restoring and preparing it.
+  The infrastructure owner manages cross-client leasing.
 - Any marker/checkpoint ambiguity fails closed. Recreate under a new dedicated
-  name instead of adopting unknown state.
-- Private Git, Harness launch, credential injection, remote log retention, and
-  detached lifecycle are intentionally absent from this public primitive.
+  name. Do not adopt unknown state.
+- This public primitive intentionally omits private Git, Harness launch,
+  credential injection, remote log retention, and detached lifecycle.

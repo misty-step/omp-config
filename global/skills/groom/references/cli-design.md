@@ -1,7 +1,7 @@
 # CLI Design Contract
 
 Use this when a context packet creates or changes a command-line interface.
-Inspired by Peter Steinberger's `create-cli` skill and the public CLI
+Base this contract on Peter Steinberger's `create-cli` skill and the public CLI
 guidelines at https://clig.dev/.
 
 ## Lock The Interface
@@ -17,19 +17,20 @@ guidelines at https://clig.dev/.
 
 ## Defaults
 
-- `-h` and `--help` always show help and ignore other args.
-- `--version` prints the version to stdout.
-- Primary data goes to stdout; diagnostics and progress go to stderr.
-- Machine output uses `--json`; stable line output uses `--plain`.
-- Prompts only when stdin is a TTY; `--no-input` disables prompts.
-- Destructive non-interactive runs require `--force` or explicit confirmation.
-- Respect `NO_COLOR` and `TERM=dumb`; provide `--no-color` when colored output
-  is otherwise default.
-- Ctrl-C exits quickly with bounded cleanup.
+- Make `-h` and `--help` show help and ignore other args.
+- Make `--version` print the version to stdout.
+- Send primary data to stdout. Send diagnostics and progress to stderr.
+- Use `--json` for machine output and `--plain` for stable line output.
+- Prompt only when stdin is a TTY. Let `--no-input` disable prompts.
+- Require `--force` or explicit confirmation for destructive non-interactive
+  runs.
+- Respect `NO_COLOR` and `TERM=dumb`. Provide `--no-color` when colored output
+  is otherwise the default.
+- Make Ctrl-C exit quickly with bounded cleanup.
 
 ## Packet Requirements
 
-For CLI work, the context packet should include:
+For CLI work, include these fields in the context packet:
 
 ```markdown
 ## CLI Surface
@@ -43,6 +44,7 @@ For CLI work, the context packet should include:
 - Examples:
 ```
 
-If the command is script-facing, include golden examples for stdout/stderr and
-exit codes. If it is human-facing, include at least one common happy path and
-one failure example.
+For script-facing commands, include golden examples for stdout/stderr and exit
+codes.
+For human-facing commands, include at least one common happy path and one
+failure example.

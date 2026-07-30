@@ -2,10 +2,10 @@
 disable-model-invocation: true
 name: powder
 description: |
-  Use when an agent needs to inspect, claim, update, request input for, or
-  complete work cards in a Powder instance. Powder is the self-hostable,
-  agent-first work board: a durable card store with run sessions, activity,
-  audit events, relations, optional proof, and human-in-loop states.
+  Use when an agent must inspect, claim, update, request input for, or
+  complete work cards in a Powder instance. Powder is a self-hostable,
+  agent-first work board with durable cards, run sessions, activity, audit
+  events, relations, optional proof, and human-in-loop states.
 argument-hint: "[list-ready|claim|update-status|update-relations|request-input|complete-card]"
 ---
 
@@ -13,181 +13,182 @@ argument-hint: "[list-ready|claim|update-status|update-relations|request-input|c
 
 Powder is a self-hostable work tool. It exposes one core through API, CLI, MCP,
 and this skill. Treat cards as context objects with acceptance oracles, not
-status rows. Real card data belongs in a deployed instance database, not in the
-product repository. Read `VISION.md` before changing Powder's product scope,
+status rows. Store real card data in a deployed instance database, not in the
+product repository. Read `VISION.md` before you change Powder's product scope,
 card/run model, runner boundary, or self-hosting assumptions.
 
-For local MCP use, set `POWDER_DB_PATH` to the instance SQLite database. To
-reach a deployed instance instead, set `POWDER_API_BASE_URL` (and
-`POWDER_API_KEY`). One of these two must be set — MCP refuses to start
-otherwise; there is no ephemeral in-memory mode, since claims and completions
-must never silently evaporate on process exit.
+For local MCP use, set `POWDER_DB_PATH` to the instance SQLite database. For a
+deployed instance, set both `POWDER_API_BASE_URL` and `POWDER_API_KEY`. Choose
+exactly one mode: `POWDER_DB_PATH` or the remote pair
+`POWDER_API_BASE_URL` plus `POWDER_API_KEY`. MCP refuses to start without one
+complete mode. No ephemeral in-memory mode exists because claims and
+completions must persist after exit.
 
-By default, `powder-mcp` exposes the agent persona only. Set
+By default, `powder-mcp` exposes only the agent persona. Set
 `POWDER_MCP_TOOLSETS=admin` or `POWDER_MCP_TOOLSETS=all` before starting the
 MCP subprocess to add operator/admin tools to the same server registration.
-The value is read once at startup for MCP client cache stability; changing it
-requires restarting `powder-mcp`. Calls to hidden admin tools fail with an
-error naming `POWDER_MCP_TOOLSETS`.
+The server reads this value once at startup for MCP client cache stability.
+Restart `powder-mcp` after you change it. Calls to hidden admin tools fail with
+an error that names `POWDER_MCP_TOOLSETS`.
 
 ## Operating Contract
 
 The MCP server `instructions` field is the source of truth for Powder's agent
-operating contract. Clients receive it in the initialize response; keep this
+operating contract. Clients receive it in the initialize response. Keep this
 skill focused on harness setup, environment variables, and reference details.
-When the workflow contract changes, update the server instructions first
-(including the claim gate: cards without acceptance criteria cannot be
-claimed).
+When the workflow contract changes, update the server instructions first.
+Keep the claim gate: cards without acceptance criteria cannot be claimed.
 
 ## Papercut intake
 
-Papercuts are agent-reported UX friction filed as backlog cards. Use
+Papercuts record agent-reported UX friction as backlog cards. Use
 `report_papercut` (MCP) or `powder papercut <body> --agent <label>
-[--service <repo>]` (CLI) in both `--db` and remote modes. The tool is
-intentionally tiny: one call, no claim, no dedup scan, no fix required. The
-reporting agent is the audit actor, the body is secret-scrubbed, and the
-card carries the `papercut` label. If `service` matches a repository entity
-the card is homed there; otherwise a `service:<name>` label is added. Grooms
-sweep with `list_cards label:papercut` (MCP) or
-`powder list-cards --label papercut` (CLI).
+[--service <repo>]` (CLI) in both `--db` and remote modes. Keep this tool
+small: one call, no claim, no dedup scan, and no fix. The reporting agent is
+the audit actor. The server scrubs the body for secrets. The card carries the
+`papercut` label. If `service` matches a repository entity, home the card
+there. Otherwise, add a `service:<name>` label. Grooms sweep with
+
+`list_cards label:papercut` (MCP) or `powder list-cards --label papercut` (CLI).
 
 ## Expected MCP Tools
 
 Default agent persona (21 tools):
 
-- `list_ready`: return claimable cards from active repositories, ordered so
-  no card appears after another card in the response it transitively
-  blocks (topological over `blocks`/`blocked_by` among the returned set),
-  ties broken by priority, age, and identifier; optionally filtered by
-  `estimate` (`S`/`M`/`L`/`XL`). Eligibility itself stays direct-blocker-only
-  (unchanged). Only the true members of a `blocks`/`blocked_by` cycle lose
-  topological ordering: they are emitted as a group in the tie-break order
-  at the cycle's own position and named in an additive `cycle_card_ids`
-  field (computed over the full eligible set, before `limit` truncation);
-  cards downstream of a cycle stay dependency-ordered after it. `get_card`'s
-  `transitive_blocked_by`/`blocked_by_cycle` fields explain a *blocked*
-  card's chain past one hop.
-- `list_cards`: enumerate cards by optional status/repo/`estimate`/`label`
-  filter, including cards `list_ready` never surfaces -- `backlog`, cards with
-  an unresolved `blocked_by` relation, and `done`/`shipped`/`abandoned`.
-  With no `status` filter, `done`/`shipped`/`abandoned` cards are
-  hidden by default (in both local `POWDER_DB_PATH` and remote
-  `POWDER_API_BASE_URL` modes) -- pass `include_terminal: true` to restore
-  the full sweep; an explicit `status` filter (e.g. `status: done`) always
-  returns matching cards regardless of `include_terminal`. `total_count` in
-  the response always reports the full matching count, terminal cards
-  included, so a hidden card is never mistaken for a nonexistent one. The
-  `hint` keeps the two shortfalls separate because they have different
-  remedies: "N more non-terminal cards (raise limit)" vs. "N terminal
-  hidden (include_terminal:true)"; a filtered query that matches nothing
-  names the active filter and the board's total (e.g. `0 matches for
-  {status:done, repo:mint}; board has 214 cards`).
-- `board_stats`: return board-shape counts (by status and repo), not card
-  contents; call this before `list_cards` when you only need the shape of
-  the board.
-- `create_card`: create one card with optional acceptance criteria, proof
-  plan, relations, parent (decomposing an epic), repository, estimate, and
-  initial status; returns a minimal ack -- `get_card` for full state.
-  `related`/`blocks`/`blocked_by` set at creation mirror reciprocally onto
-  each named peer that already exists (see `update_relations`); a peer id
-  that doesn't exist yet is tolerated and simply not mirrored.
-- `list_repositories`: list repository entities with aliases, visibility,
-  tier, import provenance, and status counts.
-- `manage_claim`: acquire, renew, heartbeat, release, or transfer a claim with
-  `action` set to `claim`, `renew`, `heartbeat`, `release`, or `transfer`.
+- `list_ready`: Return claimable cards from active repositories.
+  Order cards so no card appears after another card that it transitively blocks.
+  Use topological ordering over `blocks`/`blocked_by` among the returned set.
+  Break ties by priority, age, and identifier.
+  Optionally filter by `estimate` (`S`/`M`/`L`/`XL`).
+  Keep eligibility direct-blocker-only (unchanged).
+  Only true members of a `blocks`/`blocked_by` cycle lose topological ordering.
+  Emit cycle members as a group in tie-break order at the cycle's own position.
+  Name them in an additive `cycle_card_ids` field, computed over the full
+  eligible set before `limit` truncation.
+  Keep cards downstream of a cycle dependency-ordered after it.
+  Use `get_card`'s `transitive_blocked_by`/`blocked_by_cycle` fields to explain
+  a *blocked* card's chain past one hop.
+- `list_cards`: Enumerate cards with optional status/repo/`estimate`/`label`
+  filters.
+  Include cards that `list_ready` never surfaces: `backlog`, cards with an
+  unresolved `blocked_by` relation, and `done`/`shipped`/`abandoned`.
+  Without a `status` filter, hide `done`/`shipped`/`abandoned` cards by default
+  in both local `POWDER_DB_PATH` and remote `POWDER_API_BASE_URL` modes.
+  Pass `include_terminal: true` to restore the full sweep.
+  Use an explicit `status` filter (for example, `status: done`) to return
+  matching cards regardless of `include_terminal`.
+  Make `total_count` report the full matching count, including terminal cards.
+  Do not make a hidden card appear nonexistent.
+  Keep the two shortfalls separate in `hint`: "N more non-terminal cards (raise
+  limit)" versus "N terminal hidden (include_terminal:true)".
+  For a filtered query with no matches, name the active filter and board total,
+  for example `0 matches for {status:done, repo:mint}; board has 214 cards`.
+- `board_stats`: Return board-shape counts by status and repo, not card
+  contents. Call this before `list_cards` when you need only the board shape.
+- `create_card`: Create one card with optional acceptance criteria, proof plan,
+  relations, parent (decomposing an epic), repository, estimate, and initial
+  status. Return a minimal ack. Use `get_card` for full state.
+  `related`/`blocks`/`blocked_by` set at creation mirror reciprocally onto each
+  named peer that already exists (see `update_relations`). Tolerate a peer id
+  that does not exist yet and do not mirror it.
+- `list_repositories`: List repository entities with aliases, visibility, tier,
+  import provenance, and status counts.
+- `manage_claim`: Acquire, renew, heartbeat, release, or transfer a claim.
+  Set `action` to `claim`, `renew`, `heartbeat`, `release`, or `transfer`.
   Remote API-key mode records the authenticated integration `principal`
-  separately from the required `agent` worker label and returned `run_id`; one
-  principal may coordinate multiple workers, and lease ownership follows that
+  separately from the required `agent` worker label and returned `run_id`.
+  One principal may coordinate multiple workers. Lease ownership follows that
   principal.
   This pre-1.0 MCP break removed the old `claim_card`, `renew_claim`,
   `heartbeat`, `release_claim`, and `transfer_claim` tools.
-- `get_card`: read one card with runs, activities, links, comments, and claim
-  state; a parent card also returns bounded child summaries plus a
-  deterministic `epic_state` rollup packet (status counts, acceptance sums,
-  child evidence with provenance, freshness, and parent/child mismatch
-  flags). `detail` defaults to `concise` (newest-first, most recent 20 per
-  history section plus totals/hint when truncated); pass `detail: detailed`
-  for full history.
-- `get_run`: read one run with its card, activities, links, comments, and run
-  state. `detail` defaults to `concise` (newest-first, most recent 20 per
-  history section plus totals/hint when truncated); pass `detail: detailed`
-  for full history.
-- `list_awaiting_input`: list runs paused for human or agent input.
-- `list_approvals`: list awaiting-input runs with card title, the latest
-  question text, run id, and approval-prefixed packet links -- a
-  review-focused view over the same runs `list_awaiting_input` surfaces.
-- `answer_input`: append an actor-attributed answer and resume the run.
-- `update_status`: set a card to any status in one call and record an audit event.
-- `check_criterion`: mark one acceptance criterion checked or unchecked and
-  audit actor/time; returns a minimal ack -- `get_card` for full state.
-- `update_relations`: replace a card's `related`, `blocks`, and `blocked_by`
-  relation lists, and/or set the hierarchy edge: `parent` links the card
-  under an epic, `clear_parent` unlinks it. A hierarchy-only call leaves the
-  relation lists untouched. Parent edges never block and child completion
-  never completes the parent -- parent acceptance stays authoritative.
-  **Relation writes are reciprocal and atomic**: only the ids added or
-  removed versus the card's prior lists are mirrored onto each named peer
-  that exists, in the same transaction as the primary write -- `related` is
-  symmetric (A related X implies X related A), `blocks`/`blocked_by` mirror
-  each other (A blocks X implies X is blocked_by A). An id naming a card
-  that doesn't exist is tolerated and simply not mirrored (unchanged from
-  prior behavior -- relation targets have never been existence-checked).
-  Run `powder relations-doctor --db <path>` (add `--repair` to fix) to find
-  or repair graphs asymmetric from before this guarantee existed, or from
-  direct database writes that bypassed every face.
-- `add_link`: attach a PR, CI run, artifact, or reference URL to a card.
-- `add_comment`: attach an actor-attributed comment (`author`, `body` --
-  both required), visible immediately via `get_card`/`get_run`; `body` is
-  scrubbed for known secret shapes server-side before storage.
-- `append_work_log`: append a high-frequency, fully-attributed work_log entry
-  (agent, model, reasoning, harness, run_id, body) while actively working a
-  card -- call this often, not just at completion; `body` is scrubbed for
-  known secret shapes server-side before storage.
-- `report_papercut`: file friction the moment you feel it -- too many tokens,
-  too many calls, confusing errors, missing capability, anything awkward.
-  Required: `agent`, `body`. Optional: `service`, `model`, `harness`. The
-  report lands as a backlog card labeled `papercut`. One call; do not stop
-  working; do not fix it yourself; dedup happens at groom time. Grooms can
-  sweep with `list_cards` filtered by `label: papercut`.
-- `request_input`: move the run to `awaiting_input` with the exact question.
-- `complete_card`: mark the card done, optionally attaching proof.
-- `update_card`: patch title, body, acceptance, proof_plan, status, priority,
+- `get_card`: Read one card with runs, activities, links, comments, and claim
+  state. A parent card also returns bounded child summaries and a deterministic
+  `epic_state` rollup packet with status counts, acceptance sums, child
+  evidence with provenance, freshness, and parent/child mismatch flags.
+  `detail` defaults to `concise`, with newest-first, most recent 20 per
+  history section plus totals/hint when truncated. Pass `detail: detailed` for
+  full history.
+- `get_run`: Read one run with its card, activities, links, comments, and run
+  state. `detail` defaults to `concise`, with newest-first, most recent 20 per
+  history section plus totals/hint when truncated. Pass `detail: detailed` for
+  full history.
+- `list_awaiting_input`: List runs paused for human or agent input.
+- `list_approvals`: List awaiting-input runs with card title, latest question
+  text, run id, and approval-prefixed packet links. This is a review-focused
+  view over the same runs that `list_awaiting_input` surfaces.
+- `answer_input`: Append an actor-attributed answer and resume the run.
+- `update_status`: Set a card to any status in one call and record an audit
+  event.
+- `check_criterion`: Mark one acceptance criterion checked or unchecked and
+  audit actor/time. Return a minimal ack. Use `get_card` for full state.
+- `update_relations`: Replace a card's `related`, `blocks`, and `blocked_by`
+  relation lists, and/or set the hierarchy edge. `parent` links the card under
+  an epic. `clear_parent` unlinks it. A hierarchy-only call leaves relation
+  lists untouched. Parent edges never block. Child completion never completes
+  the parent. Parent acceptance stays authoritative.
+  **Relation writes are reciprocal and atomic**: mirror only ids added or
+  removed against the card's prior lists. Mirror them onto each named peer that
+  exists in the same transaction as the primary write. `related` is symmetric:
+  A related X implies X related A. `blocks`/`blocked_by` mirror each other:
+  A blocks X implies X is blocked_by A. Tolerate an id for a nonexistent card
+  and do not mirror it. This is unchanged from prior behavior because relation
+  targets have never been existence-checked.
+  Run `powder relations-doctor --db <path>` (add `--repair` to fix) to find or
+  repair graphs asymmetric from before this guarantee or from direct database
+  writes that bypassed every face.
+- `add_link`: Attach a PR, CI run, artifact, or reference URL to a card.
+- `add_comment`: Attach an actor-attributed comment (`author`, `body` -- both
+  required). Make it visible immediately via `get_card`/`get_run`. The server
+  scrubs `body` for known secret shapes before storage.
+- `append_work_log`: Append a high-frequency, fully-attributed work_log entry
+  with `(agent, model, reasoning, harness, run_id, body)` while actively
+  working a card. Call this often, not only at completion. The server scrubs
+  `body` for known secret shapes before storage.
+- `report_papercut`: File friction as soon as you feel it. Report too many
+  tokens, too many calls, confusing errors, missing capability, or anything
+  awkward. Required: `agent`, `body`. Optional: `service`, `model`, `harness`.
+  The report creates a backlog card labeled `papercut`. Make one call. Do not
+  stop working. Do not fix it yourself. Dedup happens at groom time. Grooms
+  can sweep with `list_cards` filtered by `label: papercut`.
+- `request_input`: Move the run to `awaiting_input` with the exact question.
+- `complete_card`: Mark the card done and optionally attach proof.
+- `update_card`: Patch title, body, acceptance, proof_plan, status, priority,
   or labels on an existing card (`PATCH /api/v1/cards/{id}`). Any
-  authenticated actor may patch; every patch is audited with actor and field
-  list, so recording an operator ruling never requires the admin key.
+  authenticated actor may patch. Audit every patch with actor and field list.
+  Recording an operator ruling never requires the admin key.
 
 Admin add-on when `POWDER_MCP_TOOLSETS=admin` or `all` (9 tools):
 
-- `upsert_repository`: create or update repository settings.
-- `merge_repository_alias`: merge duplicate repo strings into one canonical
+- `upsert_repository`: Create or update repository settings.
+- `merge_repository_alias`: Merge duplicate repo strings into one canonical
   repository and audit re-homed cards.
-- `delete_repository`: delete an unused repository entity.
-- `create_event_subscription`: create a signed webhook subscription.
-- `list_event_subscriptions`: list webhook subscriptions without secrets.
-- `disable_event_subscription`: disable a webhook subscription while preserving
+- `delete_repository`: Delete an unused repository entity.
+- `create_event_subscription`: Create a signed webhook subscription.
+- `list_event_subscriptions`: List webhook subscriptions without secrets.
+- `disable_event_subscription`: Disable a webhook subscription and preserve
   delivery history.
-- `list_dead_letters`: list webhook deliveries that exhausted retry attempts.
-- `tail_events`: read durable card events after an optional sequence cursor.
-- `list_keys`: list API-key metadata without raw secrets or hashes.
+- `list_dead_letters`: List webhook deliveries that exhausted retry attempts.
+- `tail_events`: Read durable card events after an optional sequence cursor.
+- `list_keys`: List API-key metadata without raw secrets or hashes.
 
 ## Instance CLI
 
-`powder` is remote-capable for the full card and claim-lifecycle workflow:
-with `POWDER_API_BASE_URL` and `POWDER_API_KEY` set, `list-ready`,
-`list-cards`, `papercut`, `get-card`, `create-card`, `claim`, `heartbeat`, `renew-claim`,
-`transfer-claim`, `release-claim`, `update-status`, `check-criterion`, `add-link`,
-`add-comment`, `append-work-log`, `request-input`, and `complete-card` all operate against the
-deployed instance when `--db` is omitted -- there is no separate "remote
-closeout" wrapper to reach for; the same commands used against `--db` work
-unchanged against a deployed instance. `--db` always wins when supplied, so a
-local smoke cannot accidentally mutate the deployed board. Run `powder
-version` before a lane starts: it reports the git commit the installed
-binary was built from, so a stale `~/.cargo/bin/powder` (one that predates a
-command's remote-mode support) is obvious instead of surfacing as a bare
-`missing --db` error on a command the checkout has long since covered.
+`powder` supports remote mode for the full card and claim-lifecycle workflow.
+Set `POWDER_API_BASE_URL` and `POWDER_API_KEY`, then omit `--db` for
+`list-ready`, `list-cards`, `papercut`, `get-card`, `create-card`, `claim`,
+`heartbeat`, `renew-claim`, `transfer-claim`, `release-claim`, `update-status`,
+`check-criterion`, `add-link`, `add-comment`, `append-work-log`,
+`request-input`, and `complete-card`. These commands operate against the
+deployed instance. No separate "remote closeout" wrapper exists. The same
+commands work unchanged against `--db`. `--db` always wins when supplied, so a
+local smoke cannot accidentally mutate the deployed board.
 
-A lane closing out a card against a deployed instance -- no local database at
-all -- looks like:
+Run `powder version` before a lane starts. It reports the git commit that built
+the installed binary. A stale `~/.cargo/bin/powder` (one that predates a
+command's remote-mode support) is then obvious. You will not see a bare
+`missing --db` error for a command the checkout already covers.
+
+To close a card against a deployed instance without a local database, run:
 
 ```sh
 export POWDER_API_BASE_URL=https://powder.internal
@@ -200,10 +201,11 @@ powder complete-card 001 --proof https://github.com/misty-step/example/pull/1
 ```
 
 `update-relations`, `get-run`, `list-awaiting-input`, `answer-input`,
-`repository-*`, `import-github-issues`, `key-*`, and `subscription-*` remain `--db`-only:
-they are either bulk/admin operations or read paths with no remote-mode
-demand yet. Omitting `--db` on those fails with a bare `missing --db`, not
-yet the command-specific transport error the remote-capable commands give.
+`repository-*`, `import-github-issues`, `key-*`, and `subscription-*` remain
+`--db`-only. These commands are bulk/admin operations or read paths without
+remote-mode demand yet. If you omit `--db`, they fail with a bare
+`missing --db`, not the command-specific transport error that remote-capable
+commands return.
 
 ```sh
 powder init-db --db ./data/powder.db --show-secret
@@ -231,7 +233,8 @@ powder complete-card 001 --db ./data/powder.db
 ## MCP Over HTTP
 
 Set `POWDER_API_BASE_URL` and `POWDER_API_KEY` to run `powder-mcp` against a
-live `powder-server` instead of a local SQLite file. A minimal local smoke is:
+live `powder-server` instead of a local SQLite file. Run this minimal local
+smoke:
 
 ```sh
 DB=/tmp/powder-http-smoke/powder.db
@@ -243,65 +246,64 @@ POWDER_DB_PATH="$DB" POWDER_AUTH_MODE=api-key POWDER_BIND_ADDR=127.0.0.1:4017 po
 POWDER_API_BASE_URL=http://127.0.0.1:4017 POWDER_API_KEY="$KEY" powder-mcp
 ```
 
-For Harness Kit `factory-mcps`, the remote entry shape is `required_env_any:
-[[POWDER_API_BASE_URL, POWDER_API_KEY], [POWDER_DB_PATH]]`; the factory remote
-variant should populate `POWDER_API_BASE_URL` and `POWDER_API_KEY` from the
-Agents vault and run `powder-mcp`.
+For Harness Kit `factory-mcps`, use this remote entry shape:
+`required_env_any: [[POWDER_API_BASE_URL, POWDER_API_KEY], [POWDER_DB_PATH]]`.
+The factory remote variant must populate `POWDER_API_BASE_URL` and
+`POWDER_API_KEY` from the Agents vault and run `powder-mcp`.
 
-Registered MCP subprocesses (e.g. a `bash -lc 'source ~/.secrets && exec
-powder-mcp'` server entry) resolve `POWDER_API_BASE_URL` from their own
-launch environment, which can silently diverge from the value in an
-operator's interactive shell (a stale manual export is enough). Send an
-`initialize` call and compare `result.serverInfo.baseUrl` against your own
-`POWDER_API_BASE_URL` before assuming an add-comment failure is a bug in
-Powder rather than two faces pointed at different deployments.
+Registered MCP subprocesses (for example, a `bash -lc 'source ~/.secrets &&
+exec powder-mcp'` server entry) resolve `POWDER_API_BASE_URL` from their own
+launch environment. That value can differ silently from the operator's
+interactive shell. A stale manual export is enough. Send an `initialize` call.
+Compare `result.serverInfo.baseUrl` with your own `POWDER_API_BASE_URL` before
+you treat an add-comment failure as a Powder bug. Two faces may point to
+different deployments.
 
-Agents hitting the HTTP API directly, without the CLI or MCP, can read
-`GET /api/v1/routes` for the full route contract including example request
-bodies -- it names the fields `POST /api/v1/cards` and
-`POST /api/v1/cards/{id}/links` actually require instead of leaving that to
+Agents that hit the HTTP API directly, without the CLI or MCP, can read
+`GET /api/v1/routes` for the full route contract and example request bodies.
+It names the fields that `POST /api/v1/cards` and
+`POST /api/v1/cards/{id}/links` require. Use it instead of
 deserialize-error trial-and-error.
 
 ### Key rotation and stale-key/stale-host runbook (powder-944)
 
-A registered `powder-mcp` subprocess captures `POWDER_API_KEY` (and
-`POWDER_API_BASE_URL`) once, at process boot. Rotating the key, or
-re-pointing the deployment at a new hostname, does not change an
-already-running subprocess's environment -- it keeps sending the old
-value until something restarts it. Two ways to handle this:
+At process boot, a registered `powder-mcp` subprocess captures
+`POWDER_API_KEY` and `POWDER_API_BASE_URL`. A key rotation or deployment
+hostname change does not update an already-running subprocess. It keeps sending
+the old value until you restart it. Use one of these two methods:
 
 - **Restart the MCP client** after any key rotation or host cutover. This
   always works and needs no configuration.
 - Set `POWDER_API_KEY_CMD` to a shell command that prints a fresh key on
-  stdout (e.g. `security find-generic-password -a "$USER" -s
+  stdout (for example, `security find-generic-password -a "$USER" -s
   powder-api-key -w`, or `op read op://Agents/POWDER_API_KEY__bridge/credential`).
-  `powder-mcp` runs it once at boot, and again, once, the first time a
-  request comes back `401` -- if the command resolves a different key than
-  the one that just failed, it transparently retries with the new key and
-  the caller never sees the rotation. `POWDER_API_KEY` remains the plain
-  fallback; leaving `POWDER_API_KEY_CMD` unset is unchanged behavior.
+  At boot, `powder-mcp` runs the command once. It runs the command once more
+  the first time a request returns `401`. If the command resolves a different
+  key than the failed key, `powder-mcp` retries with the new key. The caller
+  does not see the rotation. `POWDER_API_KEY` remains the plain fallback.
+  Leaving `POWDER_API_KEY_CMD` unset keeps the current behavior.
 
-When both a rotation and a retry are exhausted, or `POWDER_API_KEY_CMD` isn't
-set, a `401` error names the key prefix `powder-mcp` used (matching the
-`list_keys`/`ApiKeySummary` prefix convention) and says to restart the MCP
-client or configure `POWDER_API_KEY_CMD`. A run of three or more consecutive
-`404`s on tool calls gets a distinct steer instead: `POWDER_API_BASE_URL` may
-be pointed at a stale host (a deployment cutover, powder-965's class of
-incident) -- restart the MCP client after fixing the URL.
+When rotation and retry both exhaust, or when `POWDER_API_KEY_CMD` is not set,
+`powder-mcp` returns a `401` error. The error names the key prefix
+`powder-mcp` used, matching the `list_keys`/`ApiKeySummary` prefix convention.
+It tells the caller to restart the MCP client or configure
+`POWDER_API_KEY_CMD`. After three or more consecutive `404`s on tool calls,
+`powder-mcp` gives a distinct stale-host steer. `POWDER_API_BASE_URL` may point
+to a stale host (a deployment cutover, powder-965's class of incident).
+Restart the MCP client after fixing the URL.
 
 ## Response Evolution Contract
 
-Status vocabulary changes are additive from the client's perspective.
-`powder-core::CardStatus` rejects unknown values on writes, so the server
-and store never persist invalid statuses. On read surfaces, however,
-clients decode with `powder_api::ClientStatus`: an unrecognized value
-degrades only that card and is preserved as a raw string. A listing
-(`list_ready`, `list_cards`, `board_stats`) must never hard-fail just
-because one card carries a future or retired status value. `get_card`
-and `get_run` return the server's JSON verbatim, so they are also
-version-skew safe. Agents and adapters should keep this contract in mind
-when adding new status values: deploy the server change first, then
-update clients at their own pace; the old client must keep reading.
+Treat status vocabulary changes as additive from the client's perspective.
+`powder-core::CardStatus` rejects unknown values on writes. Therefore, the
+server and store never persist invalid statuses. On read surfaces, clients
+decode with `powder_api::ClientStatus`. An unrecognized value degrades only
+that card and remains preserved as a raw string. A listing (`list_ready`,
+`list_cards`, `board_stats`) must never hard-fail because one card carries a
+future or retired status value. `get_card` and `get_run` return the server's
+JSON verbatim, so they remain version-skew safe. When you add a status value,
+deploy the server change first. Update clients at their own pace. The old
+client must keep reading.
 
 ## Local Gate
 

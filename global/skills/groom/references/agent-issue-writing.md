@@ -3,18 +3,18 @@
 ## Principle
 
 Treat the issue as a prompt for a senior coding agent.
-Give the agent the goal, the local context, the quality bar, and the boundaries.
-Do not replace thinking with a brittle step-by-step script.
+Give the agent its goal, local context, quality bar, and boundaries.
+Do not replace judgment with a rigid step-by-step script.
 
 ## What to include
 
 ### Problem
 
-State what is wrong or missing, with concrete evidence when available.
+State what is wrong or missing. Add concrete evidence when available.
 
 ### Outcome
 
-State what should be true when the issue is done.
+State what must be true when the issue is done.
 
 ### Context
 
@@ -24,20 +24,20 @@ Include only the context needed to make good decisions:
 - existing patterns
 - relevant linked issues or docs
 
-Use domain names and behavioral contracts before file paths. Paths are
-touchpoints, not the source of truth; they go stale faster than the behavior.
+Use domain names and behavioral contracts before file paths.
+Paths are touchpoints, not the source of truth; they go stale faster than the behavior.
 
 ### Acceptance criteria
 
-Write them so they can map to tests, commands, or visible behaviors.
-Good tags:
+Write criteria that map to tests, commands, or visible behaviors.
+Use these good tags:
 - `[behavioral]`
 - `[test]`
 - `[command]`
 
 ### Boundaries
 
-Say what should not change. This is often more valuable than extra implementation steps.
+Say what must not change. This is often more valuable than extra implementation steps.
 
 ### Verification
 
@@ -45,33 +45,33 @@ Provide runnable commands when possible.
 
 ### Touchpoints
 
-List likely files, modules, routes, tests, or data paths when known. These are starting points, not
-prisons.
+List likely files, modules, routes, tests, or data paths when known.
+Treat them as starting points, not fixed limits.
 
 ### Agent Autonomy
 
 Label the expected execution mode when it matters:
 
-- **AFK:** the issue is fully specified, has an executable or inspectable
-  oracle, and can be completed by an agent without new product judgment.
-- **HITL:** the issue needs a human decision, credential, design review,
-  production access, or external confirmation before implementation can safely
-  finish.
+- **AFK:** The issue has a full specification, an executable or inspectable
+  oracle, and no new product judgment is needed.
+- **HITL:** The issue needs a human decision, credential, design review,
+  production access, or external confirmation before implementation can finish
+  safely.
 
-Do not mark an issue AFK unless dependencies, boundaries, and verification are
-visible in the issue body.
+Do not mark an issue AFK until the issue body shows its dependencies, boundaries,
+and verification.
 
 ## What to avoid
 
-- vague requests like “clean this up”
-- giant multi-outcome tickets (an epic with one coherent outcome, an oracle,
-  and ordered children is fine; a grab-bag without done criteria is not)
-- hidden dependencies in comments only
-- instructions that describe exact shell steps instead of the desired result
-- “etc”, “as needed”, or other scope leak phrases
-- acceptance criteria that cannot be observed or tested
-- stale line-number directives as the only source of truth
-- AFK labels on work that still needs product or architecture decisions
+- Avoid vague requests such as “clean this up”.
+- Avoid tickets with multiple outcomes. An epic with one coherent outcome, an
+  oracle, and ordered children is fine. A ticket without done criteria is not.
+- Avoid hidden dependencies in comments only.
+- Avoid instructions that describe exact shell steps instead of the desired result.
+- Avoid “etc”, “as needed”, and other scope leak phrases.
+- Avoid acceptance criteria that cannot be observed or tested.
+- Avoid stale line-number directives as the only source of truth.
+- Avoid AFK labels on work that still needs product or architecture decisions.
 
 ## Type-specific guidance
 
@@ -137,13 +137,13 @@ pnpm typecheck
 ## AI-agent modification
 
 Optimize for first-pass execution:
-- prefer one issue per coherent diff
-- split broad plans into vertical tracer bullets that are independently
-  demoable or verifiable
-- keep prompts goal-oriented, not step-prescriptive
-- include deterministic constraints explicitly
-- separate exploration from implementation when uncertainty is high
-- rewrite oversized issues before assigning them
+- Prefer one issue per coherent diff.
+- Split broad plans into vertical tracer bullets that agents can demonstrate or
+  verify independently.
+- Keep prompts goal-oriented, not step-prescriptive.
+- State deterministic constraints explicitly.
+- Separate exploration from implementation when uncertainty is high.
+- Rewrite oversized issues before assigning them.
 
 ## Sources
 

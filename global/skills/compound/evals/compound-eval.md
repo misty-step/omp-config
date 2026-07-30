@@ -1,13 +1,14 @@
 # /compound eval
 
-The one claim `/compound` must earn: **after a solved problem, the skill
-causes an agent to write exactly one grep-ready, anchored learning or update an
-overlapping one, where a raw closeout prompt either loses the lesson in chat or
-creates duplicative prose without retrieval fields.**
+The `/compound` skill must earn one claim.
+After a solved problem, it must write exactly one grep-ready, anchored learning or update an overlapping one.
+A raw closeout prompt either loses the lesson in chat or creates duplicate prose without retrieval fields.
 
-This is a `mode-eval` A/B run. Arms: A = `/compound` installed and invoked; B =
-raw same-model closeout prompt with the same solved-problem evidence. Grade
-blind, objective first, judge a different model family than the workers.
+
+This is a `mode-eval` A/B run.
+Arms: A = `/compound` installed and invoked; B = raw same-model closeout prompt with the same solved-problem evidence.
+Grade blind, objective first, and judge with a different model family than the workers.
+
 
 ## Fixtures
 
@@ -29,31 +30,36 @@ blind, objective first, judge a different model family than the workers.
       `rg -n --glob '*.md' '^(title|tags|applies_when):|<module>|<failure-mode>' docs/solutions`.
 - [ ] Fixture 2 does not create a near-duplicate learning.
 
+
 ## Rubric
 
 | Dimension | 5 | 1 |
 |---|---|---|
 | Reusability | The lesson changes future agent behavior in a similar task. | The note is a session summary. |
 | Retrieval quality | Title, tags, and applies_when are concrete grep handles. | Future agents would not find it by grep. |
-| Evidence discipline | Claims are anchored to checkable repo evidence. | Claims rely on memory or chat. |
+| Evidence discipline | Claims use checkable repo evidence. | Claims rely on memory or chat. |
+
 
 ## Pass condition
 
 Arm A beats Arm B on retrieval quality and evidence discipline across at least
-2 of 3 fixtures, and ties-or-wins every objective check. A no-op skill fails
-because raw closeout reliably omits overlap checks or grep-ready frontmatter.
+2 of 3 fixtures.
+Arm A ties-or-wins every objective check.
+A no-op skill fails because a raw closeout often omits overlap checks or grep-ready frontmatter.
 
 ## Human anchor
 
-Pending. The operator should blind-grade fixture 2 because duplicate avoidance
-is the easiest place for plausible but harmful corpus growth.
+Pending.
+The operator should blind-grade fixture 2 because duplicate avoidance is the clearest test of harmful duplicate additions.
+
 
 ## Cadence
 
-Edit-time smoke on any `global/skills/compound/**` or
-`global/references/learnings.md` change. Full 3-fixture A/B when
-the frontmatter schema or duplicate policy changes. Re-audit after major
-model releases.
+Run an edit-time smoke on any `global/skills/compound/**` or
+`global/references/learnings.md` change.
+Run full 3-fixture A/B when the frontmatter schema or duplicate policy changes.
+Re-audit after major model releases.
+
 
 ## Run log
 
