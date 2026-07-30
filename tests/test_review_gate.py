@@ -471,9 +471,14 @@ class ReviewGateProtocolTests(unittest.TestCase):
             "args = sys.argv[1:]\n"
             "output = args[args.index('--json-output') + 1]\n"
             "model = args[args.index('--model') + 1]\n"
+            "datasets = [args[index + 1] for index, value in enumerate(args) if value == '--dataset']\n"
             "findings = [] if model == 'test-clean' else ["
             "{'severity':'medium','title':'Synthetic finding','evidence':'Observable test evidence','locations':[]}]\n"
-            "json.dump({'findings': findings, 'actionable_findings': len(findings)}, open(output, 'w'))\n"
+            "report = {'findings': findings, 'actionable_findings': len(findings), "
+            "'overall_correctness': 'patch is correct' if not findings else 'patch is incorrect'}\n"
+            "if any('bundle.review.' in dataset for dataset in datasets):\n"
+            "    report.update({'change_summary': 'Synthetic leaf review', 'interface_effects': []})\n"
+            "json.dump(report, open(output, 'w'))\n"
             "raise SystemExit(1 if findings else 0)\n",
             encoding="utf-8",
         )

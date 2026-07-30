@@ -259,11 +259,12 @@ def run_autoreview_chunks(
     engine: str,
     model: str,
     thinking: str | None,
+    reviewer: str = "autoreview",
 ) -> dict[str, Any]:
-    """Run bounded autoreview datasets; status and receipt ownership stay in core."""
+    """Run one canonical reviewer against bounded packet datasets."""
     review_names = [name for name in _packet_dataset_names(packet) if name.startswith("bundle.review.") and name.endswith(".diff")]
     if not review_names:
-        raise GateError("review packet has no autoreview datasets")
+        raise GateError("review packet has no review datasets")
     reports: list[dict[str, Any]] = []
     entries: list[dict[str, Any]] = []
     findings: list[dict[str, Any]] = []
@@ -272,10 +273,10 @@ def run_autoreview_chunks(
     unavailable = False
     failed = False
     for index, review_name in enumerate(review_names):
-        report_path = report_temp / f"autoreview.{index:03d}.raw.json"
+        report_path = report_temp / f"{reviewer}.{index:03d}.raw.json"
         report_path.unlink(missing_ok=True)
         prompt = (
-            f"Review immutable committed-range dataset chunk {index + 1} of {len(review_names)}. "
+            f"Apply the canonical {reviewer} review skill. Review immutable committed-range dataset chunk {index + 1} of {len(review_names)}. "
             "Report findings grounded in this chunk plus a compact change_summary string and "
             "interface_effects string array. Return actionable_findings as a non-negative integer "
             "when findings is absent or empty, and include overall_correctness. Do not return a "
@@ -296,9 +297,9 @@ def run_autoreview_chunks(
             ],
             report_path,
         )
-        exit_code, stdout, stderr = _run_packet_command(command=command, repo=repo, packet=packet, reviewer="autoreview", timeout=timeout)
+        exit_code, stdout, stderr = _run_packet_command(command=command, repo=repo, packet=packet, reviewer=reviewer, timeout=timeout)
         exit_codes.append(exit_code)
-        report = _load_report(report_path, stdout, "autoreview worker report")
+        report = _load_report(report_path, stdout, f"{reviewer} worker report")
         if report is None:
             reports.append({"dataset": review_name, "error": stderr.strip() or "missing structured report"})
             actionable_findings += 1
@@ -306,8 +307,8 @@ def run_autoreview_chunks(
             unavailable = unavailable or exit_code == 127
             continue
         try:
-            summary = _review_summary(report, "autoreview", review_name)
-            finding_entries = _validated_findings(report, "autoreview")
+            summary = _review_summary(report, reviewer, review_name)
+            finding_entries = _validated_findings(report, reviewer)
             count = len(finding_entries)
         except GateError as error:
             reports.append({"dataset": review_name, "report": report, "error": str(error)})
@@ -350,8 +351,9 @@ def run_autoreview_integration(
     model: str,
     thinking: str | None,
     chunks: Mapping[str, Any],
+    reviewer: str = "autoreview",
 ) -> dict[str, Any]:
-    """Run the bounded cross-chunk reducer as adapter-only evidence."""
+    """Run one canonical reviewer's bounded cross-chunk reducer."""
     review_names = chunks["review_names"]
     entries = chunks["entries"]
     if len(entries) != len(review_names) or chunks["unavailable"]:
@@ -380,16 +382,17 @@ def run_autoreview_integration(
         }
     integration_path: Path | None = None
     try:
+        integration_name = f"{reviewer}.integration.json"
         with tempfile.NamedTemporaryFile(
             mode="wb", prefix=".omp-review-integration-", suffix=".json", dir=report_temp, delete=False
         ) as handle:
             integration_path = Path(handle.name)
             handle.write(integration_bytes)
         integration_path.chmod(0o444)
-        report_path = report_temp / "autoreview.integration.raw.json"
+        report_path = report_temp / f"{reviewer}.integration.raw.json"
         report_path.unlink(missing_ok=True)
         prompt = (
-            "Review cross-file, cross-config, and interface interactions using the immutable packet "
+            f"Apply the canonical {reviewer} review skill. Review cross-file, cross-config, and interface interactions using the immutable packet "
             "and bounded chunk summaries. Return only findings, actionable_findings, and "
             f"overall_correctness; do not return a {RESULT_SCHEMA} envelope."
         )
@@ -406,7 +409,7 @@ def run_autoreview_integration(
                     skill_path=(PACKET_DIR / "review-skill.md").as_posix(),
                 ),
                 "--dataset",
-                (PACKET_DIR / "autoreview.integration.json").as_posix(),
+                (PACKET_DIR / integration_name).as_posix(),
             ],
             report_path,
         )
@@ -414,11 +417,11 @@ def run_autoreview_integration(
             command=command,
             repo=repo,
             packet=packet,
-            reviewer="autoreview",
+            reviewer=reviewer,
             timeout=timeout,
-            extra_files={"autoreview.integration.json": integration_bytes},
+            extra_files={integration_name: integration_bytes},
         )
-        report = _load_report(report_path, stdout, "autoreview integration report")
+        report = _load_report(report_path, stdout, f"{reviewer} integration report")
         if report is None:
             return {
                 "integration": {"error": stderr.strip() or "missing structured integration report"},
@@ -428,7 +431,7 @@ def run_autoreview_integration(
                 "failed": True,
             }
         try:
-            finding_entries = _validated_findings(report, "autoreview")
+            finding_entries = _validated_findings(report, reviewer)
             count = len(finding_entries)
         except GateError as error:
             return {
@@ -441,7 +444,7 @@ def run_autoreview_integration(
         findings = finding_entries
         failed = (exit_code != 0 and count == 0) or report.get("overall_correctness") not in {"patch is correct", "patch is incorrect"}
         return {
-            "integration": {"dataset": (PACKET_DIR / "autoreview.integration.json").as_posix(), "report": report},
+            "integration": {"dataset": (PACKET_DIR / integration_name).as_posix(), "report": report},
             "findings": findings,
             "actionable_findings": count,
             "exit_codes": [exit_code],
@@ -602,51 +605,41 @@ def _run_direct_leaf(
     report_temp: Path,
 ) -> dict[str, Any]:
     skill_identity(reviewer)
-    skill_path = PACKET_DIR / "review-skill.md"
-    dataset_names = [name for name in _packet_dataset_names(packet) if name not in {"freeze.json", "evidence.json"}]
-    report_path = report_temp / f"{reviewer}.raw.json"
-    prompt = (
-        f"Apply the canonical {reviewer} review skill from {skill_path.as_posix()} without rewriting or "
-        "summarizing its bytes. Review only the immutable packet datasets and return a JSON object with "
-        "findings, actionable_findings, and any supporting explanation. Do not return a review pass or "
-        f"{RESULT_SCHEMA} envelope."
-    )
-    command = _adapter_command(
+    chunks = run_autoreview_chunks(
+        identity,
+        repo,
+        packet,
+        timeout,
+        report_temp,
         executable,
         engine,
         model,
         thinking,
-        prompt,
-        [
-            *_review_dataset_args(
-                packet,
-                ["freeze.json", "evidence.json", *dataset_names],
-                skill_path=skill_path.as_posix(),
-            )
-        ],
-        report_path,
+        reviewer,
     )
-    exit_code, stdout, stderr = _run_packet_command(
-        command=command,
-        repo=repo,
-        packet=packet,
-        reviewer=reviewer,
-        timeout=timeout,
+    integration = run_autoreview_integration(
+        identity,
+        repo,
+        packet,
+        timeout,
+        report_temp,
+        executable,
+        engine,
+        model,
+        thinking,
+        chunks,
+        reviewer,
     )
-    report = _load_report(report_path, stdout, f"{reviewer} worker report")
-    if report is None:
-        return _result_document(
-            identity,
-            packet,
-            reviewer,
-            {"findings": [], "actionable_findings": 0},
-            exit_code=exit_code,
-            error=stderr.strip() or "missing structured report",
-        )
-    findings = _validated_findings(report, reviewer)
-    error = None if exit_code == 0 or findings else (stderr.strip() or "worker exited without actionable findings")
-    status = "findings" if findings else None
-    return _result_document(identity, packet, reviewer, report, exit_code=exit_code, status=status, error=error)
+    reduced = reduce_autoreview_results(chunks, integration)
+    return _result_document(
+        identity,
+        packet,
+        reviewer,
+        reduced["report"],
+        exit_code=reduced["exit_code"],
+        status=reduced["status"],
+        error=(f"{reviewer} worker invocation failed" if reduced["status"] in {"failed", "unavailable"} else None),
+    )
 
 
 def _executable(raw: str | None) -> Path:
