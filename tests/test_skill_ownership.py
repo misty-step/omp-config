@@ -16,7 +16,12 @@ if str(BIN_DIR) not in sys.path:
 from external_registry import ExternalRegistryError, check_external_skills
 
 
-LOCAL_SKILL_CORES = ("research-core", "deliver-core", "qa-users")
+LOCAL_SKILL_CORES = (
+    "research-core",
+    "deliver-core",
+    "qa-users",
+    "simplified-technical-english",
+)
 DEPENDENCY_SECTIONS = (
     "dependencies",
     "devDependencies",

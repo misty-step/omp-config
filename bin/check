@@ -416,8 +416,14 @@ def check_tree(contract: Contract) -> None:
         if name in declared_skills:
             fail(f"duplicate skill name {name}")
         declared_skills.add(name)
-    # dispatch/research are the chief core; other entries remain visible for operator invocation.
-    expected_visible_skills = {"autoreview", "dispatch", "qa-users", "research"}
+    # The chief core plus universal communication and operator-invoked workflows stay visible.
+    expected_visible_skills = {
+        "autoreview",
+        "dispatch",
+        "qa-users",
+        "research",
+        "simplified-technical-english",
+    }
     if visible_skills != expected_visible_skills:
         fail(
             "global visible skill core drift: "
