@@ -109,7 +109,7 @@ Lanes:
 
 ## Completion Gate
 
-See `global/AGENTS.md` (Prove) for the shared core.
+See `global/references/verification-system-first.md` for the shared proof contract.
 `/document` adds:
 
 ```markdown

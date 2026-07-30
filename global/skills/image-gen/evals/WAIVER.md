@@ -4,19 +4,23 @@ expires: 2026-09-30
 
 ## Reason
 
-image-gen's load-bearing claim is a routing judgment — image vs HTML/CSS
-prototype — plus provider/model selection and mockup prompting craft. A
-falsifiable A/B needs a rubric-graded image-quality judge (legible in-image
-text, spatial layout fidelity) and a frozen set of design briefs; standing that
-harness up is real work not yet done, and the routing half depends on
-model-capability facts that rot in weeks.
+image-gen's load-bearing claim is a routing judgment: image or HTML/CSS
+prototype. It also covers provider/model selection and mockup prompting craft.
+A falsifiable A/B needs a rubric-graded image-quality judge for legible in-image
+text and spatial layout fidelity.
+It also needs a frozen set of design briefs.
+That harness does not exist yet. Routing depends on model-capability facts that
+change within weeks.
 
 ## Disposition
 
-Time-boxed deferral, not a permanent opt-out. When it expires, either an eval
-spec lands at `global/skills/image-gen/evals/image-gen-eval.md` (template:
-`global/skills/skill-eval/templates/eval-spec.md`) — a cheap first cut can
-be the routing decision alone (skill-on vs raw same-model on prompts that should
-route to HTML), graded objectively without an image judge — or this waiver is
-renewed with a fresh reason and date. A silently renewed waiver is itself a
-finding for `/harness-engineering`'s next skill-health audit.
+Defer this work for a fixed time. Do not treat the waiver as a permanent opt-out.
+When it expires, add an eval spec at
+`global/skills/image-gen/evals/image-gen-eval.md`.
+Use `global/skills/skill-eval/templates/eval-spec.md` as the template.
+A cheap first cut can test the routing decision alone: skill-on versus raw
+same-model on prompts that should route to HTML.
+Grade it objectively without an image judge.
+Alternatively, renew this waiver with a fresh reason and date.
+A silently renewed waiver is itself a finding for `/harness-engineering`'s next
+skill-health audit.

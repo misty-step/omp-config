@@ -4,15 +4,12 @@ expires: 2026-09-29
 
 ## Reason
 
-Large multi-day productization workflow (demo path, marketing site, case study); too expensive to fixture as a single eval run without a scoped-down claim first.
+The multi-day productization workflow covers a demo path, marketing site, and case study. A single eval run costs too much without a scoped claim. Define that claim first.
 
 ## Disposition
 
-Not exempt from the eval-coverage contract — this waiver is a time-boxed
-deferral, not a permanent opt-out. When it expires, either an eval spec lands
-at `global/skills/showcase/evals/showcase-eval.md` (see `global/skills/skill-eval/templates/eval-spec.md`)
-or this waiver is renewed with a fresh reason and date. A stale, silently
-renewed waiver with no new reasoning is itself a finding for `/harness-engineering`'s
-next skill-health audit.
+This waiver does not exempt the skill from the eval-coverage contract. It defers the contract for a limited time; it does not opt out permanently.
+When the waiver expires, add an eval spec at `global/skills/showcase/evals/showcase-eval.md` (see `global/skills/skill-eval/templates/eval-spec.md`) or renew this waiver with a new reason and date.
+The next `/harness-engineering` skill-health audit must report a stale waiver that has no new reasoning.
 
-No automated eval; revisit when this skill changes. Per-skill proof runs through `/skill-eval`.
+No automated eval exists. Revisit when this skill changes. Run per-skill proof through `/skill-eval`.

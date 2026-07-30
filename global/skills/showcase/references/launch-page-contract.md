@@ -1,7 +1,6 @@
 # Launch Page Contract
 
-A launch page is a proof surface, not a decoration layer. Build it only after
-the product has a demo path or a credible replay artifact.
+A launch page presents proof, not decoration. Build it only after the product has a demo path or a credible replay artifact.
 
 ## Required Inputs
 
@@ -34,6 +33,6 @@ Use the repo's frontend stack when there is one. If none exists, shape first.
 
 ## Verification
 
-Run `/design` on the rendered page and dispatch `qa` on the route. The pass
-report must name viewport(s), screenshots, console/network status where
+Run `/design` on the rendered page and dispatch `qa` on the route.
+The pass report must name viewport(s), screenshots, console/network status where
 relevant, and the evidence map status.

@@ -1,8 +1,6 @@
 # Render contract — surfaces & sync
 
-One generation, multiple renders, no drift between them. "Synced docs" means
-markdown source of truth → consistent HTML + diagrams, all from the same run —
-not three hand-maintained copies.
+Run one generation and render every surface from it. "Synced docs" means markdown source of truth → consistent HTML and diagrams from the same run, not three hand-maintained copies.
 
 ## Markdown is the source of truth
 
@@ -14,26 +12,18 @@ not three hand-maintained copies.
 
 ## HTML render
 
-The browsable, beautiful surface. Do not hand-roll a static-site generator or a
-bespoke aesthetic — **compose**:
+The browsable surface. Do not write a static-site generator or a bespoke aesthetic — **compose**:
 
-- `/design` + `anthropic-frontend-design` for the visual system, typography, and
-  avoiding templated-default tells.
-- The "think in HTML" doctrine: layout, hierarchy, tables, diagrams, and
-  callouts make the docs easier to inspect than prose.
-- `/showcase`'s publish machinery if the docs become a public site.
+- `/design` + `anthropic-frontend-design` for the visual system, typography, and avoiding templated-default tells.
+- Use the "think in HTML" doctrine: layout, hierarchy, tables, diagrams, and callouts make the docs easier to inspect than prose.
+- Use `/showcase`'s publish machinery if the docs become a public site.
 
-Constraints: self-contained and navigable (sidebar/TOC, search if cheap),
-mermaid rendered to inline SVG, internal links resolved. If the repo already has
-a docs toolchain (mkdocs, Docusaurus, rustdoc, a Mintlify site), render into it
-instead of inventing a parallel one — match the repo.
+Keep the output self-contained and navigable (sidebar/TOC, search if cheap). Render mermaid to inline SVG. Resolve internal links. If the repo has a docs toolchain (mkdocs, Docusaurus, rustdoc, or a Mintlify site), use it. Do not invent a parallel one. Match the repo.
 
 ## Diagrams
 
-- Mermaid in markdown → rendered in HTML. Architecture, sequence, data-flow,
-  dependency, state — only where they earn their place
-  (`references/information-architecture.md`).
-- The render oracle fails the build on any unparseable diagram. No silent drop.
+- Mermaid in markdown → rendered in HTML. Use architecture, sequence, data-flow, dependency, or state diagrams only when they answer a needed question (`references/information-architecture.md`).
+- The render oracle fails the build on any unparseable diagram. Do not silently drop one.
 
 ## Output layout
 
@@ -46,11 +36,8 @@ docs/
 
 The built HTML target is the operator's call — published site, a gitignored
 local `_site/`, or a GitHub Pages branch. Default to local render pending an
-explicit publish decision; never push a public site without operator sign-off.
+explicit publish decision. Never push a public site without operator sign-off.
 
 ## "Synced across surfaces"
 
-Markdown, HTML, and (optionally) a GitHub Wiki mirror all derive from the one
-generation. If mirroring to GitHub Wiki, flatten the page tree and rewrite
-internal links — but the committed `docs/` markdown remains canonical; mirrors
-are derived, never edited in place.
+Markdown, HTML, and (optionally) a GitHub Wiki mirror derive from one generation. If you mirror to GitHub Wiki, flatten the page tree and rewrite internal links. Keep the committed `docs/` markdown canonical. Treat mirrors as derived. Never edit them in place.

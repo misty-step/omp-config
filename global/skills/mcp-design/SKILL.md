@@ -1,40 +1,48 @@
 ---
 disable-model-invocation: true
 name: mcp-design
-description: |
-  Design or review MCP server tool surfaces for agent usability: tool catalog shape, schemas/descriptions, response payloads, server instructions, token budget, and eval gates. Use when building an MCP server, auditing MCP tools, reducing tool schema/output context, deciding list/read/write split, consolidating CRUD tools, persona-splitting toolsets, or debugging agents choosing MCP tools poorly. Trigger: /mcp-design, /mcp-tools, /mcp-review.
+description: >
+  Design or review MCP server tool surfaces for agent usability: catalogs,
+  schemas, response payloads, instructions, token budgets, and eval gates.
+  Use for MCP construction, audits, context reduction, scan/read/write design,
+  CRUD consolidation, persona toolsets, or tool-choice debugging.
+  Trigger: /mcp-design, /mcp-tools, /mcp-review.
 argument-hint: "[server|catalog|diff] [--design|--audit|--shrink|--eval]"
 ---
 
 # /mcp-design
 
-An MCP server is a model interface, not an API wrapper. Design the default path
-as a **scan** surface: the agent finds the right object with little context, then
-reads detail intentionally.
+An MCP server is a model interface, not an API wrapper.
+Design the default path as a **scan** surface.
+Let the agent find the right object with little context, then read detail
+intentionally.
 
 The dated source canon and public-skill comparison live in
-[`references/sources.md`](references/sources.md). Load it when defending a
-contested rule, refreshing the research base, or comparing this skill to public
-MCP builder skills.
+[`references/sources.md`](references/sources.md).
+Load it to defend a contested rule, refresh the research base, or compare this
+skill with public MCP builder skills.
 
 ## Start
 
-1. Name the agent persona and job. One server should serve one coherent job;
-   split admin, end-user, coding-agent, and debugging personas when their
+1. Name the agent persona and job.
+   Make each server serve one coherent job.
+   Split admin, end-user, coding-agent, and debugging personas when their
    default tools or risk differ.
-2. Inventory the live surface. Capture `tools/list`, initialize
-   `instructions`, representative `tools/call` outputs, and current
-   token/byte counts. If the server does not exist yet, sketch the intended
-   tool catalog and response shapes.
-3. Classify each user task as **scan**, **read**, or **write**. Scan returns
-   enough to choose. Read returns bounded detail. Write returns result plus the
-   next safe read, not a full object dump.
-4. Pick the smallest default toolset that covers the persona's frequent jobs.
-   Treat 5-15 tools as the starting range; exceed it only with eval or
-   production-call evidence.
+2. Inventory the live surface.
+   Capture `tools/list`, initialize `instructions`, representative `tools/call`
+   outputs, and current token/byte counts.
+   If the server does not exist, sketch the intended tool catalog and response
+   shapes.
+3. Classify each user task as **scan**, **read**, or **write**.
+   Make scan return enough to choose.
+   Make read return bounded detail.
+   Make write return the result plus the next safe read, not a full object dump.
+4. Pick the smallest default toolset for the persona's frequent jobs.
+   Start with 5-15 tools. Exceed that range only with eval or production-call
+   evidence.
 
-Done means the proposed catalog names its persona, default tools,
-scan/read/write contracts, growth bounds, and proof loop.
+Done means the proposed catalog names its persona and default tools.
+It also defines scan/read/write contracts, growth bounds, and a proof loop.
 
 ## Tool Surface
 
@@ -45,42 +53,46 @@ Design for outcomes, not operations.
 - Keep low-level operations only when the agent must compose them and their
   outputs stay small.
 - Use service/resource namespacing that survives neighboring servers:
-  `github_issue_search`, `sentry_event_read`, `powder_card_update`. If the
-  client already prefixes by server, keep the tool name resource/action-specific.
-- Consolidate sibling CRUD operations with a typed `method` or `action`
-  parameter when the operation family shares arguments and mental model. Split
-  when write risk, required args, or return shape diverges.
-- Split by persona before adding server-side dynamic discovery. Server-side
-  dynamic toolset enablement usually breaks prompt-cache stability and depends
-  on users configuring the server. Put discovery in the harness/client; make the
-  server expose stable curated toolsets.
-- Do not mirror REST. A REST endpoint map optimizes human developers who read
-  docs once; MCP schema sits in the model context every session.
+  `github_issue_search`, `sentry_event_read`, `powder_card_update`.
+  If the client prefixes by server, keep the tool name resource/action-specific.
+- Consolidate sibling CRUD operations with a typed `method` or `action` parameter
+  when the operation family shares arguments and a mental model.
+  Split the family when write risk, required arguments, or return shape diverge.
+- Split by persona before adding server-side dynamic discovery.
+  Dynamic toolset enablement usually breaks prompt-cache stability and depends
+  on user configuration.
+  Put discovery in the harness/client. Make the server expose stable curated
+  toolsets.
+- Do not mirror REST.
+  A REST endpoint map serves human developers who read docs once.
+  MCP schema sits in the model context every session.
 
 ## Schemas And Descriptions
 
 Every schema token is context tax.
 
 - Flatten inputs into primitive fields, arrays of primitives, and
-  `enum`/`Literal` choices. Avoid nested filter bags unless the nested shape is
-  the product object the agent naturally manipulates.
+  `enum`/`Literal` choices.
+  Avoid nested filter bags unless the nested shape is the product object the
+  agent naturally manipulates.
 - Give defaults for safe common cases: `limit: 20`, `detail: "summary"`,
   `include_archived: false`.
 - Describe when to use the tool, how to format arguments, and what the response
-  contains. Tool descriptions are steering text, not API docs.
-- Prefer stable semantic identifiers in scan results. Include opaque ids only
-  when the next tool requires them.
+  contains.
+  Tool descriptions steer the agent; they are not API docs.
+- Prefer stable semantic identifiers in scan results.
+  Include opaque ids only when the next tool requires them.
 - Use `outputSchema` / `structuredContent` when deterministic clients or evals
-  need validation. Still consider a compact text or Markdown rendering if the
-  target model performs better with it; format is an eval question, not a
-  principle.
-- Keep examples tiny and discriminating. One example that prevents a likely
-  wrong call beats a long usage section.
+  need validation.
+  Add a compact text or Markdown rendering when the target model performs
+  better with it. Treat format as an eval question, not a principle.
+- Keep examples tiny and discriminating.
+  One example that prevents a likely wrong call beats a long usage section.
 
 ## Response Design
 
-The list contract is strict: **list output is a subset of get output**. Lists
-help choose; gets explain.
+The list contract is strict: **list output is a subset of get output**.
+Lists help the agent choose. Gets explain.
 
 | Surface | Return | Exclude |
 |---|---|---|
@@ -90,39 +102,42 @@ help choose; gets explain.
 
 Response rules:
 
-- Bound everything that grows: histories, comments, logs, work notes,
-  attachments, timelines, Markdown bodies.
+- Bound every growing surface: histories, comments, logs, work notes,
+  attachments, timelines, and Markdown bodies.
 - Paginate with default 20-50 items and metadata: `has_more`, `next_cursor` or
-  `next_offset`, and `total_count` when cheap. If truncated, say exactly what
-  was omitted and which next call continues.
-- Filter before bytes reach the model. Add server-side search/filter parameters
-  for common scans; use code execution or harness offload for large intermediate
-  datasets when available.
+  `next_offset`, and `total_count` when cheap.
+  If you truncate output, say exactly what you omitted and which next call
+  continues.
+- Filter before bytes reach the model.
+  Add server-side search/filter parameters for common scans.
+  Use code execution or harness offload for large intermediate datasets when
+  available.
 - Remove zero values, nulls, empty arrays, default booleans, repeated criteria,
-  pretty-print whitespace, and decorative URLs. Compact serialization is a
-  product feature.
-- Add `detail`/`response_format` only when agents actually need both shapes.
+  pretty-print whitespace, and decorative URLs.
+  Compact serialization is a product feature.
+- Add `detail`/`response_format` only when agents need both shapes.
   Default to summary. Make `detailed` opt-in.
-- Return errors with the correction path: which argument failed, valid enum
-  values, smaller limit/filter suggestion, or a specific read/search
-  alternative. Opaque stack traces teach nothing.
+- Return errors with a correction path.
+  Name the failed argument, valid enum values, a smaller limit/filter suggestion,
+  or a specific read/search alternative.
+  Opaque stack traces teach nothing.
 
 ### Powder Case Study
 
-A 2026-07 audit of the Powder work-board MCP found the canonical failure
-pattern:
+A 2026-07 audit of the Powder work-board MCP found this canonical failure pattern:
 
 - 31 tools cost about 2.6k schema tokens per session before any work.
-- `list(20)` returned about 14k tokens and `list(50)` about 31.5k because lists
-  returned full card objects.
-- 56% of list bytes were the same criteria text serialized twice; about 8% were
-  always-null fields; pretty JSON added 16%.
+- `list(20)` returned about 14k tokens and `list(50)` about 31.5k.
+  Lists returned full card objects.
+- 56% of list bytes repeated the same criteria text; about 8% were always-null
+  fields; pretty JSON added 16%.
 - Detail reads were unbounded while product doctrine encouraged frequent
   work-log appends.
 - Fields needed for scan decisions were only about 10% of the payload.
 
-Lessons: drive the server over stdio, count bytes by field, separate scan/read
-intents, delete duplication/nulls first, and bound every append-only surface.
+Apply these lessons: drive the server over stdio, count bytes by field, separate
+scan/read intents, delete duplication/nulls first, and bound every append-only
+surface.
 
 ## Server Instructions
 
@@ -131,33 +146,34 @@ Aim near 300 tokens.
 
 Include:
 
-- What this server is for and the persona it serves.
+- What this server is for and which persona it serves.
 - The default scan -> read -> write flow.
-- Safety/approval boundaries and destructive-tool handling.
-- Pagination/truncation rules and how to continue.
-- Naming conventions or IDs the agent must preserve.
-- One line telling the agent to prefer filters/smaller reads over broad dumps.
+- Safety and approval boundaries, plus destructive-tool handling.
+- Pagination and truncation rules, including how to continue.
+- Naming conventions or IDs that the agent must preserve.
+- One line that tells the agent to prefer filters or smaller reads over broad
+  dumps.
 
-Do not put the whole tool catalog in instructions; tools already carry
-descriptions.
+Do not put the whole tool catalog in instructions.
+Tools already carry descriptions.
 
 ## Measure And Eval
 
-A design change is not better until driven through a loop.
+A design change is not better until you drive it through a loop.
 
-- Schema budget: serialize `tools/list`; count total tokens and per-tool schema
-  tokens.
-- Output budget: call representative scan/read/write tools over stdio; record
-  bytes/tokens by top-level field and by repeated text.
-- Task eval: run realistic prompts against old vs new surface. Grade task
-  success, wrong-tool rate, calls per task, total tokens, truncation recovery,
-  and error self-correction.
-- Format eval: compare JSON, XML, Markdown, CSV, and `structuredContent` where
-  relevant. Different models prefer different shapes.
-- Regression rule: any tool rename, consolidation, list shape change, or
-  default-detail change needs a paired eval or production transcript
-  comparison. Keep aliases only where compatibility requires them, and measure
-  alias confusion.
+- **Schema budget:** Serialize `tools/list`.
+  Count total tokens and per-tool schema tokens.
+- **Output budget:** Call representative scan/read/write tools over stdio.
+  Record bytes/tokens by top-level field and repeated text.
+- **Task eval:** Run realistic prompts against the old and new surfaces.
+  Grade task success, wrong-tool rate, calls per task, total tokens,
+  truncation recovery, and error self-correction.
+- **Format eval:** Compare JSON, XML, Markdown, CSV, and `structuredContent`
+  where relevant. Different models prefer different shapes.
+- **Regression rule:** Pair an eval or production transcript for any tool rename,
+  consolidation, list shape change, or default-detail change.
+  Keep aliases only when compatibility requires them.
+  Measure alias confusion.
 
 Minimal stdio audit shape:
 
