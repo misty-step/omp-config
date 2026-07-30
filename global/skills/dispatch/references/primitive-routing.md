@@ -48,6 +48,7 @@ Validate every explicit tool name against OMP's existing built-in tool authority
 | capture a durable solved pattern | `compound` | the implementing lane after verification |
 | groom, prioritize, rethink, or find ambitious work | `groom`, `vision`, `grilling`, `research` | `curator`; never use a one-ticket shape workflow |
 | settle project identity or long-term direction | `vision`, `grilling`, `research` | `curator` with `solomon` for a contested decision |
+| shape or refresh a human project roadmap | `roadmap`, `grilling`, `simplified-technical-english`; add `vision` when direction changes | `curator` for decisions; `builder` for artifact edits; `qa` for browser proof |
 | produce interface alternatives | `design`, `image-gen` | bundled `designer`; use `daedalus` first when architecture is unsettled |
 | improve an existing interface without replacing its identity | `improve-ui`, `baseline-ui` | bundled `designer` for review; `builder` for implementation |
 | accessibility or motion defects | `fixing-accessibility`, `fixing-motion-performance` | `builder` plus `qa`; add a vision pass |

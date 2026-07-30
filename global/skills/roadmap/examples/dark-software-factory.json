@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "project": "Dark software factory",
+  "updated": "2026-07-30",
+  "visionSource": "July 2026 factory discussion",
+  "vision": {
+    "purpose": "Build a software factory where agents create, verify, ship, observe, repair, and improve software with minimal human action.",
+    "target": "Agents complete most work without terminal care. Humans set intent, grant authority, amend rules, and review measured outcomes.",
+    "humanRole": "Humans write intent, approve spend, amend rules, and review exceptions and outcomes.",
+    "systemRule": "Keep durable context, explicit authority, independent proof, and replaceable service boundaries under every workflow."
+  },
+  "measures": [
+    {
+      "name": "Human time",
+      "description": "Minutes per verified outcome"
+    },
+    {
+      "name": "Escalations",
+      "description": "Human decisions per durable run"
+    },
+    {
+      "name": "Recovery",
+      "description": "Failures repaired inside approved limits"
+    },
+    {
+      "name": "Evidence",
+      "description": "Outcomes with complete lineage"
+    },
+    {
+      "name": "Value",
+      "description": "Cost per measured later outcome"
+    }
+  ],
+  "workAuthority": {
+    "name": "Powder",
+    "description": "Actionable work, claims, attempts, relations, activity, and proof records"
+  },
+  "items": [
+    {
+      "id": "R01",
+      "horizon": "current",
+      "title": "Establish the project compass",
+      "outcome": "Keep one concise repository view for vision, sequence, open decisions, research, and proof.",
+      "proof": "The operator can find the vision, current item, and next items in less than two minutes.",
+      "question": "Does one HTML projection give enough clarity before a roadmap service exists?",
+      "research": "Compare small roadmap applications and test the view with a cold operator.",
+      "coverage": [
+        "Principles as a first-class artifact",
+        "Human and agent tools differ",
+        "Humans as executives"
+      ]
+    },
+    {
+      "id": "R02",
+      "horizon": "next",
+      "title": "Make all agent work durable and asynchronous",
+      "outcome": "Preserve runs, waits, replies, context, effects, cancellation, and recovery without terminal care.",
+      "proof": "Stop a process or host. The correct run resumes at the correct wait without a duplicate effect.",
+      "question": "Which substrate best preserves stable run identity, messages, waits, and cancellation?",
+      "research": "Compare Temporal, Hatchet, Jujutsu workspaces, herdr, Agent Mail, Beads, Buzz, and direct message substrates.",
+      "coverage": [
+        "Everything is asynchronous",
+        "Agent inbox with context restore",
+        "Worktrees, Jujutsu, Buzz, IRC, and Beads"
+      ]
+    },
+    {
+      "id": "R03",
+      "horizon": "next",
+      "title": "Test the specification pipeline",
+      "outcome": "Turn signals into specifications and keep only workflow stages that improve measured results.",
+      "proof": "Compare direct work with staged work across repeated tasks. Keep a stage only when it improves quality, time, or cost.",
+      "question": "Which specification, plan, review, build, and end-to-end stages beat a direct frontier agent?",
+      "research": "Run controlled comparisons across several task types, models, costs, and later reversals.",
+      "coverage": [
+        "Reusable task templates",
+        "Human work at specification and PR review"
+      ]
+    },
+    {
+      "id": "R04",
+      "horizon": "next",
+      "title": "Build an independent quality system",
+      "outcome": "Combine deterministic gates, blind review, security checks, and useful evals without self-approval.",
+      "proof": "Seed known defects and compare each judge with its null case. Keep only unique and stable detection.",
+      "question": "Which independent judges detect useful defects at an acceptable cost?",
+      "research": "Evaluate autoreview, Thermo reviews, Codex Security CLI, DeepSec, and seeded-defect benchmarks.",
+      "coverage": [
+        "Gauntlet Loop",
+        "Codex Security CLI and DeepSec",
+        "Evals for everything"
+      ]
+    },
+    {
+      "id": "R05",
+      "horizon": "later",
+      "title": "Compile fresh agent compositions",
+      "outcome": "Select each role, model, tool, skill, context, authority, and verifier for one outcome.",
+      "proof": "Reproduce a composition from its digest. Compare achievement prompts with a null prompt on repeated hard tasks.",
+      "question": "Which composition and context choices improve results across repeated tasks?",
+      "research": "Test model, provider, reasoning, skill, tool, context, and ambition-prompt choices on repeated hard tasks.",
+      "coverage": [
+        "Agent composition from zero",
+        "Ambition prompt",
+        "Durable context underneath all work"
+      ]
+    },
+    {
+      "id": "R06",
+      "horizon": "later",
+      "title": "Join work, cost, proof, and outcomes",
+      "outcome": "Link intent, run, composition, tokens, change, release, incident, proof, and later value.",
+      "proof": "One query explains whether one change was worth its tokens and identifies every source record.",
+      "question": "Which stable identifiers can Powder, R90, Canary, Overmind, OMP, and trace tools emit now?",
+      "research": "Define shared identifiers and compare trace joins across current source systems.",
+      "coverage": [
+        "Traces from Raindrop or LangSmith",
+        "R90 usage telemetry",
+        "Overmind synthesis"
+      ]
+    },
+    {
+      "id": "R07",
+      "horizon": "later",
+      "title": "Make failures loud and repair bounded",
+      "outcome": "Connect each failure to its cause and start safe investigation, repair, rollback, or escalation.",
+      "proof": "An injected failure starts a bounded response and keeps complete evidence without operator polling.",
+      "question": "Which failures can agents repair without new authority?",
+      "research": "Classify recent failures by detection, repair authority, blast radius, and required human decision.",
+      "coverage": [
+        "Loud errors and automatic repair",
+        "Dark factory"
+      ]
+    },
+    {
+      "id": "R08",
+      "horizon": "later",
+      "title": "Keep a user-persona fleet active",
+      "outcome": "Run named user agents through real entry points and turn their evidence into product signals.",
+      "proof": "Measure overlap between agent findings and later real-user findings. Change weak personas.",
+      "question": "Which personas reveal important problems before real users report them?",
+      "research": "Compare persona findings with support, analytics, incident, and real-user evidence.",
+      "coverage": [
+        "User-persona agents"
+      ]
+    },
+    {
+      "id": "R09",
+      "horizon": "later",
+      "title": "Finish the full product surface",
+      "outcome": "Treat documentation, change notes, onboarding, explanation, and distribution as product work.",
+      "proof": "A new user can understand and adopt the product without operator guidance.",
+      "question": "Which adoption evidence proves that a product surface is complete?",
+      "research": "Test product understanding and adoption with cold users and user-persona agents.",
+      "coverage": [
+        "Marketing sites, documentation, and change logs"
+      ]
+    },
+    {
+      "id": "R10",
+      "horizon": "explore",
+      "title": "Consolidate services around deep boundaries",
+      "outcome": "Map functions before services, build where Misty Step has a thesis, and delete weak sketches.",
+      "proof": "Each service boundary has one authority, failure, privacy, retention, or scale reason. Replaced projects leave no active path.",
+      "question": "Which projects should become services, adapters, references, or deletions?",
+      "research": "Compare current projects, provider tools, Ousterhout boundaries, build choices, and the separate Mint architecture decision.",
+      "coverage": [
+        "Ousterhout design",
+        "Build the services ourselves",
+        "Old projects can be sketches",
+        "Mint architecture"
+      ]
+    }
+  ],
+  "exclusions": []
+}
