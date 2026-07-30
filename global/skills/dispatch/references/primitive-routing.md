@@ -44,6 +44,8 @@ Validate every explicit tool name against OMP's existing built-in tool authority
 |---|---|---|
 | build one accepted ticket | `deliver` (loads `deliver-core`); add `refactor` only for an explicit architecture refactor | `builder` |
 | run or strengthen gates | `ci`, `project-engineering` | `builder` authoring; `qa` verification |
+| audit, assess, and remediate lint, build, typecheck, and hook gates | `quality-toolchain`; the program composes `ci` and `project-engineering` lanes | one owning lane runs the program: `scout`/`sonic` inventory, ad-hoc audit lanes, `builder` or `fixer` remediation, fresh `qa` verification |
+| audit, assess, and remediate the automated test system | `quality-tests`; the program composes `review-tests` and `ci` lanes | one owning lane runs the program: `scout`/`sonic` inventory, ad-hoc audit lanes, `builder` or `fixer` remediation, fresh `qa` verification |
 | review a meaningful change | `code-review` for `freeze -> prepare -> submit -> record -> verify`; `autoreview`, `thermo-nuclear-review`, and `thermo-nuclear-code-quality-review` are ordinary skills loaded explicitly by the caller; add `peer-harnesses` only for optional extra critics | `reviewer` |
 | capture a durable solved pattern | `compound` | the implementing lane after verification |
 | groom, prioritize, rethink, or find ambitious work | `groom`, `vision`, `grilling`, `research` | `curator`; never use a one-ticket shape workflow |
