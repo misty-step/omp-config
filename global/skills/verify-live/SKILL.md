@@ -2,58 +2,59 @@
 disable-model-invocation: true
 name: verify-live
 description: |
-  Live-behavior verification playbook: drive a real browser and real
-  entrypoints, prove a change works or fails, and return PASS/WARN/FAIL/SKIP
-  evidence. Escalation ladder across the builtin browser tool, the
-  agent-browser CLI, and the chrome-devtools CLI. Use when asked to verify,
-  QA, smoke-test, or reproduce a rendered surface, golden path, performance,
-  or console/network behavior against a running app.
+  Verify live behavior: drive a real browser and real entrypoints, prove that a
+  change works or fails, and return PASS/WARN/FAIL/SKIP evidence. Use the ladder
+  of the builtin browser tool, the agent-browser CLI, and the chrome-devtools
+  CLI. Use when asked to verify, QA, smoke-test, or reproduce a rendered
+  surface, golden path, performance, or console/network behavior against a
+  running app.
   Trigger: /verify-live.
 ---
 
 # /verify-live
 
-Reproduce the claimed behavior through the real user-facing surface before
-trusting it. "Tests pass" is not verification — exercise the exact contract
-named in the claim and capture the command, screenshot, snapshot, or log
-that shows it. Never repair the artifact you are verifying: no edits, no
-writes, no commits, no mutating a tracker. State what was exercised and what
-was not as clearly as the verdict itself.
+Reproduce the claimed behavior through the real user-facing surface before you
+trust it. "Tests pass" is not verification. Exercise the exact contract named
+in the claim. Capture the command, screenshot, snapshot, or log that shows it.
+Never repair the artifact under verification: make no edits, writes, commits,
+or tracker mutations. State what you exercised and what you did not as clearly
+as the verdict itself.
 
 ## Escalation ladder
 
-Three tiers, cheapest first. Never skip to a higher tier for a job a lower
-tier settles — each step up costs more tokens or more setup.
+Three tiers exist, from cheapest to most expensive. Never use a higher tier when
+a lower tier settles the job. Each higher tier costs more tokens or setup.
 
-**Tier 1 — builtin `browser` tool.** Zero standing cost, already loaded.
-Puppeteer-based: `tab.observe()`, `tab.ariaSnapshot()`, `tab.screenshot`,
-`tab.evaluate`, CSS and `aria/`/`text/`/`xpath/`/`pierce/` selectors.
-Playwright-only pseudo-selectors (`:has-text()`, `:visible`) are rejected —
-use `aria/<role>` or `text/<substring>` instead. Default for "does the
-golden path still work" and "did this render."
+**Tier 1 — builtin `browser` tool.** This tier has zero standing cost and is
+already loaded. It uses Puppeteer: `tab.observe()`, `tab.ariaSnapshot()`,
+`tab.screenshot`, `tab.evaluate`, CSS and
+`aria/`/`text/`/`xpath/`/`pierce/` selectors. Playwright-only pseudo-selectors
+(`:has-text()`, `:visible`) are rejected. Use `aria/<role>` or
+`text/<substring>` instead. This tier is the default for "does the golden path
+still work" and "did this render."
 
 **Tier 2 — `agent-browser` CLI via `bash`**
-(`/Users/phaedrus/.npm-global/bin/agent-browser`, v0.31.1). Reach for it only
-for what tier 1 cannot do: isolated console capture, uncaught-error
-isolation, network request lists and HAR export, snapshot/screenshot diffing
-against a saved baseline, Core Web Vitals, video recording of an interactive
-repro, and auth/session persistence across commands. Run
-`agent-browser skills get core` before your first command in a session —
-its usage guide is served by the installed binary and self-updates on
-upgrade, so this skill deliberately does not hardcode its full grammar. Add
-`--full` for the complete command reference when core is not enough.
+(`/Users/phaedrus/.npm-global/bin/agent-browser`, v0.31.1). Use it only when
+tier 1 cannot do the job: isolated console capture, uncaught-error isolation,
+network request lists and HAR export, snapshot or screenshot diffing against a
+saved baseline, Core Web Vitals, video recording of an interactive repro, and
+auth/session persistence across commands. Run
+`agent-browser skills get core` before your first command in a session. The
+installed binary serves and updates this usage guide on upgrade, so this skill
+does not hardcode its full grammar. Add `--full` for the complete command
+reference when core is not enough.
 
 **Tier 3 — `chrome-devtools` CLI via `bash`**
-(`/Users/phaedrus/.bun/bin/chrome-devtools`, v1.6.0). Only for
+(`/Users/phaedrus/.bun/bin/chrome-devtools`, v1.6.0). Use it only for
 Lighthouse-scored audits, performance trace-insight analysis, and heap
-snapshots — jobs neither tier 1 nor tier 2 covers. These are token-expensive;
-always pass an output/file path (`--outputDirPath`, `--filePath`) so the
-heavy payload lands on disk instead of spilling into context, then read only
-the summary you need. The `chrome-devtools` MCP server is defined in
-`global/mcp.json` but sits in `disabledServers` and stays disabled — running
-~36 always-on tool schemas through every turn is a token tax the CLI avoids
-entirely; both Google and Microsoft now recommend CLI-plus-skills over
-always-on MCP for coding agents for this exact reason. Do not re-enable it.
+snapshots. Tier 1 and tier 2 do not cover these jobs. These jobs cost many
+tokens. Always pass an output or file path (`--outputDirPath`, `--filePath`) so
+the heavy payload lands on disk. Then read only the summary you need. The
+`chrome-devtools` MCP server is defined in `global/mcp.json` but remains in
+`disabledServers` and stays disabled. Running ~36 always-on tool schemas adds
+context load that the CLI avoids. Google and Microsoft now recommend
+CLI-plus-skills over always-on MCP for coding agents for this exact reason. Do
+not re-enable it.
 
 ## Job routing table
 
@@ -68,11 +69,18 @@ always-on MCP for coding agents for this exact reason. Do not re-enable it.
 
 ## Repro-first evidence discipline
 
-- Reproduce before reporting. Verify the issue repeats at least once before recording it as a finding — a single unreplicated glitch is not evidence.
-- Document each issue immediately, in the same pass as exploration. Do not tour the whole surface first and write up findings afterward — a session interruption should never cost you a finding already found.
-- Interactive or state-dependent issues need a video plus step-by-step screenshots: `agent-browser record start <path>` before the repro, one screenshot per step, `record stop` after the broken state is visible.
-- Static issues visible on load (layout, typos, clipped text) need exactly one annotated screenshot: `tab.screenshot()` or `agent-browser screenshot --annotate <path>`. No video.
-- Never delete evidence mid-session. Do not `rm` a screenshot, video, or log because it turned out benign — note it was checked and move on.
+- Reproduce before reporting. Verify that the issue repeats at least once before
+  recording it as a finding. A single unreplicated glitch is not evidence.
+- Document each issue immediately during exploration. Do not tour the whole
+  surface first. A session interruption must not cost you a finding.
+- For interactive or state-dependent issues, record video and step-by-step
+  screenshots. Run `agent-browser record start <path>` before the repro, take
+  one screenshot per step, and run `record stop` after the broken state appears.
+- For static issues visible on load, take exactly one annotated screenshot:
+  `tab.screenshot()` or `agent-browser screenshot --annotate <path>`. Do not
+  record video.
+- Never delete evidence during the session. Do not `rm` a screenshot, video, or
+  log because it seems benign. Note that you checked it and continue.
 
 ## Verdicts
 
@@ -83,32 +91,33 @@ Report `PASS`, `WARN`, `FAIL`, or `SKIP` per checked surface:
 - **FAIL** — the observed result contradicts the claim. Name the exact mismatch.
 - **SKIP** — the surface could not be exercised (missing credentials, unreachable environment, no driver). Name the blocker; never silently omit a claimed surface.
 
-Every verdict names the exact command run and the exact observed result — a
-snapshot excerpt, a screenshot path, a status code, a console line. A green
-aggregate across verdicts is necessary, not sufficient: one FAIL on the
-actual claim outweighs ten unrelated PASSes.
+Name the exact command and observed result for every verdict. Use a snapshot
+excerpt, screenshot path, status code, or console line. A green aggregate across
+verdicts is necessary but not sufficient. One FAIL on the actual claim outweighs
+ten unrelated PASSes.
 
 ## Hard prohibitions
 
 - Never repair the artifact under verification. Report the break; do not patch it.
-- Never weaken a gate, threshold, or oracle to manufacture a pass.
-- Never claim a surface was verified without naming the exact tool call and observed output that exercised it.
-- Never assert rendered behavior without an actual render — no inferring visual correctness from source code.
+- Never weaken a gate, threshold, or oracle to create a pass.
+- Never claim verification without naming the exact tool call and observed output.
+- Never assert rendered behavior without an actual render. Do not infer visual
+  correctness from source code.
 
 ## Session hygiene
 
-Create the evidence output directory before starting
-(`mkdir -p <out>/screenshots <out>/videos`) so nothing races a missing path
-mid-session. Close every session you opened before finishing:
-`agent-browser close --all` for CLI sessions, and close browser tabs opened
-through the builtin tool. If tier 3 was used, `chrome-devtools stop` when
-the audit is done.
+Create the evidence output directory before you start:
+(`mkdir -p <out>/screenshots <out>/videos`). This prevents a missing path from
+causing a race during the session. Close every session that you opened before
+you finish. Run `agent-browser close --all` for CLI sessions, and close browser
+tabs opened through the builtin tool. If you used tier 3, run
+`chrome-devtools stop` when the audit ends.
 
 ## Reference material (read on demand, not autoloaded)
 
-These live under `global/external/`, which is not projected into the live
-skills directory — read them directly by absolute path when the job needs
-more depth than this file carries:
+These files live under `global/external/`, which is not projected into the live
+skills directory. Read them directly by absolute path when the job needs more
+depth than this file carries:
 
 - `/Users/phaedrus/Development/omp-config/global/external/vercel-agent-browser/SKILL.md` — agent-browser discovery stub; the authoritative grammar is `agent-browser skills get core`, not this file.
 - `/Users/phaedrus/Development/omp-config/global/external/vercel-dogfood/SKILL.md` — full exploratory-QA workflow this ladder condenses.

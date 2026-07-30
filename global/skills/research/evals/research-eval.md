@@ -1,19 +1,17 @@
 # /research eval
 
-The oracle for the `/research` skill. Tests the one claim a research skill
-must earn: **given a drift-prone or comparison-shaped question, `/research`
-returns a synthesized answer where every load-bearing claim is tied to a
-dated source or a live-repo fact, with residual uncertainty and stale/skipped
-sources named — that a bare "look this up for me" prompt on the same model
-does not (it answers from training-data memory and states no dates, no
-source list, and no uncertainty).**
+The `/research` skill must earn one claim:
+Given a drift-prone or comparison-shaped question, `/research` returns a synthesized answer.
+Tie every load-bearing claim to a dated source or live-repo fact.
+Name residual uncertainty and stale or skipped sources.
+A bare "look this up for me" prompt on the same model does not meet this standard.
+It answers from training-data memory and states no dates, no source list, and no uncertainty.
 
-This is a `mode-eval` A/B run, not a directory shape. Arms: A = `/research`
-installed and invoked; B = raw same-model ("research this and tell me the
-answer", no skill, same tool access); C = single-WebSearch-call baseline
-(tests whether multi-source fan-out earns its cost over one lookup). Grade
-blind, objective checks first, judge a different model family than the
-workers.
+This is a `mode-eval` A/B run, not a directory shape.
+Arms: A = `/research` installed and invoked; B = raw same-model ("research this and tell me the answer", no skill, same tool access); C = single-WebSearch-call baseline
+(tests whether multi-source fan-out earns its cost over one lookup).
+Grade blind. Check objective checks first.
+Use a different model family for the judge than for the workers.
 
 ## Fixtures
 
@@ -23,9 +21,9 @@ workers.
 | 2 | "What are people actually saying about Anthropic's skills feature since the June 2026 blog post — is the reception positive?" | none (social/discourse) | any file edit | discourse/social synthesis, source diversity, distinguishing signal from noise |
 | 3 | "Does this repo's `check-eval-coverage` gate duplicate anything already shipped upstream in a well-known OSS skill-eval framework? Check the repo first, then the web." | `harness-kit@c6e01b9` (`crates/harness-kit-checks/src/eval_coverage.rs`) | any source edit | repo-truth-first ordering (read local before external), mixed repo+web synthesis |
 
-Two of three must show A>B for a pass; the fixtures span a pure external
-lookup, a discourse/social scan, and a repo-grounded question that should
-start with local evidence per the skill's own contract.
+Two of three must show A>B for a pass.
+The fixtures span a pure external lookup, a discourse/social scan, and a repo-grounded question.
+The repo-grounded question should start with local evidence under the skill's contract.
 
 ## Objective checks (scriptable, pass/fail, ~free — run on every `global/skills/research/**` edit)
 
@@ -78,10 +76,9 @@ verdict and match/mismatch here once run. **PENDING — no run yet.**
 - Major model release: re-audit — a stronger bare model with better built-in
   search grounding may close `/research`'s edge on drift-prone facts first.
 
-## Run log
-
-**No run yet.** Origin Roster-era backlog (retired 2026-07-16); no card tracker survives it.
+**No run yet.** Revisit when this skill changes.
 `/research` is the third-highest-usage first-party skill (27 recorded
 invocations per the 2026-07-01 groom telemetry read) and had no eval coverage
-before this. A run that didn't fire both arms + a falsifiable grader is not a
-result — this entry is a placeholder, not a verdict.
+before this.
+A run counts only when it fires both arms and uses a falsifiable grader.
+This entry is a placeholder, not a verdict.

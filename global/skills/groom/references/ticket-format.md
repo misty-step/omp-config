@@ -1,8 +1,8 @@
 # Ticket Format
 
-Create work in the repository's registry-routed board. Ordinary Misty Step
-repositories use Powder; Adminifi and r90 use Habitat. Never create a local
-ticket file as an unregistered fallback.
+Create work in the repository's registry-routed board.
+Ordinary Misty Step repositories use Powder. Adminifi and r90 use Habitat.
+Never create a local ticket file as an unregistered fallback.
 
 ## Required card fields
 
@@ -17,12 +17,13 @@ ticket file as an unregistered fallback.
 - **Lifecycle:** priority P0–P3, estimate S–XL, status, autonomy, repository,
   labels, and explicit relations (`blocked_by`, `blocks`, `related`).
 
-Epics are the default strategic emission. Give the epic its own goal and
-acceptance, then model child outcomes as related or blocked cards when they are
-independently runnable. An umbrella with no done criteria is storage, not an
-epic.
+Use epics for strategic emissions.
+Give each epic its own goal and acceptance.
+Model child outcomes as related or blocked cards when they are independently
+runnable.
+An umbrella without done criteria is storage, not an epic.
 
-Before moving M+ work to ready, apply
-`references/prd-ticket-quality.md`. If the card still lacks a bounded outcome,
-executable acceptance, or proof path, keep it in backlog. When grooming this repo,
-also apply `references/backlog-doctrine.md`.
+Before moving M+ work to ready, apply `references/prd-ticket-quality.md`.
+If the card lacks a bounded outcome, executable acceptance, or proof path, keep
+it in backlog.
+When grooming this repo, also apply `references/backlog-doctrine.md`.

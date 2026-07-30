@@ -4,15 +4,18 @@ expires: 2026-09-29
 
 ## Reason
 
-Bootstrapping problem: this is the meta-skill authoring every other skill's eval in this pass. Its own claim is being proven empirically by the catalog-wide loop it is producing; a formal self-eval is deferred until that loop has completed at least one full pass.
+Bootstrapping problem: This meta-skill authors every other skill's eval in this
+pass. Its claim is proven empirically by the catalog-wide loop it produces.
+Defer formal self-eval until the loop completes at least one full pass.
 
 ## Disposition
 
-Not exempt from the eval-coverage contract — this waiver is a time-boxed
-deferral, not a permanent opt-out. When it expires, either an eval spec lands
-at `global/skills/skill-eval/evals/skill-eval-eval.md` (see `global/skills/skill-eval/templates/eval-spec.md`)
-or this waiver is renewed with a fresh reason and date. A stale, silently
-renewed waiver with no new reasoning is itself a finding for `/harness-engineering`'s
-next skill-health audit.
+This skill is not exempt from the eval-coverage contract. This waiver is a
+time-boxed deferral, not a permanent opt-out. When it expires, either land an
+eval spec at `global/skills/skill-eval/evals/skill-eval-eval.md` (see
+`global/skills/skill-eval/templates/eval-spec.md`) or renew this waiver with a
+fresh reason and date. A stale, silently renewed waiver with no new reasoning is
+itself a finding for `/harness-engineering`'s next skill-health audit.
 
-No automated eval; origin Roster-era backlog (retired 2026-07-16); revisit when this skill changes. Per-skill proof runs through `/skill-eval`.
+No automated eval exists. Revisit when this skill changes. Per-skill proof runs
+through `/skill-eval`.

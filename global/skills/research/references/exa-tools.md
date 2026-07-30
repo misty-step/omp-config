@@ -4,13 +4,15 @@ Exa provides neural search optimized for code and technical content.
 
 ## Access
 
-**Official remote MCP plus REST API via local CLI wrappers or curl.**
+**Use the official remote MCP or REST API through local CLI wrappers or curl.**
 
-Auth: `x-api-key: $EXA_API_KEY` header. Key is set in shell env.
+Auth: `x-api-key: $EXA_API_KEY` header. Set the key in the shell environment.
 
-MCP endpoint: `https://mcp.exa.ai/mcp`. Use it when the active harness has MCP
-tool support. Use `exa-search` / `exa-fetch` when MCP is unavailable or a
-script needs deterministic JSON. Use raw REST only when no wrapper is present.
+MCP endpoint: `https://mcp.exa.ai/mcp`.
+Use it when the active harness has MCP tool support.
+Use `exa-search` / `exa-fetch` when MCP is unavailable or a
+script needs deterministic JSON.
+Use raw REST only when no wrapper is present.
 
 Local wrappers, when installed:
 
@@ -36,8 +38,8 @@ curl -s https://api.exa.ai/search \
 
 ### Deep / Structured Search
 
-Use Exa deep search when the task needs stronger source gathering before
-synthesis, or structured output that a downstream script can validate.
+Use Exa deep search when the task needs stronger source gathering before synthesis.
+Use it when a downstream script needs structured output that it can validate.
 
 ```bash
 curl -s https://api.exa.ai/search \
@@ -53,18 +55,17 @@ curl -s https://api.exa.ai/search \
 
 ### Legacy Research API
 
-Do not build new work on Exa's legacy `/research/v1` API. Treat it
-as deprecated for new integration design; prefer the Agent API for async
-multi-step research, or Exa Search with `type: "deep"` / `"deep-reasoning"` for
-search-shaped fallback work.
+Do not build new work on Exa's legacy `/research/v1` API.
+Treat that API as deprecated for new integration design.
+Prefer the Agent API for async multi-step research.
+Use Exa Search with `type: "deep"` / `"deep-reasoning"` for search-shaped fallback work.
 
 ### Agent API
 
-Use Exa Agent only for broad `web-deep` work where flat search is structurally
-weak: multi-entity research, list-building, enrichment, prior-art landscapes,
-or comparisons across many sources. It is async, costed, and not zero-data-
-retention; do not send private repo/customer context unless the operator has
-explicitly allowed it for the run.
+Use Exa Agent only for broad `web-deep` work where flat search is structurally weak.
+Use it for multi-entity research, list-building, enrichment, prior-art landscapes, or comparisons across many sources.
+The API is async, costed, and not zero-data-retention.
+Do not send private repo/customer context unless the operator has explicitly allowed it for the run.
 
 This skill routes Agent output into `response.agentic`, never into the flat
 `results[]` list.
@@ -89,9 +90,9 @@ Runtime controls:
 
 Current official endpoint family: `https://api.exa.ai/agent/runs`, with
 separate run retrieval and event endpoints under Exa's Agent API docs.
-The docs checked for this change show create/poll/list/event/continue flows,
-but no verified cancel endpoint. Treat timeout after run creation as a residual
-cost risk until a cancel endpoint is confirmed.
+The docs checked for this change show create/poll/list/event/continue flows.
+They show no verified cancel endpoint.
+Treat timeout after run creation as a residual cost risk until a cancel endpoint is confirmed.
 
 ### Code Context Search
 
@@ -112,7 +113,7 @@ curl -s https://api.exa.ai/search \
 
 ### Recency-Filtered
 
-For time-sensitive queries (model releases, security advisories).
+Use this mode for time-sensitive queries, such as model releases and security advisories.
 
 ```bash
 curl -s https://api.exa.ai/search \
@@ -179,10 +180,9 @@ When Exa MCP is configured, prefer these capability-shaped tools:
 
 ## Integration with Research Skill
 
-The `/research` default fanout calls Exa for retrieval, code/context examples,
-known URL fetch, and deep/structured search. Optional Agent runs are an
-agentic acquisition lane for broad `web-deep` only. Exa results include URLs —
-always cite them.
+The `/research` default fanout calls Exa for retrieval, code/context examples, known URL fetch, and deep/structured search.
+Optional Agent runs support broad `web-deep` only and form an agentic acquisition lane.
+Exa results include URLs. Always cite them.
 
 Provider chain: Exa MCP → `exa-search` / `exa-fetch` → Exa REST/curl →
 WebSearch (fallback only)

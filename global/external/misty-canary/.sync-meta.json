@@ -2,5 +2,10 @@
   "fetched_at": "2026-07-03T21:28:45Z",
   "repo": "misty-step/canary",
   "sha": "e9bce96a5c24654c2692ae701a6db596f5966471",
-  "src_path_suffix": "canary"
+  "src_path_suffix": "canary",
+  "license_path": "LICENSE",
+  "license": "MIT",
+  "license_sha256": "6466722246e6523df30c93a39727369ab5fe2491600751e962a1b82c2896c986",
+  "payload": ["SKILL.md"],
+  "payload_sha256": {"SKILL.md": "14d3e85f36eb755a7aab9c5a461deb39b5bb2399a53d6238780370de034727ca"}
 }

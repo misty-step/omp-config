@@ -2,7 +2,7 @@
   "schema_version": "omp-config.provenance.v3",
   "authority": {
     "repository": ".",
-    "source_root": "global",
+    "source_root": ".",
     "surfaces": {
       "settings": {
         "source": "global/config.yml",
@@ -64,9 +64,27 @@
         "kind": "file",
         "origin": "local"
       },
-      "recipe_task_runner": {
-        "source": "global/lib/recipe-task-runner.ts",
-        "target": "lib/recipe-task-runner.ts",
+      "extension_herdr_sidebar": {
+        "source": "global/extensions/herdr-sidebar.ts",
+        "target": "extensions/herdr-sidebar.ts",
+        "kind": "file",
+        "origin": "local"
+      },
+      "extension_optmem": {
+        "source": "global/extensions/optmem.ts",
+        "target": "extensions/optmem.ts",
+        "kind": "file",
+        "origin": "local"
+      },
+      "runtime_recipe_lib": {
+        "source": "global/lib",
+        "target": "lib",
+        "kind": "directory",
+        "origin": "local"
+      },
+      "optmem_policy": {
+        "source": "global/optmem-policy.json",
+        "target": "optmem-policy.json",
         "kind": "file",
         "origin": "local"
       },
@@ -81,6 +99,54 @@
         "target": "presets",
         "kind": "directory",
         "origin": "local"
+      },
+      "review_gate_hook": {
+        "source": "global/hooks/review-gate.py",
+        "target": "hooks/review-gate.py",
+        "kind": "file",
+        "origin": "local"
+      },
+      "claude_hooks": {
+        "source": "global/hooks/claude-safety.py",
+        "target": "hooks/claude-safety.py",
+        "kind": "file",
+        "origin": "local"
+      },
+      "review_gate_binary": {
+        "source": "bin/review_gate.py",
+        "target": "bin/review_gate.py",
+        "kind": "file",
+        "origin": "local"
+      },
+      "review_runner_binary": {
+        "source": "bin/review_runner.py",
+        "target": "bin/review_runner.py",
+        "kind": "file",
+        "origin": "local"
+      },
+      "review_common_binary": {
+        "source": "bin/review_common.py",
+        "target": "bin/review_common.py",
+        "kind": "file",
+        "origin": "local"
+      },
+      "review_bundle_binary": {
+        "source": "bin/review_bundle.py",
+        "target": "bin/review_bundle.py",
+        "kind": "file",
+        "origin": "local"
+      },
+      "review_packet_binary": {
+        "source": "bin/review_packet.py",
+        "target": "bin/review_packet.py",
+        "kind": "file",
+        "origin": "local"
+      },
+      "review_receipt_binary": {
+        "source": "bin/review_receipt.py",
+        "target": "bin/review_receipt.py",
+        "kind": "file",
+        "origin": "local"
       }
     }
   },
@@ -90,17 +156,18 @@
     "mode": "symlink"
   },
   "upstream": {
-    "repository": "/Users/phaedrus/Development/_retired/roster",
+    "repository": "/Users/phaedrus/Development/_archives/roster-2026-07-22.tgz",
+    "archive_sha256": "463ad9c5b5b4d281dea599db36c61a3a599a031e810bf480efed27b153dcc930",
     "revision": "24a57a32a491891dffa747a1deb82c6cae0364f6",
     "skill_catalog": "primitives/skills/skills-index.yaml",
     "migrated_at": "2026-07-16",
-    "status": "retired"
+    "status": "retired",
+    "archive_only": "true"
   },
   "runtime_dependencies": {
     "bundled_agents": [
       "task",
       "scout",
-      "reviewer",
       "librarian",
       "designer",
       "sonic"
@@ -123,7 +190,8 @@
     "terminal-sessions",
     "managed-skills",
     "extensions",
-    "lib"
+    "hooks",
+    "bin"
   ],
   "migration": {
     "agents": "rewritten for OMP task-agent frontmatter and prompt bodies",

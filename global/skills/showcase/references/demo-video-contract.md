@@ -1,6 +1,6 @@
 # Demo Video Contract
 
-Demo videos sell the product moment. They also rot quickly. Pin the run.
+Demo videos sell the product moment. They also become stale quickly. Pin the run.
 
 ## Inputs
 

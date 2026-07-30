@@ -1,7 +1,7 @@
 ---
 disable-model-invocation: true
 name: fixing-motion-performance
-description: Audit and fix animation performance issues including layout thrashing, compositor properties, scroll-linked motion, and blur effects. Use when animations stutter, transitions jank, or reviewing CSS/JS animation performance.
+description: Audit and fix animation performance issues. Cover layout thrashing, compositor properties, scroll-linked motion, and blur effects. Use when animations stutter, transitions lag, or reviewing CSS/JS animation performance.
 ---
 
 # fixing-motion-performance
@@ -66,7 +66,7 @@ Reference these guidelines when:
 - use JS-driven animation only when interaction requires it
 - paint or layout animation is acceptable only on small, isolated surfaces
 - one-shot effects are acceptable more often than continuous motion
-- prefer downgrading technique over removing motion entirely
+- prefer a less costly technique over removing motion entirely
 
 ### 3. measurement (high)
 
@@ -94,7 +94,7 @@ Reference these guidelines when:
 
 ### 6. layers (medium)
 
-- compositor motion requires layer promotion, never assume it
+- compositor motion requires layer promotion; never assume the layer exists
 - use will-change temporarily and surgically
 - avoid many or large promoted layers
 - validate layer behavior with tooling when performance matters
@@ -149,4 +149,4 @@ requestAnimationFrame(() => { el.style.transition = 'transform 0.3s'; el.style.t
 - enforce critical rules first (never patterns, tool boundaries)
 - choose the least expensive rendering work that matches the intent
 - for any non-default choice, state the constraint that justifies it (surface size, duration, or interaction requirement)
-- when reviewing, prefer actionable notes and concrete alternatives over theory
+- during review, prefer actionable notes and concrete alternatives over theory

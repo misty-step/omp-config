@@ -1,0 +1,17 @@
+{
+  "fetched_at": "2026-07-27T00:00:00Z",
+  "repo": "cursor/plugins",
+  "sha": "ba7b5907843e1e21ec692418c180e1f912cbf7d3",
+  "src_path_suffix": "thermos/skills",
+  "license_path": "LICENSE",
+  "license": "MIT",
+  "license_sha256": "702f5f331b56aff0e33d8c7826df5202559f894145eb70355c6477b55b5bb8a0",
+  "payload": [
+    "thermo-nuclear-review/SKILL.md",
+    "thermo-nuclear-code-quality-review/SKILL.md"
+  ],
+  "payload_sha256": {
+    "thermo-nuclear-review/SKILL.md": "5091011c4490932d40658ae958fb55b9aaca8e2bba5196860295ab945180e434",
+    "thermo-nuclear-code-quality-review/SKILL.md": "7faca08b51b643b2ddd0836f92af15574444024685dcc1e677dbbb39ae8c9e8f"
+  }
+}

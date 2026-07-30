@@ -1,12 +1,12 @@
 # Exemplar Discovery
 
-Find best-in-class implementations that a project should study for techniques,
-not just same-domain prior art. Cross-language, cross-domain inspiration.
+Find best-in-class implementations for techniques that a project should study.
+Use cross-language and cross-domain sources, not only same-domain prior art.
 
 ## The `exemplars.md` Convention
 
-Projects maintain an `exemplars.md` at project root — a curated list of
-reference implementations organized by technique, not language or domain.
+Keep `exemplars.md` at project root as a curated list of reference implementations.
+Organize entries by technique, not language or domain.
 
 ```markdown
 # Exemplars
@@ -28,29 +28,29 @@ reference implementations organized by technique, not language or domain.
 
 - **Technique** — What it does exceptionally well. Hardware-aware optimization,
   algorithmic breakthrough, elegant API design, etc.
-- **Study for** — Why it matters to *this* project. The cross-domain transfer.
-- **Key file** — Where to look when cloning. Agents read this file, not the
-  whole repo. One file per entry, occasionally two.
+- **Study for** — Why it matters to *this* project. Show the cross-domain transfer.
+- **Key file** — Where to look first. Agents read this file, not the whole repo.
+  Keep one file per entry. Add a second file only when one file cannot show the full technique.
 
 ### What makes a good exemplar
 
-- **Disproportionate performance** — much faster than it has any right to be.
-  The kind of project that makes you wonder what black magic was used.
+- **Disproportionate performance** — much faster than expected.
+  Choose projects with unusually strong performance.
 - **Hardware-aware design** — exploits modern hardware: SIMD, cache-oblivious
   algorithms, io_uring, lock-free concurrency, massive parallelism (64+ cores),
   NVMe-optimized I/O, large memory (256GB+) data structures.
 - **Cross-domain transferability** — the technique teaches something applicable
   beyond the project's specific domain. A Zig fuzzy finder can teach a Rust
   search library. A Go scheduler can teach a Python task queue.
-- **Readable excellence** — well-structured enough that an agent can clone it,
-  read the key file, and extract the core insight in under 5 minutes.
+- **Readable excellence** — structured enough for an agent to clone and read the key file.
+  Require the agent to extract the core insight in under 5 minutes.
 
-### What is NOT an exemplar
+## What is NOT an exemplar
 
-- Popular projects that are merely competent (good but not exceptional)
-- Projects valuable only for their API surface, not their implementation
-- Frameworks where the value is ecosystem, not technique
-- Abandoned projects with no maintenance signal
+- Projects that are popular but only competent.
+- Projects valuable only for their API surface, not implementation.
+- Frameworks whose value comes from ecosystem, not technique.
+- Abandoned projects without a maintenance signal.
 
 ## Discovery: Exa Queries
 
@@ -90,7 +90,7 @@ curl -s https://api.exa.ai/findSimilar \
   }'
 ```
 
-Use when the user provides a seed exemplar — find more projects like it.
+When the user provides a seed exemplar, find more projects like it.
 
 ## Discovery: xAI Social Signal
 
@@ -110,12 +110,12 @@ curl -s "${XAI_BASE_URL:?set XAI_BASE_URL to Mint's xAI proxy route}/responses" 
   }'
 ```
 
-Social signal surfaces projects that benchmarks and READMEs miss — the ones
-developers actually rave about.
+Social signal finds projects that benchmarks and READMEs miss.
+It finds projects that developers praise.
 
 ## Output Format
 
-Structure results for direct inclusion in `exemplars.md`:
+Format results for direct inclusion in `exemplars.md`.
 
 ```markdown
 ## [Technique Domain]
@@ -125,13 +125,12 @@ Structure results for direct inclusion in `exemplars.md`:
   **Key file:** `[path]` — [what to learn from this file]
 ```
 
-When updating an existing `exemplars.md`, preserve existing entries. Add new
-entries under existing sections or create new sections. Remove entries only
-if the user requests it or the project is dead/archived.
+When updating an existing `exemplars.md`, preserve existing entries.
+Add new entries under existing sections or create new sections.
+Remove entries only when the user requests removal or the project is dead or archived.
 
 ## Integration with Default Fanout
 
-When the standard `/research` fanout surfaces exemplary implementations via Exa
-code search (common for queries about "how to build X" or "best approach for Y"),
-format implementation-worthy results using the convention above. If
-`exemplars.md` exists at project root, offer to add discoveries to it.
+When standard `/research` fanout finds exemplary implementations through Exa code search, format implementation-worthy results with the convention above.
+These results often answer queries about "how to build X" or "best approach for Y".
+If `exemplars.md` exists at project root, offer to add discoveries to it.

@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://misty-step.dev/schemas/qa-users/input.v1.json",
+  "title": "qa-users run input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "personas",
+    "harness",
+    "provider",
+    "model",
+    "reasoning",
+    "concurrency",
+    "session_length_seconds",
+    "seed",
+    "entrypoints",
+    "issue_threshold",
+    "maximum_creates",
+    "tracker"
+  ],
+  "properties": {
+    "schema_version": { "const": "qa-users.input.v1" },
+    "personas": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "persona.v1.json" }
+    },
+    "harness": { "$ref": "execution.v1.json#/$defs/harness" },
+    "provider": { "$ref": "execution.v1.json#/$defs/provider" },
+    "model": { "$ref": "execution.v1.json#/$defs/model" },
+    "reasoning": { "$ref": "execution.v1.json#/$defs/reasoning" },
+    "concurrency": { "$ref": "execution.v1.json#/$defs/concurrency" },
+    "session_length_seconds": { "$ref": "execution.v1.json#/$defs/session_length_seconds" },
+    "seed": { "$ref": "execution.v1.json#/$defs/seed" },
+    "entrypoints": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "target", "real", "environment"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1, "pattern": "^[a-z][a-z0-9._-]{1,63}$" },
+          "kind": { "type": "string", "enum": ["browser", "cli", "http", "desktop", "mcp", "other"] },
+          "target": { "type": "string", "minLength": 1, "pattern": "^[^\\n\\r]{1,512}$" },
+          "real": { "const": true },
+          "environment": { "type": "string", "enum": ["local", "dev", "staging"] },
+          "description": { "type": "string", "maxLength": 512 }
+        }
+      }
+    },
+    "issue_threshold": { "$ref": "execution.v1.json#/$defs/issue_threshold" },
+    "maximum_creates": { "$ref": "execution.v1.json#/$defs/maximum_creates" },
+    "tracker": { "$ref": "tracker.v1.json" },
+    "execution_overrides": { "$ref": "execution.v1.json#/$defs/input_overrides" },
+    "dry_run": { "type": "boolean", "default": false },
+    "fix_and_pr": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authorized", "after_issue_filed", "inside_user_session"],
+      "properties": {
+        "authorized": { "const": true },
+        "after_issue_filed": { "const": true },
+        "inside_user_session": { "const": false },
+        "handoff_target": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

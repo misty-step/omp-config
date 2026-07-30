@@ -2,13 +2,12 @@
 
 > You orchestrate. Sub-agents do the work.
 
-Reference pattern for dispatching focused work to sub-agents and synthesizing
-their evidence.
+Reference pattern for focused work dispatch and evidence synthesis.
 
 ## Your Role
 
-You remain the lead. You frame the work, dispatch lanes, compare evidence,
-decide, verify, and report.
+You remain the lead.
+Frame the work, dispatch lanes, compare evidence, decide, verify, and report.
 
 1. **Frame** — State the claim, question, or artifact each lane must test
 2. **Route** — Send bounded work to appropriate sub-agents or providers
@@ -27,7 +26,7 @@ decide, verify, and report.
 
 ## Dispatch Packet
 
-Every lane gets:
+Give every lane:
 
 - Role and objective.
 - Scope: files, domains, commands, sources, and boundaries.
@@ -35,8 +34,8 @@ Every lane gets:
 - Evidence requirement: URLs, file:line, command output, receipt id, or artifact.
 - What not to touch.
 
-State the goal, not a step-by-step script. Give the lane room to choose the
-path inside the packet constraints.
+State the goal, not a step-by-step script.
+Give the lane room to choose a path inside the packet constraints.
 
 **Good:** "Investigate this stack trace. Find root cause. Propose fix with file:line."
 
@@ -44,7 +43,7 @@ path inside the packet constraints.
 
 ## Dependency-Aware Orchestration
 
-For large work (10+ subtasks, multiple phases), use DAG-based scheduling:
+For large work (10+ subtasks or multiple phases), use DAG-based scheduling:
 
 ```text
 Phase 1 (no deps):    Tasks 01, 02, 03 -> spawn in parallel
@@ -52,19 +51,23 @@ Phase 2 (deps on P1): Tasks 04, 05     -> blocked until P1 complete
 Phase 3 (deps on P2): Tasks 06, 07, 08 -> blocked until P2 complete
 ```
 
-Use task tracking to manage phases: decompose into atomic tasks with
-dependencies, spawn all unblocked tasks simultaneously, mark completed,
-check newly-unblocked, spawn next phase.
+Use task tracking to manage phases.
+Decompose work into atomic tasks with dependencies.
+Spawn all unblocked tasks simultaneously.
+Mark completed tasks.
+Check newly unblocked tasks.
+Spawn the next phase.
 
 ## Curation
 
 For each sub-agent finding:
 
-- **Validate**: Does the cited evidence support the claim?
-- **Filter**: Generic advice, stale facts, source-quality gaps, or style
-  preferences that contradict local conventions.
-- **Resolve conflicts**: When sub-agents disagree, explain the tradeoff,
-  recommend which evidence to trust, and name what would change the verdict.
+- **Validate**: Check whether the cited evidence supports the claim.
+- **Filter**: Remove generic advice, stale facts, source-quality gaps, or style
+  preferences that conflict with local conventions.
+- **Resolve conflicts**: When sub-agents disagree, explain the tradeoff.
+  Recommend which evidence to trust.
+  Name what would change the verdict.
 
 ## Output Template
 

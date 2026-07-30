@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://misty-step.dev/schemas/qa-users/execution-resolver-fixtures.v1.json",
+  "schema_version": "qa-users.execution-resolver-fixtures.v1",
+  "cases": [
+    {
+      "name": "cli exclusion rejects persona assignment",
+      "source": "cli",
+      "declared_entrypoint_ids": ["home", "settings"],
+      "entrypoints": ["settings"],
+      "error_fragment": "omits persona"
+    },
+    {
+      "name": "harness default exclusion rejects undeclared entrypoint",
+      "source": "harness-default",
+      "entrypoints": ["settings"],
+      "input_without_entrypoints": true,
+      "error_fragment": "not declared"
+    }
+  ],
+  "invalid_cases": [
+    {
+      "name": "cli NaN concurrency",
+      "source": "cli",
+      "field": "concurrency",
+      "value_kind": "NaN",
+      "input_without_field": true,
+      "error": "invalid qa-users input semantics: invalid execution overrides: concurrency from cli must be integer"
+    },
+    {
+      "name": "cli session length above maximum",
+      "source": "cli",
+      "field": "session_length_seconds",
+      "value": 86401,
+      "input_without_field": true,
+      "error": "invalid qa-users input semantics: invalid execution overrides: session_length_seconds from cli must be <= 86400"
+    },
+    {
+      "name": "cli maximum creates above maximum",
+      "source": "cli",
+      "field": "maximum_creates",
+      "value": 101,
+      "input_without_field": true,
+      "error": "invalid qa-users input semantics: invalid execution overrides: maximum_creates from cli must be <= 100"
+    },
+    {
+      "name": "harness default Infinity concurrency",
+      "source": "harness-default",
+      "field": "concurrency",
+      "value_kind": "Infinity",
+      "input_without_field": true,
+      "error": "invalid qa-users input semantics: invalid execution overrides: concurrency from harness-default must be integer"
+    },
+    {
+      "name": "harness default infinite confidence",
+      "source": "harness-default",
+      "field": "issue_threshold",
+      "value": { "minimum_severity": "medium", "minimum_confidence_kind": "Infinity" },
+      "input_without_field": true,
+      "error": "invalid qa-users input semantics: invalid issue_threshold from harness-default: issue_threshold minimum_confidence must be finite and between 0 and 1"
+    },
+    {
+      "name": "cli reasoning enum",
+      "source": "cli",
+      "field": "reasoning",
+      "value": "verbose",
+      "input_without_field": true,
+      "error": "invalid qa-users input semantics: invalid execution overrides: reasoning from cli must be equal to one of the allowed values"
+    }
+  ]
+}

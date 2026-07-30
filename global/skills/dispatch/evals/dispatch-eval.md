@@ -2,9 +2,9 @@
 
 ## Claim
 
-Given a mixed-risk work item, `/dispatch` produces a focused composition that
-selects the correct role, model/provider/reasoning level, hidden skills, MCPs,
-tools, verifier, and lane contract. The chief does not execute specialist work.
+Given a mixed-risk work item, `/dispatch` must produce a focused composition.
+It must select the correct role, model/provider/reasoning level, hidden skills, MCPs, tools, verifier, and lane contract.
+The chief must not execute specialist work.
 A bare prompt should lose on at least two of three fixtures.
 
 ## Arms
@@ -21,11 +21,11 @@ A bare prompt should lose on at least two of three fixtures.
    Powder MCP; independent `qa` verifier.
 2. High-risk production latency incident with Canary evidence and an unknown
    recent deploy. Correct route: `cassandra` plus `factory-apps`,
-   `estate-infrastructure`, and `mint`; Canary MCP; reproduce before repair.
-3. Meaningful structural diff that needs Cursor Thermo-Nuclear review and a
-   release decision. Correct route: `reviewer` plus `code-review`,
-   `peer-harnesses`, and `ci`; cross-family Cerberus and Cursor
-   lanes; Scully verifies live claims.
+   `estate-infrastructure`, and `mint`; Canary CLI/API; reproduce before repair.
+3. Meaningful structural diff that needs the canonical code-quality review leaf
+   and a release decision. Correct route: `reviewer` plus `code-review`,
+   `peer-harnesses`, and `ci`; use cross-family independent lanes and have
+   `qa` verify live claims.
 
 ## Objective checks
 
@@ -40,8 +40,9 @@ Each output must:
 - state outcome, authority, scope, oracle, output, dependencies, and non-goals;
 - keep final integration and judgment with the chief.
 
-A nonexistent role, skill, model, provider, or MCP fails the fixture. A generic
-`task` worker fails when a declared role fits.
+A nonexistent role, skill, model, provider, or MCP fails the fixture.
+A generic `task` worker fails when a declared role fits.
+
 
 ## Rubric
 
@@ -54,14 +55,17 @@ Score each dimension from 1 to 5:
 5. executable lane contract;
 6. chief-versus-specialist boundary.
 
+
 ## Decision
 
 Keep only when A wins at least two of three fixtures, no objective check fails,
-and the grader can select B. Adapt on a routing miss. Cut when current frontier
-models match the composition without the skill.
+and the grader can select B.
+Adapt when routing misses.
+Remove the skill when current frontier models match the composition without it.
+
 
 ## Cadence
 
 Run all fixtures after model palette, provider policy, agent frontmatter,
-primitive routes, or OMP skill-loading mechanics change. Also run after a major
-model release.
+primitive routes, or OMP skill-loading mechanics change.
+Also run after a major model release.

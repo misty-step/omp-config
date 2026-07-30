@@ -50,8 +50,11 @@ for candidate in /usr/bin/python3 /opt/homebrew/bin/python3 /usr/local/bin/pytho
 done
 [ -n "$PYTHON_BIN" ] || { echo "sprite-lane: Python 3 is required" >&2; exit 1; }
 
-RECEIPTS_DIR="${SPRITE_LANE_RECEIPTS:-$HOME/.roster/receipts/sprite-lane}"
-OWNERS_DIR="${SPRITE_LANE_OWNERS:-$HOME/.roster/state/sprite-lane}"
+RECEIPTS_DIR="${SPRITE_LANE_RECEIPTS:-$HOME/.omp/agent/receipts/sprite-lane}"
+OWNERS_DIR="${SPRITE_LANE_OWNERS:-$HOME/.omp/agent/state/sprite-lane}"
+MIGRATE_LEGACY_STATE=1
+[ -n "${SPRITE_LANE_RECEIPTS-}" ] && MIGRATE_LEGACY_STATE=0
+[ -n "${SPRITE_LANE_OWNERS-}" ] && MIGRATE_LEGACY_STATE=0
 BAKE_VERSION="3"
 
 REMOTE_FS_HELPER="$(/bin/cat <<'PY'
@@ -371,6 +374,40 @@ die() {
 	echo "sprite-lane: $*" >&2
 	exit 1
 }
+
+migrate_legacy_state() {
+	[ "$MIGRATE_LEGACY_STATE" = 1 ] || return 0
+	local legacy_receipts="$HOME/.roster/receipts/sprite-lane"
+	local legacy_owners="$HOME/.roster/state/sprite-lane"
+	local old_path new_path
+	for old_path in "$legacy_receipts" "$legacy_owners"; do
+		if [ -e "$old_path" ] || [ -L "$old_path" ]; then
+			[ -d "$old_path" ] && [ ! -L "$old_path" ] \
+				|| die "legacy state path is not a real directory: $old_path"
+			case "$old_path" in
+			"$legacy_receipts") new_path="$RECEIPTS_DIR" ;;
+			"$legacy_owners") new_path="$OWNERS_DIR" ;;
+			esac
+			if [ -e "$new_path" ] || [ -L "$new_path" ]; then
+				die "cannot migrate legacy state $old_path: destination already exists at $new_path; resolve the collision and retry"
+			fi
+		fi
+	done
+	for old_path in "$legacy_receipts" "$legacy_owners"; do
+		[ -e "$old_path" ] || [ -L "$old_path" ] || continue
+		case "$old_path" in
+		"$legacy_receipts") new_path="$RECEIPTS_DIR" ;;
+		"$legacy_owners") new_path="$OWNERS_DIR" ;;
+		esac
+		/bin/mkdir -p -- "$(dirname -- "$new_path")" \
+			|| die "cannot create migration parent for $new_path"
+		/bin/mv -- "$old_path" "$new_path" \
+			|| die "cannot migrate legacy state $old_path to $new_path"
+		echo "sprite-lane: migrated legacy state $old_path -> $new_path" >&2
+	done
+}
+
+migrate_legacy_state
 
 cleanup_provider() {
 	local snapshot="${PINNED_PROVIDER:-}"

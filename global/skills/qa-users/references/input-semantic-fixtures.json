@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://misty-step.dev/schemas/qa-users/input-semantic-fixtures.v1.json",
+  "schema_version": "qa-users.input-semantic-fixtures.v1",
+  "valid": [
+    {
+      "name": "configured threshold copies input",
+      "input": {
+        "personas": [
+          { "id": "explorer", "entrypoint_ids": ["home"] },
+          { "id": "accessibility", "entrypoint_ids": ["home"] }
+        ],
+        "entrypoints": [
+          { "id": "home", "environment": "local" },
+          { "id": "settings", "environment": "local" }
+        ],
+        "issue_threshold": { "minimum_severity": "medium", "minimum_confidence": 0.7 },
+        "execution_overrides": { "entrypoints": ["home"], "issue_threshold": "configured" }
+      },
+      "effective_entrypoint_ids": ["home"],
+      "issue_threshold": { "minimum_severity": "medium", "minimum_confidence": 0.7 },
+      "issue_threshold_rule": "configured"
+    },
+    {
+      "name": "stricter threshold applies fixed v1 rule",
+      "input": {
+        "personas": [{ "id": "explorer", "entrypoint_ids": ["home"] }],
+        "entrypoints": [{ "id": "home", "environment": "dev" }],
+        "issue_threshold": { "minimum_severity": "low", "minimum_confidence": 0.65 },
+        "execution_overrides": { "issue_threshold": "stricter" }
+      },
+      "effective_entrypoint_ids": ["home"],
+      "issue_threshold": { "minimum_severity": "medium", "minimum_confidence": 0.75 },
+      "issue_threshold_rule": "stricter.v1"
+    }
+  ],
+  "invalid": [
+    {
+      "name": "duplicate persona IDs",
+      "input": {
+        "personas": [
+          { "id": "explorer", "entrypoint_ids": ["home"] },
+          { "id": "explorer", "entrypoint_ids": ["home"] }
+        ],
+        "entrypoints": [{ "id": "home", "environment": "local" }]
+      }
+    },
+    {
+      "name": "duplicate entrypoint IDs",
+      "input": {
+        "personas": [{ "id": "explorer", "entrypoint_ids": ["home"] }],
+        "entrypoints": [
+          { "id": "home", "environment": "local" },
+          { "id": "home", "environment": "local" }
+        ]
+      }
+    },
+    {
+      "name": "undeclared override entrypoint",
+      "input": {
+        "personas": [{ "id": "explorer", "entrypoint_ids": ["home"] }],
+        "entrypoints": [{ "id": "home", "environment": "local" }],
+        "issue_threshold": { "minimum_severity": "low", "minimum_confidence": 0.5 },
+        "execution_overrides": { "entrypoints": ["missing"] }
+      }
+    },
+    {
+      "name": "dropped persona entrypoint",
+      "input": {
+        "personas": [{ "id": "explorer", "entrypoint_ids": ["settings"] }],
+        "entrypoints": [
+          { "id": "home", "environment": "local" },
+          { "id": "settings", "environment": "staging" }
+        ],
+        "issue_threshold": { "minimum_severity": "low", "minimum_confidence": 0.5 },
+        "execution_overrides": { "entrypoints": ["home"] }
+      }
+    },
+    {
+      "name": "invalid override entrypoint list never falls back",
+      "input": {
+        "personas": [{ "id": "explorer", "entrypoint_ids": ["home"] }],
+        "entrypoints": [{ "id": "home", "environment": "local" }],
+        "issue_threshold": { "minimum_severity": "low", "minimum_confidence": 0.5 },
+        "execution_overrides": { "entrypoints": [] }
+      }
+    },
+    {
+      "name": "production environment is rejected",
+      "input": {
+        "personas": [{ "id": "explorer", "entrypoint_ids": ["home"] }],
+        "entrypoints": [{ "id": "home", "environment": "production" }],
+        "issue_threshold": { "minimum_severity": "low", "minimum_confidence": 0.5 }
+      }
+    }
+  ]
+}

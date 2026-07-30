@@ -10,11 +10,11 @@ speech_reference_last_researched: 2026-07-13
 
 # Model / Provider / Harness Index
 
-Factual context for composition design. This reference is evidence input for a
+Factual context for composition design. This reference supplies evidence to a
 lead agent, not a routing policy. It must not prescribe role fit, preferred
-team shapes, or "best for X" judgments. The lead agent chooses compositions
-from the current task, current repo evidence, runtime probes, receipts, and
-this factual sheet.
+team shapes, or "best for X" judgments. The lead agent chooses each
+composition from the current task, current repo evidence, runtime probes,
+receipts, and this factual sheet.
 
 ## Freshness Contract
 
@@ -22,13 +22,13 @@ this factual sheet.
 - Treat model facts as stale after the review due date.
 - Verify exact model ids, availability, prices, context windows, and benchmark
   claims from live provider docs or catalogs before changing defaults.
-- Record local smoke evidence in delegation receipts; this file may point at
-  receipts, but receipts remain the proof that a local harness invocation ran.
+- Record local smoke evidence in delegation receipts. This file may point to
+  receipts, but receipts remain proof that a local harness invocation ran.
 
 ## Live model facts: the OpenRouter MCP
 
-The OpenRouter MCP is the live source for everything in this file that rots.
-It is a remote HTTP server, user-scoped so it is available in every repo:
+The OpenRouter MCP is the live source for every rotting fact in this file. It
+is a remote HTTP server, user-scoped so it is available in every repo:
 
 ```sh
 claude mcp add --scope user --transport http openrouter https://mcp.openrouter.ai/mcp
@@ -38,14 +38,15 @@ claude mcp login openrouter   # one-time OAuth (browser); issues a 7-day, $10-ca
 Tools: `models-list` / `model-get` / `model-endpoints` (catalog, providers,
 live pricing), `benchmarks` (third-party quality scores), `rankings-daily`,
 `credits-get` (balance), `generation-get` (per-call cost/tokens), `chat-send`
-(billable test inference), `docs-search`, `ping`. Use it to verify slugs,
-prices, and context windows before changing defaults, and to compose a
-`/council` bench from current top diverse families. Quote prices at dispatch
-time; never hardcode them into gates.
+(billable test inference), `docs-search`, `ping`. Use these tools to verify
+slugs, prices, and context windows before changing defaults. Use them to
+compose a `/council` bench from current diverse families. Quote prices at
+dispatch time. Never hardcode prices into gates.
+
 
 ## Local Harness Roster
 
-Source: `primitives/providers.yaml`, with command discovery rechecked on
+Source: `global/models.yml`, with command discovery rechecked on
 2026-06-14 and selected providers refreshed on the dates below.
 
 | Provider target | Harness / CLI | Active model id | Dispatch surface | Local probe status |
@@ -61,10 +62,11 @@ Source: `primitives/providers.yaml`, with command discovery rechecked on
 | `oracle` | Oracle browser consult | `gpt-5.5-pro-browser` | `npx -y @steipete/oracle --engine browser --model gpt-5.5-pro -p` | available via `npx`; dry-run smoke passed 2026-06-16 |
 | `manual` | Human/imported evidence | none | manual summary | manual |
 
-Local probe status proves only command discovery. It does not prove task
+Local probe status proves command discovery only. It does not prove task
 quality, current billing, tool-call reliability, or benchmark performance.
-Oracle status proves only the browser-mode dry-run path; omp-config forbids
+Oracle status proves the browser-mode dry-run path only. omp-config forbids
 Oracle API mode in its skill and roster defaults.
+
 
 ## Realtime And Speech Substrate Snapshot
 
@@ -122,11 +124,11 @@ ElevenLabs:
 - Sources: <https://elevenlabs.io/docs/overview/capabilities/speech-to-text>,
   <https://elevenlabs.io/realtime-speech-to-text>.
 
-Design implication for AI-first meeting products: deterministic code should
-own approval, policy, event logs, sandboxing, schemas, and evals; semantic
-proposal generation, speech understanding, and diarization should be shaped
-against a model/provider capability surface first, with deterministic
-heuristics only as explicit fallback or fixture paths.
+For AI-first meeting products, deterministic code should own approval, policy,
+event logs, sandboxing, schemas, and evals. Shape semantic proposal generation,
+speech understanding, and diarization against the model/provider capability
+surface first. Use deterministic heuristics only as explicit fallback or
+fixture paths.
 
 ## Substrate Assessment Addendum
 
@@ -180,26 +182,26 @@ Kimi K2.7 Code sentinel dispatch receipts on 2026-06-14:
 ## Focused Lane Harness Projection
 
 Compose a narrow lane as an OMP agent definition (`.omp/agents/<name>.md`,
-project or user scope) or an explicit `agent(prompt, agent=..., model=...)`
-call; promote recurring compositions to a declared agent in omp-config.
+project or user scope) or as an explicit
+`agent(prompt, agent=..., model=...)` call. Promote recurring compositions to
+a declared agent in omp-config.
 
-The selected Harness owns execution. omp-config owns declarations and ephemeral
-projection only; Powder owns durable work evidence and omp-config writes a bounded
-local dispatch receipt. A failed provider returns evidence to the lead, which
-decides whether to replace the lane.
+The selected Harness owns execution. omp-config owns declarations and
+ephemeral projection only. Powder owns durable work evidence. omp-config writes
+a bounded local dispatch receipt. A failed provider returns evidence to the
+lead. The lead decides whether to replace the lane.
 
 ## Open-Model / OpenRouter Catalog Snapshot
-
 Pi, Goose, and OpenCode can attempt OpenRouter model ids through their
-configured dispatch surfaces. The rows below are OpenRouter catalog facts
+configured dispatch surfaces. The rows below contain OpenRouter catalog facts
 captured with `curl -fsSL https://openrouter.ai/api/v1/models` on 2026-07-08.
-A row here does not mean the model has been smoke-tested through every harness,
-and it is not a recommendation. Record a delegation receipt before treating a
-non-roster model as locally proven. OpenRouter rows describe OpenRouter
-listings only; do not infer local Codex, Claude Code, Antigravity, Cursor, or
-Grok CLI pricing or limits from them. `~...latest` ids are OpenRouter catalog
-aliases. Detailed sections below carry extra source notes for selected rows;
-this table is the scannable catalog snapshot.
+A row does not mean that every harness smoke-tested the model. It is not a
+recommendation. Record a delegation receipt before treating a non-roster model
+as locally proven. OpenRouter rows describe OpenRouter listings only. Do not
+infer local Codex, Claude Code, Antigravity, Cursor, or Grok CLI pricing or
+limits from them. `~...latest` ids are OpenRouter catalog aliases. Detailed
+sections below add source notes for selected rows. This table is the scannable
+catalog snapshot.
 
 | OpenRouter id | Created | Context | Max completion | Input | Output | Cache read | Modalities | Supported parameters excerpt |
 |---|---:|---:|---:|---:|---:|---:|---|---|
@@ -224,10 +226,10 @@ this table is the scannable catalog snapshot.
 | `openai/gpt-5.3-codex` | 2026-02-24 | 400,000 | 128,000 | `$1.75/M` | `$14.00/M` | `$0.175/M` | text+image+file -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
 | `qwen/qwen3-coder-next` | 2026-02-04 | 262,144 | 262,144 | `$0.11/M` | `$0.80/M` | `$0.07/M` | text -> text | `tools`, `tool_choice`, `structured_outputs` |
 
-Live OpenRouter readback on 2026-07-11 confirms `moonshotai/kimi-k2.7-code` at
-262,144 context and max completion, with `$0.72/M` input, `$3.50/M` output,
-and `$0.15/M` cache reads. Treat provider catalog values as expiring evidence;
-refresh before quoting spend or composing long-output lanes.
+Live OpenRouter readback on 2026-07-11 confirms `moonshotai/kimi-k2.7-code`
+with 262,144 context and max completion, `$0.72/M` input, `$3.50/M` output,
+and `$0.15/M` cache reads. Treat provider catalog values as expiring evidence.
+Refresh before quoting spend or composing long-output lanes.
 
 ## Verified Model Facts
 
@@ -470,23 +472,23 @@ refresh before quoting spend or composing long-output lanes.
 
 - Active local id: `composer-2.5`.
 - Local dispatch surface: Cursor Agent CLI `cursor-agent -p --model composer-2.5`.
-- Source for local availability: `primitives/providers.yaml` plus a direct
+- Source for local availability: `global/models.yml` plus a direct
   `cursor-agent --version`/headless smoke on 2026-06-07.
 - Public model-card/pricing/context facts were not verified in this refresh.
   Do not infer pricing, context, or benchmark facts from the local model id.
 
 ## Refresh Procedure
 
-Use `/harness-engineering models` or `/research` when this file is stale
-or a user asks for current model/provider/harness choices.
+Use `/harness-engineering models` or `/research` when this file is stale or
+when a user asks for current model/provider/harness choices.
 
-1. Read `primitives/providers.yaml`, harness settings, and this file.
-2. Probe local providers with `command -v` plus the provider's documented
-   non-billable version/help command; use a bounded sentinel only when needed.
+1. Read `global/models.yml`, harness settings, and this file.
+2. Probe local providers with `command -v` and the provider's documented
+   non-billable version/help command. Use a bounded sentinel only when needed.
 3. Query live provider catalogs/docs for exact model ids, context windows,
    max output, pricing, tool support, release dates, and deprecation notes.
 4. Update this file with hard facts only.
-5. Update omp-config model settings only when changing a runnable default or
+5. Update omp-config model settings only when you change a runnable default or
    variant.
 6. Run omp-config `bin/check` and the affected provider's direct smoke probe.
 

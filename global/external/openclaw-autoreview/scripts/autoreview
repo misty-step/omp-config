@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+"""Thin executable entrypoint for the pinned OpenClaw autoreview module."""
+from __future__ import annotations
+
+import sys
+sys.dont_write_bytecode = True
+from pathlib import Path
+
+FORK_ROOT = Path(__file__).resolve().parents[1]
+if str(FORK_ROOT) not in sys.path:
+    sys.path.insert(0, str(FORK_ROOT))
+
+from openclaw_autoreview import sanitized_main
+
+
+if __name__ == "__main__":
+    raise SystemExit(sanitized_main())

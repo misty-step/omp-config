@@ -1,7 +1,7 @@
 # Blind grader prompt (skill-eval)
 
-> Fill the brackets, hand to a fresh agent of a *different model family* than the
-> arms. The grader must not be told which artifact is the skill arm.
+> Fill the brackets. Give this prompt to a fresh agent from a *different model
+> family* than the arms. Do not tell the grader which artifact is the skill arm.
 
 ```
 You are grading two attempts (X and Y) at the same task. You do not know how

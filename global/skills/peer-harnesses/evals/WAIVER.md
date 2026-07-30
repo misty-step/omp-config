@@ -4,15 +4,19 @@ expires: 2026-08-01
 
 ## Reason
 
-Reference/routing skill (peer-CLI capability map). The falsifiable claim is routing correctness, structurally identical to the already-proven routing-eval pattern (`global/skills/skill-eval/examples/routing-eval.md`, run 15/15 while it lived in `/design`) — next in line to adapt that harness with a peer-harness-specific answer key.
+This skill maps peer-CLI capability and routing. Its falsifiable claim is routing
+correctness. The claim matches the proven routing-eval pattern
+(`global/skills/skill-eval/examples/routing-eval.md`, run 15/15 while it lived
+in `/design`). Adapt that harness with a peer-harness-specific answer key.
 
 ## Disposition
 
-Not exempt from the eval-coverage contract — this waiver is a time-boxed
-deferral, not a permanent opt-out. When it expires, either an eval spec lands
-at `global/skills/peer-harnesses/evals/peer-harnesses-eval.md` (see `global/skills/skill-eval/templates/eval-spec.md`)
-or this waiver is renewed with a fresh reason and date. A stale, silently
-renewed waiver with no new reasoning is itself a finding for `/harness-engineering`'s
-next skill-health audit.
+This waiver is not exempt from the eval-coverage contract. It defers coverage
+for a limited time. Before it expires, add an eval spec at
+`global/skills/peer-harnesses/evals/peer-harnesses-eval.md` (see
+`global/skills/skill-eval/templates/eval-spec.md`), or renew this waiver with a
+new reason and date. Treat a stale waiver without new reasoning as a finding
+for `/harness-engineering`'s next skill-health audit.
 
-No automated eval; origin Roster-era backlog (retired 2026-07-16); revisit when this skill changes. Per-skill proof runs through `/skill-eval`.
+No automated eval exists. Revisit when this skill changes. Run per-skill proof
+through `/skill-eval`.

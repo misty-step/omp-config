@@ -1,0 +1,25 @@
+{
+  "fetched_at": "2026-07-27T00:00:00Z",
+  "repo": "openclaw/agent-skills",
+  "sha": "fe588b1a6267eb47f785d0c748db9f6f3e9a3b4f",
+  "fork": true,
+  "fork_reason": "Recognize Mint credential placeholders and explicit synthetic secret fixtures without weakening real-secret detection.",
+  "src_path_suffix": "skills/autoreview",
+  "license_path": "LICENSE",
+  "license": "MIT",
+  "license_sha256": "6ae2daf92d73e912aef033d56ce374df997ae0ad1d88ca9ef76f0c11123aae27",
+  "payload": [
+    "SKILL.md",
+    "openclaw_autoreview.py",
+    "scripts/autoreview",
+    "scripts/test-review-harness",
+    "scripts/test-review-harness.py"
+  ],
+  "payload_sha256": {
+    "SKILL.md": "ebc732cd3df231ec5a29fafb798ef27a9178ca3fbc1070ab32684df2c2299f41",
+    "openclaw_autoreview.py": "d74959ba92cb2a7d864b322f5ae1bd73809ce423b9e27d3d64f30bf7767625ea",
+    "scripts/autoreview": "cceae5cb3f58085faae5a8d7ea7a3bcd3b06cb1e3ff418786c11c35c57a49d55",
+    "scripts/test-review-harness": "d58e158818a634b291893b74d1e21b0027e187ef6ee28a1cb84361345e1d5308",
+    "scripts/test-review-harness.py": "ae9a94e53bfd6742a6cecd6eef28ac3f5085714393232a23ee20d5eb539422b9"
+  }
+}

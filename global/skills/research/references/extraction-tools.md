@@ -1,7 +1,8 @@
 # Extraction Tools
 
 Use extraction tools when the research task names a URL, site, crawl, sitemap,
-or page content target. Do not route ordinary broad research here by default.
+or page-content target.
+Do not route ordinary broad research here by default.
 
 ## Capability Routing
 
@@ -16,16 +17,16 @@ or page content target. Do not route ordinary broad research here by default.
 ## Harness Contract
 
 - Bound crawls by domain, path, max pages, and time budget.
-- Emit source URLs and extraction status; an extracted summary without the
-  source URL is not evidence.
+- Emit source URLs and extraction status.
+- Do not treat an extracted summary without its source URL as evidence.
 - Prefer official docs or repo-local files before paid extraction.
-- Treat browser agents as the fallback for dynamic pages, not the default for
+- Use browser agents as the fallback for dynamic pages, not the default for
   static pages.
 
 ## Smoke Shape
 
-Live provider smoke tests are env-gated. Offline evals should assert routing,
-not hit paid APIs:
+Gate live provider smoke tests with env vars.
+Offline evals assert routing and must not call paid APIs.
 
 - `map this docs site` routes to map/crawl capability.
 - `extract this URL` routes to fetch/extract capability.

@@ -21,7 +21,7 @@ Validate a skill against quality gates.
 | **Mode bloat** | >4 modes with inline content, or any single mode >60 lines inline? | Extract mode content to references/mode-*.md; use router pattern (see /diagnose) |
 | **Reference integrity** | Do all referenced local files in routing tables, gotchas, and examples exist? | Create the missing file, fix the path, or delete the stale reference |
 | **Self-containment** | Do scripts source only paths under `global/skills/<name>/`? Do they resolve `SCRIPT_DIR` via `readlink -f` and `STATE_ROOT` from the invoking project? | Move shared libs into the skill tree; rewrite source paths to use `$SCRIPT_DIR/lib/…`; decouple state root from script dir. |
-| **Delegation guidance** | Where a skill delegates, does it point at the Shared Operating Spine instead of restating it? | Point to `../../../shared/AGENTS.md` (Act); delete restated doctrine. |
+| **Delegation guidance** | Where a skill delegates, does it point at the Shared Operating Spine instead of restating it? | Point to `../../../AGENTS.md` for the shared doctrine; delete restated doctrine. |
 
 ## Self-containment check
 
@@ -38,9 +38,10 @@ rg -n 'SCRIPT_DIR/\.\./\.\.' global/skills/*/scripts/
 
 Either match is a lint failure. The fix is structural, not a suppression.
 
-Every scripted skill should also ship a distribution smoke test at
-`global/skills/<name>/scripts/distribution_test.sh` that symlinks the skill into
-a throwaway project and verifies `--help` works from there.
+Every scripted skill should also ship a distribution smoke test.
+Place it at `global/skills/<name>/scripts/distribution_test.sh`.
+The test symlinks the skill into a throwaway project.
+It verifies that `--help` works from there.
 
 ## Batch lint
 

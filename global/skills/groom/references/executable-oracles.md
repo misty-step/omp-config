@@ -1,7 +1,7 @@
 # Executable Oracles
 
-An oracle is a check that decides success. Checkbox oracles drift.
-Executable oracles enforce.
+An oracle is a check that decides whether a task succeeds.
+Checkbox oracles can become unreliable. Executable oracles enforce the result.
 
 ## The Problem
 
@@ -10,12 +10,13 @@ Prose oracles require interpretation:
 - "Response time should be fast" — how fast?
 - "Tests should pass" — which tests?
 
-These decay into opinion. The builder declares victory, the critic
-disagrees, and nobody has a ground truth to point at.
+These statements become matters of opinion.
+The builder can claim success while the critic disagrees, and the team has no
+objective result to check.
 
 ## The Fix: Oracles as Commands
 
-Every oracle should be a command that returns pass/fail:
+Make every oracle a command that returns pass/fail:
 
 ```bash
 # Bad: "The login endpoint should return 200 with valid credentials"
@@ -41,7 +42,7 @@ npm test -- --bail 2>&1 | tail -1 | grep -q 'passed'
 
 ## Template
 
-When writing the Oracle section of a context packet:
+Write the Oracle section of a context packet:
 
 ```markdown
 ## Oracle (Definition of Done)
@@ -58,18 +59,19 @@ Observable outcomes (verified by human or /qa):
 ```
 
 Split into two categories:
-1. **Automated** — commands that can run in CI or a Stop check
-2. **Observable** — outcomes that require visual/interactive verification
+1. **Automated** — commands that CI or a Stop check can run
+2. **Observable** — outcomes that require visual or interactive verification
 
-Automated oracles are the primary gate. Observable outcomes catch
-what scripts can't (layout, UX flow, visual correctness).
+Automated oracles are the primary gate.
+Observable outcomes cover layout, UX flow, and visual correctness that scripts
+cannot verify.
 
 ## When You Can't Write an Oracle
 
-If you can't write an executable oracle, the goal isn't clear enough.
-Go back to the spec. Common causes:
+If you cannot write an executable oracle, the goal is not clear enough.
+Review the specification again. Common causes:
 - Goal is too vague ("improve performance")
 - Success depends on subjective judgment with no proxy metric
-- The feature can't be tested without infrastructure that doesn't exist yet
+- The feature needs test infrastructure that does not exist yet
 
-For the third case, building the test infrastructure IS the first task.
+For the third case, build the test infrastructure first.

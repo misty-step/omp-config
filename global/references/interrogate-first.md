@@ -1,61 +1,51 @@
 # Interrogate-First Lens
 
-Use before shaping a contestable idea or framing a strategic groom. The posture
-is an interview, not a questionnaire: walk the operator down the decision tree
-until the hidden choices are visible and resolved. `/shape`'s own grill step
-(`primitives/skills/shape/SKILL.md`) loads this reference and is the primary
-consumer of the stance. The invocable relative of this posture is
-`primitives/skills/grilling/SKILL.md` ("grill me" trigger phrases fire it
-directly); it shares this lens's batching doctrine rather than duplicating it
-(2026-07-15, roster-batching-and-reasoning-defaults — one-question-at-a-time is
-revoked everywhere, not just grilling; the operator dictates and wants a
-laundry list, not call-and-response).
+Use before shaping a contestable idea or framing a strategic groom.
+Treat this as an interview, not a questionnaire.
+Guide the operator through the decision tree until hidden choices are visible and resolved.
+`/shape`'s grill step loads this reference as its primary stance.
+`global/skills/grilling/SKILL.md` is the invocable relative. Its `"grill me"` trigger phrases invoke it directly.
+It shares this lens's batching doctrine instead of duplicating it.
+(2026-07-15 batching update: Revoke one-question-at-a-time everywhere, not only in grilling.)
+The operator dictates and wants all questions at once, not call-and-response.
 
-1. **Batch every round.** Present ALL currently-open questions at once,
-   grouped by theme, each with your recommended answer and a one-line why.
-   The operator answers whatever subset however he wants — often rambling
-   dictation, any order, partial. Absorb the answers, resolve the decisions
-   they settle, and return the next full batch: unanswered carry-overs +
-   newly-surfaced questions + follow-ups on ambiguous answers. Loop until
-   nothing is open. A single question asked and awaited produces "I agree"
-   turn after turn and wastes the operator's attention.
-2. **Resolve the tree, branch by branch.** Surface the decisions that depend on
-   each other and settle them within and across batches in dependency order. A
-   load-bearing choice left implicit is a decision deferred to the worst
-   possible moment.
-3. **Recommend an answer.** For every question give your best answer and what
-   breaks if it's wrong. An interrogation that only extracts is lazy; the point
-   is to move toward a resolved design, not to quiz the operator.
-4. **Explore before you ask.** If the codebase, vision, or a command can answer
-   it, go read it — don't spend the operator's attention on what you can resolve
-   yourself.
-5. **Relentless until shared understanding.** Stop when the design is genuinely
-   pinned, not when the operator sounds tired. "Decide during implementation" on
-   a load-bearing choice means the interview isn't done.
+1. **Batch every round.** Present all currently open questions at once.
+   Group them by theme. Give a recommended answer and one-line reason for each.
+   The operator may answer any subset in any order, including partial dictation.
+   Absorb answers and resolve the decisions they settle.
+   Return the next full batch with unanswered questions, new questions, and follow-ups for ambiguous answers.
+   Repeat until no question remains.
+   A single awaited question often produces repeated `"I agree"` responses and wastes operator attention.
+2. **Resolve the tree, branch by branch.** Surface dependent decisions and settle them across batches in dependency order.
+   Do not leave a load-bearing choice implicit. It defers a decision to a later stage.
+3. **Recommend an answer.** Give your best answer for every question.
+   State what fails if the answer is wrong.
+   Use interrogation to move toward a resolved design, not only to extract answers.
+4. **Explore before you ask.** Read the codebase, vision, or command when it can answer the question.
+   Do not spend operator attention on what you can resolve yourself.
+5. **Continue until shared understanding.** Stop when the design is settled, not when the operator sounds tired.
+   If a load-bearing choice waits for implementation, the interview is not done.
 
 ## Which Move for Which Unknown
 
-The interview handles decisions the operator knows are open. Not every gap is
-that kind; route by the type of unknown:
+The interview handles decisions the operator knows are open.
+Route other gaps by the type of unknown.
 
-- **Resolvable** — the repo, vision, or a command can answer it. Read it
-  (rule 4). Never interview for facts.
-- **Known unknown** — a decision the operator knows is open. Interview: the
-  body of this file.
+- **Resolvable** — the repo, vision, or a command can answer it. Read it (rule 4). Never interview for facts.
+- **Known unknown** — a decision the operator knows is open. Use the body of this file for the interview.
 - **Unknown known** — "I'll know it when I see it" (design, copy, feel).
-  Don't extract prose criteria that don't exist yet; route to disposable
-  prototype variations and let the operator react before the spec locks.
-- **Unknown unknown** — new domain; the operator doesn't know what to ask.
-  Run a **blindspot pass** before interrogating: teach the domain's shape —
-  what good looks like, the standard failure modes, the questions they should
-  be asking — then interview. Answers extracted from an untaught operator pin
-  the design to guesses.
+  Do not extract prose criteria that do not exist.
+  Use disposable prototype variations and let the operator react before the spec locks.
+- **Unknown unknown** — a new domain where the operator does not know what to ask.
+  Run a **blindspot pass** before interrogating.
+  Teach the domain's structure, desired quality, standard failure modes, and useful questions.
+  Then interview. Answers from an untaught operator can base the design on guesses.
 
 ## Boundaries
 
-Do not manufacture questions for choices the evidence already locks — that is
-railroading, not rigor. Do not interrogate what you can read. The stance is the
-default posture for contestable framing, not a toll booth on every request.
+Do not create questions for choices that evidence already resolves.
+Do not interrogate what you can read.
+Use this stance for contestable framing, not every request.
 
 ## Prompt
 

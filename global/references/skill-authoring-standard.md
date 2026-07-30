@@ -1,13 +1,10 @@
-# Skill authoring standard (roster house conventions)
+# Skill authoring standard (OMP house conventions)
 
-The judgment layer lives in the vendored
-`primitives/skills/.external/mattpocock-writing-great-skills/SKILL.md`
-(predictability, invocation choice, the six failure modes, information hierarchy,
-leading words, positive framing, and the no-op test) and Anthropic's
-progressive-disclosure guidance
-(`docs/research/roster-926-import-design-brief.md`). This file resolves their
-frontier-model tension and adds only the house conventions they leave open.
-Apply the no-op test to every line — including lines from this standard.
+Judgment rules live in the vendored `global/skills/writing-great-skills/SKILL.md`.
+They define predictability, invocation choice, six failure modes, information hierarchy, leading words, positive framing, and the no-op test.
+Anthropic's progressive-disclosure guidance also applies.
+This file resolves frontier-model tension and adds only house conventions not covered there.
+Apply the no-op test to every line, including lines from this standard.
 
 ## Frontmatter
 
@@ -23,8 +20,8 @@ Apply the no-op test to every line — including lines from this standard.
 
 - H1 is the trigger form: `# /<name>`.
 - Three tiers: frontmatter → SKILL.md body → `references/` on demand.
-  A body pushing past ~900 words is a signal to extract, not a violation —
-  the test is whether the inline prose is load-bearing for every invocation.
+  Treat a body over ~900 words as a signal to extract content, not as a violation.
+  Keep inline prose only when every invocation needs it.
 - Fenced examples must not contain lines that scan as real headings
   (indent them or use placeholder text).
 
@@ -49,37 +46,34 @@ One-line pointers instead of local rewordings:
 - Vision: `Read root VISION.md when present; if missing or stale, route to
   /vision.`
 - Verification loops: point at
-  `primitives/shared/references/verification-system-first.md` — do not
+  `global/references/verification-system-first.md` — do not
   re-derive it.
 - Simplicity: the delete-first/Ponytail load trigger lives inside
-  `primitives/shared/references/delete-first.md`; skills just point there.
+  `global/references/delete-first.md`; skills just point there.
 
 A skill that needs a *different* rule than the shared line says is making a
 claim — state the delta explicitly and say why, next to the pointer.
 
 ## Routing tables
 
-One signal→skill routing table exists, in `/orient`. `/next` and any other
-skill that routes consumes it by pointer and adds only its own framing.
-Never fork the table.
+One signal→skill routing table exists in `/orient`.
+`/next` and other routing skills consume it by pointer and add only their framing.
+Never duplicate the table.
 
 ## Frontier-model resolution
 
-WGS asks for ordered steps with completion criteria; current frontier-model
-guidance warns that procedural checklists over-constrain capable models. Roster
-targets frontier orchestrators by default, so encode the invariant process,
-boundaries, oracle, and stop condition—not a narrated SDLC. Ordered steps earn
-their place only when tool order is semantically required or `/skill-eval`
-shows that the target model fails without them.
+WGS asks for ordered steps with completion criteria.
+Frontier guidance warns that procedural checklists over-constrain capable models.
+OMP targets frontier orchestrators by default.
+Encode the invariant process, boundaries, oracle, and stop condition, not a narrated SDLC.
+Add ordered steps only when tool order is semantically required or `/skill-eval` shows the target model fails without them.
 
 Additional Fable 5 deltas (2026-07):
 
 - Deletion is the top rewrite move. Strip prior-model coaching before adding.
 - Never ask the model to expose or transcribe internal reasoning.
 - Over-firing skills need a `Do not use when:` boundary beside `Use when:`.
-- A reference pointer states the condition and intended use; weak “see also”
-  pointers are variance bugs.
-- Pair every prohibition with the target behavior. A bare negation makes the
-  forbidden path more salient.
+- A reference pointer states the condition and intended use. Weak “see also” pointers create variance bugs.
+- Pair every prohibition with the target behavior. Bare negation makes the forbidden path more salient.
 - Completion-reporting skills point to the Shared Operating Spine rather than
   repeating universal evidence prose.

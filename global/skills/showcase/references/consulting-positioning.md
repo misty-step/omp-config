@@ -1,7 +1,6 @@
 # Consulting Positioning
 
-Showcase assets should make a prospect infer: this operator can turn ambiguous
-AI workflows into reliable, inspectable software.
+Showcase assets should show that this operator can turn ambiguous AI workflows into reliable, inspectable software.
 
 ## Positioning Axes
 
@@ -13,8 +12,8 @@ Pick one primary axis per asset:
 - **Executive clarity**: complex system made legible enough to buy or sponsor.
 - **Artifact quality**: the demo, docs, and product feel finished.
 
-Do not try to sell all axes equally. A focused case study beats a generic
-capabilities page.
+Do not promote all axes equally. A focused case study is stronger than a
+generic capabilities page.
 
 ## Consulting Fit Questions
 
@@ -22,7 +21,7 @@ capabilities page.
 - What decision-maker would understand the value in 30 seconds?
 - What technical buyer would believe it after inspection?
 - Which artifact proves judgment, not just implementation?
-- What would make this feel like toyware, and how do we remove that?
+- What would make this look trivial or untrustworthy, and how do we remove that?
 
 ## Copy Rules
 

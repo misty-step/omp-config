@@ -4,7 +4,7 @@ Compact critic rubrics. The primary reads a lens here and commissions an
 **ad-hoc** critic subagent that embodies it — no static persona file is
 required (backlog 061, "subagent roles, not files"). Name the
 lens, give it scope + an evidence contract, synthesize its findings yourself.
-Used by `primitives/shared/references/routing.md`, `/code-review`, `/critique`,
+Used by `/code-review`, `/critique`,
 `/groom`, `/refactor`, and `/shape`.
 
 ## critic
@@ -15,8 +15,8 @@ oracle, not the author's rationale.
 - Diff claims that do not match the changed files.
 - Risk hidden by generated files, broad summaries, or self-review.
 - Blocking ambiguity in the oracle, scope, or residual risk.
-**Catches:** plausible "done" claims that would fail production because no
-fresh reviewer tried to refute the actual artifact.
+**Catches:** plausible "done" claims that could fail in production.
+No fresh reviewer tried to refute the actual artifact.
 
 ## ousterhout
 **Essence:** deep modules — a simple interface over a powerful implementation;
@@ -41,15 +41,13 @@ NOT to do.
 over-engineered, unshippable code.
 
 ## grug
-**Essence:** complexity is the enemy — say "no" to abstraction theater early
-and often.
+**Essence:** complexity causes defects. Reject unsupported abstraction early and often.
 **Looks for:**
 - Abstraction before two concrete uses or a clear cut-point.
-- Too many layers, clever code, patterns that hurt debugging.
+- Too many layers, clever code, or patterns that make debugging harder.
 - Chesterton's-fence violations: removing code whose reason isn't understood.
-- Frameworks/microservices where a monolith or direct call works.
-**Catches:** early abstraction and complexity that make the code impossible to
-debug or change without cascading breakage.
+- Frameworks or microservices where a monolith or direct call works.
+**Catches:** early abstraction and complexity that make code difficult to debug or change without cascading failures.
 
 ## beck
 **Essence:** red-green-refactor TDD + simple design (passes tests, reveals
@@ -57,7 +55,7 @@ intention, no duplication, fewest elements).
 **Looks for:**
 - Tests written before implementation for new behavior or a bug fix.
 - The four design rules applied in priority order; YAGNI enforced.
-- Small evolutionary steps, not big-bang changes.
+- Small incremental steps, not large changes.
 - Abstraction only after 2+ concrete implementations exist.
 **Catches:** code written before its tests, leaving untestable design that
 can't be refactored safely.
@@ -92,13 +90,13 @@ because no adversarial path exercised the authority or input boundary.
 ## works
 **Essence:** tests are not the whole definition of working — public surface,
 human workflow, performance tradeoffs, compatibility, and operations matter.
-**Looks for:** see `primitives/shared/references/works-critique.md`.
+**Looks for:** see `global/references/works-critique.md`.
 **Catches:** changes that pass tests while the API/CLI/UI, operator path, or
 production signal is incoherent.
 
 ## delete-first
 **Essence:** question, delete, simplify, speed up, automate — in that order.
-**Looks for:** see `primitives/shared/references/delete-first.md`.
+**Looks for:** see `global/references/delete-first.md`.
 **Catches:** optimizing or automating a requirement, dependency, process, mode,
 or abstraction that should not exist.
 

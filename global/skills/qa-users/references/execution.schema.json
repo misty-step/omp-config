@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://misty-step.dev/schemas/qa-users/execution.v1.json",
+  "title": "qa-users shared execution contracts",
+  "$defs": {
+    "harness": { "type": "string", "minLength": 1, "pattern": "^[a-z][a-z0-9._-]{1,63}$" },
+    "provider": { "type": "string", "minLength": 1, "pattern": "^[a-z][a-z0-9._-]{1,63}$" },
+    "model": { "type": "string", "minLength": 1, "pattern": "^[^\\s]{2,128}$" },
+    "reasoning": { "type": "string", "enum": ["low", "medium", "high", "xhigh", "max"] },
+    "concurrency": { "type": "integer", "minimum": 1, "maximum": 128 },
+    "session_length_seconds": { "type": "integer", "minimum": 30, "maximum": 86400 },
+    "seed": { "type": "integer", "minimum": 0 },
+    "entrypoint_id": { "type": "string", "minLength": 1, "pattern": "^[a-z][a-z0-9._-]{1,63}$" },
+    "entrypoint_ids": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/entrypoint_id" } },
+    "issue_threshold": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum_severity", "minimum_confidence"],
+      "properties": {
+        "minimum_severity": { "type": "string", "enum": ["info", "low", "medium", "high", "critical"] },
+        "minimum_confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "maximum_creates": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "tracker_name": { "type": "string", "minLength": 2, "maxLength": 64, "pattern": "^[a-z][a-z0-9._-]{1,63}$" },
+    "override_source": { "type": "string", "enum": ["cli", "input", "harness-default"] },
+    "override_provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source"],
+      "properties": { "source": { "$ref": "#/$defs/override_source" } }
+    },
+    "issue_threshold_provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "rule"],
+      "properties": {
+        "source": { "$ref": "#/$defs/override_source" },
+        "rule": { "type": "string", "enum": ["configured", "stricter.v1"] }
+      }
+    },
+    "input_overrides": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "harness": { "$ref": "#/$defs/harness" },
+        "provider": { "$ref": "#/$defs/provider" },
+        "model": { "$ref": "#/$defs/model" },
+        "reasoning": { "$ref": "#/$defs/reasoning" },
+        "concurrency": { "$ref": "#/$defs/concurrency" },
+        "session_length_seconds": { "$ref": "#/$defs/session_length_seconds" },
+        "seed": { "$ref": "#/$defs/seed" },
+        "entrypoints": { "$ref": "#/$defs/entrypoint_ids" },
+        "issue_threshold": { "type": "string", "enum": ["stricter", "configured"] },
+        "maximum_creates": { "$ref": "#/$defs/maximum_creates" },
+        "tracker": { "$ref": "#/$defs/tracker_name" }
+      }
+    },
+    "output_overrides": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["harness", "provider", "model", "reasoning", "concurrency", "session_length_seconds", "seed", "entrypoints", "issue_threshold", "maximum_creates", "selected_tracker", "provenance"],
+      "properties": {
+        "harness": { "$ref": "#/$defs/harness" },
+        "provider": { "$ref": "#/$defs/provider" },
+        "model": { "$ref": "#/$defs/model" },
+        "reasoning": { "$ref": "#/$defs/reasoning" },
+        "concurrency": { "$ref": "#/$defs/concurrency" },
+        "session_length_seconds": { "$ref": "#/$defs/session_length_seconds" },
+        "seed": { "$ref": "#/$defs/seed" },
+        "entrypoints": { "$ref": "#/$defs/entrypoint_ids" },
+        "issue_threshold": { "$ref": "#/$defs/issue_threshold" },
+        "maximum_creates": { "$ref": "#/$defs/maximum_creates" },
+        "selected_tracker": { "$ref": "#/$defs/tracker_name" },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["harness", "provider", "model", "reasoning", "concurrency", "session_length_seconds", "seed", "entrypoints", "issue_threshold", "maximum_creates", "selected_tracker"],
+          "properties": {
+            "harness": { "$ref": "#/$defs/override_provenance" },
+            "provider": { "$ref": "#/$defs/override_provenance" },
+            "model": { "$ref": "#/$defs/override_provenance" },
+            "reasoning": { "$ref": "#/$defs/override_provenance" },
+            "concurrency": { "$ref": "#/$defs/override_provenance" },
+            "session_length_seconds": { "$ref": "#/$defs/override_provenance" },
+            "seed": { "$ref": "#/$defs/override_provenance" },
+            "entrypoints": { "$ref": "#/$defs/override_provenance" },
+            "issue_threshold": { "$ref": "#/$defs/issue_threshold_provenance" },
+            "maximum_creates": { "$ref": "#/$defs/override_provenance" },
+            "selected_tracker": { "$ref": "#/$defs/override_provenance" }
+          }
+        }
+      }
+    }
+  }
+}

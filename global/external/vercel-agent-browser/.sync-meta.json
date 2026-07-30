@@ -2,5 +2,10 @@
   "fetched_at": "2026-06-10T15:41:34Z",
   "repo": "vercel-labs/agent-browser",
   "sha": "4cc6ca40b76a590bb06d1ec5abc16d27bb7d43c0",
-  "src_path_suffix": "agent-browser"
+  "src_path_suffix": "agent-browser",
+  "license_path": "LICENSE",
+  "license": "Apache-2.0",
+  "license_sha256": "014bb31e83d5c2e76aea1cc6e82217346ab41362f32cb355ad0f5c10aa0aeaff",
+  "payload": ["SKILL.md"],
+  "payload_sha256": {"SKILL.md": "b2e54fa784581734c689611860de39916364d4e4b9cf17472b8e2afdaaa9d320"}
 }

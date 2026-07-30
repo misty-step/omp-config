@@ -1,6 +1,6 @@
 # mint — errors and honest scope
 
-## Errors — read the status code, don't retry blind
+Read the status code. Do not retry blindly.
 
 | Status | Meaning | What it means for you |
 |---|---|---|
@@ -16,24 +16,25 @@ fields (`access_token`, `refresh_token`, `private_key`, `client_secret`,
 
 ## What mint doesn't do yet (honest scope)
 
-See mint's own `VISION.md` before assuming a capability beyond what ships today.
+Read mint's own `VISION.md` before you assume that a capability ships today.
 
-- Only the egress HTTP proxy mode exists — no typed-action broker, no
-  secretless protocol proxy (both declared in VISION.md, neither built).
-- Backing stores today: the macOS keychain for local development and one
-  service-private file per alias in production, delivered through systemd
-  `LoadCredentialEncrypted=` on the dedicated DigitalOcean node. The broker's
-  ordinary request path does not call 1Password and does not carry raw
-  `MINT_SECRET_*` values in its environment. OpenBao remains future work.
-- Deployed auth is tailnet-whois (mint-924): your identity is your machine's
-  tailnet peer address. Shared-secret capability auth survives only for
-  loopback dev `mint serve`. There is NO auth path yet for non-tailnet
-  callers (DO App Platform apps, GitHub Actions CI) — that is mint-911's
-  OIDC work, not something to improvise around.
-- Only flat two-segment aliases (`secret://<service>/<name>`) — no
-  hierarchical names.
-- `approval_required` policy rules currently **deny** the call outright. There
-  is no human-tap escalation yet; it comes back as a `403`, never a
+- Only the egress HTTP proxy mode exists. No typed-action broker or secretless
+  protocol proxy exists; `VISION.md` declares both, but neither is built.
+- Backing stores today include the macOS keychain for local development and one
+  service-private file per alias in production. Systemd
+  `LoadCredentialEncrypted=` delivers the production file on the dedicated
+  DigitalOcean node. The broker's ordinary request path does not call 1Password.
+  It does not carry raw `MINT_SECRET_*` values in its environment. OpenBao remains
+  future work.
+- Deployed auth uses tailnet-whois (mint-924): your identity is your machine's
+  tailnet peer address. Shared-secret capability auth remains only for loopback
+  dev `mint serve`. No auth path exists yet for non-tailnet callers, such as DO
+  App Platform apps or GitHub Actions CI. That is mint-911's OIDC work; do not
+  improvise it.
+- Only flat two-segment aliases (`secret://<service>/<name>`) exist. Hierarchical
+  names do not exist.
+- `approval_required` policy rules currently **deny** the call outright. No
+  human-tap escalation exists yet. The call returns a `403`, never a
   pending/approval response.
-- No hot reload — policy and capability changes require restarting `mint serve`.
-- No SDK face yet (the MCP face shipped — see `operator-surfaces.md`).
+- No hot reload exists. Restart `mint serve` after policy or capability changes.
+- No SDK face exists yet. The MCP face shipped; see `operator-surfaces.md`.

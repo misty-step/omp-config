@@ -76,9 +76,10 @@ def _relative_path(
     *,
     single_child: bool = False,
     max_parts: int | None = None,
+    allow_root: bool = False,
 ) -> Path:
     path = Path(value)
-    if path.is_absolute() or ".." in path.parts or path == Path("."):
+    if path.is_absolute() or ".." in path.parts or (path == Path(".") and not allow_root):
         raise ContractError(f"{label} must be a non-empty relative path")
     if single_child and len(path.parts) != 1:
         raise ContractError(f"{label} must be one direct child of the projection root")
@@ -104,7 +105,11 @@ def load_contract(root: Path, projection_root: Path | None = None) -> Contract:
     repository = (root / _string(authority, "repository", "authority")).resolve()
     if repository != root:
         raise ContractError("authority.repository must resolve to this repository")
-    source_root_rel = _relative_path(_string(authority, "source_root", "authority"), "authority.source_root")
+    source_root_rel = _relative_path(
+        _string(authority, "source_root", "authority"),
+        "authority.source_root",
+        allow_root=True,
+    )
     source_root = (root / source_root_rel).resolve()
     if not source_root.is_relative_to(root):
         raise ContractError("authority.source_root escapes the repository")

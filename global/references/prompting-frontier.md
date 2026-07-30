@@ -1,97 +1,78 @@
 # Prompting Fable-class models
 
-Adapted for this harness from Matt Shumer's "How I Prompt Fable" (2026-07-03),
-operator-ratified the same day, with the operator's directionality correction:
-**these rules describe how to commission FABLE — the operator prompting the
-lead, or the lead prompting a rare peer-Fable lane.** They do NOT loosen how
-Fable commissions downward: when the lead dispatches non-Fable subagents
-(codex, sonnet, GLM), the lead IS the superior judgment in the pair and OWNS
-the broad design decisions and the specific implementation decisions — briefs
-to cheaper models are rightly prescriptive, and get more so as capability
-drops. What flows downward to every lane regardless of tier: bars not
-adjectives, builder-never-grades, live status artifacts, evidence
-expectations, and house rules.
+Adapted for this harness from Matt Shumer's "How I Prompt Fable" (2026-07-03).
+The operator ratified it the same day and added a directionality correction.
+**These rules describe how to commission FABLE: the operator prompts the lead, or the lead prompts a rare peer-Fable lane.**
+These rules do not loosen how Fable commissions downward.
+When the lead dispatches non-Fable subagents (codex, sonnet, GLM), the lead has superior judgment in the pair.
+The lead owns broad design decisions and specific implementation decisions.
+Briefs to cheaper models remain prescriptive. Make them more prescriptive as capability drops.
+Every lane receives bars, not adjectives; builder-never-grades; live status artifacts; evidence expectations; and house rules.
 
 ## The seven rules
 
-1. **Goal, not steps** (when commissioning Fable). Hand big, underspecified
-   outcomes. Every step dictated to a Fable overrides its judgment with
-   yours. Inverted downward: a FABLE dictating design and mechanism to a
-   lesser lane is the system working as intended — that is where the
-   frontier judgment belongs.
-2. **House rules, not scripts.** Fence the open goal with the few invariants
-   that must survive any path: repo red lines, ratified design verdicts,
-   security boundaries, "describe behavior in the agent's prompt instead of
-   hard-coding special cases." House rules live in AGENTS.md / VISION.md /
-   the lane card's constraints block — short, absolute, checkable.
-3. **A bar, not adjectives.** "High quality" stops at the model's own idea of
-   good enough. Give an executable bar (see verification-system-first.md) —
-   and when you can't define the measuring stick, DELEGATE ITS INVENTION:
-   "figure out how to measure X, then hit it" is a legal, often superior
-   oracle assignment.
-4. **The builder never grades its own work.** A build lane carries a
-   trajectory of self-justification. Verification is a FRESH context pointed
-   at the real output — rendered pixels, the running app, the live route,
-   never the diff alone — commissioned to PROVE THE WORK FAILS the bar and
-   the house rules before anything ships. (Extends fresh-context-critique:
-   the critic's target is the artifact-in-reality, not the artifact-in-repo.)
-5. **Loop until the bar, never until satisfied.** For creative or
-   quality-chasing work: build → fresh-check → name the biggest gap → close
-   it → again. The model never declares itself finished; the loop ends at
-   the bar or by operator call. Long runs keep a LIVE STATUS ARTIFACT the
-   operator can glance from a phone (in this shop: post to the Bridge feed
-   and/or a dedicated status page — screenshots, current gap, next move).
-6. **Old work is fuel.** Point lanes at prior artifacts as the quality bar
-   ("match this, then beat it") and at prior SESSION TRACES as technique
-   ("read what the forest build tried; learn what worked"). In this shop the
-   traces are searchable: QMD collections cover Claude/Codex session
-   history; Powder runs/comments/links and `~/.factory-lanes/wave*/` hold lane
-   receipts. Re-explaining a solved problem to a fresh lane is waste.
-7. **Clear the road up front.** Budgets instead of permission-asks; key
-   LOCATIONS documented (never values); "make your own calls, return only
-   when truly blocked or facing an operator-only decision" written into the
-   brief. The one exception: for huge, hard-to-reverse foundations, demand
-   the plan first and surface every uncertainty as upfront questions — then
-   run without stopping.
+1. **Goal, not steps** (when commissioning Fable). Hand large, underspecified outcomes.
+Each dictated step overrides Fable's judgment.
+Downward, a FABLE may dictate design and mechanism to a lesser lane.
+This is intended and places frontier judgment at the higher tier.
+2. **House rules, not scripts.** Define the few invariants that must survive every path.
+Use repo red lines, ratified design verdicts, security boundaries, and "describe behavior in the agent's prompt instead of hard-coding special cases."
+Store house rules in AGENTS.md / VISION.md / the lane card's constraints block.
+Keep them short, absolute, and checkable.
+3. **A bar, not adjectives.** "High quality" stops at the model's own idea of good enough.
+Give an executable bar (see verification-system-first.md).
+When you cannot define the measuring stick, DELEGATE ITS INVENTION.
+"Figure out how to measure X, then hit it" is a legal, often superior oracle assignment.
+4. **The builder never grades its own work.** A build lane can justify its own result.
+Use a FRESH context to verify the real output: rendered pixels, the running app, or the live route.
+Never use the diff alone.
+Commission verification to PROVE THE WORK FAILS the bar and the house rules before anything ships.
+Extend fresh-context-critique: target the artifact in reality, not the artifact in the repository.
+5. **Loop until the bar, never until satisfied.** For creative or quality-chasing work, use this sequence.
+Build → fresh-check → name the biggest gap → close it → repeat.
+The model never declares itself finished. The loop ends at the bar or by operator call.
+Long runs keep a LIVE STATUS ARTIFACT that the operator can view from a phone.
+In this shop, post to the Bridge feed and/or a dedicated status page with screenshots, current gap, and next move.
+6. **Use prior work.** Point lanes to prior artifacts as the quality bar ("match this, then beat it") and prior SESSION TRACES as technique.
+Read what the prior build tried and learn what worked.
+In this shop, QMD collections cover Claude/Codex session history.
+Powder runs/comments/links and `~/.factory-lanes/wave*/` hold lane receipts.
+Re-explaining a solved problem to a fresh lane wastes time.
+7. **Remove blockers early.** Set budgets instead of asking permission.
+Document key LOCATIONS, never values.
+Write "make your own calls, return only when truly blocked or facing an operator-only decision" into the brief.
+For huge, hard-to-reverse foundations, demand the plan first and surface every uncertainty as upfront questions.
+Then run without stopping.
 
 ## Reviewing lane work: narration before diff
 
-(Dax/OpenCode observation, operator-ratified 2026-07-04.) After a big lane
-change, don't start from the raw diff — ask the builder (or a fresh reader)
-for a per-file narration: what changed in each file and why, surfacing
-files and function signatures, not function bodies. Anything weird sticks
-out immediately in narration; one or two follow-ups usually converge. The
-diff stays the ground truth for the final gate — narration is the triage
-layer that tells you where to actually read. Same principle shapes
-documentation surfaces (glance pages, PR bodies, receipts): signatures and
-flows first, bodies on demand, 10,000 ft before detail.
+(Dax/OpenCode observation, operator-ratified 2026-07-04.) After a large lane change, do not start with the raw diff.
+Ask the builder or a fresh reader for per-file narration.
+Ask what changed and why. Include file names and function signatures, not function bodies.
+Narration reveals unusual items early. One or two follow-ups usually resolve them.
+Use the diff as final authority for the gate. Use narration to select files to read.
+Apply the same principle to documentation surfaces: overview pages, PR bodies, and receipts.
+Show signatures and flows first. Load bodies on demand. Show the overview before detail.
 
-## Two formations
+## Two approaches
 
-- **Engineering:** several sessions pulling tasks in parallel, each
-  triple-checked by its own sub-agents, PRs carrying evidence; ONE
-  integrator session that only merges, runs everything end-to-end like a
-  real user, and keeps the tree green. Overlapping features: one lane reads
-  the other's traces as it builds and integrates as it lands.
-- **Creative:** same loop and bar, but fan sub-agents out per piece
-  (one perfecting each tree in the forest), and/or run independent parallel
-  attempts, keep the best, carry what worked into the next round.
+- **Engineering:** Run several sessions in parallel, each triple-checked by its own sub-agents, with evidence in PR.
+  ONE integrator session merges only, runs everything end-to-end as a real user, and keeps all checks passing.
+  For overlapping features, one lane reads another lane's traces while it builds and integrates work as it arrives.
+- **Creative:** Use the same loop and bar. Assign subagents per piece.
+  Run independent parallel attempts. Keep the best attempt and carry successful methods into the next round.
 
 ## Ultracode
 
-Reserve for FOUNDATIONS: a new system you'll build on for months, where the
-base being right compounds forever. A good loop with an ambitious bar covers
-nearly everything else. (Also the ShadCN lesson: when cloning/matching
-something, existing scaffolding you're fighting is baggage — starting from
-nothing is often the better foundation.)
+Reserve for FOUNDATIONS: a new system you will build on for months, where a correct base improves later work.
+A good loop with an ambitious bar covers nearly everything else.
+The ShadCN lesson: when cloning or matching something, existing scaffolding can obstruct work.
+Starting from nothing can provide a better foundation.
 
-## Anti-patterns this file exists to kill
+## Anti-patterns in this file
 
-- Recipe-briefs to frontier lanes (mechanism dictation without a ruling
-  behind it).
+- Recipe briefs to frontier lanes (mechanism dictation without a ruling behind it).
 - Adjective oracles ("polished", "world-class") with no measuring stick.
-- Builder-graded "done" — a lane's own checklist as acceptance evidence
-  (see the self-graded-oracle-inflation incident, 2026-07-03).
-- Long silent runs — no status artifact, results living in scrollback
-  (see the memory-bakeoff loss, 2026-07-03).
-- Cold lanes re-deriving what a prior trace already learned.
+- Builder-graded "done": a lane's own checklist used as acceptance evidence (see the self-graded-oracle-inflation incident, 2026-07-03).
+- Long runs without a status artifact; results remain only in scrollback (see the memory-bakeoff loss, 2026-07-03).
+- Lanes repeating work already covered by a prior trace.

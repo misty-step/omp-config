@@ -10,8 +10,8 @@ model: <generating model + verifier family, e.g. opus-4.8 / verified-by gpt-5.6-
 
 <!--
 World-class page skeleton. Delete sections that do not apply to this page's
-Diátaxis mode — do not pad. Lead with the job-to-be-done, link to source lines,
-capture intent and flow, never paraphrase function bodies.
+Diátaxis mode. Do not pad. Lead with the job-to-be-done. Link to source lines.
+Capture intent and flow. Never paraphrase function bodies.
 -->
 
 # <Title>
@@ -20,14 +20,14 @@ capture intent and flow, never paraphrase function bodies.
 
 ## In one read
 
-The job-to-be-done framing: what a reader can do or understand after this page.
-Two or three sentences, not a definition dump.
+The job-to-be-done: what a reader can do or understand after this page.
+Use two or three sentences. Do not repeat definitions.
 
 ## How it works
 
 The flow and the *why*. Link claims to source: see `src/auth/session.ts:42`.
-Every architectural assertion here must survive the accuracy oracle — if you
-cannot point a skeptic at the lines, cut it or mark it `unverified`.
+Every architectural assertion must survive the accuracy oracle. If you cannot
+point a skeptic at the lines, cut the claim or mark it `unverified`.
 
 ```mermaid
 %% Only if a diagram answers a question prose answers worse.
@@ -44,11 +44,12 @@ sequenceDiagram
 
 ## Why it is shaped this way
 
-Non-obvious decisions and trade-offs, each with a source (commit, ADR, comment).
-Unsourced rationale is a guess — drop it or find the source. This is the
-highest-value, lowest-supply section; do not skip it when the *why* is real.
+Record non-obvious decisions and trade-offs. Cite each with a source (commit,
+ADR, comment). Unsourced rationale is a guess. Drop it or find the source.
+This section is valuable and often missing. Do not skip it when the *why*
+is real.
 
 ## See also
 
 - [<Related page>](../<section>/<page>.md) — cross-links the navigability oracle
-  exercises; point the reader where they go next.
+  exercises. Point the reader to the next page.

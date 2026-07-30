@@ -1,12 +1,12 @@
 ---
 disable-model-invocation: true
 name: baseline-ui
-description: Quickly deslop UI code by fixing spacing, hierarchy, typography, and small layout issues. Use when the interface needs a fast cleanup or polish pass.
+description: Quickly improve UI code by fixing spacing, hierarchy, typography, and small layout issues. Use when the interface needs a fast cleanup or polish pass.
 ---
 
 # Baseline UI
 
-Enforces an opinionated UI baseline to prevent AI-generated interface slop.
+Applies an opinionated UI baseline to prevent common AI-generated interface problems.
 
 ## How to use
 

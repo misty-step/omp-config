@@ -2,5 +2,10 @@
   "fetched_at": "2026-06-10T15:41:43Z",
   "repo": "JuliusBrussee/caveman",
   "sha": "c2ed24b3e5d412cd0c25197b2bc9af587621fd99",
-  "src_path_suffix": "caveman"
+  "src_path_suffix": "caveman",
+  "license_path": "LICENSE",
+  "license": "MIT",
+  "license_sha256": "5eb826cd03151bcc7cce3f80d40e87733237fedfc6c36d6908aca5fd650a0bdb",
+  "payload": ["SKILL.md"],
+  "payload_sha256": {"SKILL.md": "f9c83a2b20fc3b3503af9d1ae1cf2098c9f8c3d326c203c236b160ebe81ac8f0"}
 }

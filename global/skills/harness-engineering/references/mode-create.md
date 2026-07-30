@@ -3,15 +3,16 @@
 Create a new omp-config source skill or agent from scratch.
 
 For a project-local skill in a consumer repo (bespoke QA drivers, persona
-probes), write it directly into the repo's `.agents/skills/<name>/` with the
-repo's real routes and commands — same craft, local facts. This mode is for
-first-party catalog primitives under `global/skills/`.
+probes), write it directly into the repo's `.agents/skills/<name>/`.
+Use the repo's real routes and commands.
+This mode creates first-party catalog primitives under `global/skills/`.
 
 ## The description field is everything
 
-The description determines when the model loads the skill. Write it assertively.
-Include trigger phrases users actually say. If the skill doesn't fire, the
-description is wrong — not the model.
+The description determines when the model loads the skill.
+Write it assertively.
+Include trigger phrases that users actually say.
+If the skill does not fire, the description is wrong, not the model.
 
 **Good:** `"Use when: 'debug this', 'why is this broken', 'investigate', 'production down'"`
 **Bad:** `"A debugging utility for code analysis"`
@@ -35,16 +36,16 @@ append-only JSONL/schema path and privacy rule; otherwise leave it stateless.
 
 ## What to encode
 
-Encode judgment the model lacks. Not procedures it already knows.
+Encode judgment the model lacks, not procedures it already knows.
 
-**Highest signal:** Gotchas — what goes wrong, not just what to do right.
-A gotcha list is more valuable than pages of happy-path instructions.
-Enumerate failure modes, common mistakes, things the model consistently
-gets wrong without the skill.
+**Highest signal:** Gotchas show what goes wrong, not only what goes right.
+A gotcha list has more value than pages of happy-path instructions.
+List failure modes and common mistakes that the model consistently gets wrong
+without the skill.
 
-**Avoid:** Step-by-step procedures the model can derive from context.
-If you're writing "1. Read the file 2. Find the function 3. Edit it" —
-that's not a skill, that's a task description.
+**Avoid:** Step-by-step procedures that the model can derive from context.
+If you write "1. Read the file 2. Find the function 3. Edit it," you wrote a
+task description, not a skill.
 
 **In-repo exemplars worth reading before drafting:**
 - `global/skills/sprites/SKILL.md` — one primitive, a routing table, gotchas.
@@ -54,27 +55,31 @@ that's not a skill, that's a task description.
 
 **External exemplars:**
 - `skill-creator` (upstream `anthropics/skills`, not vendored) — the "theory
-  of mind" framing: explain the *why* before the *how* so the model can handle
-  edge cases the rules don't enumerate.
+  of mind" framing.
+  Explain the *why* before the *how*.
+  This helps the model handle edge cases that the rules do not enumerate.
 - `claude-api` (upstream `anthropics/skills`, not vendored) — stratified
-  progressive disclosure across SKILL.md body → language-specific reference
-  folders → code examples.
+  progressive disclosure.
+  Use the SKILL.md body, then language-specific reference folders, then code
+  examples.
 - `vercel-dogfood` (installed under `global/external/`) — repro-first
-  discipline: document immediately before moving on, so findings survive
-  session handoff.
+  discipline.
+  Document immediately before moving on.
+  This lets findings survive session handoff.
 
 ## Progressive disclosure
 
-Three layers. Each loads only when needed:
+Use three layers.
+Load each layer only when needed:
 
-1. **Description** (~100 tokens) — always in context. Decides triggering.
-2. **SKILL.md body** (< 500 lines) — loads when skill fires.
-3. **References/scripts/assets/templates/examples** — loaded or run on demand
+1. **Description** (~100 tokens) — always in context. It decides triggering.
+2. **SKILL.md body** (< 500 lines) — loads when the skill fires.
+3. **References/scripts/assets/templates/examples** — load or run on demand
    when the specific situation requires them.
 
-Keep SKILL.md focused on what to do and what goes wrong. Move deep reference
-material, examples, boilerplate, schemas, and repeatable mechanics out of the
-entry file and into the skill folder.
+Keep `SKILL.md` focused on what to do and what goes wrong.
+Move deep reference material, examples, boilerplate, schemas, and repeatable
+mechanics into the skill folder.
 
 ## Brevity doctrine
 
@@ -93,9 +98,9 @@ Useful source patterns:
   https://github.com/JuliusBrussee/caveman
 - petekp/claude-code-setup `grill-me`: a tiny, standalone interrogation skill
   that forces one question at a time with a recommended answer.
-- cursor/plugins `thermo-nuclear-code-quality-review`: harsh maintainability
-  review focused on structural simplification, file-size pressure, and
-  spaghetti-growth blockers.
+- upstream `thermos/skills` maintainability review leaf: harsh review focused
+  on structural simplification, file-size pressure, and spaghetti-growth
+  blockers.
 - Anthropic skill authoring: description selection and progressive disclosure.
   https://anthropic.mintlify.app/en/docs/agents-and-tools/agent-skills/best-practices
 - Vercel Agent Skills: concise `SKILL.md`, reusable versioned context, and
@@ -118,6 +123,7 @@ hide: true                          # optional: loaded and reachable via skill:/
 ```
 
 `name` and `description` are required for native `.omp` discovery
-(`requireDescription: true`); `name` defaults to the directory name if
-omitted. Additional frontmatter keys are preserved as unknown metadata, so
-skill-specific fields (like `argument-hint`) are safe to keep.
+(`requireDescription: true`).
+The directory name supplies `name` when you omit it.
+Native discovery preserves additional frontmatter keys as unknown metadata.
+Skill-specific fields, such as `argument-hint`, are safe to keep.

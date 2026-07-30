@@ -9,18 +9,18 @@ Retrieval-first web research with citations and recency controls.
 - `/research web-docs <query>`: library/docs-focused retrieval
 
 Legacy aliases: `/web`, `/web-deep`, `/web-news`, `/web-docs`.
-`meta.command` below stores the normalized internal routing value, not the full
+The `meta.command` field stores the normalized internal routing value, not the full
 user-facing slash command.
 
 ## Behavior Contract
-- Return structured result envelope (see schema below)
-- Include citation URL for every claim
-- Prefer Context7 for docs/library lookups
-- Prefer Exa as primary general provider
-- Use xAI for social/real-time and grounded web with multimodal (see `xai-search.md`)
-- Fallback to Brave on provider failure
-- Optional Perplexity pass allowed only for synthesis, never source of truth
-- Optional Exa Agent pass is `web-deep` only, default-off, and recorded in
+- Return a structured result envelope (see schema below).
+- Include a citation URL for every claim.
+- Prefer Context7 for docs/library lookups.
+- Prefer Exa as the primary general provider.
+- Use xAI for social/real-time and grounded web with multimodal (see `xai-search.md`).
+- Fall back to Brave when a provider fails.
+- Allow an optional Perplexity pass only for synthesis; never use it as the source of truth.
+- Keep the optional Exa Agent pass limited to `web-deep`, default-off, and recorded in
   `agentic`; it is not part of the flat provider chain.
 - Treat Tavily/Firecrawl as extraction or site-map tools, not default broad
   search, unless the query asks for a URL/site/crawl/map.
@@ -28,7 +28,7 @@ user-facing slash command.
 ## Exa-First Patterns
 
 ### Reference Implementation Search
-Enforces CLAUDE.md "reference architecture first" red line.
+Apply CLAUDE.md's "reference architecture first" red line.
 ```
 Query: "open source [problem domain] implementation [language/framework]"
 Provider: Exa code context

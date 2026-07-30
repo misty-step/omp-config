@@ -24,19 +24,19 @@ Keyword, semantic, user, and thread search on X. Real-time social data.
 | Video content analysis from X | X Search with `enable_video_understanding` |
 | General web with domain filtering | Web Search with `allowed_domains` |
 
-Default `/research` fanout uses xAI alongside Exa, not instead of it. Use
-xAI/Grok for grounded web retrieval, recency verification, contradiction
-checks, X-native discourse, and multimodal web/social evidence. Do not reduce
-Grok to social sentiment only.
+Use xAI alongside Exa in the default `/research` fanout, not instead of it.
+Use xAI/Grok for grounded web retrieval, recency verification, contradiction
+checks, X-native discourse, and multimodal web/social evidence.
+Do not limit Grok to social sentiment.
 
 ## API Access
 
-Base URL: `XAI_BASE_URL`, which must equal
-`${MINT_BASE_URL}/proxy/https/api.x.ai/v1`. The runtime rejects direct-vendor,
-alternate-origin, query-bearing, and sibling-path values.
+Set `XAI_BASE_URL` to `${MINT_BASE_URL}/proxy/https/api.x.ai/v1`.
+The runtime rejects direct-vendor, alternate-origin, query-bearing, and
+sibling-path values.
 Auth: `Authorization: Bearer __mint.xai.default__`
-API: OpenAI Responses API compatible. Default model: `grok-4.3` unless the
-environment overrides it.
+Use the OpenAI Responses API-compatible interface.
+The default model is `grok-4.3` unless the environment overrides it.
 
 ## Web Search
 
@@ -123,10 +123,9 @@ response = client.responses.create(
 )
 ```
 
-The Vercel xAI provider and xAI native SDK examples are intentionally omitted:
-the versions evaluated for this integration do not expose the base-URL seam
-required to force every request through Mint. Use the OpenAI-compatible client
-or the built-in provider above.
+Omit the Vercel xAI provider and xAI native SDK examples.
+The versions evaluated for this integration do not expose the base-URL seam required to force every request through Mint.
+Use the OpenAI-compatible client or the built-in provider above.
 
 ## Citations
 
@@ -134,11 +133,11 @@ Responses include `response.citations` with source URLs. Always cite them.
 
 ## Integration Notes
 
-- Both tools can be used in the same request
-- `enable_image_understanding` on Web Search also enables it for X Search
-- `enable_video_understanding` is X Search only
-- `allowed_domains` / `excluded_domains` cannot be combined in one request
-- `allowed_x_handles` / `excluded_x_handles` cannot be combined in one request
-- In this harness's runtime, xAI is a retrieval/discourse provider when
-  `XAI_BASE_URL` is set. It is routed before Exa for social/discourse queries
-  and after Exa for recency corroboration.
+- Both tools can be used in the same request.
+- `enable_image_understanding` on Web Search also enables it for X Search.
+- Use `enable_video_understanding` only with X Search.
+- Do not combine `allowed_domains` and `excluded_domains` in one request.
+- Do not combine `allowed_x_handles` and `excluded_x_handles` in one request.
+- In this harness runtime, use xAI as a retrieval/discourse provider when
+  `XAI_BASE_URL` is set.
+- Route it before Exa for social/discourse queries and after Exa for recency corroboration.

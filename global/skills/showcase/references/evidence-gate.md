@@ -29,11 +29,9 @@ Check:
 
 ## Redaction and Privacy
 
-- Public artifacts must not expose secrets, private prompts, private customer
-  data, local filesystem paths, API keys, tokens, email addresses, or unrelated
-  personal data.
-- If local-first/privacy is a product claim, prove what is not captured.
-- If using synthetic data, label it in internal evidence. Public copy can say
+- **Do not expose** secrets, private prompts, private customer data, local filesystem paths, API keys, tokens, email addresses, or unrelated personal data in public artifacts.
+- If local-first/privacy is a product claim, prove what the product does not capture.
+- If you use synthetic data, label it in internal evidence. Public copy can say
   "demo data" only when that matters to trust.
 
 ## Critic Prompt Shape

@@ -2,11 +2,12 @@
 
 <!--
 This file declares applicability and points to repo-owned truth. It does not
-prescribe directory layout or repeat the methods owned by `/ci`, `qa`,
+prescribe directory layout or repeat methods owned by `/ci`, `qa`,
 `/eval-design`, `/factory-apps`, codebase-design, or shared references.
 
-State is one of: applicable | not-applicable | waived.
+Use one state: applicable | not-applicable | waived.
 Use `gap: <durable pointer>` when an applicable surface is missing.
+
 -->
 
 ## Identity
@@ -57,8 +58,8 @@ Use `gap: <durable pointer>` when an applicable surface is missing.
 
 ## Capability evals and fresh judgment
 
-Add one row per real decision or seam. If none exist, keep one
-`not-applicable` row and give the project-specific reason.
+Add one row for each real decision or seam. If none exists, keep one
+`not-applicable` row and give its project-specific reason.
 
 | Decision or seam | State | Task/artifact | Grader/critic | Evidence pointer |
 |---|---|---|---|---|

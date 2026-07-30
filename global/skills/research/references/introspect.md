@@ -1,11 +1,11 @@
 # Introspect
 
-Mine session transcripts for usage patterns. Output actionable improvement recommendations.
+Analyze session transcripts for usage patterns. Output actionable improvement recommendations.
 
 ## Role
 
-Staff engineer conducting a retrospective on how this machine is actually used,
-not how it's supposed to be used. Evidence over intuition.
+Act as a staff engineer conducting a retrospective on actual use.
+Review actual use, not intended use. Use evidence over intuition.
 
 ## Objective
 
@@ -44,11 +44,13 @@ Tool calls appear as `{ "type": "tool_use", "name": "ToolName", "input": {...} }
 
 ## Durable Mining Contract
 
-Effectiveness mining is an opt-in research lane over explicit transcript and
-skill-log inputs. Redact before reporting, fail closed on unresolved
-secret-like content, join evidence stores only when refs match, and report
-missing coverage instead of inferring effectiveness from sparse data. Default
-reports contain counts and refs, not raw turn text.
+Effectiveness mining is an opt-in research lane that uses explicit transcript and
+skill-log inputs.
+Redact before reporting.
+Fail closed when secret-like content remains unresolved.
+Join evidence stores only when refs match.
+Report missing coverage instead of inferring effectiveness from sparse data.
+Default reports contain counts and refs, not raw turn text.
 
 ## Durable Command Expansion Checklist
 
@@ -68,14 +70,14 @@ falsification checks to extract:
 - **Repeated user messages** (normalized, count >= 3)
 
 ### Qualitative
-- Sample 80 random user messages for manual pattern recognition
-- Extract user corrections/frustrations (messages containing "wrong", "not what I", "still", "again")
+- Sample 80 random user messages for manual pattern recognition.
+- Extract user corrections and frustrations from messages containing "wrong", "not what I", "still", or "again".
 
 ### Filters
-- Skip `subagents/` directories for top-level analysis
-- Skip tool_result content (it's response data, not intent)
-- Skip skill expansion text (messages containing "Base directory for this skill:")
-- Cap sampled messages at 300 chars, skip messages < 3 chars
+- Skip `subagents/` directories during top-level analysis.
+- Skip tool_result content because it contains response data, not intent.
+- Skip skill expansion text, including messages containing "Base directory for this skill:".
+- Cap sampled messages at 300 chars and skip messages shorter than 3 chars.
 
 ## Output Format
 
@@ -99,8 +101,9 @@ Skills, workflows, or patterns that data shows are unused or superseded.
 
 ## Constraints
 
-- Evidence-first. Every recommendation must cite session data.
-- Agent-agnostic. Analysis applies to any coding agent, not just Claude Code.
-- Principles over pragmatics. CLAUDE.md updates should be philosophical, not procedural.
-- No fluff categories. If a recommendation doesn't have 3+ supporting data points, cut it.
-- Respect the user's time. Findings should be scannable in under 2 minutes.
+- Use evidence first. Cite session data for every recommendation.
+- Keep analysis agent-agnostic. Apply it to any coding agent, not only Claude Code.
+- Prefer principles over pragmatics. Keep CLAUDE.md updates philosophical, not procedural.
+- Remove fluff categories.
+- Cut any recommendation with fewer than 3 supporting data points.
+- Respect the user's time. Keep findings scannable in under 2 minutes.

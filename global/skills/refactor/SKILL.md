@@ -2,32 +2,32 @@
 disable-model-invocation: true
 name: refactor
 description: |
-  Architecture refactor mode: set a concrete improvement goal, refactor until
-  the architecture is simpler and coherent, live-test after each significant
-  step, autoreview, commit green milestones, and track progress in
-  /tmp/refactor-{project}.md. Use when: "refactor this", "clean up the
-  architecture", "make the design better", "refactor until you're happy",
-  "pay down design debt", "simplify this subsystem". Trigger: /refactor.
+  Architecture refactor mode. Set a concrete goal, refactor until the architecture
+  is simpler and coherent, live-test after each significant step, autoreview,
+  commit green milestones, and track progress in /tmp/refactor-{project}.md.
+  Trigger: /refactor.
+
 argument-hint: "[scope|subsystem]"
 ---
 
 # /refactor
 
-Refactor architecture deliberately. Keep behavior stable unless the operator
-explicitly asks for product change.
+Refactor architecture deliberately.
+Keep behavior stable unless the operator explicitly asks for product change.
 
 ## Goal Articulation
 
-Set an explicit active goal — not "refactor until happy," a goal with:
+Set an explicit active goal with:
 
 - **Outcome:** the architectural property that will be true.
 - **Scope:** subsystem, files, routes, or public surface in bounds.
 - **Fitness tests:** live command, route, consumer build, or browser path that
-  must keep passing after each significant step. When the fitness test is not
-  already a credible proof loop, define claim, falsifier, driver, grader,
-  evidence packet, and cadence per
+  must keep passing after each significant step.
+  When the fitness test is not already a credible proof loop, define claim,
+  falsifier, driver, grader, evidence packet, and cadence per
   `global/references/verification-system-first.md`.
-- **Stop rule:** what evidence means the architecture is good enough.
+- **Stop rule:** state what evidence means the architecture is good enough.
+
 
 Good shape:
 
@@ -40,54 +40,62 @@ architecture concern, and no broader behavior change is needed.
 
 ## Progress File
 
-Create `/tmp/refactor-{project}.md` immediately and keep it current — it is the
-handoff if the session dies. Track the goal/scope/fitness/stop rule, the current
-architecture read (modules, smells, constraints), the quality system
-(`global/references/quality-system.md`), milestones (planned/active/
-done), live-test receipts, and review findings, commits, and residual risk. No
-secrets or private customer data in `/tmp`.
+Create `/tmp/refactor-{project}.md` immediately and keep it current.
+Use it as the handoff if the session ends.
+Track the goal/scope/fitness/stop rule, the current architecture read
+(modules, smells, constraints), the quality system
+(`global/references/quality-system.md`), milestones (planned/active/done),
+live-test receipts, review findings, commits, and residual risk.
+Keep secrets and private customer data out of `/tmp`.
 
 ## Working Loop
-
 1. **Read shape before edits.** Map module ownership, public interfaces,
-   invariants, and the live verification path. If no live path exists, build or
-   name the smallest credible one first — a refactor without a
-   behavior-preservation loop is a rewrite in disguise.
+   invariants, and the live verification path.
+   If no live path exists, build or name the smallest credible one first.
+   Keep this rule: a refactor without a behavior-preservation loop is a rewrite in disguise.
+
 2. **Choose one architectural pressure.** Split ownership, shallow wrapper,
-   dependency direction, duplicated data shape, feature logic hiding in UI glue.
+   dependency direction, duplicated data shape, or feature logic hiding in UI glue.
    See `global/references/delete-first.md` (Ponytail:
-   `global/external/dietrich-ponytail/SKILL.md`). Do not tidy
-   everything.
+   `global/external/dietrich-ponytail/SKILL.md`).
+   Do not tidy everything.
 3. **Make one significant step** — a moved boundary, deleted abstraction,
    renamed public concept, data-flow simplification, or large-file split.
-   Mechanical formatting is not a milestone, and a step you cannot test and
-   commit independently is too large.
+   Mechanical formatting is not a milestone.
+   A step that you cannot test and commit independently is too large.
 4. **Live-test immediately.** Use the repo's verification path, dispatch
-   `qa`, or use the surface-specific route. Refactors break integration
-   seams; unit tests alone do not close a milestone.
+   `qa`, or use the surface-specific route.
+   Refactors can break integration seams.
+   Unit tests alone do not close a milestone.
 5. **Autoreview the milestone** with fresh-context critique when substantive.
-   Critics get the artifact and the oracle only — never the author's reasoning
-   trail (Shared Operating Spine: Prove); here that's the
-   diff + architecture goal + fitness tests. Scale critic topology with
-   `global/references/quality-system.md`; a risky boundary change
-   earns more than one lens. Fix blockers before continuing.
+   Give critics the artifact and oracle only.
+   Never give them the author's reasoning trail (Shared Operating Spine: Prove).
+   Here, give them the diff, architecture goal, and fitness tests.
+   Scale critic topology with `global/references/quality-system.md`.
+   A risky boundary change earns more than one lens.
+   Fix blockers before continuing.
 6. **Commit green milestones.** One concern per commit.
 7. **Reassess the stop rule.** Continue only while another high-leverage
    architecture pressure remains in scope and the live loop stays cheap.
 
 ## Delegation Judgment
 
-Delegate per the Shared Operating Spine (Act). Useful
-lanes: an Explore lane to map ownership and coupling before edits, a critic lane
-to attack the goal or a milestone diff, a QA lane to exercise the live surface
-when the lead cannot drive it cheaply.
+Delegate according to the Shared Operating Spine (Act).
+Useful lanes include an Explore lane to map ownership and coupling before edits,
+a critic lane to challenge the goal or a milestone diff, and a QA lane to
+exercise the live surface when the lead cannot drive it cheaply.
 
-Default harsh critic: the synced `thermo-nuclear-code-quality-review` skill
-(`global/external/cursor-thermo-nuclear-code-quality-review/SKILL.md`)
-for milestone diffs that add abstractions, split modules, cross file-size
-thresholds, or claim "cleaner architecture." julius-caveman for interim
-synthesis only; findings, code, commits, and final artifacts stay normal
-English.
+Default harsh critic: the canonical
+`thermo-nuclear-code-quality-review` leaf.
+Read the projected skill at
+`global/skills/thermo-nuclear-code-quality-review/SKILL.md`.
+It is standalone and does not require a special vendor harness.
+Use it for milestone diffs that add abstractions, split modules, cross file-size
+thresholds, or claim cleaner architecture.
+
+Use `julius-caveman` only for interim synthesis.
+Keep findings, code, commits, and final artifacts in normal English.
+
 
 ## Stop Conditions
 
@@ -101,20 +109,23 @@ Stop and report instead of improvising when:
 
 ## Gotchas
 
-- **Vibes as oracle.** "Happy" is not evidence. The stop rule needs a diff,
-  live proof, and review signal.
-- **Architecture theater.** Renames, folders, and wrappers do not count unless
+- **Unmeasured oracle.** Treat "Happy" as non-evidence.
+  The stop rule needs a diff, live proof, and review signal.
+- **Architecture appearance.** Renames, folders, and wrappers do not count unless
   they reduce coupling, clarify ownership, or delete a real failure mode.
-- **Unfenced win.** A god-file split or corrected dependency direction with no
-  gate to stop it regrowing comes back. Ratchet the structural win into a
-  standing gate — a fitness function, a god-file baseline — per
-  `global/references/quality-gates.md`.
+- **Unprotected change.** A god-file split or corrected dependency direction
+  needs a gate that prevents regression.
+Ratchet the structural win into a standing gate — a fitness function, a god-file baseline — per
+`global/references/quality-gates.md`.
+
 
 ## Completion Gate
 
-See `primitives/shared/AGENTS.md` (Prove; Durable State and Closeout) for the
-shared core. `/refactor` adds: the goal stop rule satisfied or explicitly
-blocked; a live-test receipt for every significant step; blocking review
-findings fixed or rejected with a reason; meaningful milestones committed; and
+See `global/references/verification-system-first.md` for the shared proof contract.
+`/refactor` adds:
+the goal stop rule satisfied or explicitly blocked;
+a live-test receipt for every significant step;
+blocking review findings fixed or rejected with a reason;
+meaningful milestones committed; and
 `/tmp/refactor-{project}.md` naming final architecture, commits, verification,
 residual risk, and follow-up pressure outside scope.

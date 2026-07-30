@@ -1,11 +1,6 @@
 # Provenance & freshness — the committed-docs contract
 
-Committing docs into `docs/` versions them with the code, makes doc changes show
-up in PR diffs, and lets the docs travel with forks and offline clones. It also
-means they drift the instant code changes. Drift in committed, authoritative
-docs is the *silent killer* — no error, just steady divergence into confident
-lies. The mitigation is non-negotiable for this choice: make drift **detectable**
-with provenance, and **checkable** with a falsifier.
+Committing docs into `docs/` versions them with the code. It includes doc changes in PR diffs and carries docs through forks and offline clones. It also means docs drift when code changes. Drift in committed docs can persist without an error or clear signal. Make drift **detectable** with provenance and **checkable** with a falsifier.
 
 ## Per-page provenance stamp
 
@@ -23,48 +18,33 @@ model: <generating model + verifier family>
 ---
 ```
 
-`covers:` is load-bearing: it is how coverage, incremental scope, and freshness
-all key off a page. Be precise — over-broad globs make every page perpetually
-stale; over-narrow globs let real drift slip through.
+`covers:` carries load-bearing semantics. Coverage, incremental scope, and freshness use it. Be precise. Over-broad globs make pages stale too often. Over-narrow globs let drift escape.
 
 ## Freshness falsifier
 
 - **Claim:** every committed page is true of the current HEAD.
-- **Falsifier:** a page whose `covers:` globs match files changed since its
-  `generated-at-sha`.
-- **Driver:** `scripts/freshness.py [docs_dir]` — parses each page's stamp, runs
-  `git diff --name-only <sha>..HEAD`, and reports pages whose covered files
-  moved. Exits non-zero if any page is stale, so it can gate.
-- **Grader:** zero stale pages = synced. Stale pages are the incremental-scope
-  work list.
-- **Cadence:** start of every run (to scope the work) and on `--check`.
+- **Falsifier:** a page whose `covers:` globs match files changed since its `generated-at-sha`.
+- **Driver:** `scripts/freshness.py [docs_dir]` — parses each page's stamp, runs `git diff --name-only <sha>..HEAD`, and reports pages whose covered files moved. Exits non-zero if any page is stale, so it can gate.
+- **Grader:** zero stale pages = synced. Stale pages are the incremental-scope work list.
+- **Cadence:** start every run (to scope the work) and run on `--check`.
 
 ## Incremental scope
 
-The quality bar is constant — the full verify loop runs every time. The *scope*
-is not: on a re-run, regenerate only
+The quality bar stays constant. Run the full verify loop every time. Scope does not.
+On a rerun, regenerate only:
 
 1. pages the freshness driver flagged stale, plus
-2. their cross-link neighbors (a changed system can falsify a claim on a page
-   that points at it).
+2. their cross-link neighbors (a changed system can falsify a claim on a page that points at it).
 
-`--full` overrides this and regenerates everything (use after large refactors or
-IA changes). This is how "always world-class" stays affordable on a one-line
-change instead of re-documenting the monorepo from scratch.
+Use `--full` to regenerate everything after large refactors or IA changes. This keeps the world-class standard while limiting work on small changes.
 
-## The Mode B handoff
+Keeping committed docs fresh on every push would be an event-triggered Mode B
+loop, but no active event plane is available. `/document` is the on-demand
+Mode A generator. The freshness driver is the local trigger contract. Do not
+build push-triggered automation inside this skill or invent a replacement
+service.
 
-Keeping committed docs fresh *on every push* is an event-triggered loop — Mode B
-— which by `meta/CONTRACTS.md` lives in **bitterblossom**, not here. `/document`
-is the on-demand (Mode A) generator. The freshness driver is the trigger
-contract that future loop consumes: a push that makes pages stale is the event;
-running `/document` (incremental) is the action.
+Until a future product is explicitly named, staleness stays visible (stamped
+and `--check`-able) between manual runs. This is better than invisible drift in
+an unstamped wiki.
 
-Before proposing that loop, load
-`global/references/loop-readiness.md` and name the three hard stops.
-Do not build the push-triggered automation inside this skill — ship the Mode A
-generator and the detectable-staleness signal; hand the refresh loop to the
-event plane.
-
-Until that loop exists, staleness is *visible* (stamped + `--check`-able)
-between manual runs — far better than the invisible drift of an unstamped wiki.

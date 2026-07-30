@@ -2,20 +2,20 @@
 disable-model-invocation: true
 name: oracle
 description: |
-  Browser-mode-only Oracle consults: bundle a prompt plus selected files and ask
-  a signed-in ChatGPT GPT-5.5 Pro browser session for a second opinion. Use
-  when stuck, debugging hard bugs, reviewing an architecture plan, or
-  cross-checking a substantive diff with large file context. Never use Oracle
-  API mode in this harness. Trigger: /oracle, /consult.
+  Browser-mode-only Oracle consults: bundle a prompt with selected files and ask
+  a signed-in ChatGPT GPT-5.5 Pro browser session for a second opinion. Use when
+  stuck, debugging hard bugs, reviewing an architecture plan, or cross-checking
+  a substantive diff with large file context. Never use Oracle API mode in this
+  harness. Trigger: /oracle, /consult.
 argument-hint: "[prompt] [--file <glob>...]"
 ---
 
 # /oracle
 
 Use Oracle only as a browser-backed consult surface. It bundles the prompt and
-selected files, opens a signed-in ChatGPT browser session, and stores the
-answer under `~/.oracle/sessions`. The lead agent still owns synthesis,
-verification, and final judgment.
+selected files, opens a signed-in ChatGPT browser session, and stores the answer
+under `~/.oracle/sessions`. The lead agent still owns synthesis, verification,
+and final judgment.
 
 ## Hard Boundary
 
@@ -24,7 +24,7 @@ verification, and final judgment.
 - Never run `--engine api`, `--provider openai`, `--no-azure`, `--models`, or
   API preflight from this skill.
 - If an Oracle command would need an API key or per-token billing, do not use
-  Oracle for that work; use the normal roster/research paths
+  Oracle for that work; use the normal research paths
   instead.
 
 ## Workflow
@@ -47,7 +47,8 @@ verification, and final judgment.
      -p "<task>" --file "src/**" --file "!**/*.test.*"
    ```
 
-4. If the run detaches or times out, do not re-run. Inspect the stored session:
+4. If the run detaches or times out, do not run it again. Inspect the stored
+   session:
 
    ```sh
    npx -y @steipete/oracle status --hours 72
@@ -56,10 +57,10 @@ verification, and final judgment.
 
 ## Good Prompts
 
-Oracle starts cold. Include the repo goal, relevant commands, exact failure,
-constraints, and desired output shape. Critics get the artifact and the
-oracle only — never the author's reasoning trail (Shared Operating Spine:
-Prove).
+Oracle starts cold. Include the repository goal, relevant commands, exact
+failure, constraints, and desired output shape. Give critics the artifact and
+Oracle only. Never give them the author's reasoning trail (Shared Operating
+Spine: Prove).
 
 Good output requests:
 
@@ -72,7 +73,7 @@ Good output requests:
 - Do not attach secrets, `.env`, key files, tokens, browser profiles, or private
   customer data.
 - Use `--dry-run summary --files-report` before every real run.
-- Treat Oracle output as advisory evidence. Verify with the repo's live oracle,
-  tests, gate, browser route, or command before claiming done.
-- Browser mode is cheaper than API billing but can be slow and subject to
+- Treat Oracle output as advisory evidence. Verify it with the repository's live
+  oracle, tests, gate, browser route, or command before claiming done.
+- Browser mode costs less than API billing, but it can run slowly and hit
   ChatGPT subscription limits.

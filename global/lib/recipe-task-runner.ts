@@ -102,10 +102,10 @@ interface RpcClientModule {
 const SAFE_PREPARE_ENV = [
 	"PATH",
 	// Selects the mint alias omp_recipe.py bakes into the runtime's models.yml.
-	// Billing evidence caught its absence: the Hatchet factory set the variable
-	// at every hop, and every run still billed the DEFAULT key because this
-	// allowlist - the third in the chain - silently dropped it before the
-	// compiler ran. A placeholder name, never a credential.
+	// Billing evidence caught its absence: a workload set the variable at every
+	// hop, and every run still billed the DEFAULT key because this allowlist -
+	// the third in the chain - silently dropped it before the compiler ran. A
+	// placeholder name, never a credential.
 	"OMP_RECIPE_MINT_ALIAS",
 	"TMPDIR",
 	"LANG",

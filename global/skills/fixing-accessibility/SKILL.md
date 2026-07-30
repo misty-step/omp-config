@@ -1,7 +1,7 @@
 ---
 disable-model-invocation: true
 name: fixing-accessibility
-description: Audit and fix HTML accessibility issues including ARIA labels, keyboard navigation, focus management, color contrast, and form errors. Use when adding interactive controls, forms, dialogs, or reviewing WCAG compliance.
+description: Audit and fix HTML accessibility issues. Cover ARIA labels, keyboard navigation, focus management, color contrast, and form errors. Use when adding interactive controls, forms, dialogs, or reviewing WCAG compliance.
 ---
 
 # fixing-accessibility
@@ -95,7 +95,7 @@ Reference these guidelines when:
 
 ### 7. contrast and states (medium)
 
-- ensure sufficient contrast for text and icons
+- make sure text and icons have sufficient contrast
 - hover-only interactions must have keyboard equivalents
 - disabled states must not rely on color alone
 - do not remove focus outlines without a visible replacement
