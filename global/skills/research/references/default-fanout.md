@@ -4,12 +4,10 @@ Multi-source triangulation for substantive research.
 
 ## Use
 
-Load this reference when the user asks broad research, comparison, architecture
-prior art, model/provider investigation, "what are people saying", or any
-question where a single lookup would overfit one source.
+Load this reference when the user asks for broad research, comparison, architecture prior art, or model/provider investigation.
+Also load it for "what are people saying" or any question where a single lookup would overfit one source.
 
-Single-source research is allowed only when the user names the source or the
-task is a narrow fact/version lookup.
+Use single-source research only when the user names the source or requests a narrow fact/version lookup.
 
 ## Context Packet
 
@@ -27,8 +25,8 @@ Capture the packet before launching lanes:
 
 ## Source Invariant
 
-Default research accounts for these capability lanes. Run the lane when it is
-relevant; otherwise keep it in the matrix as `skipped` with the reason.
+Account for these capability lanes in default research.
+Run a lane when relevant; otherwise keep it in the matrix as `skipped` with the reason.
 
 | Lane | Capability | Primary refs |
 |---|---|---|
@@ -41,20 +39,19 @@ relevant; otherwise keep it in the matrix as `skipped` with the reason.
 | Synthesis | concise answer over gathered evidence | Perplexity/Exa deep/lead synthesis |
 | Repo-aware critique | local fit, architecture tradeoffs, second opinion | `delegate.md` |
 
-If a lane fails, times out, lacks credentials, or is intentionally skipped by
-scope, keep its section and label the status. Do not silently collapse failed
-lanes into synthesis.
+If a lane fails, times out, lacks credentials, or is intentionally skipped by scope, keep its section and label its status.
+Do not silently collapse failed lanes into synthesis.
 
-Capability lanes do not replace the roster floor. For substantive research,
-also dispatch the provider lanes required by `global/AGENTS.md`
-(Act) unless a documented waiver applies.
+Capability lanes do not replace the roster floor.
+For substantive research, follow the chief contract in `../../../AGENTS.md` unless a documented waiver applies.
 
 ## Capability Routing
 
-For each capability, prefer the most agent-native verified surface available:
-MCP tool first, local CLI wrapper second, direct REST/API call third, and
-built-in WebSearch last. Report substitutions explicitly. The local wrapper
-surface, when installed, is intentionally thin and JSON-emitting:
+For each capability, prefer the most agent-native verified surface.
+Use MCP tool first, local CLI wrapper second, direct REST/API call third, and
+built-in WebSearch last.
+Report substitutions explicitly.
+Keep the local wrapper surface intentionally thin and JSON-emitting when installed:
 `exa-search`, `exa-fetch`, `brave-search`, `firecrawl-fetch`, and
 `xai-search web|x`. MCP-only surfaces such as `parallel-search` still belong
 at the first step in the chain.
@@ -73,10 +70,10 @@ at the first step in the chain.
 | Repo architecture or local tradeoffs | roster lanes | scoped grep plus lead analysis |
 | Saved user reading/highlights | Readwise | local notes or explicit web search |
 
-Route by capability. Vendor names are implementation details; if a named
-provider is unavailable, use the closest source and report the substitution.
-Do not add a vendor to the prose unless a script, command recipe, or explicit
-manual fallback can actually invoke it.
+Route by capability.
+Treat vendor names as implementation details.
+If a named provider is unavailable, use the closest source and report the substitution.
+Do not add a vendor to the prose unless a script, command recipe, or explicit manual fallback can invoke it.
 
 ## Report Shape
 
@@ -108,8 +105,8 @@ Use this shape for default fanout reports:
 [Stale facts, missing providers, unqueried sources, or none with reason.]
 ```
 
-For source-heavy reports, keep per-source detail below the matrix. Readers must
-be able to tell what each lane contributed independently.
+For source-heavy reports, keep per-source detail below the matrix.
+Readers must identify each lane's independent contribution.
 
 ## Failure Labels
 
@@ -120,5 +117,5 @@ be able to tell what each lane contributed independently.
   credentials/tooling.
 - `stale`: evidence may be outdated for the requested freshness tolerance.
 
-Every recommendation should survive removing the weakest source. If it does
-not, label the recommendation low confidence.
+Test every recommendation without the weakest source.
+If it fails, label the recommendation low confidence.

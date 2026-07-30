@@ -4,8 +4,9 @@ Query the user's Readwise Reader library for saved articles, highlights, and doc
 
 ## Authentication
 
-Route every call through Mint. The shell receives only the stable proxy URL and
-the non-secret placeholder; it never reads a Readwise credential:
+Route every call through Mint.
+Give the shell only the stable proxy URL and the non-secret placeholder.
+Keep the Readwise credential out of the shell:
 ```bash
 : "${MINT_BASE_URL:?set MINT_BASE_URL to the Mint broker origin}"
 READWISE_BASE_URL="${MINT_BASE_URL%/}/proxy/https/readwise.io"
@@ -15,13 +16,13 @@ curl -s -o /dev/null -w "%{http_code}" "$READWISE_BASE_URL/api/v2/auth/" \
 # 204 = valid
 ```
 
-All requests use `READWISE_BASE_URL` and `READWISE_AUTH_HEADER` from the block above.
+Use `READWISE_BASE_URL` and `READWISE_AUTH_HEADER` for every request.
 
 ## Core Operations
 
 ### Search by Topic
 
-No full-text search endpoint exists. Strategy: fetch documents, filter client-side.
+No full-text search endpoint exists. Fetch documents, then filter them client-side.
 
 ```bash
 curl -s "$READWISE_BASE_URL/api/v3/list/?limit=100" \
@@ -30,7 +31,7 @@ curl -s "$READWISE_BASE_URL/api/v3/list/?limit=100" \
         | .[] | {title: (.title // "(untitled)"), source_url, summary: (.summary // ""), reading_progress, word_count, saved_at}'
 ```
 
-Searches all locations by default. Add `&location=later` or `&category=article` to narrow.
+Search all locations by default. Add `&location=later` or `&category=article` to narrow.
 
 ### List Recent Saves
 
@@ -87,7 +88,7 @@ curl -s "$READWISE_BASE_URL/api/v3/list/?category=highlight&limit=100" \
 
 ## Pagination
 
-Response includes `nextPageCursor`. Loop until null:
+The response includes `nextPageCursor`. Loop until null:
 
 ```bash
 CURSOR=""

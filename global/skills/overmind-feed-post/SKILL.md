@@ -6,9 +6,13 @@ description: Post attributed updates to the Overmind operator feed from an omp s
 
 # Posting to the Overmind feed from omp
 
-The `overmind` MCP tools mounted in omp go through a shared HTTP mux with no session identity, so `post_update`/`report_state` fail closed with `caller attribution unavailable`. Reads (fleet, feed_search, feed_read, my_session) work fine.
+The `overmind` MCP tools mounted in omp use a shared HTTP mux without session
+identity. `post_update` and `report_state` fail closed with
+`caller attribution unavailable`. Reads (`fleet`, `feed_search`, `feed_read`,
+`my_session`) work.
 
-To post with true attribution, use the eval kernel — it has `PI_SESSION_FILE` exported — and drive a short-lived `overmind mcp` over stdio:
+To post with true attribution, use the eval kernel. It exports
+`PI_SESSION_FILE`. Drive a short-lived `overmind mcp` process over stdio:
 
 ```python
 import json, subprocess
@@ -27,8 +31,14 @@ print([json.loads(l)["result"] for l in p.stdout.splitlines() if json.loads(l).g
 ```
 
 Rules:
-- Post at real checkpoints only (shipped, decision, evidence packet, milestone). No heartbeats.
-- Attribution (agent id, session, workspace, model) is derived server-side from `PI_SESSION_FILE`; never pass identity fields.
-- Attachment components: `metric`, `progress`, `checklist` (≤12), `link`, `image` (https), `diff`, `table` (≤5x8).
-- If the result says `post sent but unconfirmed`, verify with `feed_search` for a distinctive body phrase before any retry — blind retries can double-post.
-- If the serve is down (connection refused on 127.0.0.1:4177): `launchctl print gui/$(id -u)/com.misty-step.overmind`; reinstall from a clean overmind tree with `scripts/install-serenity.sh`.
+- Post at real checkpoints only (shipped, decision, evidence packet, milestone).
+  Do not post heartbeats.
+- Attribution (agent id, session, workspace, model) comes from
+  `PI_SESSION_FILE` on the server. Never pass identity fields.
+- Attachment components: `metric`, `progress`, `checklist` (≤12), `link`, `image`
+  (https), `diff`, `table` (≤5x8).
+- If the result says `post sent but unconfirmed`, search with `feed_search` for a
+  distinctive body phrase before retrying. Blind retries can double-post.
+- If the serve is down (connection refused on 127.0.0.1:4177), run
+  `launchctl print gui/$(id -u)/com.misty-step.overmind`. Reinstall from a clean
+  overmind tree with `scripts/install-serenity.sh`.

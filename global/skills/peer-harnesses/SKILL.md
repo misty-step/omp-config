@@ -15,36 +15,27 @@ argument-hint: "[provider] [task]"
 
 # /peer-harnesses
 
-You are not the only frontier agent on this machine. These CLIs are
-installed and each runs headlessly. They are options, not obligations:
-native subagents remain the default delegation path, and a peer harness
-earns a lane only when you can name what it adds — usually a decorrelated
-model family or a genuinely fresh context.
+These CLIs run headlessly on this machine. They are options, not obligations.
+Native subagents remain the default delegation path. Give a peer harness a
+lane only when it adds a decorrelated model family or a genuinely fresh
+context.
 
 ## When a peer harness beats a native subagent
 
-- **Adversarial critique of your own work.** A reviewer from a different
-  model family has decorrelated failure modes and no loyalty to your
-  reasoning. Critics get the artifact and the oracle only — never the
-  author's reasoning trail (Shared Operating Spine: Prove).
-- **Second opinion on a contested judgment** — architecture call, risk
-  assessment, "is this idiomatic" — where one model's taste shouldn't
-  decide alone.
+- **Adversarial critique of your own work.** Ask a different model family to review your work. Its failure modes differ from yours. Give critics only the artifact and oracle. Never give them the author's reasoning trail (Shared Operating Spine: Prove).
+- **Second opinion on a contested judgment.** Use another model for an architecture call, risk assessment, or idiom check. Do not let one model's taste decide alone.
 - **Competing attempts** at the same bounded problem, graded blind.
-- **Wide bench** — high-stakes adversarial review (a P0, a security or
-  data-loss surface, a pre-ship "be exhaustive" pass). Fan the artifact
-  across several *distinct* open-model families via Pi/OpenRouter, each
-  critic on its own lens; distinct families surface distinct real findings
-  instead of confirming each other. See **Adversarial bench** below.
+- **Wide bench.** Use a high-stakes adversarial review for a P0, security or data-loss surface, or pre-ship "be exhaustive" pass. Fan the artifact across several *distinct* open-model families through Pi/OpenRouter. Give each critic one lens. Distinct families find distinct real issues instead of confirming each other. See **Adversarial bench** below.
 
-A native subagent is still better for exploration, scoped builds, and
-anything where harness identity doesn't matter — it shares your tools,
-needs no cold start, and the orchestrator is trained on it.
+A native subagent remains better for exploration and scoped builds. Use it when
+harness identity does not matter. It shares your tools, needs no cold start, and
+the orchestrator is trained on it.
 
 ## The CLIs
 
-Verified installed and probed 2026-06-14 (grok re-probed 2026-07-08). Each
-row is the headless form; add the prompt as the argument or via stdin.
+Installations and probes were verified on 2026-06-14 (grok re-probed 2026-07-08).
+Each row shows the headless form. Add the prompt as the argument or through
+stdin.
 
 | CLI | Stack | Headless invocation |
 |---|---|---|
@@ -60,69 +51,70 @@ row is the headless form; add the prompt as the argument or via stdin.
 | `oracle` | Oracle browser consult | `npx -y @steipete/oracle --engine browser --model gpt-5.5-pro -p "<task>" --file <paths>` |
 Current model ids, pricing, context windows, and freshness dates:
 `references/model-provider-harness-index.md`.
-Model and harness facts rot in days, and the ranking of favorites is itself
-perishable — a drop like Grok 4.5 (2026-07-08: Opus-class at $2/$6) can
-reorder the bench overnight. A past-due review date on the index, a new frontier release, or a composition
-decision the index can't settle each trigger a refresh (/research or
-/harness-engineering models) before dispatching on remembered facts.
+Model and harness facts become stale within days. Favorite rankings also
+change. A drop like Grok 4.5 (2026-07-08: Opus-class at $2/$6) can reorder the
+bench overnight. Refresh the index with (/research or /harness-engineering
+models) when its review date passes, a new frontier release appears, or a
+composition decision the index cannot settle occurs. Refresh before dispatching
+on remembered facts.
 
 ## Adversarial bench
 
-High-stakes review is a *model-family spread*, not one second opinion:
-distinct families each catch distinct real bugs (in one P0 pass, one family
-found a startup-bricking blocker, another a null-timestamp escape, another a
-write-path gap — no overlap).
+High-stakes review needs a *model-family spread*, not one second opinion.
+Distinct families find distinct real bugs. One P0 pass found a
+startup-bricking blocker, a null-timestamp escape, and a write-path gap across
+three families.
 
 - **3–5 distinct families** (Kimi/Moonshot, DeepSeek, MiniMax, Qwen,
-  GLM/Zhipu when listed). Same-family variants don't decorrelate — a wide
-  bench of one family is waste.
+  GLM/Zhipu when listed). Same-family variants do not decorrelate. A wide bench
+  from one family wastes capacity.
 - **Discover slugs live**: `pi --provider openrouter --list-models
-  <family>`. Slugs rot in days; substitute when a family isn't listed.
+  <family>`. Slugs rot in days. Substitute when a family is not listed.
 - **One distinct lens per critic** (correctness/data-loss, durability,
   security, perf, API-shape — `global/references/lenses.md`).
   Optionally load that lens or a domain skill into the critic: `pi --skill
   <path>`.
-- **Cold, bounded, artifact-only**: inline diff + oracle + context, run `pi
-  -p --no-extensions --no-tools --provider openrouter --model <slug>
-  "<prompt>"`, background the lanes, synthesize the verdicts yourself. Add
-  one or two native critics on their own lenses (a further family), then
-  re-review the *delta* after you fix.
+- **Cold, bounded, artifact-only**: Inline everything the lane needs. Include
+  the diff, oracle, and context. Run
+  `pi -p --no-extensions --no-tools --provider openrouter --model <slug>
+  "<prompt>"` in background lanes. Synthesize the verdicts yourself. Add one
+  or two native critics on their own lenses. Re-review the *delta* after you
+  fix it.
 
-Scale to stakes — a routine diff gets one well-aimed cross-family critic,
-not the full bench.
+Scale the bench to the stakes. Give a routine diff one well-aimed cross-family
+critic instead of the full bench.
 
 ## Judgment
 
-- One well-aimed critic beats three vague ones. Aim it at the claim that
-  would embarrass us in production, with explicit "ignore style/naming"
-  bounds.
-- Peer output is evidence, not authority. You weigh it, accept or reject
-  it, and own the result.
-- A failed or rambling lane is a result too — report it, don't re-roll
-  silently.
-- Oracle is browser-mode only. Use it for high-context consults through a
-  signed-in ChatGPT session; do not use Oracle API mode or multi-model API
+- One well-aimed critic beats three vague critics. Aim at the claim that would
+  embarrass us in production. Add explicit "ignore style/naming" bounds.
+- Treat peer output as evidence, not authority. Weigh it, accept or reject it,
+  and own the result.
+- Report a failed or rambling lane. Do not re-roll it silently.
+- Use Oracle in browser mode only. Use it for high-context consults through a
+  signed-in ChatGPT session. Do not use Oracle API mode or multi-model API
   panels by default.
 - For a bounded lane whose evidence should outlive the session, write the
-  receipt to Powder — a run, comment, or link on the card the lane's work
-  feeds. Optional for quick second opinions; useful when the lane's verdict
-  feeds a ship decision.
-- Heavy, long-running, or isolation-needing lanes run on sprites
-  (`/sprites`) regardless of which CLI executes them.
+  receipt to Powder. Use a run, comment, or link on the card that receives the
+  work. This remains optional for a quick second opinion and useful for a ship
+  decision.
+- Run heavy, long-running, or isolation-needing lanes on sprites (`/sprites`)
+  regardless of the CLI.
 
 ## Gotchas
 
-- Peer CLIs run cold: no conversation history, no local skills unless the
-  harness loads them itself. Inline everything the lane needs.
-- Auth rots independently per CLI. A lane failing instantly with an auth
-  error means re-login locally, not a provider verdict.
+- Peer CLIs run cold. They have no conversation history and no local skills
+  unless the harness loads them.
+- Inline everything the lane needs.
+- Auth rots independently per CLI. If a lane fails at once with an auth error,
+  re-login locally. Do not treat the failure as a provider verdict.
 
 ## Prompting frontier lanes
 
-For Fable and GPT-5.6 Luna lanes (and the lead's own operation), load
-`global/references/prompting-frontier.md`: goal-not-steps briefs
-fenced by house rules, executable bars (delegate metric-invention when the
-bar is fuzzy), builder-never-grades verification against the REAL output,
-loop-until-the-bar with a live status artifact, prior traces as fuel, and
-budgets instead of permission-asks. Cheaper models still earn more
-mechanism — tune the prescription to the concrete model and reasoning effort.
+For Fable and GPT-5.6 Luna lanes, and for the lead's own operation, load
+`global/references/prompting-frontier.md`. Use goal-not-steps briefs fenced by
+house rules. Use executable bars and delegate metric invention when a bar is
+fuzzy. Verify against the REAL output; the builder never grades. Loop until the
+bar passes and keep a live status artifact. Use prior traces as fuel and
+budgets instead of permission asks. Give cheaper models more mechanism. Tune
+the prescription to the model and reasoning effort.
