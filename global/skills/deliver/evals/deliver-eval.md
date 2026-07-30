@@ -1,10 +1,10 @@
 # /deliver eval
 
-The oracle for `/deliver`. It tests one claim: **given one routed ticket or raw
-idea, `/deliver` produces the smallest coherent change that satisfies an
-executable contract, proves the live outcome, resolves fresh review, and leaves
-durable closeout evidence—behavior a bare “implement this ticket” prompt does
-not reliably produce.**
+The `/deliver` skill must earn one claim.
+Given one routed ticket or raw idea, it must produce the smallest coherent change that satisfies an executable contract.
+It must prove the live outcome, resolve fresh review, and leave durable closeout evidence.
+A bare “implement this ticket” prompt must not reliably produce the same behavior.
+
 
 This is a `mode-eval` A/B run, not a directory shape. Arms: A = `/deliver`
 installed and invoked; B = raw same-model ("implement this ticket end to end
@@ -14,9 +14,9 @@ model family than the workers. Protocol: `global/skills/skill-eval/references/ru
 
 ## Fixtures
 
-Each fixture is a small, self-contained ticket in a seeded scratch repository
-so both arms can build, test, and review it end to end without relying on a
-retired product repository.
+Each fixture is a small, self-contained ticket in a seeded scratch repository.
+Both arms can build, test, and review it end to end without a retired product repository.
+
 
 | # | Prompt | Fixture | Forbidden edits | What it stresses |
 |---|---|---|---|---|
@@ -24,8 +24,9 @@ retired product repository.
 | 2 | "Deliver: fix the parser bug that treats a quoted comma as a delimiter." | seeded parser with a reproducible failure | files outside parser/tests | failing observable check, root-cause fix, regression proof |
 | 3 | "Deliver: add report mode so operators can list covered and missing checks without failing the process." | seeded gate with no acceptance criteria | files outside gate/tests | no-oracle stop, `curator` `/groom` route, closeout discipline |
 
-Two of three must show A>B. The fixtures span a bounded feature, a regression,
-and an underspecified request that should not be implemented blindly.
+Two of three must show A>B.
+The fixtures cover a bounded feature, a regression, and an underspecified request that should not be implemented blindly.
+
 
 ## Objective checks (scriptable, pass/fail)
 
@@ -43,6 +44,7 @@ and an underspecified request that should not be implemented blindly.
       and residual risk.
 - [ ] Fixture 3 stops for an oracle or routes to `curator` for `/groom` before code changes.
 
+
 ## Rubric (1–5, blind, one-line justification each)
 
 | Dimension | 5 | 1 |
@@ -53,30 +55,35 @@ and an underspecified request that should not be implemented blindly.
 | Review rigor | fresh critic challenges the oracle/diff and dispositions are proven | self-review or rubber stamp |
 | Closeout | routed ledger, exact proof, deviations, and residual risk reconciled | vague “done” |
 
+
 ## Pass condition
 
 Arm A beats B on aggregate and ties-or-wins every objective check across at
-least two fixtures. If a current frontier model reaches the same bar unaided,
-adapt or retire `/deliver` rather than lowering the oracle.
+least two fixtures.
+If a current frontier model reaches the same bar unaided, adapt or retire `/deliver`.
+Do not lower the oracle.
+
 
 ## Human anchor
 
-The operator blind-grades ≥1 fixture (recommend fixture 2 — the TDD bug fix,
-since "did they actually write the failing test first" is easy to verify and
-easy for a rubric to fake). Record the verdict and match/mismatch with the
-agent grader here once run. **PENDING — no run yet.**
+The operator blind-grades at least one fixture.
+Use fixture 2 when possible because its TDD bug fix tests whether the agent writes a failing test first.
+Record the verdict and match/mismatch with the agent grader here once run.
+**PENDING — no run yet.**
+
 
 ## Cadence
 
-- Edit-time: one paired fixture smoke on changes to `/deliver`.
-- Contract change: all three fixtures with decorrelated workers and blind judge.
-- Major model release: rerun; stronger bare behavior is evidence to shrink or
-  retire the skill.
+- Edit-time: run one paired fixture smoke on changes to `/deliver`.
+- Contract change: run all three fixtures with decorrelated workers and a blind judge.
+- Major model release: rerun.
+  Stronger bare behavior is evidence to shrink or retire the skill.
+
 
 ## Run log
 
 **No run yet.** Revisit when this skill changes.
 `/deliver` is the highest-usage first-party skill (36 recorded invocations per
-the 2026-07-01 groom telemetry read) and had no eval coverage before this. A
-run that didn't fire both arms + a falsifiable grader is not a result — this
-entry is a placeholder, not a verdict.
+the 2026-07-01 groom telemetry read) and had no eval coverage before this.
+A run that did not fire both arms and a falsifiable grader is not a result.
+This entry is a placeholder, not a verdict.

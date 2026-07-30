@@ -217,6 +217,6 @@ python3 bin/review_gate.py verify --repo .
 Report the frozen `bundle_digest`, exact reviewer identities, worker
 attributions, submission statuses, command exit statuses, finding counts,
 fixes and refreezes, and the final `record` plus `verify` commands. Include
-residual risk and evidence in the `global/AGENTS.md` closeout format.
+residual risk and evidence in the `global/references/verification-system-first.md` evidence packet.
 Do not call the review complete from one submission, an optional critic, a
 prose-only summary, a hand-authored artifact, or a stale receipt.

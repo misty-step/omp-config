@@ -2,17 +2,17 @@
 disable-model-invocation: true
 name: project-engineering
 description: |
-  Adopt or audit a repository's project-engineering fitness function: map
-  applicable obligations to repo-owned commands, policy and evidence paths,
-  Factory integrations, and expiring waivers. Use when: "adopt project
-  engineering" or "audit this repo's engineering profile".
+  Adopt or audit a repository's project-engineering fitness function. Map
+  obligations to repo-owned commands, policy and evidence paths, Factory
+  integrations, and expiring waivers. Use when: "adopt project engineering"
+  or "audit this repo's engineering profile".
 argument-hint: "[repo-path] [adopt|audit]"
 ---
 
 # /project-engineering
 
-Make the project's engineering contract legible without imposing a fleet-wide
-layout. The repo owns its commands and paths; this skill composes their
+Make the project's engineering contract clear without imposing a fleet-wide
+layout. The repo owns its commands and paths. This skill combines their
 applicability and evidence into one fitness function.
 
 ## Branch
@@ -35,13 +35,15 @@ Keep these distinct in the profile and report:
 5. **Fresh judgment** — artifact-only critique for irreducible architectural
    or product judgment.
 
-A declaration routes proof; it never substitutes for the other classes. Load
-[`references/profile-contract.md`](references/profile-contract.md) when
-classifying a repo, filling the template, or auditing evidence.
+Use a declaration to route proof. Never substitute it for another class. Load
+[`references/profile-contract.md`](references/profile-contract.md) when you
+classify a repo, fill the template, or audit evidence.
+
 
 ## Routing
 
-Use the existing owner for method; keep this skill at the composition layer.
+Use the existing owner for each method. Keep this skill at the composition
+layer.
 
 | Concern | Owner |
 |---|---|
@@ -52,6 +54,6 @@ Use the existing owner for method; keep this skill at the composition layer.
 | Module depth, seams, dependency direction | `global/external/mattpocock-codebase-design/SKILL.md` |
 | Application-only obligations and waivers | `global/references/application-floor.md` |
 
-Return the populated profile plus a gap report grouped by proof class. Route
-leaf implementation to the owning skill; do not expand this audit into every
+Return the populated profile and a gap report grouped by proof class. Route
+leaf implementation to the owning skill. Do not expand this audit into every
 remediation.

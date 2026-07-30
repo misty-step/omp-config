@@ -2,25 +2,25 @@
 disable-model-invocation: true
 name: review-security
 description: |
-  Security lens for code-critic: read a diff and find security defects
-  provable from the change itself — secret leakage, missing or reordered
-  authorization, injection, unsafe deserialization, blast-radius growth,
-  weakened gates, and leaky error handling. Static, read-only, no live
-  exploitation. Use when code-critic is dispatched with the security lens
-  on a diff. Trigger: /review-security.
+  Security lens for code-critic: read a diff and find security defects proven
+  by the change itself. Check secret leakage, missing or reordered authorization,
+  injection, unsafe deserialization, blast-radius growth, weakened gates, and
+  error handling that leaks data. Work statically and read-only. Do not exploit
+  live systems. Use when code-critic runs with the security lens on a diff.
+  Trigger: /review-security.
 ---
 
 # /review-security
 
-Judge the diff, not the codebase. Every finding cites a file, a line, a diff
-hunk, or literal text from the change under review. A vulnerability that
-predates the diff and the diff does not touch, worsen, or newly expose is out
-of scope for `blocking`/`important` — call it `advisory` at most and say it
-is pre-existing debt. Do not pad the packet to justify the run.
+Judge the diff, not the codebase. Cite a file, line, diff hunk, or literal text
+from the change in every finding. Treat a vulnerability as out of scope for
+`blocking`/`important` when it predates the diff. Apply this rule only when the
+diff does not touch, worsen, or newly expose it. Call it `advisory` at most.
+State that it is pre-existing debt. Do not add findings to justify the run.
 
-Static only: reason from the diff, its file, and named callers found by grep
-or LSP references. No running code, no requests, no exploitation attempts,
-no speculation about a theoretical attacker with no shown path.
+Work statically. Reason from the diff, its file, and named callers found by grep
+or LSP references. Do not run code, send requests, or attempt exploitation. Do
+not speculate about a theoretical attacker without a shown path.
 
 Read-only. Never edit, write, commit, or mutate tracker state. Return
 findings; do not fix them.
@@ -113,9 +113,10 @@ instead of fixing what it guarded.
 
 ### 7. Error handling as a leak
 
-Flag error paths reachable by an untrusted caller that surface internals: a
-stack trace or raw exception body in an HTTP response instead of a generic
-error; internal paths/hosts/env details in a user-facing error — e.g.
+Flag error paths reachable by an untrusted caller when they surface internals.
+Flag a stack trace or raw exception body in an HTTP response instead of a
+generic error. Flag internal paths/hosts/env details in a user-facing error —
+e.g.
 `throw new Error(\`failed to read /etc/app/secrets.yaml\`)` propagated to the
 client; raw query text echoed in a 500 body; identity leaked through error
 asymmetry — e.g. a login endpoint returning a different error for "wrong
