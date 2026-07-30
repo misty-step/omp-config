@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://misty-step.dev/schemas/qa-users/output.v1.json",
+  "title": "qa-users output",
+  "type": "object",
+  "unevaluatedProperties": false,
+  "oneOf": [
+    {
+      "allOf": [
+        { "$ref": "#/$defs/output_base" },
+        {
+          "type": "object",
+          "properties": {
+            "dry_run": { "const": true },
+            "phase": { "const": "planned" },
+            "personas": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "status": { "const": "planned" },
+                  "evidence_count": { "const": 0 }
+                }
+              }
+            },
+            "findings": { "type": "array", "maxItems": 0 },
+            "strengths": { "type": "array", "maxItems": 0 },
+            "suppressed_friction": { "type": "array", "maxItems": 0 },
+            "tracker_summary": {
+              "type": "object",
+              "properties": {
+                "scanned_pages": { "const": 0 },
+                "truncated": { "const": false },
+                "ambiguous": { "const": false },
+                "created": { "const": 0 },
+                "read_back_issue_ids": { "type": "array", "maxItems": 0 }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "allOf": [
+        { "$ref": "#/$defs/output_base" },
+        {
+          "type": "object",
+          "properties": {
+            "dry_run": { "const": false },
+            "phase": { "enum": ["executed", "blocked"] }
+          }
+        }
+      ]
+    }
+  ],
+  "$defs": {
+    "output_base": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "dry_run", "phase", "execution_overrides", "personas", "findings", "strengths", "suppressed_friction", "tracker_summary"],
+      "properties": {
+        "schema_version": { "const": "qa-users.output.v1" },
+        "dry_run": { "type": "boolean" },
+        "phase": { "type": "string", "enum": ["planned", "executed", "blocked"] },
+        "execution_overrides": { "$ref": "execution.v1.json#/$defs/output_overrides" },
+        "personas": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/persona_report" } },
+        "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+        "strengths": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "suppressed_friction": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "tracker_summary": { "$ref": "#/$defs/tracker_summary" }
+      }
+    },
+    "persona_report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["persona_id", "status", "entrypoints", "evidence_count"],
+      "properties": {
+        "persona_id": { "type": "string", "minLength": 1 },
+        "status": { "type": "string", "enum": ["planned", "completed", "blocked", "failed"] },
+        "entrypoints": { "$ref": "execution.v1.json#/$defs/entrypoint_ids" },
+        "evidence_count": { "type": "integer", "minimum": 0 },
+        "blocked_reason": { "type": "string", "minLength": 1 },
+        "failure_reason": { "type": "string", "minLength": 1 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "blocked" } }, "required": ["status"] },
+          "then": {
+            "required": ["blocked_reason"],
+            "properties": { "blocked_reason": { "type": "string", "minLength": 1 } }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "failed" } }, "required": ["status"] },
+          "then": {
+            "required": ["failure_reason"],
+            "properties": { "failure_reason": { "type": "string", "minLength": 1 } }
+          }
+        }
+      ]
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fingerprint", "persona", "affected_entrypoint", "reproduction", "expected", "observed", "evidence", "severity", "confidence", "category", "actionability", "status"],
+      "properties": {
+        "fingerprint": { "type": "string", "pattern": "^[0-9a-f]{64}$", "description": "Canonical lowercase SHA-256 finding fingerprint." },
+        "persona": { "type": "string", "minLength": 1 },
+        "affected_entrypoint": { "$ref": "execution.v1.json#/$defs/entrypoint_id" },
+        "reproduction": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "expected": { "type": "string", "minLength": 1 },
+        "observed": { "type": "string", "minLength": 1 },
+        "evidence": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "severity": { "type": "string", "enum": ["info", "low", "medium", "high", "critical"] },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "category": { "type": "string", "enum": ["strength", "friction", "accessibility", "reliability", "performance", "safety", "content", "other"] },
+        "actionability": { "type": "boolean" },
+        "root_cause": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+        "status": { "type": "string", "enum": ["accepted", "deduplicated", "suppressed", "blocked"] },
+        "tracker_issue_id": { "type": "string", "minLength": 1 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "enum": ["accepted", "deduplicated"] } }, "required": ["status"] },
+          "then": {
+            "required": ["tracker_issue_id"],
+            "properties": { "tracker_issue_id": { "type": "string", "minLength": 1 } }
+          }
+        }
+      ]
+    },
+    "tracker_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["selected", "scanned_pages", "truncated", "ambiguous", "created", "read_back_issue_ids"],
+      "properties": {
+        "selected": { "$ref": "execution.v1.json#/$defs/tracker_name" },
+        "scanned_pages": { "type": "integer", "minimum": 0 },
+        "truncated": { "type": "boolean" },
+        "ambiguous": { "type": "boolean" },
+        "created": { "type": "integer", "minimum": 0 },
+        "read_back_issue_ids": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+      }
+    }
+  }
+}

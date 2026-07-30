@@ -1,0 +1,28 @@
+{
+  "$schema": "https://misty-step.dev/schemas/qa-users/output-semantic-fixtures.v1.json",
+  "schema_version": "qa-users.output-semantic-fixtures.v1",
+  "valid": [
+    {
+      "name": "all selected personas report exactly once",
+      "input": { "personas": [{ "id": "explorer" }, { "id": "accessibility" }] },
+      "output": { "personas": [{ "persona_id": "explorer" }, { "persona_id": "accessibility" }] }
+    }
+  ],
+  "invalid": [
+    {
+      "name": "missing selected persona",
+      "input": { "personas": [{ "id": "explorer" }, { "id": "accessibility" }] },
+      "output": { "personas": [{ "persona_id": "explorer" }] }
+    },
+    {
+      "name": "wrong output persona",
+      "input": { "personas": [{ "id": "explorer" }] },
+      "output": { "personas": [{ "persona_id": "unknown" }] }
+    },
+    {
+      "name": "duplicate output persona",
+      "input": { "personas": [{ "id": "explorer" }] },
+      "output": { "personas": [{ "persona_id": "explorer" }, { "persona_id": "explorer" }] }
+    }
+  ]
+}

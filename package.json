@@ -3,27 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "scripts": {
-    "preinstall": "python3 bin/preflight.py"
-  },
   "dependencies": {
-    "@misty-step/harness-primitives": "file:../harness-primitives",
-    "@misty-step/qa-users": "file:../qa-users"
-  },
-  "omp": {
-    "firstPartySkillLinks": {
-      "global/skills/research-core": {
-        "package": "@misty-step/harness-primitives",
-        "target": "skills/research-core"
-      },
-      "global/skills/deliver-core": {
-        "package": "@misty-step/harness-primitives",
-        "target": "skills/deliver-core"
-      },
-      "global/skills/qa-users": {
-        "package": "@misty-step/qa-users",
-        "target": "skills/qa-users"
-      }
-    }
+    "ajv": "8.17.1"
   }
 }

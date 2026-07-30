@@ -58,19 +58,28 @@ The projected `bin/` directory is a runtime cotenant. Only the declared
 `review_gate.py` and `review_runner.py` links are owned by this repository;
 other installed bin entries remain untouched.
 
-## Standalone checkout prerequisite
+## Owned skill cores
 
-`omp-config` owns the OMP projection but does not vendor the first-party
-`@misty-step/harness-primitives` or `@misty-step/qa-users` packages. Before
-running `npm install` from a standalone clone, run `python3 bin/preflight.py`
-and bootstrap those sibling repositories at `../harness-primitives` and
-`../qa-users`. The npm `preinstall` hook repeats the check and names every
-missing package and its required path; do not replace sibling packages with
-copies or broken symlinks.
+`omp-config` owns `research-core`, `deliver-core`, and `qa-users` as real local
+skill directories under `global/skills/`, each with its own `SKILL.md`.
+`research-core` and `deliver-core` provide harness-neutral contracts in this
+tree; OMP adapters add routing, acquisition, role, review, gate, and closeout
+behavior. `qa-users` is the local core for bounded persona-driven QA. There
+are no first-party package bootstrap prerequisites for `npm install`.
 
-The extensions directory is co-tenanted. `herdr-omp-agent-state.ts` remains a real, Herdr-managed file at ~/.omp/agent/extensions/herdr-omp-agent-state.ts. Its header states that Herdr overwrites it during integration updates. The provenance contract records this cotenant with owner herdr. The four OMP extension files are separate file links. The installed audit rejects every other extension entry. This prevents an invisible writer from entering the projected home. It also prevents Herdr from writing into the repository and prevents Git operations from rolling back the integration.
+## Herdr runtime cotenant
 
-The Herdr file was adopted as a runtime cotenant on 2026-07-21. It was not copied into this repository.
+The extensions directory is co-tenanted. `herdr-omp-agent-state.ts` remains a
+real, Herdr-managed file at `~/.omp/agent/extensions/herdr-omp-agent-state.ts`.
+Its header states that Herdr overwrites it during integration updates. The
+provenance contract records this cotenant with owner `herdr`. The four OMP
+extension files are separate file links. The installed audit rejects every
+other extension entry. This prevents an invisible writer from entering the
+projected home. It also prevents Herdr from writing into the repository and
+prevents Git operations from rolling back the integration.
+
+The Herdr file was adopted as a runtime cotenant on 2026-07-21. It was not
+copied into this repository.
 
 ## Stock API boundaries
 

@@ -17,7 +17,7 @@ Give each skill to the lane that owns its outcome.
 | code-review program | `reviewer` | `code-review` for the gate-owned freeze/packet/submission/receipt protocol; `peer-harnesses` only for optional critics | its own bench: cross-family `code-critic` lanes plus `qa` for live claims |
 | one static critique lane | `code-critic` | exactly one injected review lens; carries no standing doctrine | another model family if its finding decides release |
 | live verification | `qa` | `verify-live`, `ci`; add surface-specific skills | a different model family from the author |
-| persona-driven QA user coordination | `qa-user` | `qa-users`, `dispatch` | no-read coordinator dispatches browser-only `qa-user-leaf`; OMP root owns triage, suppression, RCA, and serialized tracker read-back |
+| persona-driven QA user coordination | `qa-user` | `qa-users`, `dispatch` | OMP root first explores repository/product docs, rules, scripts, and live local/dev/staging browser entrypoints; then the no-read coordinator dispatches browser-only `qa-user-leaf` instances; root owns validation, triage, suppression, RCA, deduplication, and serialized tracker or PR writes |
 | production incident or digital forensics | `cassandra` | `factory-apps`, `estate-infrastructure`, `mint` | replay the original failure and watch the live signal |
 | contested decision | `solomon` | add `council` only through an ad-hoc lane that can execute it | reversal condition and cheapest experiment |
 | visual product design | bundled `designer` | `design`, `image-gen`; add UI skills below | Gemini 3.6 Flash rendered pass plus `qa` for behavior |
@@ -71,7 +71,7 @@ Validate every explicit tool name against OMP's existing built-in tool authority
 | find security defects in a diff | `review-security` | `code-critic` with the lens injected; escalate credential findings immediately |
 | judge a change against stated product intent | `review-vision` | `code-critic` with the lens injected; requires a written authority |
 | verify live behavior end to end | `verify-live` | `qa`; cheapest browser tier first, CLI escalation only when needed |
-| coordinate persona-driven application QA | `qa-users` | `qa-user` coordinator with browser-only `qa-user-leaf`; OMP root owns triage, suppression, RCA, and serialized tracker query/create/read-back |
+| coordinate persona-driven application QA | `qa-users` | OMP root discovery and frozen input, then `qa-user` coordinator with browser-only `qa-user-leaf`; root owns validation, triage, suppression, RCA, and serialized tracker query/create/read-back plus deduplicated PR or work-ledger writes |
 
 ## MCP and tool routes
 

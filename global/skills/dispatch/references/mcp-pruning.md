@@ -1,8 +1,10 @@
 # Disabled MCP mapping
 
 `global/mcp.json` keeps a small catalog of disabled servers for explicit policy
-and audit visibility. Disabled entries are not runtime routes and must not be
-re-enabled by a skill or workflow. Prefer these canonical replacements:
+and audit visibility.
+Disabled entries are not runtime routes.
+Do not re-enable them from a skill or workflow.
+Prefer these canonical replacements:
 
 | Disabled server | Canonical replacement | Rationale |
 |---|---|---|

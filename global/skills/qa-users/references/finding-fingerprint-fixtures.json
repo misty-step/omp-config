@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://misty-step.dev/schemas/qa-users/finding-fingerprint-fixtures.v1.json",
+  "schema_version": "qa-users.finding-fingerprint-fixtures.v1",
+  "cases": [
+    {
+      "name": "normalizes case and whitespace",
+      "finding": {
+        "affected_entrypoint": "Checkout",
+        "reproduction": ["Open  cart", "Click\r\nPay"],
+        "expected": "Payment completes",
+        "observed": "Payment\n stalls",
+        "category": "Reliability"
+      },
+      "equivalent": {
+        "affected_entrypoint": " checkout ",
+        "reproduction": ["open cart", "click pay"],
+        "expected": "payment completes",
+        "observed": "payment stalls",
+        "category": "reliability"
+      },
+      "expected_pattern": "^[0-9a-f]{64}$"
+    }
+  ]
+}

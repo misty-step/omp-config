@@ -458,6 +458,26 @@ def check_tree(contract: Contract) -> None:
                     f"{reference}"
                 )
 
+def check_qa_users_integrity() -> None:
+    try:
+        result = subprocess.run(
+            ["node", "global/skills/qa-users/scripts/check-integrity.mjs"],
+            cwd=ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=30,
+        )
+    except FileNotFoundError:
+        fail("Node executable is not available on PATH")
+    except subprocess.TimeoutExpired:
+        fail("qa-users integrity validation timed out")
+    detail = "\n".join(part for part in (result.stdout.strip(), result.stderr.strip()) if part)
+    if result.returncode:
+        fail(f"qa-users integrity failed: {detail or 'no output'}")
+    if detail:
+        print(detail)
+
 def check_optmem_dependency() -> None:
     try:
         result = verify_installation()
@@ -483,6 +503,7 @@ def main(argv: list[str]) -> int:
     except ContractError as error:
         fail(str(error))
     check_tree(contract)
+    check_qa_users_integrity()
     check_external_skills(contract)
     check_external_registry_inventory(contract)
     try:

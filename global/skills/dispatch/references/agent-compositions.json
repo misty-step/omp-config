@@ -121,7 +121,7 @@
       "spawns": []
     },
     "qa-user": {
-      "when_to_use": "Coordinate a bounded persona-driven QA user run from a scoped root artifact without raw reads or editing product or harness files.",
+      "when_to_use": "Coordinate a bounded persona-driven QA user run after the OMP root explores repository/product docs, rules, scripts, and live local, dev, or staging browser entrypoints and freezes the input; no raw reads or editing product or harness files.",
       "model": [
         "anthropic/claude-sonnet-5:xhigh",
         "openai-codex/gpt-5.6-luna:xhigh"
@@ -137,7 +137,7 @@
       ]
     },
     "qa-user-leaf": {
-      "when_to_use": "Exercise one configured real browser entrypoint as a persona user with no source, filesystem, tracker, or child authority.",
+      "when_to_use": "Exercise one configured real local, dev, or staging browser entrypoint as a persona user with no source, filesystem, tracker, or child authority.",
       "model": [
         "anthropic/claude-sonnet-5:xhigh",
         "openai-codex/gpt-5.6-luna:xhigh"

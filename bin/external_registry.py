@@ -98,85 +98,6 @@ def _root_from_contract(contract: Any) -> tuple[Path, Path]:
     return skills.parents[1], external
 
 
-def _read_package_manifest(path: Path, label: str) -> dict[str, object]:
-    if path.is_symlink() or not path.is_file():
-        raise ExternalRegistryError(f"{label} is missing or symlinked: {path}")
-    try:
-        parsed = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as error:
-        raise ExternalRegistryError(f"{label} is invalid JSON: {path}: {error}") from error
-    if not isinstance(parsed, dict):
-        raise ExternalRegistryError(f"{label} must contain an object: {path}")
-    return parsed
-
-
-def _first_party_skill_links(root: Path, skills: Path) -> set[str]:
-    manifest_path = root / "package.json"
-    if not manifest_path.is_file():
-        return set()
-    manifest = _read_package_manifest(manifest_path, "OMP package manifest")
-    omp = manifest.get("omp")
-    if omp is None:
-        return set()
-    if not isinstance(omp, dict):
-        raise ExternalRegistryError(f"{manifest_path} omp setting must be an object")
-    links = omp.get("firstPartySkillLinks")
-    if links is None:
-        return set()
-    if not isinstance(links, dict):
-        raise ExternalRegistryError(f"{manifest_path} omp.firstPartySkillLinks must be an object")
-    dependencies = manifest.get("dependencies")
-    if not isinstance(dependencies, dict):
-        raise ExternalRegistryError(f"{manifest_path} must declare dependencies for first-party skills")
-    skills_relative = skills.relative_to(root)
-    mapped: set[str] = set()
-    for raw_consumer, raw_link in links.items():
-        if not isinstance(raw_consumer, str):
-            raise ExternalRegistryError(f"{manifest_path} has a non-string first-party consumer path")
-        consumer_relative = _relative_path(raw_consumer, "first-party consumer")
-        if consumer_relative.parent != skills_relative:
-            raise ExternalRegistryError(
-                f"{manifest_path} first-party consumer must be under {skills_relative}: {raw_consumer!r}"
-            )
-        if not isinstance(raw_link, dict):
-            raise ExternalRegistryError(f"{manifest_path} first-party link {raw_consumer!r} must be an object")
-        package_name = raw_link.get("package")
-        target = raw_link.get("target")
-        if not isinstance(package_name, str) or not package_name:
-            raise ExternalRegistryError(f"{manifest_path} first-party link {raw_consumer!r} lacks package")
-        target_relative = _relative_path(target, "first-party target")
-        spec = dependencies.get(package_name)
-        if not isinstance(spec, str) or not spec.startswith("file:"):
-            raise ExternalRegistryError(
-                f"{manifest_path} dependency {package_name!r} must use a file: spec for first-party skill"
-            )
-        package_reference = Path(spec[5:])
-        if package_reference.is_absolute() or not package_reference.parts or any(
-            part in {"", "."} for part in package_reference.parts
-        ):
-            raise ExternalRegistryError(f"{manifest_path} dependency {package_name!r} has invalid file spec {spec!r}")
-        package_root = (root / package_reference).resolve(strict=False)
-        package_manifest = _read_package_manifest(
-            package_root / "package.json", f"first-party package {package_name!r}"
-        )
-        if package_manifest.get("name") != package_name:
-            raise ExternalRegistryError(
-                f"first-party package identity drift for {package_name!r}: "
-                f"found {package_manifest.get('name')!r}"
-            )
-        consumer = root / consumer_relative
-        if not consumer.is_symlink():
-            raise ExternalRegistryError(f"first-party consumer is not a symlink: {consumer}")
-        expected = (package_root / target_relative).resolve(strict=False)
-        actual = consumer.resolve(strict=False)
-        if actual != expected:
-            raise ExternalRegistryError(
-                f"first-party skill target drift for {consumer}: expected {expected}, got {actual}"
-            )
-        mapped.add(consumer_relative.as_posix())
-    return mapped
-
-
 def _relative_path(raw: object, field: str) -> Path:
     if not isinstance(raw, str) or not raw:
         raise ExternalRegistryError(f"receipt {field} must be a non-empty relative path")
@@ -378,7 +299,6 @@ def check_external_skills(contract: Any) -> None:
     by_vendor = _registry_sources(registry, external)
     skills = Path(contract.surface("skills").source)
     skills_relative = skills.relative_to(root)
-    first_party = _first_party_skill_links(root, skills)
     declared: dict[str, tuple[str, Path]] = {}
     for vendor_name, source in by_vendor.items():
         consumers = source.get("consumers")
@@ -399,8 +319,6 @@ def check_external_skills(contract: Any) -> None:
         if not entry.is_symlink():
             continue
         relative = entry.relative_to(root).as_posix()
-        if relative in first_party:
-            continue
         declaration = declared.get(relative)
         if declaration is None:
             raise ExternalRegistryError(f"projected skill is not a declared registry consumer: {entry}")
