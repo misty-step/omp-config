@@ -107,13 +107,13 @@ Most patterns are prompts, not skills.
 - omp-config's own skills live in `global/skills/`.
   A consumer repo's `.agents/skills/` is bespoke project content, not a
   projection of the global catalog.
-- `global/AGENTS.md` is a router, not a manual.
-  `bin/install` installs it by symlink at `~/.omp/agent/AGENTS.md`.
-  Keep only non-obvious facts there.
+- `global/skills/dispatch/SKILL.md` is the routing authority; `global/AGENTS.md`
+  is the chief contract.
+  `bin/install` installs the chief contract by symlink at `~/.omp/agent/AGENTS.md`.
 - OMP discovers task agents by precedence:
   nearest project `.omp/agents` > user `~/.omp/agent/agents` >
   Claude plugin `agents/` roots (when enabled) > bundled (`task`, `scout`,
-  `reviewer`, `librarian`, `designer`, `sonic`).
+  `librarian`, `designer`, `sonic`).
   Skills follow the analogous native-provider precedence:
   project/user `.omp`/`.agents` skills first.
   Auto-learn managed skills always defer to a same-named authored skill.

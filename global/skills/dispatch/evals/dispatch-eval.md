@@ -25,7 +25,7 @@ A bare prompt should lose on at least two of three fixtures.
 3. Meaningful structural diff that needs the canonical code-quality review leaf
    and a release decision. Correct route: `reviewer` plus `code-review`,
    `peer-harnesses`, and `ci`; use cross-family independent lanes and have
-   Scully verify live claims.
+   `qa` verify live claims.
 
 ## Objective checks
 

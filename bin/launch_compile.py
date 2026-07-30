@@ -126,6 +126,7 @@ def render_isolation(
 
 def render_prompt(
     global_instructions: str,
+    sticky_rules: str,
     repository_instructions: str,
     agent: str,
     agent_body: str,
@@ -136,6 +137,7 @@ def render_prompt(
     subagent_tools: tuple[str, ...],
 ) -> str:
     sections = [
+        "<sticky-rules>\n" + sticky_rules.strip() + "\n</sticky-rules>",
         "<global-constitution>\n" + global_instructions.strip() + "\n</global-constitution>",
         "<repository-contract>\n" + repository_instructions.strip() + "\n</repository-contract>",
         f'<agent-role name="{agent}">\n{agent_body.strip()}\n</agent-role>',
@@ -317,10 +319,14 @@ def resolve_contract(config_root: Path, contract_path: Path) -> CompiledLaunch:
 
     mcp = load_selected_mcp(config_root, repository, mcp_servers)
     global_instructions_path = config_root / "global" / "AGENTS.md"
+    sticky_rules_path = config_root / "global" / "RULES.md"
+    if not sticky_rules_path.is_file():
+        raise ContractError(f"missing sticky rules: {sticky_rules_path}")
     if not global_instructions_path.is_file():
         raise ContractError(f"missing global constitution: {global_instructions_path}")
     prompt = render_prompt(
         global_instructions_path.read_text(),
+        sticky_rules_path.read_text(),
         instructions.read_text(),
         agent,
         root_body,
