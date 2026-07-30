@@ -557,6 +557,19 @@ class ReviewGateProtocolTests(unittest.TestCase):
         self.assertEqual(passed["status"], "clean")
         self.assertEqual(passed["worker"]["harness"], "test-harness")
 
+    def test_codex_adapter_keeps_tools_for_isolated_review_workspace(self) -> None:
+        command = review_runner._adapter_command(
+            Path("/tmp/autoreview"),
+            "codex",
+            "gpt-test",
+            "high",
+            "Review the packet.",
+            [".omp/review-packet/bundle.review.000.diff"],
+            Path("/tmp/review-result.json"),
+        )
+
+        self.assertNotIn("--no-tools", command)
+
     def test_autoreview_worker_isolated_from_repo_and_tools(self) -> None:
         self.freeze_and_prepare()
         sentinel = self.repo / "review-author-sentinel.txt"

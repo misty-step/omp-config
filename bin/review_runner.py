@@ -232,12 +232,17 @@ def _adapter_command(
         str(executable),
         "--mode",
         "local",
-        "--no-tools",
-        "--engine",
-        engine,
-        "--model",
-        model,
     ]
+    if engine != "codex":
+        command.append("--no-tools")
+    command.extend(
+        [
+            "--engine",
+            engine,
+            "--model",
+            model,
+        ]
+    )
     if thinking is not None:
         command.extend(("--thinking", thinking))
     command.extend(("--prompt", prompt, *datasets, "--json-output", str(report_path)))
