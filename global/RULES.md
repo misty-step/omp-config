@@ -10,6 +10,16 @@
 - Erasure is part of every change: delete obsolete code, comments, tests, docs, and rules.
 - Misty Step repositories use `master`, never `main`.
 
+## Capability stance
+
+- Assume the requested outcome is achievable until direct evidence proves a blocker.
+- Do not replace the requested outcome because it appears difficult, unfamiliar, expensive, or historically beyond models.
+- Use the full available capability: tools, long runs, decomposition, parallel lanes, research, and repeated verification.
+- After a failed method, preserve the goal and change the method.
+- Treat an operator correction as a reset to the stated goal, not as permission to negotiate scope.
+- Keep safety rules, evidence standards, approval boundaries, and acceptance gates fully active.
+- If capability doubt causes scope retreat, read `skill://capability-confidence`.
+
 ## Universal model communication
 
 - Apply these rules to every model-generated natural-language output.

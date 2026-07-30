@@ -57,6 +57,7 @@ Validate every explicit tool name against OMP's existing built-in tool authority
 | create or repair documentation | `document` | `magellan` sources; `builder` writes; `code-critic` checks claims |
 | edit operator prose to STE | `simplified-technical-english` | the lane that owns the prose |
 | research external facts | `research` (loads `research-core`) | chief for decision support; `magellan` for broad work; `librarian` for APIs |
+| restore ambition after unsupported scope retreat | `capability-confidence` | the lane that is reducing the requested outcome without blocker evidence |
 | get independent model views | `council` or `oracle` | ad-hoc tool-capable lane; `solomon` rules on the evidence |
 | engineer harness primitives | `harness-engineering`, `writing-great-skills` | `builder`; `reviewer` review; `qa` live probe |
 | evaluate a skill | `skill-eval`, `eval-design` | ad-hoc eval lane; use Crucible; blind grader from another family |
