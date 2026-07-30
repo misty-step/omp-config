@@ -10,8 +10,7 @@ One solved problem, one learning. Write the narrow reusable pattern that would
 have changed the next agent's behavior before the bug, review miss, or design
 mistake happened.
 
-Pattern docs are promoted from multiple learnings; do not author broad doctrine
-cold from one incident.
+Pattern docs are promoted from multiple learnings. Do not author broad doctrine from one incident.
 
 ## Frontmatter
 
@@ -43,15 +42,15 @@ integration constraint learned without a live bug.
 
 ## Retrieval
 
-Grep is the floor. Semantic retrieval, QMD, or future indexers may run after it;
-they do not replace it.
+Grep is the minimum. Semantic retrieval, QMD, or future indexers may run after it.
+They do not replace grep.
 
 ```sh
 rg -n --glob '*.md' '^(title|tags|applies_when):|<module>|<failure-mode>' docs/solutions
 ```
 
-Open likely matches and decide whether each applies to the current work. At
-read time, present evidence wins over stale corpus prose.
+Open likely matches and decide whether each applies to the current work.
+At read time, prefer present evidence over stale corpus prose.
 
 ## Write Discipline
 
@@ -61,10 +60,8 @@ Before adding a learning, check overlap:
 rg -n --glob '*.md' '^(title|tags|applies_when):|<module>|<failure-mode>' docs/solutions
 ```
 
-If a contradiction appears, refresh the smallest coherence neighborhood: the
-candidate learning, directly overlapping learnings, and the checkable source
-anchors. Avoid global rewrites unless multiple learnings prove the pattern has
-changed.
+If a contradiction appears, refresh the smallest related set: the candidate learning, overlapping learnings, and checkable source anchors.
+Avoid global rewrites unless multiple learnings show that the pattern changed.
 
 ## Body Template
 

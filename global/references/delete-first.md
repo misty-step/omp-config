@@ -1,7 +1,7 @@
 # Delete-First Lens
 
-Load this when: choosing a build path, or before adding automation,
-optimization, abstractions, dependencies, wrappers, or surface — not after.
+Load this before choosing a build path or adding automation, optimization, abstractions, dependencies, wrappers, or surface.
+Do not wait until after you add them.
 
 Use while shaping, refactoring, or automating. The order matters.
 
@@ -32,17 +32,14 @@ If the third line is doing all the work, the design is probably backwards.
 
 ## Erasure (during and after the work)
 
-Delete-first governs what you build; erasure governs what you leave behind.
-Anything that only ever grows — code, comments, docs, rules, memory — is
-rotting.
+Delete-first governs what you build. Erasure governs what remains.
+Remove material that grows without purpose, including code, comments, docs, rules, and memory.
 
-- Standing hunt: while working, even mid-task, remove duplicated concepts,
-  dead code, and tangled logic you pass. Your own confusion marks the spot —
-  what surprised you or was hard to follow is a bad abstraction; untangle it
-  now, not in a follow-up.
-- Swap rule: replacing X with Y includes deleting X — implementation, tests,
-  docs, config. Compatibility remnants survive only on explicit request.
-- Same-diff hygiene: a refactor deletes or rewrites the comments it staled; a
-  completed TODO leaves with the fix; a decommissioned surface takes its
-  article and inbound links with it.
-- Closeout: what did this change make obsolete, and did I delete it?
+- While working, remove duplicated concepts, dead code, and tangled logic.
+  Confusion identifies a bad abstraction. Untangle it now.
+- Swap rule: replacing X with Y includes deleting X — implementation, tests, docs, and config.
+  Compatibility remnants survive only on explicit request.
+- Same-diff hygiene: a refactor deletes or rewrites stale comments.
+  A completed TODO leaves with the fix.
+  A decommissioned surface loses its article and inbound links.
+- Closeout: identify what this change made obsolete, then delete it.
