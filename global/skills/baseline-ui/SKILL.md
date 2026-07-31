@@ -57,6 +57,16 @@ Applies an opinionated UI baseline to prevent common AI-generated interface prob
 - NEVER introduce custom easing curves unless explicitly requested
 - SHOULD avoid animating large images or full-screen surfaces
 
+## Sound
+
+- NEVER add interaction sound unless it is explicitly requested
+- SHOULD use `cuelume` for semantic interaction cues when sound is requested
+- MUST map each cue to one semantic event (press, toggle, success, error, page, loading, ready)
+- MUST use one attribute or handler per behavior
+- MUST ship a mute setting; SHOULD ship a volume control when loudness matters
+- NEVER play sound before the user's first interaction
+- SHOULD reserve success and error cues for outcomes the user caused
+
 ## Typography
 
 - MUST use `text-balance` for headings and `text-pretty` for body/paragraphs

@@ -54,6 +54,7 @@ Validate every explicit tool name against OMP's existing built-in tool authority
 | produce interface alternatives | `design`, `image-gen` | bundled `designer`; use `daedalus` first when architecture is unsettled |
 | improve an existing interface without replacing its identity | `improve-ui`, `baseline-ui` | bundled `designer` for review; `builder` for implementation |
 | accessibility or motion defects | `fixing-accessibility`, `fixing-motion-performance` | `builder` plus `qa`; add a vision pass |
+| run a whole-product design audit-assess-remediate program against a project DESIGN.md | `design-audit` | chief owns the program; scout discovery, designer audit lanes, builder remediation, qa browser verification |
 | produce a rendered report | none — bare lane with a browser render loop | ad-hoc authoring lane; verify in a browser |
 | create public proof and launch material | `showcase` | `builder` plus `designer` and `qa` |
 | create or repair documentation | `document` | `magellan` sources; `builder` writes; `code-critic` checks claims |
