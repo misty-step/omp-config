@@ -4,19 +4,16 @@ Query the user's Readwise Reader library for saved articles, highlights, and doc
 
 ## Authentication
 
-Route every call through Mint.
-Give the shell only the stable proxy URL and the non-secret placeholder.
-Keep the Readwise credential out of the shell:
+Run these commands only from an OMP process launched inside the operator's
+Agent Vault wrapper. Configure a service rule for `readwise.io/api/*`; the
+rule owns and replaces `Authorization` at the upstream boundary.
+
 ```bash
-: "${MINT_BASE_URL:?set MINT_BASE_URL to the Mint broker origin}"
-READWISE_BASE_URL="${MINT_BASE_URL%/}/proxy/https/readwise.io"
-READWISE_AUTH_HEADER="Authorization: Token __mint.readwise.default__"
-curl -s -o /dev/null -w "%{http_code}" "$READWISE_BASE_URL/api/v2/auth/" \
-  -H "$READWISE_AUTH_HEADER"
-# 204 = valid
+READWISE_BASE_URL="https://readwise.io"
 ```
 
-Use `READWISE_BASE_URL` and `READWISE_AUTH_HEADER` for every request.
+Do not set, print, or pass a Readwise credential from agent context. The
+commands below use the upstream URL and rely on the approved service rule.
 
 ## Core Operations
 
@@ -26,7 +23,6 @@ No full-text search endpoint exists. Fetch documents, then filter them client-si
 
 ```bash
 curl -s "$READWISE_BASE_URL/api/v3/list/?limit=100" \
-  -H "$READWISE_AUTH_HEADER" \
   | jq '[.results[] | select(((.title // "") + " " + (.summary // "")) | test("TOPIC"; "i"))]
         | .[] | {title: (.title // "(untitled)"), source_url, summary: (.summary // ""), reading_progress, word_count, saved_at}'
 ```
@@ -37,7 +33,6 @@ Search all locations by default. Add `&location=later` or `&category=article` to
 
 ```bash
 curl -s "$READWISE_BASE_URL/api/v3/list/?location=new&limit=20" \
-  -H "$READWISE_AUTH_HEADER" \
   | jq '.results[] | {title: (.title // "(untitled)"), category, source_url, summary: (.summary // ""), saved_at, word_count}'
 ```
 
@@ -53,7 +48,6 @@ Locations: `new`, `later`, `shortlist`, `archive`, `feed`
 
 ```bash
 curl -s "$READWISE_BASE_URL/api/v3/tags/" \
-  -H "$READWISE_AUTH_HEADER" \
   | jq '.results[] | .name'
 ```
 
@@ -61,7 +55,6 @@ curl -s "$READWISE_BASE_URL/api/v3/tags/" \
 
 ```bash
 curl -s "$READWISE_BASE_URL/api/v3/list/?tag=TAG_NAME&limit=20" \
-  -H "$READWISE_AUTH_HEADER" \
   | jq '.results[] | {title: (.title // "(untitled)"), source_url, summary: (.summary // "")}'
 ```
 
@@ -71,7 +64,6 @@ Up to 5 `tag` params allowed. Empty `tag=` finds untagged documents.
 
 ```bash
 curl -s "$READWISE_BASE_URL/api/v3/list/?id=DOCUMENT_ID&withHtmlContent=1" \
-  -H "$READWISE_AUTH_HEADER" \
   | jq '.results[0].html_content'
 ```
 
@@ -81,7 +73,6 @@ Highlights are documents with `parent_id` pointing to the source document.
 
 ```bash
 curl -s "$READWISE_BASE_URL/api/v3/list/?category=highlight&limit=100" \
-  -H "$READWISE_AUTH_HEADER" \
   | jq '[.results[] | select(.parent_id == "DOCUMENT_ID")]
         | .[] | {title: (.title // "(untitled)"), summary: (.summary // ""), notes: (.notes // "")}'
 ```
@@ -95,8 +86,7 @@ CURSOR=""
 while true; do
   PARAMS="limit=100"
   [ -n "$CURSOR" ] && PARAMS="$PARAMS&pageCursor=$CURSOR"
-  RESPONSE=$(curl -s "$READWISE_BASE_URL/api/v3/list/?$PARAMS" \
-    -H "$READWISE_AUTH_HEADER")
+  RESPONSE=$(curl -s "$READWISE_BASE_URL/api/v3/list/?$PARAMS")
   echo "$RESPONSE" | jq '.results[]'
   CURSOR=$(echo "$RESPONSE" | jq -r '.nextPageCursor // empty')
   [ -z "$CURSOR" ] && break
@@ -125,7 +115,6 @@ On `429`, check `Retry-After` header.
 ### Save Something for Later
 ```bash
 curl -s -X POST "$READWISE_BASE_URL/api/v3/save/" \
-  -H "$READWISE_AUTH_HEADER" \
   -H "Content-Type: application/json" \
   -d '{"url": "URL", "location": "later", "tags": ["tag1"]}'
 ```

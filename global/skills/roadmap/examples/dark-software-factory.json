@@ -163,12 +163,12 @@
       "outcome": "Map functions before services, build where Misty Step has a thesis, and delete weak sketches.",
       "proof": "Each service boundary has one authority, failure, privacy, retention, or scale reason. Replaced projects leave no active path.",
       "question": "Which projects should become services, adapters, references, or deletions?",
-      "research": "Compare current projects, provider tools, Ousterhout boundaries, build choices, and the separate Mint architecture decision.",
+      "research": "Compare current projects, provider tools, Ousterhout boundaries, build choices, and the separate Agent Vault architecture decision.",
       "coverage": [
         "Ousterhout design",
         "Build the services ourselves",
         "Old projects can be sketches",
-        "Mint architecture"
+        "Agent Vault architecture"
       ]
     }
   ],

@@ -1,6 +1,6 @@
-# Brokered through production mint (tailnet): apiKey is a PLACEHOLDER, the
-# real key never touches this machine. Wiring + how to extend: global/MINT.md.
+# OpenRouter uses the official upstream URL. Agent Vault's service rule owns
+# and replaces Authorization; this is a non-secret client-side sentinel.
 providers:
   openrouter:
-    baseUrl: "http://100.108.0.89:4949/proxy/https/openrouter.ai/api/v1"
-    apiKey: "__mint.openrouter.default__"
+    baseUrl: "https://openrouter.ai/api/v1"
+    apiKey: "__OPENROUTER_API_KEY__"

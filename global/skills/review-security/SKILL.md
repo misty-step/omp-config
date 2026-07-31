@@ -45,18 +45,16 @@ fake value. Real credentials never appear in a finding or this file.
 
 ### 1. Secret leakage — always `blocking`
 
-This workstation holds zero vendor credential bytes (`global/MINT.md`).
-Credentialed calls route through the mint broker; config carries a
-placeholder shaped `__mint.<service>.<name>__` and the broker resolves it
-host-side after the request leaves the agent. Anything else key-shaped in
-the diff is a mint-bypass bug.
+This workstation holds zero vendor credential bytes. An operator-configured
+Agent Vault wrapper supplies the scoped proxy and CA environment, while its
+service rules own and replace `Authorization` at the upstream boundary.
+OpenRouter config carries the non-secret `__OPENROUTER_API_KEY__` sentinel;
+it is not a credential or an Agent Vault management token.
 
-Flag: a literal credential in code/config/fixtures/tests/logs — e.g.
-`apiKey: "sk-live-4f9a..."` where the diff should carry
-`apiKey: "__mint.openrouter.default__"`; a placeholder replaced by a literal
-mid-diff — e.g. `Authorization: __mint.stripe.default__` changed to
-`Authorization: Bearer rk_live_abc123`; a secret or resolved value echoed to
-stdout or an error — e.g. `console.log("using key", apiKey)`.
+Flag: a literal credential in code/config/fixtures/tests/logs, a child route
+that bypasses the wrapper's proxy/CA boundary, or a resolved value echoed to
+stdout or an error. A provider sentinel may remain in a diff only when the
+documented provider contract names it; never replace it with a real key.
 
 ### 2. Authorization
 
@@ -94,13 +92,10 @@ on attacker-reachable input.
 
 Flag any change widening what a credential, token, role, or process can
 reach, and name the widening explicitly (from X to Y), not "this could be
-risky": a mint policy route broadened from a narrow path to a wildcard —
-e.g. `require_placeholder` scope narrowed from
-`/proxy/https/api.stripe.com/v1/charges` to `/proxy/https/api.stripe.com/*`;
-a service account or DB role granted a broader verb/resource than the diff's
-purpose needs — e.g. a read-only reporting job now runs with `db.write`; a
-process boundary removed — e.g. a sandboxed worker gains a raw shell or
-outbound network access it didn't have.
+risky": an Agent Vault service rule widened from a narrow host/path to an
+unneeded wildcard; a service account or DB role granted a broader
+verb/resource than the diff's purpose needs; or a child that gains arbitrary
+environment authority instead of the documented proxy/CA allowlist.
 
 ### 6. Weakened gate — always `blocking`
 

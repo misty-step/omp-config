@@ -177,6 +177,10 @@
     {
       "path": "extensions/herdr-omp-agent-state.ts",
       "owner": "herdr"
+    },
+    {
+      "path": "extensions/agent-usage-telemetry.ts",
+      "owner": "agent-usage-telemetry"
     }
   ],
   "excluded_runtime_state": [

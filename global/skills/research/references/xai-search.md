@@ -31,19 +31,19 @@ Do not limit Grok to social sentiment.
 
 ## API Access
 
-Set `XAI_BASE_URL` to `${MINT_BASE_URL}/proxy/https/api.x.ai/v1`.
-The runtime rejects direct-vendor, alternate-origin, query-bearing, and
-sibling-path values.
-Auth: `Authorization: Bearer __mint.xai.default__`
-Use the OpenAI Responses API-compatible interface.
-The default model is `grok-4.3` unless the environment overrides it.
+Base URL: `https://api.x.ai/v1`.
+Run the caller inside the operator-configured Agent Vault wrapper. An
+approved service rule for `api.x.ai` owns and replaces `Authorization`; this
+source does not define an xAI credential placeholder or expose provider keys
+in agent context.
+API: OpenAI Responses API compatible. Default model: `grok-4.3` unless the
+environment overrides it.
 
 ## Web Search
 
 ```bash
-curl "${XAI_BASE_URL:?set XAI_BASE_URL to Mint's xAI proxy route}/responses" \
+curl "${XAI_BASE_URL:-https://api.x.ai/v1}/responses" \
   -H "Content-Type: application/json" \
-  -H "$(printf '%s: Bearer %s' Authorization __mint.xai.default__)" \
   -d '{
   "model": "grok-4.3",
   "input": [{"role": "user", "content": "What is the latest on AI regulation?"}],
@@ -72,9 +72,8 @@ curl "${XAI_BASE_URL:?set XAI_BASE_URL to Mint's xAI proxy route}/responses" \
 ## X Search
 
 ```bash
-curl "${XAI_BASE_URL:?set XAI_BASE_URL to Mint's xAI proxy route}/responses" \
+curl "${XAI_BASE_URL:-https://api.x.ai/v1}/responses" \
   -H "Content-Type: application/json" \
-  -H "$(printf '%s: Bearer %s' Authorization __mint.xai.default__)" \
   -d '{
   "model": "grok-4.3",
   "input": [{"role": "user", "content": "What are people saying about Claude 4?"}],
@@ -110,22 +109,10 @@ curl "${XAI_BASE_URL:?set XAI_BASE_URL to Mint's xAI proxy route}/responses" \
 
 ## SDK Usage
 
-### OpenAI-compatible Python
-```python
-from openai import OpenAI
-
-client = OpenAI(api_key="__mint.xai.default__", base_url=os.environ["XAI_BASE_URL"])
-
-response = client.responses.create(
-    model="grok-4.3",
-    input=[{"role": "user", "content": query}],
-    tools=[{"type": "x_search"}],  # or "web_search"
-)
-```
-
-Omit the Vercel xAI provider and xAI native SDK examples.
-The versions evaluated for this integration do not expose the base-URL seam required to force every request through Mint.
-Use the OpenAI-compatible client or the built-in provider above.
+Use the provider's configured OpenAI-compatible client only inside the
+operator-configured Agent Vault wrapper. The approved service rule supplies
+the upstream `Authorization` value; this harness source does not provide an
+API-key argument or credential placeholder.
 
 ## Citations
 

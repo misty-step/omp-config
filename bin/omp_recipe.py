@@ -29,13 +29,10 @@ REASONING_LEVELS = {
     "max",
     "auto",
 }
-OPENROUTER_BASE_URL = "http://100.108.0.89:4949/proxy/https/openrouter.ai/api/v1"
-# The mint alias whose credential every compiled bundle runs as. Overridable
-# so a workload can ride its own child key with its own spend cap and its own
-# audit trail, without forking the compiler.
-# The value is a PLACEHOLDER name, never a credential: the broker resolves it
-# host-side, and an invalid name fails closed at the proxy with 403.
-OPENROUTER_API_KEY = f"__mint.openrouter.{os.environ.get('OMP_RECIPE_MINT_ALIAS', 'default')}__"
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+# Agent Vault's service rule replaces the client-side Authorization value when
+# OMP runs inside an operator-configured vault wrapper.
+OPENROUTER_API_KEY = "__OPENROUTER_API_KEY__"
 _STATE_FILES = {
     "agent.db",
     "agent.db-shm",
@@ -586,9 +583,17 @@ def prepare_runtime(
             "LANG",
             "LC_ALL",
             "TERM",
+            "HTTP_PROXY",
+            "HTTPS_PROXY",
+            "NODE_USE_ENV_PROXY",
+            "NO_PROXY",
             "SSL_CERT_FILE",
             "SSL_CERT_DIR",
-            "NO_PROXY",
+            "NODE_EXTRA_CA_CERTS",
+            "REQUESTS_CA_BUNDLE",
+            "CURL_CA_BUNDLE",
+            "GIT_SSL_CAINFO",
+            "DENO_CERT",
         )
         env = {key: source_env[key] for key in inherited_keys if key in source_env}
         env.update(

@@ -50,7 +50,7 @@ Do not guess it from the repo path:
 | `misty-step/brainrot` | `brainrot-publishing-house` |
 | `misty-step/chrondle` | `chrondle` |
 | `misty-step/linejam` | `linejam` |
-| `misty-step/memory-engine` | `memory-engine-api` |
+| `misty-step/scry` | `memory-engine-api` |
 | `misty-step/misty-step` | `misty-step` |
 | `misty-step/powder` | `powder` |
 | `misty-step/sploot` | `sploot-web` |

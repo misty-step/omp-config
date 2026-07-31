@@ -57,8 +57,21 @@ FAKE_CHILD = (
             "models": (agent / "models.yml").read_text(),
             "proxy_env": {
                 key: os.environ.get(key)
-                for key in ("HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY")
+                for key in (
+                    "HTTP_PROXY",
+                    "HTTPS_PROXY",
+                    "NODE_USE_ENV_PROXY",
+                    "NO_PROXY",
+                    "SSL_CERT_FILE",
+                    "NODE_EXTRA_CA_CERTS",
+                    "REQUESTS_CA_BUNDLE",
+                    "CURL_CA_BUNDLE",
+                    "GIT_SSL_CAINFO",
+                    "DENO_CERT",
+                    "ALL_PROXY",
+                )
             },
+            "arbitrary_env": os.environ.get("OMP_RECIPE_ARBITRARY"),
         }
 
     for line in sys.stdin:
@@ -295,17 +308,25 @@ class BuzzOmpTests(unittest.TestCase):
         self.assertIn('      - "openrouter/second:high"', config)
         self.assertIn('      - "openrouter/third:off"', config)
 
-    def test_provider_file_uses_mint_placeholder(self) -> None:
+    def test_provider_file_uses_upstream_url_and_agent_vault_sentinel(self) -> None:
         _, messages, _ = self.invoke(self.make_bundle(), self.session_request())
         models = next(message for message in messages if message["kind"] == "runtime")[
             "models"
         ]
         self.assertIn(
-            'baseUrl: "http://100.108.0.89:4949/proxy/https/openrouter.ai/api/v1"',
+            'baseUrl: "https://openrouter.ai/api/v1"',
             models,
         )
-        self.assertIn('apiKey: "__mint.openrouter.default__"', models)
+        self.assertIn('apiKey: "__OPENROUTER_API_KEY__"', models)
+        self.assertNotIn("http://100.108.0.89:4949", models)
+        self.assertNotIn("__mint.", models)
+        self.assertNotIn("MINT_BASE_URL", models)
         self.assertNotRegex(models, r"sk-[A-Za-z0-9]{12,}")
+
+    def test_agent_vault_adds_no_mcp_or_skill(self) -> None:
+        catalog = json.loads((ROOT / "global" / "mcp.json").read_text())
+        self.assertNotIn("agent-vault", catalog["mcpServers"])
+        self.assertFalse((ROOT / "global" / "skills" / "agent-vault").exists())
 
     def test_validation_failures(self) -> None:
         base = {
@@ -431,22 +452,33 @@ class BuzzOmpTests(unittest.TestCase):
         self.assertIn("skill demo must not contain symlinks", message)
         self.assertIn("outside.md", message)
 
-    def test_proxy_credentials_are_not_inherited(self) -> None:
+    def test_agent_vault_proxy_and_ca_env_are_allowlisted(self) -> None:
+        expected = {
+            "HTTP_PROXY": "http://agent-vault-proxy.test:14322",
+            "HTTPS_PROXY": "http://agent-vault-proxy.test:14322",
+            "NODE_USE_ENV_PROXY": "1",
+            "NO_PROXY": "localhost,127.0.0.1",
+            "SSL_CERT_FILE": "/tmp/agent-vault-ca.pem",
+            "NODE_EXTRA_CA_CERTS": "/tmp/agent-vault-ca.pem",
+            "REQUESTS_CA_BUNDLE": "/tmp/agent-vault-ca.pem",
+            "CURL_CA_BUNDLE": "/tmp/agent-vault-ca.pem",
+            "GIT_SSL_CAINFO": "/tmp/agent-vault-ca.pem",
+            "DENO_CERT": "/tmp/agent-vault-ca.pem",
+            "ALL_PROXY": None,
+        }
         with patch.dict(
             os.environ,
             {
-                "HTTP_PROXY": "http://user:secret@example.test",
-                "HTTPS_PROXY": "https://user:secret@example.test",
-                "ALL_PROXY": "socks5://user:secret@example.test",
+                **{key: value for key, value in expected.items() if value is not None},
+                "ALL_PROXY": "socks5://unapproved-proxy.test:1080",
+                "OMP_RECIPE_ARBITRARY": "must-not-reach-child",
             },
             clear=False,
         ):
             _, messages, _ = self.invoke(self.make_bundle(), self.session_request())
         runtime = next(message for message in messages if message["kind"] == "runtime")
-        self.assertEqual(
-            runtime["proxy_env"],
-            {"HTTP_PROXY": None, "HTTPS_PROXY": None, "ALL_PROXY": None},
-        )
+        self.assertEqual(runtime["proxy_env"], expected)
+        self.assertIsNone(runtime["arbitrary_env"])
 
     def test_forbidden_model_selection_is_rejected_without_forwarding(self) -> None:
         request = (

@@ -3,11 +3,11 @@ disable-model-invocation: true
 name: factory-apps
 description: >
   Route Misty Step factory application capabilities across Canary, Powder,
-  Landmark, Aesthetic, and mint. Use owned surfaces for observability, work
-  state, release intelligence, design law, and credentialed outbound calls.
-  Mode B has no active workflow plane; do not invent a replacement. Trigger:
-  /factory-apps, /factory-stack.
-argument-hint: "[canary|powder|landmark|aesthetic|mint|audit]"
+  Landmark, Aesthetic, and the local Agent Vault wrapper. Use owned surfaces
+  for observability, work state, release intelligence, design law, and
+  credentialed outbound calls. Mode B has no active workflow plane; do not
+  invent a replacement. Trigger: /factory-apps, /factory-stack.
+argument-hint: "[canary|powder|landmark|aesthetic|agent-vault|audit]"
 ---
 
 # /factory-apps
@@ -27,7 +27,7 @@ registration in `global/mcp.json`.
 | release intelligence, versions, changelogs, release notes, release kit, fleet adoption | Landmark | `misty-landmark` and `landmark describe --json` / dry-run CLI/action paths | `docs/agent-integration.md`, `docs/fleet-integration-playbook.md` |
 | UI/UX, Misty Step design law, tokens, static design registry, rendered design gate | Aesthetic | `misty-aesthetic`, `@misty-step/aesthetic` package, static API, law gate | `docs/ADOPTING.md`, `DESIGN.md` |
 | event-triggered agents, reflex loops, durable runs | unavailable | Mode B has no active workflow plane; keep work in Mode A until a future product is named | do not invent a replacement |
-| outbound API call needing a credential (API key, token, secret) | mint | `global/skills/mint/SKILL.md` — egress proxy contract (`X-Mint-Capability` header + `__mint.<service>.<name>__` placeholders) | `mint policy check`/`mint audit tail`/`mint alias list` CLI (operator-only) |
+| outbound API call needing a credential (API key, token, secret) | Agent Vault-wrapped parent | Operator launches `agent-vault vault run --vault default -- omp` or the proxy-only `agent-vault run -- omp`; service rules own `Authorization` | Keep provider interfaces generic; no Agent Vault MCP or skill |
 
 ## Operating Rule
 
@@ -44,11 +44,10 @@ Use the owned app first. Follow these constraints:
 - **Mode B** — No active event plane is available for triggered, scheduled,
   durable, reflexive, or other unattended work. Keep ad-hoc operator work in
   Mode A and do not invent a replacement workflow service.
-- **mint** — An agent never holds credential bytes.
-  It carries a capability token and placeholders.
-  mint resolves the secret at the proxy boundary.
-  It is not in `.external/` yet because no vendorable `SKILL.md` exists.
-  Read `global/skills/mint/SKILL.md` directly.
+- **Agent Vault** — The local wrapper injects a scoped proxy session and the
+  documented proxy/CA variables. Its service rules own and replace
+  `Authorization`. It is not a sandbox, and this harness adds no Agent Vault
+  MCP or skill.
 
 ## Current Audit
 

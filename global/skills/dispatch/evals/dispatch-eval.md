@@ -20,8 +20,8 @@ A bare prompt should lose on at least two of three fixtures.
    a new error path. Correct route: `builder` plus `deliver` and `ci`;
    Powder MCP; independent `qa` verifier.
 2. High-risk production latency incident with Canary evidence and an unknown
-   recent deploy. Correct route: `cassandra` plus `factory-apps`,
-   `estate-infrastructure`, and `mint`; Canary CLI/API; reproduce before repair.
+   recent deploy. Correct route: `cassandra` plus `factory-apps` and
+   `estate-infrastructure`; Canary CLI/API; reproduce before repair.
 3. Meaningful structural diff that needs the canonical code-quality review leaf
    and a release decision. Correct route: `reviewer` plus `code-review`,
    `peer-harnesses`, and `ci`; use cross-family independent lanes and have

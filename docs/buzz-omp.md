@@ -49,7 +49,7 @@ A recipe uses schema `omp.recipe.v1`.
 }
 ```
 
-The first model is the primary model. Later entries form the ordered fallback chain. Providers are not restricted to OpenRouter. The current runtime supplies the Mint placeholder configuration when a recipe selects OpenRouter; other provider names use OMP's provider configuration.
+The first model is the primary model. Later entries form the ordered fallback chain. Providers are not restricted to OpenRouter. When a recipe selects OpenRouter, the runtime renders the official upstream URL and non-secret `__OPENROUTER_API_KEY__` sentinel; an operator-configured Agent Vault service rule replaces `Authorization` only when OMP runs inside an Agent Vault wrapper. Other provider names use OMP's generic provider configuration. This harness adds no Agent Vault skill or MCP.
 
 Paths are relative to the recipe file's directory. `instructions` names one file. Each skill or task-skill `path` names a complete directory whose root contains `SKILL.md`; the compiler packages every nested file and directory. It rejects path traversal, symbolic links at any depth, hard-linked regular files at any depth, duplicate skill names, duplicate skill source paths, duplicate model entries, unknown keys, and malformed MCP entries.
 

@@ -101,11 +101,11 @@ model in-pane:
 Verify each lane with `herdr agent wait <lane> --until working --timeout 30000`
 after the kick, or use `herdr agent list` to confirm `working` within ~30 s.
 
-Also know the mint-side cause: a lifetime `max_calls` policy cap with no
-`window_seconds` denies ALL OpenRouter-routed calls until the rule gains a
-window. The 2026-07-21 incident was fixed in mint `ed65ec3`. If the stall is
-OpenRouter-specific and the error says `call limit exhausted`, check the mint
-broker rule before you churn lane models.
+Also know the local Agent Vault cause: a missing or denied OpenRouter service
+rule, an unapproved credential slot, or a bypassed proxy/CA environment can
+stall only OpenRouter-routed calls. Inspect the operator-visible service
+status and request log without printing credential values before churning
+lane models.
 
 ## Model palette notes (R90 convention)
 

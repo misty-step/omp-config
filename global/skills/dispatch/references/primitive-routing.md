@@ -18,7 +18,7 @@ Give each skill to the lane that owns its outcome.
 | one static critique lane | `code-critic` | exactly one injected review lens; carries no standing doctrine | another model family if its finding decides release |
 | live verification | `qa` | `verify-live`, `ci`; add surface-specific skills | a different model family from the author |
 | persona-driven QA user coordination | `qa-user` | `qa-users`, `dispatch` | OMP root first explores repository/product docs, rules, scripts, and live local/dev/staging browser entrypoints; then the no-read coordinator dispatches browser-only `qa-user-leaf` instances; root owns validation, triage, suppression, RCA, deduplication, and serialized tracker or PR writes |
-| production incident or digital forensics | `cassandra` | `factory-apps`, `estate-infrastructure`, `mint` | replay the original failure and watch the live signal |
+| production incident or digital forensics | `cassandra` | `factory-apps`, `estate-infrastructure` | replay the original failure and watch the live signal |
 | contested decision | `solomon` | add `council` only through an ad-hoc lane that can execute it | reversal condition and cheapest experiment |
 | visual product design | bundled `designer` | `design`, `image-gen`; add UI skills below | Gemini 3.6 Flash rendered pass plus `qa` for behavior |
 | bounded read-only lookup | bundled `scout` | task-named hidden skill only | parent checks the cited source |
@@ -67,7 +67,7 @@ Validate every explicit tool name against OMP's existing built-in tool authority
 | design an MCP surface | `mcp-design`, `harness-engineering` | `daedalus` architecture; `builder` implementation; `qa` replay |
 | operate Misty Step apps | `factory-apps`; then the named app skill or MCP | `cassandra` for incidents; `builder` for planned changes |
 | operate Estate infrastructure | `estate-infrastructure` | `cassandra` for incidents; `builder` for approved changes |
-| call a credentialed vendor API | `mint` | the specialist lane that owns the call; never expose credential bytes |
+| call a credentialed vendor API | Agent Vault wrapper | the specialist lane that owns the call; never expose credential bytes |
 | manage Powder work | `powder` | the lane that owns the card; `curator` for board-wide work |
 | prepare remote public sandboxes | `sprites` | `builder` with a clean checkpoint |
 | post an Overmind milestone | `overmind-feed-post` | the lane that produced the milestone |
@@ -98,7 +98,7 @@ A disabled MCP name is never a route.
 | Powder work ledger | Powder MCP; claim one card before mutation |
 | R90 work ledger | Habitat MCP only; never Powder |
 | production health and incidents | Canary CLI/API through `factory-apps`; the Canary MCP stays disabled |
-| vendor credentials | Mint broker; no local secret bytes |
+| vendor credentials | Agent Vault-wrapped parent; no local secret bytes |
 | GitHub repository operations | GitHub device tool; use repository URLs as evidence |
 | model or harness second opinion | `peer-harnesses`, `council`, or `oracle` according to the required surface |
 | durable operator feed update | Overmind tools; use `overmind-feed-post` when attribution requires stdio |
