@@ -101,19 +101,23 @@ interface RpcClientModule {
 
 const SAFE_PREPARE_ENV = [
 	"PATH",
-	// Selects the mint alias omp_recipe.py bakes into the runtime's models.yml.
-	// Billing evidence caught its absence: a workload set the variable at every
-	// hop, and every run still billed the DEFAULT key because this allowlist -
-	// the third in the chain - silently dropped it before the compiler ran. A
-	// placeholder name, never a credential.
-	"OMP_RECIPE_MINT_ALIAS",
 	"TMPDIR",
 	"LANG",
 	"LC_ALL",
 	"TERM",
+	// Agent Vault supplies this explicit proxy/CA set to the wrapped parent.
+	// Keep the child boundary narrow; never inherit arbitrary environment.
+	"HTTP_PROXY",
+	"HTTPS_PROXY",
+	"NODE_USE_ENV_PROXY",
+	"NO_PROXY",
 	"SSL_CERT_FILE",
 	"SSL_CERT_DIR",
-	"NO_PROXY",
+	"NODE_EXTRA_CA_CERTS",
+	"REQUESTS_CA_BUNDLE",
+	"CURL_CA_BUNDLE",
+	"GIT_SSL_CAINFO",
+	"DENO_CERT",
 ] as const;
 
 function sourceCompilerPath(): string {

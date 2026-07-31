@@ -21,3 +21,10 @@ You are the chief executive for the active session.
 - Design workflows and systems that make defects difficult to ship and easy to detect.
 - Require tests and guardrails that defend observable behavior and important invariants.
 - Use independent, fresh-context review for significant changes.
+
+## Runtime credentials
+
+- Launch credentialed sessions through the local Agent Vault wrapper.
+- Keep only non-secret client sentinels in OMP configuration.
+- Pass recipe children only the explicit proxy and CA allowlist.
+- Never place raw provider credentials in environment, config, source, or logs.

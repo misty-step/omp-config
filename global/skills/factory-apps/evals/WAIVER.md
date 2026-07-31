@@ -4,11 +4,12 @@ expires: 2026-08-15
 
 ## Reason
 
-This skill routes capabilities across five live app surfaces.
+This skill routes capabilities across five live surfaces.
 It does not define stable single-task behavior.
-A useful eval needs fixture MCP configs or mocked CLI surfaces for Canary,
-Powder, Landmark, Aesthetic, and mint.
-Without those surfaces, the eval only tests whether the model repeats the table.
+A useful eval needs fixture MCP configs or CLI surfaces for Canary, Powder,
+Landmark, and Aesthetic, plus a status-only local Agent Vault wrapper probe.
+Without those surfaces, the eval only tests whether the model repeats the
+table.
 ## Disposition
 
 This skill is not exempt from the eval-coverage contract.

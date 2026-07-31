@@ -201,15 +201,23 @@ describe("recipe task runner", () => {
 		expect(childPidFileExistedAtCallTime).toBeFalse();
 	});
 
-	test("OMP_RECIPE_MINT_ALIAS survives the prepare env filter into models.yml", async () => {
-		// Billing evidence caught the regression this pins: a workload set the
-		// variable at every hop and every run still billed the DEFAULT key,
-		// because SAFE_PREPARE_ENV - the third allowlist in the chain - dropped
-		// it before the compiler wrote the runtime's models.yml.
-		process.env.OMP_RECIPE_MINT_ALIAS = "prepare-env-proof";
-		// The alias only surfaces for openrouter models, and the shared alpha
-		// fixture deliberately uses a non-network fixture provider - so this
-		// test carries its own minimal bundle.
+	test("Agent Vault proxy and CA env survives the prepare filter", async () => {
+		const agentVaultEnv = {
+			HTTP_PROXY: "http://agent-vault-proxy.test:14322",
+			HTTPS_PROXY: "http://agent-vault-proxy.test:14322",
+			NODE_USE_ENV_PROXY: "1",
+			NO_PROXY: "localhost,127.0.0.1",
+			SSL_CERT_FILE: "/tmp/agent-vault-ca.pem",
+			NODE_EXTRA_CA_CERTS: "/tmp/agent-vault-ca.pem",
+			REQUESTS_CA_BUNDLE: "/tmp/agent-vault-ca.pem",
+			CURL_CA_BUNDLE: "/tmp/agent-vault-ca.pem",
+			GIT_SSL_CAINFO: "/tmp/agent-vault-ca.pem",
+			DENO_CERT: "/tmp/agent-vault-ca.pem",
+		};
+		const managedKeys = [...Object.keys(agentVaultEnv), "OMP_RECIPE_ARBITRARY"];
+		const prior = new Map(managedKeys.map(key => [key, process.env[key]]));
+		for (const [key, value] of Object.entries(agentVaultEnv)) process.env[key] = value;
+		process.env.OMP_RECIPE_ARBITRARY = "must-not-reach-child";
 		const bundle = join(scratch, "openrouter-bundle");
 		rmSync(bundle, { recursive: true, force: true });
 		mkdirSync(bundle, { recursive: true });
@@ -225,17 +233,20 @@ describe("recipe task runner", () => {
 		writeFileSync(join(bundle, ".omp-recipe-owned"), "omp.recipe.v1\n");
 		mkdirSync(join(bundle, "runtime"), { recursive: true });
 		try {
-			let modelsYml = "";
 			const handle = await startRecipeTask({
 				...recipeOptions(bundle, "inspect"),
 				async onPrepared(descriptor) {
-					modelsYml = readFileSync(join(descriptor.agentDir, "models.yml"), "utf8");
+					expect(descriptor.env).toMatchObject(agentVaultEnv);
+					expect(descriptor.env.OMP_RECIPE_ARBITRARY).toBeUndefined();
 				},
 			});
 			await handle.wait();
-			expect(modelsYml).toContain("__mint.openrouter.prepare-env-proof__");
 		} finally {
-			delete process.env.OMP_RECIPE_MINT_ALIAS;
+			for (const key of managedKeys) {
+				const value = prior.get(key);
+				if (value === undefined) delete process.env[key];
+				else process.env[key] = value;
+			}
 		}
 	});
 

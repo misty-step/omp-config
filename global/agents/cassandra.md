@@ -4,7 +4,7 @@ description: Reproduce-first production incident investigator. Explains a live-s
 model: openai-codex/gpt-5.6-luna:xhigh, anthropic/claude-sonnet-5:high
 thinkingLevel: xhigh
 spawns: scout
-autoloadSkills: factory-apps,estate-infrastructure,mint
+autoloadSkills: factory-apps,estate-infrastructure
 readSummarize: true
 ---
 

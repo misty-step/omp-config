@@ -51,9 +51,11 @@ OMP_RECIPE_RPC_CLIENT_MODULE
 OMP_RECIPE_CLI_PATH
 OMP_RECIPE_COMPILER
 OMP_RECIPE_PYTHON
-OMP_RECIPE_MINT_ALIAS
 ```
-`OMP_RECIPE_MINT_ALIAS` selects the mint alias segment baked into a compiled bundle's `models.yml`. It defaults to `default`. The value is a placeholder name, never a credential; an unknown alias fails closed at the mint proxy with HTTP 403.
+
+When OMP runs inside Agent Vault, the compiler forwards only its explicit
+proxy and CA trust allowlist. Arbitrary parent environment variables never
+reach a recipe child.
 
 ## Machine preparation boundary
 

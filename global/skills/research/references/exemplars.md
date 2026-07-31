@@ -94,21 +94,11 @@ When the user provides a seed exemplar, find more projects like it.
 
 ## Discovery: xAI Social Signal
 
-Use xAI X Search to find projects developers praise for performance:
-
-```bash
-curl -s "${XAI_BASE_URL:?set XAI_BASE_URL to Mint's xAI proxy route}/responses" \
-  -H "$(printf '%s: Bearer %s' Authorization __mint.xai.default__)" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "grok-4.20-beta-latest-non-reasoning",
-    "tools": [{"type": "x_search"}],
-    "messages": [{
-      "role": "user",
-      "content": "What open source [DOMAIN] projects do developers praise as exceptionally fast or well-optimized? Looking for projects with disproportionate performance."
-    }]
-  }'
-```
+Use the configured research provider surface for xAI X Search when the
+operator has enabled it. If the request needs vendor credentials, run the
+caller inside the Agent Vault wrapper with an approved service rule; the rule
+owns `Authorization`. This source does not define an xAI credential
+placeholder or expose provider keys in agent context.
 
 Social signal finds projects that benchmarks and READMEs miss.
 It finds projects that developers praise.

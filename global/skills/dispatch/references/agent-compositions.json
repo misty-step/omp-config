@@ -31,8 +31,7 @@
       "thinkingLevel": "xhigh",
       "autoloadSkills": [
         "factory-apps",
-        "estate-infrastructure",
-        "mint"
+        "estate-infrastructure"
       ],
       "spawns": [
         "scout"
