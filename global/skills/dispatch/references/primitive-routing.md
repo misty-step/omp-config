@@ -78,6 +78,8 @@ Validate every explicit tool name against OMP's existing built-in tool authority
 | verify live behavior end to end | `verify-live` | `qa`; cheapest browser tier first, CLI escalation only when needed |
 | coordinate persona-driven application QA | `qa-users` | OMP root discovery and frozen input, then `qa-user` coordinator with browser-only `qa-user-leaf`; root owns validation, triage, suppression, RCA, and serialized tracker query/create/read-back plus deduplicated PR or work-ledger writes |
 | audit, assess, and remediate operational quality with trend evidence | `quality-operations`; audit lanes add `verify-live`, `ci`, `factory-apps` per domain | lead lane owns the loop; `scout` inventory; `qa` audit probes; `fixer` remediation; independent `qa` verification |
+| audit, assess, and remediate system architecture statically | `audit-architecture`; critic lanes inject the `review-tests` lens | chief runs the loop; `magellan`/`scout` discovery; `daedalus` target state at XL; `code-critic` lens audit; `fixer` or `builder` remediation; `qa` plus a fresh `code-critic` verify |
+| audit, assess, and remediate live product correctness | `audit-product`; deterministic lanes load `verify-live`; persona track follows `qa-users` | chief discovery and frozen input; `qa` scenario verdicts; existing `qa-user` coordinator with browser-only `qa-user-leaf` personas; `builder` or `fixer` remediation; fresh `qa` re-verification |
 
 ## MCP and tool routes
 
