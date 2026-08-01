@@ -1,7 +1,7 @@
 ---
 disable-model-invocation: true
 name: baseline-ui
-description: Quickly improve UI code by fixing spacing, hierarchy, typography, and small layout issues. Use when the interface needs a fast cleanup or polish pass.
+description: Improve UI code with baseline layout, accessibility, and motion-performance rules. Use for fast cleanup, WCAG checks, or animation performance reviews.
 ---
 
 # Baseline UI
@@ -94,3 +94,26 @@ Applies an opinionated UI baseline to prevent common AI-generated interface prob
 - MUST give empty states one clear next action
 - SHOULD limit accent color usage to one per view
 - SHOULD use existing theme or Tailwind CSS color tokens before introducing new ones
+
+## Deep accessibility checks
+
+- SHOULD use native `button`, `a`, `input`, and list elements before ARIA roles.
+- MUST label every `input`, `select`, and `textarea` programmatically.
+- MUST link helper text and errors to fields with `aria-describedby`.
+- MUST set `aria-invalid="true"` on invalid fields and announce required fields.
+- MUST expose critical form errors through `aria-live`; do not rely on toasts alone.
+- MUST trap focus in open dialogs, set initial focus, and restore focus to the trigger.
+- MUST let `Escape` close applicable dialogs or overlays.
+- MUST keep the page position stable when a dialog opens.
+- MUST keep keyboard focus visible and never use a positive `tabindex`.
+- MUST provide keyboard equivalents for hover-only interactions.
+
+## Deep motion-performance checks
+
+- MUST batch all DOM reads before DOM writes in one frame.
+- MUST measure layout once, then animate with `transform` or `opacity`.
+- SHOULD use FLIP for layout-like transitions: capture first and last rectangles, invert with `transform`, then transition to identity.
+- SHOULD use Scroll or View Timelines for scroll-linked motion when supported.
+- MUST use `IntersectionObserver` for visibility and pausing.
+- NEVER drive animation from `scrollTop`, `scrollY`, or scroll events.
+- NEVER read layout repeatedly during an animation.

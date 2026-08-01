@@ -49,6 +49,34 @@ stdin.
 | `agy` | Antigravity (Gemini) | `agy --print "<task>"` |
 | `hermes` | Hermes agent | `hermes -z "<task>"` (`-m <model>`) |
 | `oracle` | Oracle browser consult | `npx -y @steipete/oracle --engine browser --model gpt-5.5-pro -p "<task>" --file <paths>` |
+
+### Oracle browser consult details
+
+Use a signed-in ChatGPT browser session for Oracle consults.
+Do not use Oracle API mode.
+Preview every run:
+
+```sh
+npx -y @steipete/oracle --engine browser --model gpt-5.5-pro \
+  --dry-run summary --files-report \
+  -p "<task>" --file "src/**" --file "!**/*.test.*"
+```
+
+Run a consult only after its preview is sensible:
+
+```sh
+npx -y @steipete/oracle --engine browser --model gpt-5.5-pro \
+  --slug "<3-5-words>" \
+  -p "<task>" --file "src/**" --file "!**/*.test.*"
+```
+
+Inspect a detached or timed-out run instead of rerunning it:
+
+```sh
+npx -y @steipete/oracle status --hours 72
+npx -y @steipete/oracle session <id> --render
+```
+
 Current model ids, pricing, context windows, and freshness dates:
 `references/model-provider-harness-index.md`.
 Model and harness facts become stale within days. Favorite rankings also
@@ -91,9 +119,6 @@ critic instead of the full bench.
 - Treat peer output as evidence, not authority. Weigh it, accept or reject it,
   and own the result.
 - Report a failed or rambling lane. Do not re-roll it silently.
-- Use Oracle in browser mode only. Use it for high-context consults through a
-  signed-in ChatGPT session. Do not use Oracle API mode or multi-model API
-  panels by default.
 - For a bounded lane whose evidence should outlive the session, write the
   receipt to Powder. Use a run, comment, or link on the card that receives the
   work. This remains optional for a quick second opinion and useful for a ship

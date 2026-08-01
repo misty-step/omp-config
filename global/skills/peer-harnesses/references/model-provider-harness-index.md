@@ -64,8 +64,8 @@ Source: `global/models.yml`, with command discovery rechecked on
 
 Local probe status proves command discovery only. It does not prove task
 quality, current billing, tool-call reliability, or benchmark performance.
-Oracle status proves the browser-mode dry-run path only. omp-config forbids
-Oracle API mode in its skill and roster defaults.
+Oracle status proves the browser-mode dry-run path only. The OMP roster
+defaults forbid Oracle API mode.
 
 
 ## Realtime And Speech Substrate Snapshot

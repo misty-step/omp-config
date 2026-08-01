@@ -3,10 +3,7 @@
 Use before shaping a contestable idea or framing a strategic groom.
 Treat this as an interview, not a questionnaire.
 Guide the operator through the decision tree until hidden choices are visible and resolved.
-`/shape`'s grill step loads this reference as its primary stance.
-`global/skills/grilling/SKILL.md` is the invocable relative. Its `"grill me"` trigger phrases invoke it directly.
-It shares this lens's batching doctrine instead of duplicating it.
-(2026-07-15 batching update: Revoke one-question-at-a-time everywhere, not only in grilling.)
+The `/shape` step loads this reference as its primary stance.
 The operator dictates and wants all questions at once, not call-and-response.
 
 1. **Batch every round.** Present all currently open questions at once.
@@ -16,6 +13,19 @@ The operator dictates and wants all questions at once, not call-and-response.
    Return the next full batch with unanswered questions, new questions, and follow-ups for ambiguous answers.
    Repeat until no question remains.
    A single awaited question often produces repeated `"I agree"` responses and wastes operator attention.
+
+## Batch format
+
+Use this structure for each round:
+
+```markdown
+## Round <n>
+
+### <Theme>
+1. <question> — recommend: <answer> (<one-line reason>)
+2. <question> — recommend: <answer> (<one-line reason>)
+```
+
 2. **Resolve the tree, branch by branch.** Surface dependent decisions and settle them across batches in dependency order.
    Do not leave a load-bearing choice implicit. It defers a decision to a later stage.
 3. **Recommend an answer.** Give your best answer for every question.
@@ -25,6 +35,9 @@ The operator dictates and wants all questions at once, not call-and-response.
    Do not spend operator attention on what you can resolve yourself.
 5. **Continue until shared understanding.** Stop when the design is settled, not when the operator sounds tired.
    If a load-bearing choice waits for implementation, the interview is not done.
+6. **Confirm before action.** A complete batch does not approve action.
+   State the resulting shared understanding in full.
+   Get explicit operator confirmation before you act.
 
 ## Which Move for Which Unknown
 

@@ -158,7 +158,6 @@ sources:
     license: MIT
     license_path: LICENSE
     consumers:
-      - global/skills/council/SKILL.md
       - global/skills/groom/SKILL.md
 
   - repo: mattpocock/skills

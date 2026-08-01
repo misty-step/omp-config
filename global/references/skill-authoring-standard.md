@@ -1,9 +1,16 @@
 # Skill authoring standard (OMP house conventions)
 
-Judgment rules live in the vendored `global/skills/writing-great-skills/SKILL.md`.
-They define predictability, invocation choice, six failure modes, information hierarchy, leading words, positive framing, and the no-op test.
-Anthropic's progressive-disclosure guidance also applies.
-This file resolves frontier-model tension and adds only house conventions not covered there.
+Use this file as the only shared skill-authoring authority.
+Make predictability the goal: keep the agent's process stable, not its output.
+Use model invocation only when the agent or another skill must reach the skill.
+Use `disable-model-invocation: true` for hand-only skills; use a router when hand-only skills multiply.
+For each ordered step, define a checkable and exhaustive completion criterion.
+If the criterion remains vague and the agent stops early, split later steps across a user or subagent hand-off.
+Split skills only for a distinct invocation branch or to hide later steps that cause premature completion.
+Keep each meaning in one source. Delete irrelevant, stale, duplicated, and no-op lines.
+Use one compact leading word to anchor behavior; repeat it in the body, description, prompts, and code.
+Move branch-only reference behind a condition-specific pointer; keep universal rules inline.
+State the positive target. Pair every unavoidable prohibition with the required action.
 Apply the no-op test to every line, including lines from this standard.
 
 ## Frontmatter
@@ -62,8 +69,7 @@ Never duplicate the table.
 
 ## Frontier-model resolution
 
-WGS asks for ordered steps with completion criteria.
-Frontier guidance warns that procedural checklists over-constrain capable models.
+Ordered steps expose completion criteria, but frontier guidance warns that checklists can over-constrain capable models.
 OMP targets frontier orchestrators by default.
 Encode the invariant process, boundaries, oracle, and stop condition, not a narrated SDLC.
 Add ordered steps only when tool order is semantically required or `/skill-eval` shows the target model fails without them.

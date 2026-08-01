@@ -44,7 +44,7 @@ Create `/tmp/refactor-{project}.md` immediately and keep it current.
 Use it as the handoff if the session ends.
 Track the goal/scope/fitness/stop rule, the current architecture read
 (modules, smells, constraints), the quality system
-(`global/references/quality-system.md`), milestones (planned/active/done),
+(`global/references/verification-system-first.md`), milestones (planned/active/done),
 live-test receipts, review findings, commits, and residual risk.
 Keep secrets and private customer data out of `/tmp`.
 
@@ -71,7 +71,7 @@ Keep secrets and private customer data out of `/tmp`.
    Give critics the artifact and oracle only.
    Never give them the author's reasoning trail (Shared Operating Spine: Prove).
    Here, give them the diff, architecture goal, and fitness tests.
-   Scale critic topology with `global/references/quality-system.md`.
+   Scale critic topology with `global/references/verification-system-first.md`.
    A risky boundary change earns more than one lens.
    Fix blockers before continuing.
 6. **Commit green milestones.** One concern per commit.

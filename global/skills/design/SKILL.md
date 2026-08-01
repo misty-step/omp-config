@@ -84,8 +84,8 @@ count two lanes as one when they share a layout and differ only in paint.
 - Whole-product audit → assessment → remediation program with dispatched
   lanes and a `DESIGN.md` target state → `design-audit`.
 - Baseline hygiene rules for new UI → `baseline-ui`.
-- WCAG/ARIA/keyboard deep pass → `fixing-accessibility`.
-- Animation lag or scroll performance → `fixing-motion-performance`.
+- WCAG/ARIA/keyboard deep pass → `baseline-ui`.
+- Animation lag or scroll performance → `baseline-ui`.
 - Behavior verification and evidence capture → dispatch `qa`.
 
 Update `DESIGN.md` when a durable token or layout fact changes; keep its
