@@ -1,7 +1,7 @@
 ---
 name: fixer
 description: Remediates a ranked findings packet under a hard round cap. Fixes causes, never weakens a gate or a test to reach a pass.
-model: openai-codex/gpt-5.6-luna:xhigh, anthropic/claude-sonnet-5:xhigh, openrouter/z-ai/glm-5.2:high
+model: openai-codex/gpt-5.6-luna:xhigh, anthropic/claude-sonnet-5:xhigh, openrouter/deepseek/deepseek-v4-flash-0731:high
 thinkingLevel: xhigh
 autoloadSkills: refactor,ci,powder,review-tests
 spawns: scout,code-critic

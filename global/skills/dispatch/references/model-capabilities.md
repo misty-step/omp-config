@@ -7,7 +7,7 @@ Keep the factual catalog and freshness evidence in
 Read both when a model id or provider route changed after this file's last update.
 
 
-Last policy update: 2026-07-21.
+Last policy update: 2026-08-01.
 
 ## Preferred capability models
 
@@ -15,14 +15,26 @@ Last policy update: 2026-07-21.
 |---|---|---|---|---|
 | Claude Fable 5 | `anthropic` | high, xhigh | chief execution, ambiguous synthesis, integration, high-consequence judgment | cheap mechanical collection |
 | GPT-5.6 Sol | `openai-codex` | high, xhigh, max | architecture, decomposition, formal reasoning, difficult cross-system debugging | routine file mechanics |
-| GPT-5.6 Luna | `openai-codex` | high, xhigh, max | implementation, refactoring, repository mechanics, long autonomous build lanes | independent review of its own work |
+| GPT-5.6 Luna | `openai-codex` | high, xhigh, max | primary accepted implementation and repository work; text+image tasks; broader hosted tools; cost-sensitive high-volume work when modality and local evidence fit | independent review of its own work; high-consequence arbitration without an independent check |
+| DeepSeek V4 Flash 0731 | `openrouter/deepseek/deepseek-v4-flash-0731` | high locally; first-party low, high, max | cost-shaped, high-volume, bounded text-only agentic and coding work | image/file work, high-consequence arbitration, or default use without local workload proof |
 | Claude Sonnet 5 | `anthropic` | high, xhigh | tool-heavy execution, verification, reliable general work | primary architecture when Sol or Fable fits |
 | Kimi K3 | `kimi-code` | high | long-context research, broad synthesis, design bench work | high-consequence arbitration without an independent check |
 | Grok 4.5 | `xai-oauth` | high | adversarial review, assumption breaking, strategy, independent challenge | implementing the artifact it reviews |
 | GLM 5.2 | `openrouter/z-ai/glm-5.2` | high | design alternatives and implementation alternatives when no native Z.AI route exists | default routing when a native subscription model fits |
-| Gemini 3.6 Flash | `google-antigravity` | low, medium, high | multimodal inspection, broad fast analysis, rendered UI verification | flash-lite work; Antigravity has no flash-lite model |
+| Gemini 3.6 Flash | `openrouter/google/gemini-3.6-flash` | minimal, low, medium, high | multimodal inspection, broad fast analysis, rendered UI verification | flash-lite work; accepted implementation |
 | Gemini 3.5 Flash Lite | `openrouter/google/gemini-3.5-flash-lite` | auto | tiny classification, bounded inventory, cheap fallback | primary judgment or implementation |
 | GPT-5.5 Pro browser | `peer-harnesses` browser mode | provider default | a signed-in, large-context second opinion on hard architecture or debugging | API mode or routine review |
+
+## Cost-aware selection
+
+Select with task quality, marginal spend, modality, provider route, and local harness evidence together.
+Treat independent benchmark near-parity as a prior, not transfer proof for local task quality.
+Use Luna at xhigh for normal accepted builds; raise to max only for demonstrated hard autonomous work.
+The generic `task` role is an explicit policy exemption: it receives unclassified substantive work and stays at Luna max. Declared builder/fixer accepted implementation stays at xhigh on Luna.
+Use DeepSeek Flash 0731 at high for bounded text-only cost-shaped work because local OpenRouter metadata exposes high only. The representative local workload probe is recorded in `global/skills/peer-harnesses/references/model-provider-harness-index.md` and covers only a bounded repository-read task.
+DeepSeek does not replace Luna for accepted implementation, image/file work, or high-consequence arbitration.
+For builder/fixer, DeepSeek is a resilience-only terminal fallback after Luna and Sonnet provider failure; it is not the accepted-implementation primary.
+Select DeepSeek only after the representative local workload evaluation confirms the task fit; that bounded repository-read probe does not prove all workloads.
 
 Use native subscription providers first when they offer the required model.
 For API-key-only providers, route calls through
@@ -68,7 +80,5 @@ Prefer native OAuth routes when capabilities are equivalent.
 Do not replace a current model with an older model from the same class because a subscription catalog lacks the newer model.
 
 
-`global/config.yml` also carries DeepSeek, Qwen, Muse, Haiku, and older tiny
-models in retry chains.
-Use them when a preferred route fails or when a shaped benchmark proves a specific fit.
-Do not promote them into the capability matrix from retry order alone.
+`global/config.yml` carries DeepSeek as the `smol` primary and other models in retry chains.
+The explicit matrix and shaped local evidence justify role fit; retry order never does.

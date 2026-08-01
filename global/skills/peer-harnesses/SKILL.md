@@ -2,9 +2,9 @@
 disable-model-invocation: true
 name: peer-harnesses
 description: |
-  Enumerates the peer AI agent CLIs installed on this machine (codex, pi,
-  goose, opencode, claude, cursor-agent, grok, agy, hermes, oracle)
-  and how to invoke each headlessly. A capability map, not a quota: useful
+  Documents peer AI agent command surfaces (codex, pi, goose, opencode,
+  claude, cursor-agent, grok, agy, hermes, oracle) and how to invoke each
+  headlessly. A capability map, not an installation claim or quota: useful
   for fresh-context adversarial review on a different model family, second
   opinions, competing attempts, and wide benches. Use when: "ask codex",
   "ask another model", "second opinion", "cross-model review", "what AI
@@ -15,7 +15,7 @@ argument-hint: "[provider] [task]"
 
 # /peer-harnesses
 
-These CLIs run headlessly on this machine. They are options, not obligations.
+These command surfaces can run headlessly when installed. They are options, not obligations.
 Native subagents remain the default delegation path. Give a peer harness a
 lane only when it adds a decorrelated model family or a genuinely fresh
 context.
@@ -33,9 +33,11 @@ the orchestrator is trained on it.
 
 ## The CLIs
 
-Installations and probes were verified on 2026-06-14 (grok re-probed 2026-07-08).
-Each row shows the headless form. Add the prompt as the argument or through
-stdin.
+Standalone command discovery was last positive on 2026-06-14, with Grok
+re-probed on 2026-07-08. Native OMP Luna and OpenRouter routes passed
+sentinels on 2026-08-01.
+Probe each standalone command in its normal login environment before dispatch.
+Each row shows its headless form.
 
 | CLI | Stack | Headless invocation |
 |---|---|---|
@@ -79,12 +81,10 @@ npx -y @steipete/oracle session <id> --render
 
 Current model ids, pricing, context windows, and freshness dates:
 `references/model-provider-harness-index.md`.
-Model and harness facts become stale within days. Favorite rankings also
-change. A drop like Grok 4.5 (2026-07-08: Opus-class at $2/$6) can reorder the
-bench overnight. Refresh the index with (/research or /harness-engineering
-models) when its review date passes, a new frontier release appears, or a
-composition decision the index cannot settle occurs. Refresh before dispatching
-on remembered facts.
+Model facts and harness facts become stale within days.
+The OpenAI GPT-5.6 Luna price cut on 2026-07-30 and DeepSeek V4 Flash 0731 release on 2026-07-31 can reorder the bench overnight.
+Refresh the index with `/research` or `/harness-engineering models` when its review date passes, a new frontier release appears, or a composition decision the index cannot settle occurs.
+Refresh before dispatching on remembered facts.
 
 ## Adversarial bench
 

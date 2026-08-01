@@ -14,5 +14,6 @@ Prefer these canonical replacements:
 | `monologue` | repository search and the owning product CLI/API | No OMP skill has a live Monologue MCP contract; do not invent one. |
 | `node_repl` | the repository's declared runtime or `bun`/`node` entrypoint | Runtime execution belongs to the project command, not a global REPL server. |
 | `openaiDeveloperDocs` | `web_search` and `read` against official documentation URLs | Current documentation lookup uses the web tools and keeps provider schemas out of every turn. |
+| `openrouter` | Mint-brokered OpenRouter catalog/API plus `omp models` | The disabled MCP is not a route; Mint owns credentialed egress and the local catalog command exposes the selected metadata. |
 | `qmd` | `grep`, `glob`, `read`, and the local search CLI | Bounded repository search is available without an always-on index server. |
 

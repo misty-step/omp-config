@@ -1,7 +1,7 @@
 ---
-model_reference_review_due: 2026-08-05
-openai_reference_review_due: 2026-07-18
-last_researched: 2026-07-11
+model_reference_review_due: 2026-08-08
+openai_reference_review_due: 2026-08-08
+last_researched: 2026-08-01
 substrate_reference_review_due: 2026-07-20
 substrate_reference_last_researched: 2026-07-13
 speech_reference_review_due: 2026-07-20
@@ -18,54 +18,53 @@ receipts, and this factual sheet.
 
 ## Freshness Contract
 
-- Review due: 2026-08-05.
+- Review due: 2026-08-08.
 - Treat model facts as stale after the review due date.
 - Verify exact model ids, availability, prices, context windows, and benchmark
   claims from live provider docs or catalogs before changing defaults.
 - Record local smoke evidence in delegation receipts. This file may point to
   receipts, but receipts remain proof that a local harness invocation ran.
 
-## Live model facts: the OpenRouter MCP
+## Live model facts: the Mint-brokered OpenRouter catalog
 
-The OpenRouter MCP is the live source for every rotting fact in this file. It
-is a remote HTTP server, user-scoped so it is available in every repo:
-
-```sh
-claude mcp add --scope user --transport http openrouter https://mcp.openrouter.ai/mcp
-claude mcp login openrouter   # one-time OAuth (browser); issues a 7-day, $10-cap key
-```
-
-Tools: `models-list` / `model-get` / `model-endpoints` (catalog, providers,
-live pricing), `benchmarks` (third-party quality scores), `rankings-daily`,
-`credits-get` (balance), `generation-get` (per-call cost/tokens), `chat-send`
-(billable test inference), `docs-search`, `ping`. Use these tools to verify
-slugs, prices, and context windows before changing defaults. Use them to
-compose a `/council` bench from current diverse families. Quote prices at
-dispatch time. Never hardcode prices into gates.
-
+The disabled `openrouter` MCP is not a live authority or runtime route.
+Current OpenRouter facts come from the Mint-brokered catalog/API route and
+`omp models`; never use direct credentials.
+The route is
+`http://mint.tail5f5eb4.ts.net:4949/proxy/https/openrouter.ai/api/v1` with the
+value-free `__mint.openrouter.default__` placeholder. Mint owns upstream
+authorization.
+The current OpenRouter rows below were read on 2026-08-01 through that route
+and the local `omp models` catalog. OpenRouter scope applies only to those
+catalog rows; do not infer local Codex, Claude Code, Antigravity, Cursor, or
+Grok CLI pricing or limits from them.
 
 ## Local Harness Roster
 
-Source: `global/models.yml`, with command discovery rechecked on
-2026-06-14 and selected providers refreshed on the dates below.
+Source: `global/models.yml` and current shell probes. Native OMP routes were
+rechecked on 2026-08-01. Standalone peer commands retain their historical
+probe dates and require a new command probe before dispatch.
 
 | Provider target | Harness / CLI | Active model id | Dispatch surface | Local probe status |
 |---|---|---|---|---|
-| `codex` | OpenAI Codex CLI | `gpt-5.6-luna` | `codex exec --model gpt-5.6-luna --config model_reasoning_effort="medium"` | available |
-| `pi` | Pi coding agent via OpenRouter | `openrouter/moonshotai/kimi-k2.7-code` | `pi -p --no-extensions --provider openrouter --model moonshotai/kimi-k2.7-code --thinking medium` | available |
-| `goose` | Goose CLI via OpenRouter | `openrouter/moonshotai/kimi-k2.7-code` | `goose run --provider openrouter --model moonshotai/kimi-k2.7-code --text` | available |
-| `opencode` | OpenCode CLI via OpenRouter | `openrouter/moonshotai/kimi-k2.7-code` | `opencode run --model openrouter/moonshotai/kimi-k2.7-code --variant max --format json` | available |
-| `claude` | Claude Code CLI | `claude-opus-4-8` (also `claude-fable-5`, `claude-sonnet-5`) | `claude -p --model claude-opus-4-8 --effort medium` | available; fable-5 verified live as a session model 2026-07-08 |
-| `agy` | Antigravity CLI | `gemini-3.5-flash` | `agy --dangerously-skip-permissions --print` | available |
-| `cursor-agent` | Cursor Agent CLI | `composer-2.5` | `cursor-agent -p --model composer-2.5` | available |
-| `grok-build` | xAI Grok Build CLI (v0.2.91) | `grok-4.5` (CLI default; `grok-4.3` retained as cheaper 1M-ctx fallback) | `grok --model grok-4.5 --reasoning-effort high -p` (4.5 effort tiers: low/medium/high) | available; grok-4.5 sentinel dispatch passed 2026-07-08 |
-| `oracle` | Oracle browser consult | `gpt-5.5-pro-browser` | `npx -y @steipete/oracle --engine browser --model gpt-5.5-pro -p` | available via `npx`; dry-run smoke passed 2026-06-16 |
+| `openai-codex` | OMP native provider | `gpt-5.6-luna` | `omp -p --model openai-codex/gpt-5.6-luna --thinking <level>` | available; max sentinel passed 2026-08-01 |
+| `openrouter` | OMP through Mint | `deepseek/deepseek-v4-flash-0731` | `omp -p --model openrouter/deepseek/deepseek-v4-flash-0731 --thinking high` | available; high sentinel passed 2026-08-01 |
+| `codex` | Standalone Codex CLI | `gpt-5.6-luna` | `codex exec --model gpt-5.6-luna --config model_reasoning_effort="medium"` | historical discovery 2026-06-14; re-probe before dispatch |
+| `pi` | Pi coding agent via OpenRouter | `openrouter/moonshotai/kimi-k2.7-code` | `pi -p --no-extensions --provider openrouter --model moonshotai/kimi-k2.7-code --thinking medium` | historical discovery 2026-06-14; re-probe before dispatch |
+| `goose` | Goose CLI via OpenRouter | `openrouter/moonshotai/kimi-k2.7-code` | `goose run --provider openrouter --model moonshotai/kimi-k2.7-code --text` | historical discovery 2026-06-14; re-probe before dispatch |
+| `opencode` | OpenCode CLI via OpenRouter | `openrouter/moonshotai/kimi-k2.7-code` | `opencode run --model openrouter/moonshotai/kimi-k2.7-code --variant max --format json` | historical discovery 2026-06-14; re-probe before dispatch |
+| `claude` | Claude Code CLI | `claude-opus-4-8` | `claude -p --model claude-opus-4-8 --effort medium` | historical discovery 2026-06-14; Fable session route passed 2026-07-08 |
+| `agy` | Antigravity CLI | `gemini-3.5-flash` | `agy --dangerously-skip-permissions --print` | historical discovery 2026-06-14 only; current availability unverified; re-probe before dispatch |
+| `cursor-agent` | Cursor Agent CLI | `composer-2.5` | `cursor-agent -p --model composer-2.5` | historical discovery 2026-06-14; re-probe before dispatch |
+| `grok-build` | xAI Grok Build CLI | `grok-4.5` | `grok --model grok-4.5 --reasoning-effort high -p` | sentinel passed 2026-07-08; re-probe before dispatch |
+| `oracle` | Oracle browser consult | `gpt-5.5-pro-browser` | `npx -y @steipete/oracle --engine browser --model gpt-5.5-pro -p` | `npx` available 2026-08-01; browser dry-run last passed 2026-06-16 |
 | `manual` | Human/imported evidence | none | manual summary | manual |
 
-Local probe status proves command discovery only. It does not prove task
-quality, current billing, tool-call reliability, or benchmark performance.
-Oracle status proves the browser-mode dry-run path only. The OMP roster
-defaults forbid Oracle API mode.
+Command discovery proves availability only.
+A sentinel proves one bounded invocation, not task quality, current billing,
+tool-call reliability, or benchmark performance.
+Oracle status proves the browser-mode dry-run path only.
+The OMP roster defaults forbid Oracle API mode.
 
 
 ## Realtime And Speech Substrate Snapshot
@@ -192,9 +191,11 @@ a bounded local dispatch receipt. A failed provider returns evidence to the
 lead. The lead decides whether to replace the lane.
 
 ## Open-Model / OpenRouter Catalog Snapshot
+
 Pi, Goose, and OpenCode can attempt OpenRouter model ids through their
-configured dispatch surfaces. The rows below contain OpenRouter catalog facts
-captured with `curl -fsSL https://openrouter.ai/api/v1/models` on 2026-07-08.
+configured dispatch surfaces. The table retains earlier dated catalog
+snapshots and adds current rows read through the Mint-brokered OpenRouter
+catalog/API plus `omp models` on 2026-08-01.
 A row does not mean that every harness smoke-tested the model. It is not a
 recommendation. Record a delegation receipt before treating a non-roster model
 as locally proven. OpenRouter rows describe OpenRouter listings only. Do not
@@ -208,7 +209,9 @@ catalog snapshot.
 | `x-ai/grok-4.5` | 2026-07-08 | 500,000 | unknown | `$2.00/M` | `$6.00/M` | `$0.50/M` | text+image+file -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning`, `response_format` |
 | `anthropic/claude-sonnet-5` | 2026-06-30 | 1,000,000 | 128,000 | `$2.00/M` | `$10.00/M` | `$0.20/M` | text+image+file -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
 | `z-ai/glm-5.2` | 2026-06-16 | 1,048,576 | 128,000 | `$0.42/M` | `$1.32/M` | `$0.078/M` | text -> text | `tools`, `tool_choice`, `parallel_tool_calls`, `structured_outputs`, `reasoning`, `reasoning_effort` |
-| `moonshotai/kimi-k2.7-code` | 2026-06-12 | 262,144 | 262,144 | `$0.72/M` | `$3.50/M` | `$0.15/M` | text+image -> text | `tools`, `tool_choice`, `parallel_tool_calls`, `structured_outputs`, `reasoning`, `reasoning_effort` |
+| `google/gemini-3.6-flash` | unknown | 1,048,576 | 65,536 | `$1.50/M` | `$7.50/M` | `$0.15/M` | text+image -> text | `reasoning`, `reasoning_effort` |
+| `google/gemini-3.5-flash-lite` | unknown | 1,048,576 | 65,536 | `$0.30/M` | `$2.50/M` | `$0.03/M` | text+image -> text | `reasoning`, `reasoning_effort` |
+| `moonshotai/kimi-k2.7-code` | 2026-08-01 | 262,144 | 262,144 | `$0.73/M` | `$3.50/M` | `$0.15/M` | text+image -> text | `tools`, `tool_choice`, `parallel_tool_calls`, `structured_outputs`, `reasoning`, `reasoning_effort` |
 | `anthropic/claude-fable-5` | 2026-06-09 | 1,000,000 | 128,000 | `$10.00/M` | `$50.00/M` | `$1.00/M` | text+image+file -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
 | `qwen/qwen3.7-plus` | 2026-06-03 | 1,000,000 | 65,536 | `$0.32/M` | `$1.28/M` | `$0.064/M` | text+image -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
 | `minimax/minimax-m3` | 2026-05-31 | 1,048,576 | 512,000 | `$0.30/M` | `$1.20/M` | `$0.06/M` | text+image+video -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
@@ -218,7 +221,8 @@ catalog snapshot.
 | `x-ai/grok-4.3` | 2026-04-30 | 1,000,000 | unknown | `$1.25/M` | `$2.50/M` | `$0.20/M` | text+image+file -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
 | `openai/gpt-5.5` | 2026-04-24 | 1,050,000 | 128,000 | `$5.00/M` | `$30.00/M` | `$0.50/M` | file+image+text -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
 | `deepseek/deepseek-v4-pro` | 2026-04-24 | 1,048,576 | 384,000 | `$0.435/M` | `$0.87/M` | `$0.003625/M` | text -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
-| `deepseek/deepseek-v4-flash` | 2026-04-24 | 1,048,576 | 65,536 | `$0.09/M` | `$0.18/M` | `$0.018/M` | text -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
+| `deepseek/deepseek-v4-flash-0731` | unknown | 1,048,576 | 384,000 | `$0.14/M` | `$0.28/M` | `$0.0028/M` | text -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
+| `openai/gpt-5.6-luna` | unknown | 1,050,000 | 128,000 | `$0.10/M` | `$0.60/M` | `$0.01/M` | text+image -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
 | `moonshotai/kimi-k2.6` | 2026-04-20 | 262,144 | 262,144 | `$0.65/M` | `$3.41/M` | `$0.14/M` | text+image -> text | `tools`, `tool_choice`, `parallel_tool_calls`, `structured_outputs`, `reasoning` |
 | `z-ai/glm-5.1` | 2026-04-07 | 202,752 | 128,000 | `$0.966/M` | `$3.036/M` | `$0.1794/M` | text -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
 | `x-ai/grok-4.20` | 2026-03-31 | 2,000,000 | unknown | `$1.25/M` | `$2.50/M` | `$0.20/M` | text+image+file -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
@@ -226,10 +230,10 @@ catalog snapshot.
 | `openai/gpt-5.3-codex` | 2026-02-24 | 400,000 | 128,000 | `$1.75/M` | `$14.00/M` | `$0.175/M` | text+image+file -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
 | `qwen/qwen3-coder-next` | 2026-02-04 | 262,144 | 262,144 | `$0.11/M` | `$0.80/M` | `$0.07/M` | text -> text | `tools`, `tool_choice`, `structured_outputs` |
 
-Live OpenRouter readback on 2026-07-11 confirms `moonshotai/kimi-k2.7-code`
-with 262,144 context and max completion, `$0.72/M` input, `$3.50/M` output,
-and `$0.15/M` cache reads. Treat provider catalog values as expiring evidence.
-Refresh before quoting spend or composing long-output lanes.
+Live `omp models` readback on 2026-08-01 confirms `moonshotai/kimi-k2.7-code`
+with 262,144 context and max completion, `$0.73/M` input, `$3.50/M` output,
+and `$0.15/M` cache reads. The catalog also reports minimal, low, medium, and
+high reasoning levels. Treat provider catalog values as expiring evidence.
 
 ## Verified Model Facts
 
@@ -268,21 +272,16 @@ Refresh before quoting spend or composing long-output lanes.
 
 - Active local id for Pi, Goose, and OpenCode: `openrouter/moonshotai/kimi-k2.7-code`.
 - OpenRouter id: `moonshotai/kimi-k2.7-code`.
-- OpenRouter created date: 2026-06-12.
-- OpenRouter context length: 262,144 tokens.
-- OpenRouter max completion tokens: 262,144.
-- OpenRouter API catalog readback on 2026-07-11: input `$0.72/M`, output
-  `$3.50/M`, cache read `$0.15/M`.
+- `omp models` readback on 2026-08-01 reports 262,144 context and 262,144
+  maximum output tokens, `$0.73/M` input, `$3.50/M` output, and `$0.15/M`
+  cache reads.
 - OpenRouter modalities: text+image input to text output.
-- OpenRouter model page excerpt on 2026-06-14 summarized `$0.95/M` input and
-  `$4/M` output. Treat API/page price disagreement as live provider drift and
-  verify before quoting spend.
-- OpenRouter modalities: text+image input to text output.
+- Reasoning levels: minimal, low, medium, and high.
 - OpenRouter supported parameters include `tools`, `tool_choice`,
-  `structured_outputs`, `reasoning`, and `response_format`.
-- Source: `curl -fsSL https://openrouter.ai/api/v1/models` filtered to
-  `moonshotai/kimi-k2.7-code` on 2026-06-14, plus
-  https://openrouter.ai/moonshotai/kimi-k2.7-code.
+  `structured_outputs`, `reasoning`, and `reasoning_effort`.
+- Older 2026-06-14 and 2026-07-11 snapshots are historical and superseded by
+  this 2026-08-01 readback; do not use them for current limits or pricing.
+- Source: `omp models` readback on 2026-08-01.
 
 ### Moonshot Kimi K2.6
 
@@ -333,6 +332,47 @@ Refresh before quoting spend or composing long-output lanes.
 - Source: `curl -fsSL https://openrouter.ai/api/v1/models` filtered to
   `deepseek/deepseek-v4-pro` on 2026-06-14, and
   https://api-docs.deepseek.com/quick_start/pricing.
+
+### DeepSeek V4 Flash 0731
+
+- First-party DeepSeek scope: the July 31, 2026 public beta uses API name
+  `deepseek-v4-flash`. `DeepSeek-V4-Flash-0731` is the deployed version name,
+  not a DeepSeek-direct API alias with the `-0731` suffix. It keeps the preview
+  architecture and size, uses only re-post-training, upgrades only Flash, and
+  adds the native Responses API and Codex adaptation.
+- First-party DeepSeek API scope: the pricing page lists 1M context, 384K
+  maximum output, JSON and tool calls, 2,500 concurrency, `$0.0028/M`
+  cache-hit input, `$0.14/M` cache-miss input, and `$0.28/M` output for
+  `DeepSeek-V4-Flash-0731`.
+- Official model-card scope: DeepSeek V4 Flash 0731 supports low, high, and
+  max effort. Reported scores are Terminal Bench 2.1 82.7, NL2Repo 54.2,
+  Cybergym 76.7, DeepSWE 54.4, Toolathlon Verified 70.3, Agents' Last Exam
+  25.2, AutomationBench Public 25.1, DSBench-FullStack 68.7, and DSBench-Hard
+  59.6. Public code-agent tasks used an unreleased DeepSeek Harness minimal
+  mode at max effort; DSBench-FullStack and DSBench-Hard are internal sets.
+- OpenRouter scope: the current Mint-brokered catalog row is
+  `deepseek/deepseek-v4-flash-0731` with 1,048,576 context, 384K maximum
+  output, `$0.14/M` input, `$0.28/M` output, `$0.0028/M` cache reads, text-only
+  input, reasoning, tools, and structured outputs (catalog read on 2026-08-01).
+- Local OMP scope: the pinned route is
+  `openrouter/deepseek/deepseek-v4-flash-0731:high`, and local metadata exposes
+  high only.
+- A representative bounded repository-read probe on 2026-08-01 used only the
+  exact route `openrouter/deepseek/deepseek-v4-flash-0731:high`, the `read` and
+  `grep` tools, and a repository task reading `global/config.yml`; it
+  successfully extracted the exact `smol`, `task`, `vision`, and `commit`
+  bindings. This bounded probe does not prove all workloads.
+- A local high sentinel passed on 2026-08-01. First-party weights and API
+  support low/high/max, but a max request returned correctly and may have
+  been clamped; do not claim local max support.
+- Independent evaluation scope: Artificial Analysis reports Intelligence Index
+  50 for DeepSeek V4 Flash 0731 at max effort. This is near-parity evidence,
+  not local task-quality proof; evaluation methodology and transfer to this
+  harness remain unverified. Source:
+  https://artificialanalysis.ai/models/deepseek-v4-flash.
+- Sources: https://api-docs.deepseek.com/updates/,
+  https://api-docs.deepseek.com/quick_start/pricing, and
+  https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash-0731.
 
 ### MiniMax M3
 
@@ -437,36 +477,63 @@ Refresh before quoting spend or composing long-output lanes.
 - Source: https://docs.x.ai/developers/models/grok-4 and the OpenRouter
   catalog readback on 2026-07-08.
 
-### OpenAI GPT-5.6 Luna Through Codex
+### OpenAI GPT-5.6 Luna Through Codex and OpenRouter
 
-- Active local id: `gpt-5.6-luna`.
-- Sibling IDs `gpt-5.6-sol` and `gpt-5.6-terra` are also listed by the local
-  Codex model cache; this roster selects Luna and deliberately does not select
-  Terra.
-- Local dispatch surface: Codex CLI `codex exec --model gpt-5.6-luna` with an
-  explicit `model_reasoning_effort` of `high` or `xhigh`.
-- Local model cache readback on 2026-07-11 (Codex CLI 0.144.1) lists Luna as
-  supported by the API with `low`, `medium`, `high`, `xhigh`, and `max`
-  reasoning levels.
-- Smoke evidence: `codex exec -C /tmp --skip-git-repo-check -s read-only
-  -m gpt-5.6-luna -c model_reasoning_effort=high --ephemeral` returned `READY`.
-- The older Codex model row remains historical provider/catalog evidence only;
-  new lanes must use the current local model cache and an explicit effort.
-- Sources: local `~/.codex/models_cache.json`, local `~/.codex/config.toml`,
-  and the 2026-07-11 Codex smoke transcript.
+- Native OpenAI scope: the active local id is `gpt-5.6-luna`. Sibling IDs
+  `gpt-5.6-sol` and `gpt-5.6-terra` remain in the local Codex cache; this
+  roster selects Luna and does not select Terra.
+- OpenAI announcement scope: on 2026-07-30, OpenAI reduced Luna pricing by
+  80% to `$0.20/M` input and `$1.20/M` output. Luna remains available in Codex,
+  ChatGPT Work, and the API.
+- Native OpenAI API scope: the model page lists `$0.20/M` input, `$0.02/M`
+  cached input, `$1.20/M` output, and `$0.25/M` cache writes. Inputs above
+  272K use 2x input and 1.5x output pricing. The API provides 1.05M context,
+  922K maximum input, 128K output, text and image input, reasoning, and broad
+  Responses tools.
+- OpenRouter scope: the current Mint-brokered catalog row is
+  `openai/gpt-5.6-luna` with 1,050,000 context, 128K maximum output,
+  `$0.10/M` input, `$0.60/M` output, `$0.01/M` cache reads, and `$0.125/M`
+  cache writes (catalog read on 2026-08-01). Keep these provider-specific
+  OpenRouter prices distinct from native OpenAI prices.
+- Local OMP scope: `omp models` reports 272K effective local context, 128K
+  output, low/medium/high/xhigh/max effort, text and image input, and current
+  native rates of `$0.20/M` input and `$1.20/M` output. A native Luna max
+  sentinel passed on 2026-08-01.
+- Independent evaluation scope: Artificial Analysis reports Intelligence Index
+  51 for Luna at max effort, 172.1 output tokens per second, and 130M generated
+  evaluation tokens. Its comparison with DeepSeek V4 Flash 0731 is near-parity
+  evidence, not local task-quality proof; evaluation methodology and transfer
+  to this harness remain unverified. Source:
+  https://artificialanalysis.ai/models/gpt-5-6-luna.
+- Sources: https://openai.com/index/advancing-the-price-performance-frontier-with-gpt-5-6/
+  and https://developers.openai.com/api/docs/models/gpt-5.6-luna.
 
-### Google Gemini 3.5 Flash Through Antigravity
+### Google Gemini 3.6 Flash and Gemini 3.5 Flash Lite Through OpenRouter
 
-- Active local id: `gemini-3.5-flash`.
-- Local dispatch surface: Antigravity CLI `agy --print`.
-- Reported facts (2026-07 coverage): GA since I/O 2026; `$1.50/M` in,
-  `$9.00/M` out; 1M context; native Search grounding.
-- Gemini 3.5 Pro: NOT GA as of 2026-07-08 — surfaced via
-  Antigravity/LMArena testing only, no official model card or pricing;
-  the strongest callable Google lanes today are 3.5 Flash and
-  `gemini-3.1-pro-preview` (`$2/$12`, 1M, per the same coverage).
+- Current Mint-brokered `omp models` catalog readback on 2026-08-01 reports
+  `openrouter/google/gemini-3.6-flash` with 1,048,576 context, 65,536 maximum
+  output tokens, text+image input, minimal/low/medium/high reasoning levels,
+  `$1.50/M` input, `$7.50/M` output, and `$0.15/M` cache reads.
+- A low sentinel for `openrouter/google/gemini-3.6-flash:high` passed on
+  2026-08-01.
+- The same catalog readback reports
+  `openrouter/google/gemini-3.5-flash-lite` with 1,048,576 context, 65,536
+  maximum output tokens, text+image input, minimal/low/medium/high reasoning
+  levels, `$0.30/M` input, `$2.50/M` output, and `$0.03/M` cache reads.
+- A low sentinel for `openrouter/google/gemini-3.5-flash-lite` passed on
+  2026-08-01.
+
+### Historical Google Gemini 3.5 Flash Through Antigravity
+
+- Historical local id recorded on 2026-06-14: `gemini-3.5-flash`.
+- Historical 2026-07 coverage reported GA since I/O 2026; `$1.50/M` input,
+  `$9.00/M` output, 1M context, and native Search grounding.
+- Gemini 3.5 Pro was not GA in that historical 2026-07 coverage; it surfaced
+  through Antigravity/LMArena testing without an official model card or pricing.
+- These Antigravity records are historical only and do not establish current
+  availability; re-probe before dispatch.
 - Sources: 2026-07 coverage (tokenmix.ai, VentureBeat); verify against
-  ai.google.dev model docs before changing a default.
+  `ai.google.dev` model docs before changing a default.
 
 ### Cursor Composer 2.5
 

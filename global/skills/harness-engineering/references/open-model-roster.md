@@ -1,19 +1,18 @@
 ---
-roster_review_due: 2026-08-05
+roster_review_due: 2026-08-08
 ---
 
 # Open-Model Roster Notes
 
-Last researched: 2026-07-08 (OpenRouter catalog re-pulled; harness notes from
-2026-06-19 substrate report unless dated otherwise).
+Last researched: 2026-08-01 for DeepSeek V4 Flash 0731 and Kimi K2.7 Code;
+other catalog and harness notes retain their cited dates.
 
 Use this when choosing open-model defaults and variants for OMP peer lanes.
 Treat this as a one-day operating snapshot.
 Re-check OpenRouter and run live local smokes before each default change.
 
 The substrate positioning came from a 2026-06-19 coding-agent substrate report.
-The model catalog rows still depend on the 2026-06-14 OpenRouter snapshot
-unless a later live probe is cited.
+Each model note names its catalog or probe date.
 
 ## Current Defaults
 
@@ -50,24 +49,23 @@ Sentinel objective: `open-model-roster-smoke`, expected output
 ### Kimi K2.7 Code
 
 `moonshotai/kimi-k2.7-code` is the current open-model dispatch-floor default.
-OpenRouter listed it on 2026-07-08 with:
+The `omp models` readback on 2026-08-01 reports:
 
 - 262,144 context tokens.
-- **16,384 max completion tokens — down from 262,144 in the 2026-06-14
-  snapshot.** Verify this before promoting it for long-output lanes (big diffs,
-  generated docs).
-  This drift alone may justify re-evaluating the default.
+- 262,144 maximum output tokens.
 - text+image input to text output.
-- prompt `$0.74/M`, completion `$3.50/M`, cache read `$0.15/M`.
+- prompt `$0.73/M`, completion `$3.50/M`, cache read `$0.15/M`.
+- minimal, low, medium, and high reasoning levels.
 - supported parameters including tools, tool choice, parallel tool calls,
   structured outputs, reasoning, and reasoning effort.
 
+Older 2026-06-14 and 2026-07-08 snapshots are historical and do not override
+the 2026-08-01 catalog readback.
 Quote prices from the catalog/page at dispatch time.
 Do not hard-code them into gates.
 
-Sources: `curl -fsSL https://openrouter.ai/api/v1/models` filtered to
-`moonshotai/kimi-k2.7-code` on 2026-07-08, and
-https://openrouter.ai/moonshotai/kimi-k2.7-code.
+Sources: `omp models` readback on 2026-08-01; older OpenRouter page snapshots
+remain historical only.
 
 ### Kimi rollback and reasoning variants
 
@@ -83,12 +81,19 @@ local task smoke.
 - `deepseek/deepseek-v4-pro` remains `long_context`.
   OpenRouter listed 1,048,576 context tokens, 384,000 max completion tokens,
   tools, structured outputs, and reasoning on 2026-06-14.
-- `deepseek/deepseek-v4-flash` is `budget_long_context`.
-  It has the same 1M context class, a lower catalog price, and a smaller max
-  completion.
+- `deepseek/deepseek-v4-flash-0731` is the current `budget_long_context`
+  candidate for OMP and OpenRouter.
+  The stable DeepSeek-direct API name remains `deepseek-v4-flash`.
+  The Mint-brokered catalog listed 1,048,576 context tokens, 384,000 max
+  completion tokens, text-only input, tools, structured outputs, reasoning,
+  `$0.14/M` input, `$0.28/M` output, and `$0.0028/M` cache reads on 2026-08-01.
+- First-party Flash supports low, high, and max effort.
+  Local OMP metadata exposes high only, and the high sentinel passed on
+  2026-08-01.
 
-Use these through Pi/Goose/OpenCode when long context or cheap large-context
-review matters more than Kimi-family continuity.
+Use `openrouter/deepseek/deepseek-v4-flash-0731:high` for bounded,
+cost-shaped text-only work after a representative local workload check.
+Keep Luna primary for accepted implementation and image or file work.
 
 ### MiniMax
 

@@ -1,7 +1,7 @@
 ---
 name: code-critic
 description: Fresh-context static critic. Reads a change through exactly one injected lens and returns evidence-backed findings without fixing anything.
-model: xai-oauth/grok-4.5:high, openai-codex/gpt-5.6-sol:high, kimi-code/k3:high, openrouter/z-ai/glm-5.2:high
+model: xai-oauth/grok-4.5:high, openai-codex/gpt-5.6-sol:high, kimi-code/k3:high, openrouter/deepseek/deepseek-v4-flash-0731:high
 thinkingLevel: high
 tools: read,grep,glob,lsp,web_search
 autoloadSkills: ''

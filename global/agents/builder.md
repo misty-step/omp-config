@@ -1,7 +1,7 @@
 ---
 name: builder
 description: Builder for one accepted software change. Takes one work item to a live, gated, evidence-backed outcome.
-model: openai-codex/gpt-5.6-luna:xhigh, anthropic/claude-sonnet-5:xhigh, openrouter/z-ai/glm-5.2:high
+model: openai-codex/gpt-5.6-luna:xhigh, anthropic/claude-sonnet-5:xhigh, openrouter/deepseek/deepseek-v4-flash-0731:high
 thinkingLevel: xhigh
 autoloadSkills: deliver,ci,powder,factory-apps,research
 spawns: scout,code-critic,qa
