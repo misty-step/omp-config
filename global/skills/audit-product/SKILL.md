@@ -1,126 +1,36 @@
 ---
 disable-model-invocation: true
 name: audit-product
-description: Chief-run live product-correctness audit loop — discover real entrypoints, freeze target outcomes, run deterministic and persona QA tracks, assess, remediate, verify.
+description: Chief-run live product audit: discover entrypoints, freeze outcomes, run QA, assess, remediate, and verify.
 argument-hint: "[target] [notes]"
 ---
 
 # /audit-product
 
-The chief runs the loop and dispatches every lane per `skill://dispatch`:
-name role, model:reasoning, skills, tools, verifier, and contract, and include
-the exact child boundary sentence `You are a subagent. Don't run memo.`
-This skill judges the product as a user experiences it, through real running
-entrypoints. Production is never a target. Route a source-structure judgment
-to `audit-architecture`; route visual design quality to `improve-ui` or
-`design`.
+Dispatch through `skill://dispatch`. Name role, model:reasoning, skills, tools,
+verifier, and contract. Include the exact child boundary sentence
+`You are a subagent. Don't run memo.`
+Judge real entrypoints; never target production. Route source structure to
+`audit-architecture`; route visual quality to `improve-ui` or `design`.
 
-Run the six steps in order. Each step ends on its completion criterion.
+## Audit spine
 
-## 1. Discover real entrypoints
-
-The chief explores with its own tools, per the `skill://qa-users` discovery
-contract: product docs, routes, scripts, project rules, and live
-non-production surfaces. Start required services through `hub`. Ask the
-operator only for persona, access, or entrypoint facts tools cannot establish.
-
-Record each entrypoint with kind, exact URL or command, and `environment` set
-to exactly `local`, `dev`, or `staging`. Complete when every entrypoint in
-scope carries observed liveness evidence — an HTTP status, a rendered page, a
-command transcript — and no entrypoint is inferred.
-
-## 2. Define the target state
-
-Write, per entrypoint, the target user outcomes: golden paths, invariants
-that must hold, error behavior a user must see, and known strengths to
-preserve.
-
-Freeze inventory — the complete oracle set, one artifact per path in the
-audited repository, stated here once:
-
-- `.evidence/quality/audit-product/product-target.md` — frozen in this step.
-  Contains two sections: the deterministic scenario table (shape in
-  [`references/qa-runbook.md`](references/qa-runbook.md)) and the persona
-  missions (who the user is, what they want, which discovered entrypoints
-  they may touch).
-- `.evidence/quality/audit-product/input.v1.json` — the schema-valid
-  `input.v1`, frozen in step 3, derived only from this artifact and the
-  step 1 entrypoint inventory.
-
-The frozen target is the audit oracle. Complete when every golden path and
-invariant in scope appears in a scenario row or a persona mission.
-
-## 3. Audit: run the QA runbook
-
-Execute both tracks of [`references/qa-runbook.md`](references/qa-runbook.md):
-
-- Deterministic track: `qa` lanes walk the scenario table against the live
-  entrypoints and return PASS/WARN/FAIL/SKIP with named evidence.
-- Persona track: the chief, acting as the OMP root, encodes step 2's persona
-  missions and step 1's discovered entrypoints into a schema-valid `input.v1`
-  — one persona per mission, one entrypoint entry per discovered surface with
-  `environment` and `real: true` — runs the `skill://qa-users` semantic
-  validation, and freezes the result at
-  `.evidence/quality/audit-product/input.v1.json`. Every
-  persona and entrypoint in `input.v1` comes from the frozen target; adding,
-  dropping, or reshaping one there is oracle drift and voids the run. Then
-  dispatch the existing `qa-user` coordinator with the frozen artifact; it
-  runs one browser-only `qa-user-leaf` per persona. `skill://qa-users` stays
-  the normative contract for input, authority boundaries, environments, and
-  triage. Never create a new QA agent or a second persona plane.
-
-Complete when every scenario has a verdict and every persona returned
-evidence or a `failure_reason`. A surface nobody exercised is SKIP with the
-blocker named, never a silent omission.
-
-## 4. Assess
-
-The chief merges both tracks into
-`.evidence/quality/audit-product/product-assessment.md`:
-
-- Verdict per deterministic scenario with its evidence reference.
-- Confirmed findings: reproduced observations with exact steps, expected
-  versus observed behavior, severity, confidence, and affected entrypoint.
-- Strengths and friction, preserved even when suppressed, with reasons.
-- Deduplication against existing tracker issues and PRs per the
-  `skill://qa-users` fingerprint and read-back rules.
-
-The operator, or the chief when delegated, accepts or rejects each gap. Only
-accepted, evidence-backed gaps proceed. Complete when every finding is
-accepted, suppressed with a reason, or rejected.
-
-## 5. Remediate
-
-- One `builder` lane per independent accepted gap; a ranked multi-gap packet
-  goes to one `fixer` lane with its two-round cap.
-- Remediation never runs inside a user session. A `fix-and-pr` handoff
-  follows the separate authorization rule in `skill://qa-users`.
-- Respect the repository's work-ledger rule before mutation.
-
-Complete when every accepted gap has a landed change or a named remaining
-blocker with evidence.
-
-## 6. Verify
-
-- Re-run the exact failing deterministic scenarios through a fresh `qa` lane:
-  same steps, same oracle, live entrypoint. A gap closes only on a live PASS.
-- Re-dispatch the affected persona missions when a remediation changed a user
-  path, and confirm the recorded strengths still hold. A fix that destroys a
-  preserved strength is a regression, not a closure.
+1. **Discover real entrypoints.** Under `skill://qa-users`, inspect docs, routes, scripts, rules, and live non-production surfaces; start via `hub`; ask only for unavailable persona, access, or entrypoint facts. Record kind, exact URL or command, and `environment` exactly `local`, `dev`, or `staging`. Require HTTP status, rendered page, or command transcript. Never infer.
+2. **Define target.** Record each entrypoint's golden paths, invariants, user-visible errors, and strengths. Freeze:
+   - `.evidence/quality/audit-product/product-target.md`: [`references/qa-runbook.md`](references/qa-runbook.md) scenario table plus persona missions (user, goal, reachable entries).
+   - `.evidence/quality/audit-product/input.v1.json`: schema-valid `input.v1`, freeze in step 3, derive only from target and step 1 inventory.
+   Put every golden path and invariant in a scenario row or mission. The target is the oracle.
+3. **Audit.** Run both [`references/qa-runbook.md`](references/qa-runbook.md) tracks:
+   - Deterministic: `qa` runs each scenario live and returns `PASS`, `WARN`, `FAIL`, or `SKIP` with named evidence.
+   - Persona: the OMP root encodes step 2 missions and step 1 entries in `input.v1`: one persona per mission and one entry per surface, with `environment` and `real: true`. Validate and freeze with `skill://qa-users`. Any addition, drop, or reshape voids the run. The existing `qa-user` coordinator runs one browser-only `qa-user-leaf` per persona from the artifact. Its contract governs input, authority boundaries, environments, and triage. Never create another QA agent or persona plane.
+   Require every scenario verdict and every persona evidence or `failure_reason`. Mark an unexercised surface `SKIP` with its blocker.
+4. **Assess.** Merge tracks into `.evidence/quality/audit-product/product-assessment.md`. Record scenario verdict/evidence; findings: steps, expected/observed behavior, severity/confidence, and entrypoint; strengths, friction, and suppression reasons. Deduplicate tracker issues/PRs with `skill://qa-users` fingerprint/read-back. Have the operator or delegated chief accept, suppress with reason, or reject each finding. Only accepted evidence-backed gaps proceed.
+5. **Remediate.** Route independent gaps to `builder`; a ranked packet to `fixer` with a two-round cap. Never mutate in a user session. Apply `fix-and-pr` authorization in `skill://qa-users`; respect the work-ledger rule. Require landed change or blocker evidence.
+6. **Verify.** A fresh `qa` reruns each failing scenario with the same steps, oracle, and live entrypoint; close on live `PASS`. Redispatch personas for changed paths. A destroyed strength is a regression, not closure.
 
 ## Completion Gate
 
-Prove and close out per the Shared Operating Spine (Prove; Durable State and
-Closeout). Verification loops follow
-`global/references/verification-system-first.md`. Phase-specific fields:
-
-- Every deterministic scenario carries a verdict with evidence; every persona
-  returned evidence or a `failure_reason`; every unexercised surface is a
-  named SKIP. A plausible subset is failure, not partial success.
-- Every accepted gap is verified closed by a live PASS, or returned as
-  remaining with its blocker.
-- The full oracle set and the assessment exist in the audited repository:
-  `.evidence/quality/audit-product/product-target.md`,
-  `.evidence/quality/audit-product/input.v1.json`, and
-  `.evidence/quality/audit-product/product-assessment.md`.
-- Strengths recorded in the assessment still hold after remediation.
+Follow the Shared Operating Spine and `global/references/verification-system-first.md`.
+- Gate: every scenario has verdict/evidence; every persona has evidence or `failure_reason`; every unexercised surface has `SKIP` and a blocker. A plausible subset fails.
+- Verify every accepted gap with live `PASS` evidence or a named blocker.
+- Keep the three artifacts named above. Confirm strengths still hold.

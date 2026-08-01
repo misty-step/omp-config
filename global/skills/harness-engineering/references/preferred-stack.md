@@ -98,10 +98,10 @@ they sleep most of the time or can be rewritten to Workers/D1.
 
 ## Backlog And Work State
 
-- **Powder first** for backlog management, work cards, issue discovery, claims,
-  relations, operator input requests, and durable work status.
-  Prefer Powder MCP when registered.
-  Otherwise use its root product skill, CLI, or API.
+- Use Powder CLI/API through its root product skill for backlog management,
+  work cards, issue discovery, claims, relations, operator input requests, and
+  durable work status.
+- Powder MCP stays disabled and is not a runtime route.
 - Do not keep durable backlog state in chat, TODO prose, or ad-hoc markdown
   when Powder is available.
   Markdown can brief or summarize.

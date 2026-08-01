@@ -28,9 +28,8 @@ omp-config adapted it to the filesystem-first contract.
 
 ## Skill-Prose Compression
 
-Source: Matt Pocock, "Writing Great Skills" (mattpocock/skills,
-`writing-great-skills`).
-Use this vocabulary for the pruning discipline that the Upgrade Loop demands.
+Authoring rules live in `global/references/skill-authoring-standard.md`.
+Keep this file for harness-specific catalog gates and upgrade-loop mechanics.
 
 - **Leading words.** A pretrained token helps the agent think.
   (*ratchet*, *mundane harvest*, *plausible-but-wrong*, *unknown unknowns*)

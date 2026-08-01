@@ -57,7 +57,7 @@ but omits the byte audit, list subset contract, and dynamic-discovery caveat.
 
 ## Human Anchor
 
-The operator blind-grades fixture 1 because it uses a real Powder MCP audit.
+The operator blind-grades fixture 1 because it uses a real Powder CLI/API audit.
 Record the verdict here after the first run.
 PENDING - no run yet.
 

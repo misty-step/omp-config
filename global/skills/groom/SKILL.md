@@ -14,251 +14,144 @@ argument-hint: "[audit|--emphasis explore|rethink|moonshot|scaffold] [context]"
 # /groom
 
 Keep the board of record true and make the project more ambitious.
-Normal strategic `/groom` is a mega-sweep, not triage.
-Cover the full project, then distill it into a world-class plan and backlog diff.
-A groom that only lists, lightly prioritizes, or emits a small set of issues is incomplete unless the user narrows the run.
+A strategic `/groom` is a mega-sweep, not triage. Cover the project and emit a
+vision-led backlog diff. Use prose only to justify that diff.
 
-The backlog diff is the artifact. Use prose to justify it.
-Groom is a conversation about the operator's judgment, which is scarce input.
-At intake, interrogate the operator about ambition, vision deltas, and hidden priors.
-Use the `grill-me`-style posture from
-`global/references/interrogate-first.md` by default.
-Use this posture even when no backlog item arrives.
-Keep the investigation sweep autonomous.
-Read the codebase for facts.
-Reserve interrogation for the operator's judgment, not facts you can read.
-
-Use julius-caveman only for interim synthesis. Keep findings, code, commits, and final artifacts in normal English.
+Use `global/references/interrogate-first.md` for operator judgment. Read the
+codebase for facts and keep the investigation autonomous. Use
+`global/skills/dispatch/SKILL.md` for lane composition. Use julius-caveman only
+for interim synthesis; keep findings and artifacts in normal English.
 
 ## Project Vision
 
-Every strategic groom creates, refreshes, or validates a durable project vision before it ranks work.
-Without a vision, brainstorming and backlog movement become local cleanup.
+Create, refresh, or validate a durable vision before ranking strategic work.
+Read root `VISION.md`. If it is missing or stale, route to `/vision`; when no
+vision exists, emit the smallest durable artifact, preferring root `VISION.md`.
+Use `docs/product.md`, a roadmap, or a named backlog epic only when evidence
+rejects root vision. Do not defer that emission.
 
-Read root VISION.md when it exists.
-If it is missing or stale, route to /vision (owned by `/vision`).
-When no vision exists, draft the smallest durable vision artifact.
-Prefer root `VISION.md`.
-Use `docs/product.md`, a roadmap doc, or a named backlog epic only when repository evidence rejects root vision.
-Treat that draft as a groom emission.
-Do not wait for a separate `/vision` pass.
-
-- Keep the vision concrete: name the audience, job-to-be-done, category,
-  standards, non-goals, strategic bets, and what excellent looks like in 6-12
-  months.
-- Revise the vision when live evidence contradicts it.
-- Do not hide direction changes in chat, issue comments, or the final report.
-- Backchain each theme and ticket to the part of the vision it advances, de-risks, simplifies, or deliberately rejects.
-- A vision or moonshot artifact can carry a system map when prose cannot show
-  the relationships or sequence:
-  `global/references/image-generation.md`.
+Name the audience, job-to-be-done, category, standards, non-goals, bets, and
+excellent 6-12 month outcome. Revise the artifact when evidence contradicts it.
+Record direction changes in the artifact, not only chat or issue comments.
+Backchain each theme and ticket to what the vision advances, de-risks,
+simplifies, or rejects. Use `global/references/image-generation.md` for a system
+map when prose cannot show relationships or sequence.
 
 ## Tidy (mandatory)
 
-Keep the board of record true: use Powder cards, not stale files (Shared Operating
-Spine: Durable State and Closeout; Powder skill, Powder MCP/CLI).
-Read the card store. Close only through Powder tools
-(`update_status`/`complete_card`). Do not invent side-channel closure:
+Use Powder cards as the board of record, not stale files. Follow the Shared
+Operating Spine durable-state and closeout rules. Read the card store. Close
+cards only through `update_status` or `complete_card`; carry shipping evidence.
+Powder audits actor, time, and change.
 
-- **Close shipped work.** When work merges, move its card to done/shipped with
-  `update_status`/`complete_card`. Carry the shipping evidence. Never act on an
-  assumption; Powder audits actor, time, and change.
-- **Flag stale claims.** Surface an `in_progress` card for the operator when its
-  branch merged or was deleted, or when it has no changes for 30+ days. Do not
-  flip it silently.
-- **Surface duplicates.** Propose consolidation. Never merge silently.
-- **Backlog size is telemetry, not policy.** When the active queue looks too
-  broad, report evidence: count, age, duplicates, stale owners, orphaned themes,
-  and unfocused small items. Consolidate only when tickets share one outcome.
-  Never veto an evidenced emission because of an arbitrary item count.
+- Close merged work as done or shipped.
+- Surface `in_progress` cards when branches merge or disappear, or when cards
+  have no changes for 30+ days. Never flip them silently.
+- Propose duplicate consolidation. Never merge duplicates silently.
+- Treat backlog size as telemetry, not policy. Report count, age, duplicates,
+  stale owners, orphaned themes, and unfocused small items.
+- Consolidate only tickets with one outcome. Never veto evidenced work by count.
 
-Do not use repository-local ticket directories.
-Ordinary Misty Step repositories use Powder. R90 repositories use Habitat.
-If you discover a legacy ticket tree, preserve its contents in the routed work
-plane. Verify live readback. Remove the tree before normal grooming.
-
-## Delegation
-
-Delegate per the Shared Operating Spine (Act).
-Strategic grooming is high-stakes by declaration. Default to the swarm.
-Use independent lanes for product/value, operator experience, runtime reliability,
-architecture, simplification/deletion, security/privacy, docs/onboarding,
-ops/infra, testing/verification, agent readiness, and external exemplars.
-Keep final prioritization with the lead.
-Scale routine grooming—a tidy-only pass or scoped ticket check—to the stakes.
-Use the Shared Operating Spine to choose fewer lanes instead of running the full
-swarm.
+Do not use repository-local ticket directories. Use Powder in ordinary Misty
+Step repositories and Habitat in R90 repositories. Preserve legacy ticket
+contents in the routed work plane, verify live readback, and remove the tree
+before grooming.
 
 ## Mega Sweep
 
-For any strategic groom, load `references/mega-groom.md`.
-Treat it as the contract for swarm size, coverage map, source matrix, and output
-shape. Use `references/investigation-bench.md` only for lane prompt shapes.
-Treat it as a template library, not the whole run.
+Load `references/mega-groom.md` for the strategic swarm, coverage map, source
+matrix, evidence, output, and emission contract. Use
+`references/investigation-bench.md` only for lane prompts. If delegation is
+unavailable, label the run degraded and execute the matrix locally. Use
+`/research` when outside knowledge can change a verdict.
 
 ## Ambition Floor
 
-Calibrate scope to what frontier agents can execute, not what a human team can
-staff. Execution costs less. Vision remains scarce.
-Strategic grooming must describe the best version of the whole project.
-Then backchain from that standard into epics, deletions, sequencing, and first
-pickups.
+Calibrate scope to frontier-agent execution, not human staffing. Describe the
+best whole project, then backchain into epics, deletions, sequencing, and first
+pickups. Compose repo-specific perspectives; invert premises, borrow from
+adjacent domains, and ask what competitors, operators, and new users notice.
+Run fresh independent lanes in parallel. If findings remain obvious, route
+`nous-creative-ideation` with lateral, analogy/biomimicry, and premortem-
+and-inversion methods.
 
-- **Brainstorm deeply from perspectives composed for this repo.**
-  No canonical layer list exists. Pick obvious axes this codebase demands.
-  Add lenses that stock lists miss: invert a premise, borrow from an adjacent
-  domain, and ask what a competitor, operator, or first-time user would notice.
-  Run perspectives in parallel fresh-context lanes.
-  Pull in `/research` when outside knowledge would change a verdict.
-  When the sweep returns only obvious findings, route divergence through
-  `nous-creative-ideation`.
-  Use its routed library of named methods (lateral provocations,
-  analogy/biomimicry, premortem-and-inversion) to produce non-obvious lenses.
-  Judge diversity and exploration depth fresh each session.
-- **Describe the best version of this software,** not the next safe increment.
-  Make it elegant, easy to change, personalizable, delightful, operationally
-  boring, and valuable in practice.
-  Treat the gap between that vision and the live repo as backlog material.
-  Close it with epics.
-- **Epic-scoped by default.** Strategic emissions are epics: a product outcome
-  with an ordered child sequence. Do not split them into tasks first.
-  Keep small items as children of an epic or as genuine isolated fixes.
-- **Ambition requires evidence.** Vet every epic's premise as you vet every
-  finding. A perspective that returns "all fine here" makes a claim; it does not
-  prove that no work remains. Raise scope, not tolerance for unevidenced claims.
+Describe software that is elegant, changeable, personalizable, delightful,
+operationally boring, and valuable. Treat the gap to that target as backlog.
+Emit epics by default with ordered children. Keep small items under an epic or
+as isolated fixes. Vet every epic premise with evidence; an "all fine" report is
+a claim, not proof.
 
-## Judgment (the actual grooming)
+## Judgment
 
-Investigate before giving opinions.
-Run a tidy-only pass only when the user asks for one.
-All other sessions require the `references/mega-groom.md` sweep.
-Run genuinely independent perspectives in parallel.
-Use `/research` when outside context would change a verdict.
-Keep fresh-context lanes to decorrelate judgment, not fill a roster.
+Investigate before opinions. Run tidy-only only when requested; otherwise run
+the mega sweep. Read live code, hotspots, debt, and the oldest stuck card.
+Challenge premises, reframe symptoms toward causes, and propose deletions with
+rationale.
 
-- **Read the live code, not only ticket text.** Read hotspots, debt
-  concentrations, and the oldest stuck ticket.
-  Every codebase has findings. "Everything is fine" means the investigation was
-  shallow.
-- **Challenge premises of the top items.** Ask whether each item names a symptom
-  or a root cause. Treat each ticket's framing as a first draft. Reframe before
-  re-ranking.
-- **Propose deletions.** The best groom reduces the backlog. Give every deletion
-  a rationale. Humans ratify removals.
-- **Audit the repo's own harness.** Treat agent readiness as backlog work, not a
-  separate process.
-  Check for a verification skill with its real routes and commands (the
-  highest-impact skill category).
-  Check whether an agent can discover verified build, test, and lint commands and
-  conventions without prior context.
-  Check for runbooks for deployed surfaces.
-  Check whether a CI gate would catch likely failures.
-  Identify whether the quality floor is meaningful and enforced, or only
-  advisory and arbitrary (`global/references/quality-gates.md`).
-  Check security gates for secret leaks in files and Git/PR metadata before
-  publication.
-  Check for stale AGENTS/CLAUDE prose and missing product context for a cold
-  agent. Treat each gap as a ticket.
-- **Vet findings before presenting them.** Re-check each claim against the live
-  repo. Open the file and run the command. Remove any claim that fails the
-  second check.
-  A false finding reduces trust.
-- **Theme, then recommend.** Group findings by shared root cause.
-  Rank impact after discounting by confidence. Agent execution makes effort a
-  small discount. Argue for one concrete action per theme.
-  Keep synthesis with the lead.
-  When the plan is contestable, use the same `grill-me` method with the operator.
-  Walk the decision tree one branch at a time: sequencing, deletions, then the
-  next pickup. Recommend each branch instead of asking for approval of the full
-  plan at once.
+Audit harness readiness as backlog work. Check verification routes, cold-agent
+build/test/lint discovery, deployed runbooks, enforced quality and security
+gates, including secret leaks in files and Git/PR metadata before publication.
+Check stale AGENTS/CLAUDE prose and missing product context. Use
+`global/references/quality-gates.md` and
+`global/references/verification-system-first.md` for shared contracts.
 
-## Shape the board, not one ticket
+Group findings by root cause, rank impact after confidence, and recommend one
+action per theme. Use the shared proof contract to vet findings against live
+evidence. Use the interrogate-first reference for contestable plans, one branch
+at a time.
 
-Shaping is part of the groom. Do not run a separate one-ticket shaping workflow.
-A request about one card still requires its board, dependencies, competing
-priorities, and project vision.
-The groom can conclude that one card is the only necessary change.
-Base that conclusion on the surrounding board and vision.
 
-Before promoting an epic or its children:
+## Shape the Board
 
-- **Challenge the premise.** Name the user or operator outcome. Treat the
-  requested mechanism as one candidate.
-- **Anchor it in live evidence.** Cite the owning code, tests, contracts,
-  previous decisions, and one repository convention.
-- **Choose a direction.** Compare credible alternatives that fail differently.
-  Reject the alternatives and name one decision.
-- **Define the scope.** State the outcome, non-goals, and invariants that must
-  survive.
-- **Make the oracle executable.** Name exact commands, routes, rendered
-  behavior, or reviewer actions plus a falsifier.
-- **Make execution cold-start safe.** Give each child enough repo anchors,
-  dependencies, acceptance, and stop conditions for a focused lane.
-- **Keep the premise durable.** Cite a digest, card, source path, or explicit
-  waiver with residual risk.
+Shaping belongs in grooming. A one-card request still requires its board,
+dependencies, competing priorities, and vision.
+Before promotion, require the outcome over the mechanism and live anchors.
+Record rejected alternatives, scope, non-goals, and invariants.
+Define an executable oracle and falsifier.
+Record cold-start dependencies, acceptance, and stop conditions.
+Preserve the premise with a source or waiver and residual risk.
 
 Use `references/prd-ticket-quality.md` for M+ work,
-`references/executable-oracles.md` when proof is disputed, and
-`references/cli-design.md` for command-line surfaces. For a voice-derived
-premise, use `references/voice-transcript-metadata.md`.
+`references/executable-oracles.md` for disputed proof,
+`references/cli-design.md` for command-line surfaces,
+`references/voice-transcript-metadata.md` for voice premises, and
+`references/ticket-format.md` for card shape and promotion rules.
 
-The groom output is a board-level decision packet: vision, themes, chosen and
-rejected directions, ordered epics, dependencies, executable oracles, risks, and
-the first pickup.
-Do not create an isolated context packet that hides nearby work or conflicts.
-
-## Ticket Format
-
-Every card carries Goal + Oracle. Add a Verification System for M+/ready work.
-Use the full template, epic shape, and promotion rules in
-`references/ticket-format.md`.
+Emit a board-level packet with vision, themes, chosen and rejected directions,
+ordered epics, dependencies, oracles, risks, and the first pickup. Do not hide
+nearby work in an isolated context packet. Every card carries Goal and Oracle;
+add a Verification System to M+ or ready work.
 
 ## Audit Mode
 
-`/groom audit` is a read-only harness-health report, not a grooming run.
-Read the harness's skill/prompt usage signal (hook logs where present) and its
-age since the last edit.
-Judge the signal: low usage with high value-when-used is fine; say so.
-Treat low usage with no demonstrated value as a deletion candidate.
-Order findings by severity. Do not auto-fix.
-Read harness-native skill-invocation logs and session evidence.
-This repo deliberately has no semantic telemetry engine.
+`/groom audit` is a read-only harness-health report, not grooming. Read skill and
+prompt usage, hook and native invocation logs, session evidence, and edit age.
+Explain high value when usage is low. Treat low usage without demonstrated value
+as a deletion candidate. Order findings by severity. Do not auto-fix. This repo
+has no semantic telemetry engine.
 
 ## Refuse
 
-- Never auto-delete or silently merge tickets.
-- Never archive a ticket whose trailer points at an unmerged branch.
-- Never let backlog size alone veto an evidenced ticket or epic.
-- Run the swarm for a strategic/mega-sweep groom when subagent, peer CLI, or
-  sprite lanes are available. Strategic grooming is high-stakes by declaration.
-  If delegation is blocked, report degraded mode and run the local matrix.
-  Scale routine grooming to the stakes per the Shared Operating Spine.
-
-## Gotchas
-
-- **Stock-lens grooming.** Do not use the same investigator roster in every repo.
-  Compose revealing perspectives for this codebase and session.
-- **Stale backlog.** Treat age as a stale signal, not an automatic verdict.
-  Inspect branch, owner, and live relevance before flipping, archiving, or
-  proposing deletion.
+- Never auto-delete or silently merge cards.
+- Never archive a card whose trailer points to an unmerged branch.
+- Never let backlog size alone veto evidenced work.
+- Run the strategic swarm when subagents, peer CLIs, or sprite lanes exist.
+  Report degraded mode and run locally when delegation is blocked.
 
 ## Completion Gate
 
-See `global/references/verification-system-first.md` for the shared proof contract; this phase adds:
+Use `global/references/verification-system-first.md` for shared proof. Add:
 
-1. **Tidy diff** — Archive, change status, and flag items by ID. Add no padding.
-2. **Source matrix** — swarm lanes, local commands, external research,
-   skipped/failed lanes, and what each contributed.
-3. **World-class plan** — vision, gaps, themes, sequencing, deletion/
-   consolidation candidates, and the one best next pickup.
-4. **Emissions** — Make epic/ticket edits with `**Why:**` naming the evidence
-  lane. Make sure strategic emissions cover the domain map, not only the easiest
-  implementation slice.
-5. **Residual** — open questions, blocked dependencies, unverified areas,
-   and what would make the sweep stronger.
+1. **Tidy diff:** archive, status-change, and flag items by ID; add no padding.
+2. **Source matrix:** lanes, local commands, external research, skipped or
+   failed lanes, and each contribution.
+3. **World-class plan:** vision, gaps, themes, sequence, deletions or
+   consolidation, and one best next pickup.
+4. **Emissions:** edit epics or tickets with `**Why:**` naming the evidence
+   lane; cover the domain map, not only the easiest implementation slice.
+5. **Residual:** open questions, blocked dependencies, unverified areas, and
+   what would strengthen the sweep.
 
-Apply non-destructive backlog edits when the user asks for grooming.
-Keep deletions, abandonments, and silent merges as proposals unless the user
-explicitly approves them.
-A groom run ends with a clean tree after it commits archives and writes
-emissions. Deletions await ratification.
+Apply non-destructive edits when requested. Keep deletions, abandonments, and
+silent merges as proposals until explicit approval. End with a clean tree after
+archives and emissions commit; deletions await ratification.

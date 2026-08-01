@@ -15,97 +15,76 @@ argument-hint: "[scope-path|--full|--check]"
 
 # /document
 
-Documentation earns trust when **every claim is verified against live source**. It is not a plausible summary that drifts.
-
-This skill owns the gap between existing code and safe system changes.
-It helps new contributors and maintainers navigate, understand, and safely
-change the system from the docs.
-It produces committed, human-facing reference docs in `docs/`.
-One source renders to markdown, HTML, and diagrams.
-The main difference from auto-wiki products is adversarial verification of each claim against source.
-That verification prevents confident false claims in the repository.
-
-These named phases (survey → plan → write → critique → iterate) follow SDLC practice. Do not narrate them.
-The skill's value is the **oracles, the IA taste, the provenance contract, and the orchestration discipline** below.
+Create committed reference docs in `docs/` from one source. Render that source
+to Markdown, HTML, and diagrams. Verify every claim against live source.
 
 ## Route
 
 | Need | Load |
 |---|---|
-| The verification system — how "comprehensive / accurate / well-organized" become falsifiers | `references/oracles.md` |
-| Information architecture — Diátaxis mapping, page taxonomy, which diagrams are useful | `references/information-architecture.md` |
-| Committed-docs provenance, freshness falsifier, incremental scope, Mode B handoff | `references/provenance-and-freshness.md` |
-| The multi-agent loop topology, lane cards, build-order discipline | `references/orchestration.md` |
-| Output surfaces: md source → HTML + mermaid, "synced across surfaces", publish target | `references/render-contract.md` |
-| Per-page provenance front-matter + world-class page skeleton | `templates/page.md` |
-| Freshness oracle driver (stale-page detector) | `scripts/freshness.py` |
+| Verification system: turn accuracy and coverage into falsifiers | `references/oracles.md` |
+| Information architecture: Diátaxis, page taxonomy, useful diagrams | `references/information-architecture.md` |
+| Provenance, freshness, incremental scope, Mode B handoff | `references/provenance-and-freshness.md` |
+| Agent loop, lane cards, build order | `references/orchestration.md` |
+| Markdown, HTML, Mermaid, sync, and publish contract | `references/render-contract.md` |
+| Page provenance and skeleton | `templates/page.md` |
+| Freshness oracle driver | `scripts/freshness.py` |
 
-`--check` runs only the freshness + render oracles against existing `docs/` (no
-generation). `--full` forces full-repo regeneration instead of incremental scope.
+`--check` runs freshness and render oracles against existing `docs/` only.
+`--full` forces full-repo regeneration instead of incremental scope.
 
-## The loop, where the judgment lives
+## Workflow judgment
 
-A table of lanes, not a procedure. Each lane is outcome-shaped; the lead owns
-decomposition. Detail and lane cards in `references/orchestration.md`.
+The lead decomposes these outcome-shaped lanes. See
+`references/orchestration.md` for lane cards and detail.
 
-| Lane | Non-obvious judgment | Oracle it feeds |
+| Lane | Required judgment | Oracle |
 |---|---|---|
-| Recon swarm | lens-blind agents (entry-points / data-flow / dep-graph / config+infra / tests-as-spec / git-*why*); each agent works without the other lenses, so one search angle cannot show full coverage | — |
-| IA plan | structure **adapts to the system** — a CLI ≠ a service ≠ a library; pick pages and diagrams from what recon found, not a fixed template | coverage |
-| Generation | one agent per page/facet, just-enough context, dependency order (overview before deep-dives); pipeline, not barrier | — |
-| Verify | adversarial skeptics from a **decorrelated model family** refute each claim against source; a cold reader proves navigability | accuracy, navigability |
-| Iterate | loop-until-dry: regenerate flagged pages until K consecutive rounds raise no blocking oracle failure | all |
-| Render + stamp | one generation → md + HTML + diagrams; stamp provenance; commit | render, freshness |
+| Recon swarm | Use blind agents for entry points, data flow, dependencies, config, tests, and git history. | — |
+| IA plan | Adapt page types and diagrams to the repo, not to a fixed tree. | coverage |
+| Generation | Use one agent per facet with just-enough context; generate in dependency order. | — |
+| Verify | Use fresh skeptics from a decorrelated model family and a cold reader. | accuracy, navigability |
+| Iterate | Regenerate flagged pages until K consecutive rounds have no blocking oracle failure. | all |
+| Render + stamp | Generate Markdown, HTML, and diagrams; stamp provenance; commit. | render, freshness |
 
-**Build-order discipline:** Use model-driven, ad-hoc fan-out first. Do not write a deterministic orchestration-workflow template before telemetry shows a recurring pattern. The harness-engineering contract requires this order. Build the asset only after the pattern recurs. Avoid the deterministic-scaffold failure mode.
+Use model-driven ad-hoc fan-out first. Build a deterministic orchestration
+workflow only after telemetry shows a recurring pattern.
 
 ## Contract
 
-- **Source-grounded or it does not ship.** Every architectural claim maps to
-  specific source lines a skeptic verified, or it is cut/flagged. Unverifiable
-  prose is the failure this skill exists to prevent.
-- **Committed pages carry provenance.** Each page stamps `generated-at-sha` and
-  `covers:` globs (`templates/page.md`). This makes drift *detectable* instead
-  of hidden — the load-bearing mitigation for committing docs into the repo.
-- **Always use the world-class quality bar with incremental scope.** Run full verification every time. On each rerun, regenerate only pages whose covered source changed (freshness-stale pages) and their cross-link neighbors. Keep quality constant and work proportional to the diff.
-- **IA adapts to the repo.** Borrow page *types*, never a fixed tree. Let the
-  system's shape choose the structure.
-- **Compose, don't reinvent.** Use `/design` + `anthropic-frontend-design` for Aesthetic/HTML. Use `/showcase` for publish machinery. Use `/groom`'s investigation bench for recon work. This skill owns the oracles and IA taste.
-- **Freshness is checkable.** `scripts/freshness.py` is the driver; a page
-  covering changed files past its stamped SHA is stale, full stop.
-- **Operator owns IA and publish choices.** Page tree, depth, diagram set, and
-  where HTML publishes are the operator's call when ambiguous.
+- Ground every architectural claim in source lines that a fresh skeptic verifies; cut or flag unsupported prose.
+- Stamp each committed page with `generated-at-sha` and `covers:` globs from `templates/page.md`.
+- Run full verification on every rerun. Regenerate only stale pages, changed-source neighbors, and required links.
+- Let the system shape choose the page tree. Borrow page types, not a fixed tree.
+- Compose with `/design` and `anthropic-frontend-design` for HTML, `/showcase` for publish machinery, and `/groom` for recon.
+- Use `scripts/freshness.py`; a page past its stamped SHA is stale.
+- Let the operator choose page tree, depth, diagrams, and HTML publish location when unclear.
 
-## Boundaries (what this is not)
+## Boundaries
 
-- **Not the agent's context substrate.** The owning lane reads live source and uses `/dispatch` for independent grounding. Humans use these docs. They are not a possibly stale substitute for source.
-- **Not marketing/demo.** `/showcase` owns external proof and launch copy. This is technical reference.
-- **Not external-repo lookup.** The vendored `deepwiki` skill queries third-party OSS wikis. This skill documents *your* repo.
-- **Auto-refresh-on-push is currently unavailable in Mode B.** This skill is
-  on-demand (Mode A). The freshness script remains the local trigger contract;
-  see `global/references/loop-readiness.md`. Do not invent a replacement
-  workflow service.
+- These docs serve humans. They do not replace live source or the agent context substrate; use `/dispatch` for independent grounding.
+- `/showcase` owns external proof and launch copy. This skill owns technical reference docs.
+- The vendored `deepwiki` skill queries third-party wikis. This skill documents the current repo.
+- Mode B auto-refresh is unavailable. Use on-demand Mode A and `global/references/loop-readiness.md`; do not invent a workflow service.
 
-## Delegation Judgment
+## Delegation
 
-Delegate per the Shared Operating Spine (Act).
-This skill is parallel-by-default and uses many tokens. Route heavy or long runs to `/sprites`.
-Lanes:
+Delegate through the Shared Operating Spine (`Act`). Route heavy or long runs to
+`/sprites`. Use these lanes:
 
-- **Recon scouts** — one per lens, blind to the others (compose `/groom`'s bench).
-- **Page generators** — one per facet, just-enough context, dependency order.
-- **Accuracy skeptics** — fresh-context, **different model family**, prompted to *refute* each claim against source. Critics get the artifact and the oracle only — never the author's reasoning trail (Shared Operating Spine: Prove).
-- **Cold-reader navigator** — sees only the generated docs and a real task. It must land in the right files. Wrong landing = bad IA.
+- Recon scouts: one per blind lens, using `/groom`'s bench.
+- Page generators: one per facet, with dependency order.
+- Accuracy skeptics: fresh context, a different model family, artifact plus oracle only; never the author's reasoning trail.
+- Cold-reader navigator: generated docs plus a real task; wrong landing means bad IA.
 
-## Gotchas
+## Failure controls
 
-- **Polished false claims are worse than plain true weakness.** If proof is weak, fix the proof.
-- **Committed docs can drift without an error.** Provenance stamps and the freshness oracle make this drift visible.
-- **Coverage is not accuracy.** A wrong flow description fails even when every symbol appears. Run both oracles; they catch different errors.
-- **Restating code is not documentation.** A page that paraphrases functions adds drift risk without understanding. Capture intent, flow, and *why*.
-- **A diagram that does not parse fails the build.** The render oracle must reject broken mermaid or dead internal links.
-- **Copied IA is generic IA.** A fixed page tree makes every repo look autogenerated. Let recon choose the structure.
-- **Unreported truncation can look complete.** If scope is bounded (top-N modules, sampled history), `log` what it skipped.
+- Fix weak proof instead of polishing unsupported claims.
+- Run coverage and accuracy oracles; they catch different failures.
+- Make render reject broken Mermaid and dead internal links.
+- Let recon choose IA; copied IA becomes generic.
+- Capture intent, flow, and why; restating code adds drift.
+- Log skipped scope when you bound recon, such as top-N modules or sampled history.
 
 ## Completion Gate
 

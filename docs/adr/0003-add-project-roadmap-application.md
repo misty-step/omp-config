@@ -24,7 +24,7 @@ Each roadmap item has a stable identifier, outcome, proof, open question, and co
 Each artifact has exactly one current item and five to twelve strategic items.
 The artifact contains no ticket state, claim state, or attempt history.
 
-The skill loads `/grilling` and asks all open decisions in batches.
+The skill loads `global/references/interrogate-first.md` and asks all open decisions in batches.
 The skill confirms shared understanding before it changes files.
 The skill applies ASD-STE100 rules to all operator-facing text.
 The skill validates the artifact and checks desktop and mobile browser views.

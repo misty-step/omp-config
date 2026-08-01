@@ -1,8 +1,7 @@
 # Quality Gates
 
 The repo's STANDING quality floor lists gates that run on every change.
-`quality-system.md` defines the bar for one work item.
-`verification-system-first.md` defines the proof loop for one change.
+`global/references/verification-system-first.md` defines the quality bar and proof loop for one change.
 This file defines automatic enforcement. Humans and agents do not need to remember these gates.
 
 Every gate names the real failure it catches, or the repo deletes it.

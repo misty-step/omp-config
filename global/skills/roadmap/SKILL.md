@@ -1,97 +1,85 @@
 ---
 name: roadmap
-description: Grill the operator, then create or update and open a concise project ROADMAP.html.
+description: Interrogate the operator, then create or update and open a concise project ROADMAP.html.
 disable-model-invocation: true
 argument-hint: "[project|path]"
 ---
 
 # /roadmap
 
-Create or update root `ROADMAP.html` as the human project planning surface.
-Keep vision, roadmap, and work authority separate.
+Create or update root `ROADMAP.html` as the human planning surface. Keep vision,
+roadmap, and work authority separate.
 
 ## Boundaries
 
-- Keep `VISION.md` as the durable direction source when that file exists.
-- Keep `ROADMAP.html` as a concise view of outcomes, sequence, questions, research, and proof.
-- Keep tasks, claims, attempts, relations, and proof records in the repository work ledger.
-- Keep five to twelve strategic items in the roadmap.
-- Keep exactly one item current.
-- Keep ticket detail out of the roadmap.
-- Open the local artifact after each successful create or update operation.
-- Publish the artifact only when the operator asks.
+- Keep durable direction in `VISION.md` when it exists.
+- Keep outcomes, sequence, questions, research, and proof in `ROADMAP.html`.
+- Keep tasks, claims, attempts, relations, and proof records in the work ledger.
+- Keep 5–12 strategic items, exactly one current item, and no ticket detail.
+- Open the local artifact after each successful update. Publish only when asked.
 
 ## Procedure
 
-### 1. Ground the project
+### 1. Ground
 
-Find the repository root and active workspace.
-Read the current `ROADMAP.html` when it exists.
-Read root `VISION.md` when it exists.
-Read only the repository sources that can settle project facts or authority.
-Resolve factual questions with tools before you question the operator.
+Find the repository root and active workspace. Read existing `ROADMAP.html` and root `VISION.md` when they exist. Read only sources that settle facts or authority. Resolve
+factual questions with tools before asking the operator. Finish when you can
+state the vision, roadmap, work authority, and relevant source files.
 
-Complete this step when you can state the current vision, roadmap, work authority, and relevant source files.
+### 2. Interrogate
 
-### 2. Grill the decisions
+Read `global/references/interrogate-first.md` before questioning the operator.
+Batch decisions about purpose, target state, human role, measures, current item,
+sequence, proof, research, exclusions, and work authority. Give one recommended
+answer and one short reason per question. Absorb dictation, remove settled
+questions, and batch again. State the full shared understanding. Get explicit
+confirmation before changing the artifact; finish only after confirmation.
 
-Read `skill://grilling` before you question the operator.
-Batch every open decision about the vision and immediate roadmap.
-Cover purpose, target state, human role, measures, current item, sequence, proof, research, exclusions, and work authority.
-Give one recommended answer and one short reason for each question.
-Absorb free-form dictation, remove settled questions, and batch the remaining questions again.
-State the full shared understanding after no question remains open.
-Get explicit operator confirmation before you change the artifact.
+### 3. Shape
 
-Complete this step only when the operator confirms the full shared understanding.
+Read `references/artifact-contract.md`. Convert confirmed understanding to its
+data shape. Preserve identifiers when outcomes remain. Map each concern to one
+item or explicit exclusion. Write outcomes, one observable proof condition, one
+next decision, and one bounded research need per item. Finish when the artifact
+contract passes.
 
-### 3. Shape the roadmap
+### 4. Update
 
-Read `references/artifact-contract.md`.
-Convert the confirmed understanding into the required data shape.
-Preserve existing item identifiers when their outcomes remain the same.
-Map every supplied concern to one roadmap item or one explicit exclusion.
-Write outcomes instead of implementation tasks.
-Write one observable proof condition for each item.
-Write one next decision and one bounded research need for each item.
+Write confirmed data to a temporary JSON file outside the repository and set its
+final update date. From this skill directory, run:
 
-Complete this step when the data satisfies every content rule in the artifact contract.
+```bash
+scripts/render_roadmap.py <data-file> <repository-root>/ROADMAP.html
+```
 
-### 4. Update the artifact
+The renderer creates a missing artifact or updates its data block. Preserve the
+layout unless the operator confirmed a layout change. Remove the temporary JSON
+after success. Finish when the root artifact contains all confirmed data and no
+template marker.
 
-Write the confirmed data to a temporary JSON file outside the repository.
-Set the final update date in that data.
-Run `scripts/render_roadmap.py <data-file> <repository-root>/ROADMAP.html` from this skill directory.
-The renderer creates a missing artifact or updates the existing data block.
-Preserve the existing layout unless the operator confirmed a layout change.
-Remove the temporary JSON file after the renderer succeeds.
+### 5. Prove and open
 
-Complete this step when root `ROADMAP.html` contains the full confirmed data and no template marker.
+Read `skill://simplified-technical-english` and apply it to visible artifact prose.
+From this skill directory, run:
 
-### 5. Prove and open the artifact
+```bash
+scripts/validate_roadmap.py <repository-root>/ROADMAP.html
+```
 
-Read `skill://simplified-technical-english`.
-Apply its rules to all visible artifact prose.
-Run `scripts/validate_roadmap.py <repository-root>/ROADMAP.html` from this skill directory.
-Resolve each validator error before you run the repository gate.
-Run the repository gate.
-Open the absolute `file://` URL in the browser.
-Check the desktop view and the mobile view.
-Check the filter and expansion controls.
-Check for JavaScript errors and horizontal overflow.
-Keep the browser open for the operator.
-
-Complete this step when the gate passes and the browser shows the current artifact without a failed check.
+Resolve each validator error before running the repository gate. Run the gate.
+Open the absolute `file://` URL in the browser. Check desktop and mobile views,
+filter and expansion controls, JavaScript errors, and horizontal overflow. Keep
+the browser open. Finish when the gate passes and the browser shows the artifact.
 
 ## Completion Gate
 
-Report the artifact path, vision changes, roadmap item changes, deferred decisions, exclusions, gate result, and browser evidence.
-End with the current item and its next question.
+Report artifact path, vision changes, roadmap item changes, deferred decisions,
+exclusions, gate result, and browser evidence. End with the current item and next question.
 
 ## Gotchas
 
-- A backlog dump hides strategy. Keep task state in the work ledger.
-- A second vision source creates drift. Summarize and link `VISION.md` when it exists.
-- A fresh identifier breaks history. Preserve an identifier until its outcome ends.
-- A large artifact defeats the human surface. Keep details behind item expansion controls.
-- A silent update loses operator intent. Require confirmed shared understanding before every write.
+- Keep backlog detail in the work ledger; a dump hides strategy.
+- Summarize and link `VISION.md`; a second vision source creates drift.
+- Preserve identifiers while outcomes remain; fresh identifiers break history.
+- Keep detail behind expansion; a large artifact defeats the human surface.
+- Require confirmed shared understanding before every write.

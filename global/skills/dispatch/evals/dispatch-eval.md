@@ -18,7 +18,7 @@ A bare prompt should lose on at least two of three fixtures.
 
 1. Medium-risk API implementation with an accepted contract, Powder card, and
    a new error path. Correct route: `builder` plus `deliver` and `ci`;
-   Powder MCP; independent `qa` verifier.
+   `powder` CLI/API through the `powder` skill; independent `qa` verifier.
 2. High-risk production latency incident with Canary evidence and an unknown
    recent deploy. Correct route: `cassandra` plus `factory-apps` and
    `estate-infrastructure`; Canary CLI/API; reproduce before repair.
