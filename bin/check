@@ -80,14 +80,19 @@ def yaml_setting(path: Path, dotted: str) -> object:
             parsed = _yaml_value(raw)
             if parsed is not None:
                 return parsed
+            children: list[object] = []
             for following in lines[index + 1 :]:
                 if not following.strip() or following.lstrip().startswith("#"):
                     continue
                 following_indent = len(following) - len(following.lstrip(" "))
                 if following_indent <= indent:
                     break
-                return _yaml_value(following.strip())
-            return None
+                value = following.strip()
+                if value.startswith("- "):
+                    children.append(_yaml_value(value[2:]))
+                    continue
+                return _yaml_value(value)
+            return children or None
         if not raw.strip():
             stack.append((indent, key))
     raise ContractError(f"{relative(path)} omits required setting {dotted}")
@@ -98,10 +103,10 @@ def check_promptspace_config(contract: Contract, effective: dict[str, object]) -
     expected = {
         "tui.chrome": "plain",
         "statusLine.preset": "custom",
-        "statusLine.leftSegments": [],
-        "statusLine.rightSegments": [],
-        "theme.dark": "kanagawa",
-        "theme.light": "kanagawa-lotus",
+        "statusLine.leftSegments": ["session_name", "model", "mode", "path", "git"],
+        "statusLine.rightSegments": ["subagents", "token_rate", "context_pct", "time_spent"],
+        "theme.dark": "light-ember",
+        "theme.light": "light-ember",
     }
     for key, wanted in expected.items():
         actual = yaml_setting(settings, key)

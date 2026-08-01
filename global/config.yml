@@ -85,24 +85,33 @@ skills:
   enabled: true
 symbolPreset: nerd
 theme: 
-  dark: kanagawa
-  light: kanagawa-lotus
+  dark: light-ember
+  light: light-ember
 setupVersion: 1
 statusLine: 
   preset: custom
+  separator: slash
+  transparent: true
   sessionAccent: true
-  compactThinkingLevel: false
+  compactThinkingLevel: true
   showHookStatus: true
   leftSegments: 
-    []
+    - session_name
+    - model
+    - mode
+    - path
+    - git
   rightSegments: 
-    []
+    - subagents
+    - token_rate
+    - context_pct
+    - time_spent
   segmentOptions: 
     model: 
       showThinkingLevel: true
     path: 
       abbreviate: true
-      maxLength: 44
+      maxLength: 42
       stripWorkPrefix: true
     git: 
       showBranch: true
@@ -114,10 +123,16 @@ statusLine:
       showSeconds: false
 display: 
   shimmer: classic
+  smoothStreaming: true
   showTokenUsage: true
+terminal: 
+  showImages: true
+  showProgress: true
 tui: 
   chrome: plain
   textSizing: false
+  titleState: true
+  hyperlinks: auto
 grep: 
   enabled: true
 async: 
