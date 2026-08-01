@@ -48,12 +48,17 @@ and tests were replaced in the same change.
   changing a grant requires a Mint policy deploy.
 - Actor identity is per-host Tailnet WhoIs (`moomooskycow@github` on
   Mirrodin); management routes stay with `phrazzld@github`.
-- Peer-harness lanes that expect an `OPENROUTER_API_KEY` environment
-  variable (pi, goose, opencode, council) remain broken here until they are
-  taught the Mint base URL or retired.
+- Peer-harness lanes (pi, goose, opencode; council uses these) are
+  Mint-routed per-tool: `~/.pi/agent/models.json`,
+  `~/.config/goose/config.yaml` + `secrets.yaml`, and
+  `~/.config/opencode/opencode.json`. Each holds the Mint base URL and the
+  `__mint.openrouter.default__` placeholder; no `OPENROUTER_API_KEY`
+  environment variable exists.
 
 Verified 2026-07-31: `omp -p --model openrouter/deepseek/deepseek-v4-flash`
 returned a genuine DeepSeek completion through Mint with no fallback.
+Verified 2026-08-01: pi 0.83.0, goose 1.45.0, and opencode 1.18.11 each
+returned a `LANE_OK` completion through the Mint route with no env vars.
 
 ## Reversal condition
 
