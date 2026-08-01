@@ -14,7 +14,8 @@ after loading this skill.
 
 1. Read the live work card or other named authority, current repository
    contracts, relevant code, existing proof, and worktree state. The live
-   authority outranks remembered context. Preserve concurrent user work.
+   authority outranks remembered context. Preserve concurrent user and agent work.
+   Do not delete, revert, or overwrite unrecognized files, hunks, or commits.
 2. Name the bounded observable outcome and the cheapest credible falsifier
    before editing. The falsifier MUST be able to show the requested behavior is
    still missing or wrong. If no executable oracle exists, stop and reshape the

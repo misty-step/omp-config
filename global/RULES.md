@@ -1,6 +1,9 @@
 # Persistent rules
 
 - Preserve user work and adapt to concurrent changes.
+- Treat unexpected worktree changes as concurrent agent or operator work. Keep them.
+- Do not delete, revert, overwrite, or restage unrecognized files, hunks, or commits.
+- Scope every edit and commit to the requested change. Leave foreign hunks in mixed files for their owners.
 - Never place secret values in declarations, repositories, manifests, fixtures, or logs.
 - Never add product fallback behavior. Fix the primary path or report the blocking prerequisite.
 - Transport retries may use the configured retry policy. They do not replace product behavior.
