@@ -127,16 +127,22 @@ Pi stays the smallest open-model peer lane.
 The receipts above already cover dispatch and model-override behavior for it.
 Invoke it with `--no-extensions` so optional personal Pi extensions cannot make
 a successful model response exit nonzero.
-Pi also supports custom OpenAI-compatible providers/models through
-`~/.pi/agent/models.json`.
+Pi routes OpenRouter through the Mint broker via
+`~/.pi/agent/models.json` (`providers.openrouter.baseUrl` =
+`http://mint.tail5f5eb4.ts.net:4949/proxy/https/openrouter.ai/api/v1`,
+`apiKey` = `__mint.openrouter.default__`). Verified live 2026-08-01.
 
 Source: https://pi.dev/docs/latest/models.
 
 ### Goose
 
 Goose is a primary open-model harness candidate for MCP-heavy work.
-Official docs list OpenRouter as a supported provider requiring
-`OPENROUTER_API_KEY`.
+Official docs list OpenRouter as a supported provider. On this machine the
+key value is the Mint placeholder `__mint.openrouter.default__` in
+`~/.config/goose/secrets.yaml`, and `OPENROUTER_HOST` in
+`~/.config/goose/config.yaml` is
+`http://mint.tail5f5eb4.ts.net:4949/proxy/https/openrouter.ai`
+(no `/api/v1`; goose appends the path). Verified live 2026-08-01.
 The local CLI exposes:
 
 ```sh
@@ -152,6 +158,10 @@ runner experiments.
 OpenRouter's official integration docs say OpenCode supports OpenRouter as a
 built-in provider through `/connect`, `/models`, or `opencode.json`.
 It accepts OpenRouter model ids through the `openrouter/<model>` form.
+On this machine `opencode.json` routes OpenRouter through Mint:
+`provider.openrouter.options.baseURL` =
+`http://mint.tail5f5eb4.ts.net:4949/proxy/https/openrouter.ai/api/v1`,
+`options.apiKey` = `__mint.openrouter.default__`. Verified live 2026-08-01.
 The 2026-06-19 substrate report's core distinction is that OpenCode is
 session/service-shaped.
 That shape fits coordinator/specialist review lanes and structured event
