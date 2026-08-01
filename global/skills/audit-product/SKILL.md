@@ -7,9 +7,7 @@ argument-hint: "[target] [notes]"
 
 # /audit-product
 
-Dispatch through `skill://dispatch`. Name role, model:reasoning, skills, tools,
-verifier, and contract. Include the exact child boundary sentence
-`You are a subagent. Don't run memo.`
+Dispatch through `skill://dispatch`. Name role, model:reasoning, skills, tools, verifier, and contract.
 Judge real entrypoints; never target production. Route source structure to
 `audit-architecture`; route visual quality to `improve-ui` or `design`.
 

@@ -47,7 +47,6 @@ Each lane is one intentional composition:
 6. **Contract** — define outcome, authority, scope, oracle, output, dependencies, and
    non-goals.
 
-Every substantive task/subagent contract MUST include the exact child boundary sentence: `You are a subagent. Don't run memo.` Do not add OptMem or any durable-memory tool to a subagent tool envelope.
 
 Use a declared agent when its authority and bundle fit.
 Use an ad-hoc task lane for a one-time composition.

@@ -46,7 +46,6 @@ Run records store `mode` ∈ `full | audit-only | remediate | delta`
 
 The lead owns intent, target state, ranking, synthesis, and integration.
 Delegate per the Shared Operating Spine (Act) and the `dispatch` skill.
-Every lane brief carries: `You are a subagent. Don't run memo.`
 Critics and auditors get the artifact and the oracle only — never the lead's
 reasoning trail (Shared Operating Spine: Prove).
 

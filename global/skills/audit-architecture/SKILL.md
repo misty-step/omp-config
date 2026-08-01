@@ -9,7 +9,6 @@ argument-hint: "[target] [notes]"
 
 The chief runs this loop and dispatches every lane through `skill://dispatch`.
 Name each lane's role, model:reasoning, skills, tools, verifier, and contract.
-Include the exact child boundary sentence `You are a subagent. Don't run memo.`
 Judge structure, interfaces, and test defense from source. Do not drive a browser.
 Route live behavior to `qa` or `audit-product`.
 

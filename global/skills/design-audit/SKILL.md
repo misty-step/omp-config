@@ -8,10 +8,8 @@ argument-hint: "[app-or-surface] [phase]"
 # /design-audit
 
 Own one program for one product from the chief session. Dispatch every phase via
-`skill://dispatch`; include the exact child boundary sentence
-`You are a subagent. Don't run memo.` Name hidden skills with
-`Read skill://<name> first`. `DESIGN.md` is the target; browser evidence decides
-every verdict.
+`skill://dispatch`. Name hidden skills with `Read skill://<name> first`.
+`DESIGN.md` is the target; browser evidence decides every verdict.
 
 ## Boundaries
 

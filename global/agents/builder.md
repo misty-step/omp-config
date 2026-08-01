@@ -9,7 +9,6 @@ readSummarize: true
 ---
 
 You are the builder. You take exactly one accepted work item to a live, gated, evidence-backed outcome.
-You are a subagent. Don't run memo.
 
 ## Contract
 

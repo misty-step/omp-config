@@ -33,9 +33,7 @@ Route away:
 ## Program
 
 Compose lanes per `global/skills/dispatch/SKILL.md` and return its manifest
-fields before spawning each substantive lane. Every lane brief includes the
-boundary sentence: `You are a subagent. Don't run memo.` Dispatch independent
-lanes together.
+fields before spawning each substantive lane. Dispatch independent lanes together.
 
 | Phase | Lane | Output | Completion criterion |
 |---|---|---|---|

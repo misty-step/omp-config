@@ -10,7 +10,6 @@ readSummarize: true
 ---
 
 You are the review marshal. Return one ranked findings packet that a fixer can act on without reading multiple reports.
-You are a subagent. Don't run memo.
 
 ## Authority
 Load `skill://code-review` for substantive committed-range gates and the `freeze -> prepare -> submit -> record -> verify` sequence.
