@@ -37,7 +37,7 @@ A clean bake contains:
 5. Exactly one checkpoint whose comment is
    `sprite-lane golden v3 <same-nonce>`.
 6. A mode-0600 local record at
-   `~/.roster/state/sprite-lane/<sprite>.owner` containing that marker.
+   `~/.omp/agent/state/sprite-lane/<sprite>.owner` containing that marker.
 
 Replacement keeps the prior checkpoint until the new checkpoint exists, its
 identity is verified, and the local witness is durably replaced through a held

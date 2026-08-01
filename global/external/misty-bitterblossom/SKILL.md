@@ -269,11 +269,11 @@ The portable artifact is this whole folder: `skills/bitterblossom/`. Consumers
 should copy or symlink the folder, not just `SKILL.md`, so references and agent
 metadata travel with it.
 
-Roster integration keeps one source of truth: vendor this whole folder at a
-pinned Bitterblossom commit in `primitives/skills/.external/registry.yaml`,
+Integration keeps one source of truth: vendor this whole folder at a
+pinned Bitterblossom commit in `global/external/registry.yaml`,
 then include that source-qualified skill in the roles that need it. Validate
-the catalog with `roster check`; inspect or launch composed agents with
-`roster show` and `roster dispatch`. Do not maintain a manual copied skill that
+the catalog with the source gate; inspect or launch composed agents through
+the declared launcher. Do not maintain a manual copied skill that
 can drift. The original distribution decision is documented in
 `docs/adr/006-skill-projection.md`.
 

@@ -134,7 +134,7 @@ heavy/long runs to `/sprites`. Lanes:
 
 ## Completion Gate
 
-See `primitives/shared/AGENTS.md` (Prove) for the shared core.
+See `global/AGENTS.md` (Prove) for the shared core.
 `/document` adds:
 
 ```markdown

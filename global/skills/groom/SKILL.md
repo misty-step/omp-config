@@ -57,7 +57,7 @@ first-class groom emission rather than waiting on a separate `/vision` pass.
 ## Tidy (mandatory)
 
 Keep the board of record true — Powder cards, not stale files (Shared Operating
-Spine: Durable State and Closeout; misty-powder skill, Powder MCP/CLI). Consume the card store; don't
+Spine: Durable State and Closeout; Powder skill, Powder MCP/CLI). Consume the card store; don't
 hand-roll closure:
 
 - **Close shipped work.** A card whose work merged moves to done/shipped via
@@ -234,7 +234,7 @@ This repo deliberately has no semantic telemetry engine.
 
 ## Completion Gate
 
-See `primitives/shared/AGENTS.md` (Prove; Durable State and Closeout) for the
+See `global/AGENTS.md` (Prove; Durable State and Closeout) for the
 shared core; this phase adds:
 
 1. **Tidy diff** — archived, flipped, flagged; by ID, no padding.

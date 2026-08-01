@@ -4,7 +4,7 @@ Compact critic rubrics. The primary reads a lens here and commissions an
 **ad-hoc** critic subagent that embodies it — no static persona file is
 required (backlog 061, "subagent roles, not files"). Name the
 lens, give it scope + an evidence contract, synthesize its findings yourself.
-Used by `primitives/shared/references/routing.md`, `/code-review`, `/critique`,
+Used by `/code-review`, `/critique`,
 `/groom`, `/refactor`, and `/shape`.
 
 ## critic
@@ -92,13 +92,13 @@ because no adversarial path exercised the authority or input boundary.
 ## works
 **Essence:** tests are not the whole definition of working — public surface,
 human workflow, performance tradeoffs, compatibility, and operations matter.
-**Looks for:** see `primitives/shared/references/works-critique.md`.
+**Looks for:** see `global/references/works-critique.md`.
 **Catches:** changes that pass tests while the API/CLI/UI, operator path, or
 production signal is incoherent.
 
 ## delete-first
 **Essence:** question, delete, simplify, speed up, automate — in that order.
-**Looks for:** see `primitives/shared/references/delete-first.md`.
+**Looks for:** see `global/references/delete-first.md`.
 **Catches:** optimizing or automating a requirement, dependency, process, mode,
 or abstraction that should not exist.
 

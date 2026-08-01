@@ -45,7 +45,7 @@ time; never hardcode them into gates.
 
 ## Local Harness Roster
 
-Source: `primitives/providers.yaml`, with command discovery rechecked on
+Source: `global/models.yml`, with command discovery rechecked on
 2026-06-14 and selected providers refreshed on the dates below.
 
 | Provider target | Harness / CLI | Active model id | Dispatch surface | Local probe status |
@@ -470,7 +470,7 @@ refresh before quoting spend or composing long-output lanes.
 
 - Active local id: `composer-2.5`.
 - Local dispatch surface: Cursor Agent CLI `cursor-agent -p --model composer-2.5`.
-- Source for local availability: `primitives/providers.yaml` plus a direct
+- Source for local availability: `global/models.yml` plus a direct
   `cursor-agent --version`/headless smoke on 2026-06-07.
 - Public model-card/pricing/context facts were not verified in this refresh.
   Do not infer pricing, context, or benchmark facts from the local model id.
@@ -480,7 +480,7 @@ refresh before quoting spend or composing long-output lanes.
 Use `/harness-engineering models` or `/research` when this file is stale
 or a user asks for current model/provider/harness choices.
 
-1. Read `primitives/providers.yaml`, harness settings, and this file.
+1. Read `global/models.yml`, harness settings, and this file.
 2. Probe local providers with `command -v` plus the provider's documented
    non-billable version/help command; use a bounded sentinel only when needed.
 3. Query live provider catalogs/docs for exact model ids, context windows,

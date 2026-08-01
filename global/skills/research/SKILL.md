@@ -67,7 +67,7 @@ its spend only by carrying distinct sources, methods, or model families.
 
 ## Completion Gate
 
-See `primitives/shared/AGENTS.md` (Prove) for the shared core.
+See `global/AGENTS.md` (Prove) for the shared core.
 `/research` adds:
 
 - Sources/tools queried and why.

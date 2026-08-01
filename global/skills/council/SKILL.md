@@ -5,7 +5,7 @@ description: |
   Convene a council of DISTINCT OpenRouter model families (via opencode/pi),
   each in a generative persona, to think divergently about one question, then
   synthesize as chair. The generative sibling of /peer-harnesses' adversarial bench:
-  councils generate and reframe, roster critiques. Use when: "convene a
+  councils generate and reframe, reviewers critique. Use when: "convene a
   council", "thinktank", "brainstorm with different models", "get diverse
   perspectives", "panel of AIs", "what would different experts think",
   "divergence pass", "ideate broadly", "stress-test this direction with other

@@ -50,8 +50,8 @@ for candidate in /usr/bin/python3 /opt/homebrew/bin/python3 /usr/local/bin/pytho
 done
 [ -n "$PYTHON_BIN" ] || { echo "sprite-lane: Python 3 is required" >&2; exit 1; }
 
-RECEIPTS_DIR="${SPRITE_LANE_RECEIPTS:-$HOME/.roster/receipts/sprite-lane}"
-OWNERS_DIR="${SPRITE_LANE_OWNERS:-$HOME/.roster/state/sprite-lane}"
+RECEIPTS_DIR="${SPRITE_LANE_RECEIPTS:-$HOME/.omp/agent/receipts/sprite-lane}"
+OWNERS_DIR="${SPRITE_LANE_OWNERS:-$HOME/.omp/agent/state/sprite-lane}"
 BAKE_VERSION="3"
 
 REMOTE_FS_HELPER="$(/bin/cat <<'PY'

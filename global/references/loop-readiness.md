@@ -1,6 +1,6 @@
 # Loop Readiness
 
-Roster designs loop handoffs. Bitterblossom or another Mode B event plane
+OMP designs loop handoffs. Bitterblossom or another Mode B event plane
 runs unattended schedules, webhooks, queues, and recurring workers. The
 canonical Mode A / Mode B boundary remains `meta/CONTRACTS.md`.
 
@@ -13,7 +13,7 @@ A workflow may become a loop only when all are true:
 3. The runner can reproduce the environment it must change or inspect.
 4. Token, dollar, time, and blast-radius budgets can absorb failed attempts.
 
-If any answer is no, keep it as an ad-hoc Roster session or a shaped
+If any answer is no, keep it as an ad-hoc operator session or a shaped
 ticket.
 
 ## 30-Second Check

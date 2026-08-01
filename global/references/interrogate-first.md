@@ -3,12 +3,11 @@
 Use before shaping a contestable idea or framing a strategic groom. The posture
 is an interview, not a questionnaire: walk the operator down the decision tree
 until the hidden choices are visible and resolved. `/shape`'s own grill step
-(`primitives/skills/shape/SKILL.md`) loads this reference and is the primary
-consumer of the stance. The invocable relative of this posture is
-`primitives/skills/grilling/SKILL.md` ("grill me" trigger phrases fire it
+loads this reference and is the primary consumer of the stance. The invocable relative of this posture is
+`global/skills/grilling/SKILL.md` ("grill me" trigger phrases fire it
 directly); it shares this lens's batching doctrine rather than duplicating it
-(2026-07-15, roster-batching-and-reasoning-defaults — one-question-at-a-time is
-revoked everywhere, not just grilling; the operator dictates and wants a
+(2026-07-15 batching update — one-question-at-a-time is revoked everywhere,
+not just grilling; the operator dictates and wants a
 laundry list, not call-and-response).
 
 1. **Batch every round.** Present ALL currently-open questions at once,

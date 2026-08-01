@@ -48,7 +48,7 @@ socket, and refuses replacement snapshot leaves. Replacing either the original
 installation path or the published broker path cannot select provider bytes.
 
 Preparation receipts land in
-`~/.roster/receipts/sprite-lane/<lane-id>.json`. The initial `preparing`
+`~/.omp/agent/receipts/sprite-lane/<lane-id>.json`. The initial `preparing`
 receipt exists before any remote mutation. Its terminal state is `prepared`,
 `setup_failed`, or `interrupted`, with the exact observed setup exit code.
 It records the remote work and card paths for the external launch owner and
@@ -59,7 +59,7 @@ durability-unknown; recovery-link cleanup debt remains distinct from failure
 before commit.
 
 A non-secret ownership record lands in
-`~/.roster/state/sprite-lane/<sprite>.owner`. Its version and random nonce must
+`~/.omp/agent/state/sprite-lane/<sprite>.owner`. Its version and random nonce must
 exactly match the remote marker and one checkpoint comment. This local witness
 prevents an arbitrary or recycled Sprite from declaring itself owned.
 
