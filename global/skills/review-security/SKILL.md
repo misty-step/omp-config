@@ -45,16 +45,18 @@ fake value. Real credentials never appear in a finding or this file.
 
 ### 1. Secret leakage — always `blocking`
 
-This workstation holds zero vendor credential bytes. An operator-configured
-Agent Vault wrapper supplies the scoped proxy and CA environment, while its
-service rules own and replace `Authorization` at the upstream boundary.
-OpenRouter config carries the non-secret `__OPENROUTER_API_KEY__` sentinel;
-it is not a credential or an Agent Vault management token.
-
-Flag: a literal credential in code/config/fixtures/tests/logs, a child route
-that bypasses the wrapper's proxy/CA boundary, or a resolved value echoed to
-stdout or an error. A provider sentinel may remain in a diff only when the
-documented provider contract names it; never replace it with a real key.
+This workstation holds zero vendor credential bytes. The tailnet-only Mint
+broker at `http://mint.tail5f5eb4.ts.net:4949` owns and replaces
+`Authorization` at the upstream boundary. Tailnet WhoIs supplies caller
+identity. Mint policy at `~/Development/mint/deploy/policy.yaml` is the grant.
+Config carries only value-free `__mint.<service>.<name>__` placeholders.
+OpenRouter uses `__mint.openrouter.default__`.
+These placeholders and `secret://<service>/<name>` aliases are not credentials.
+Flag a literal credential in code, config, fixtures, tests, or logs.
+Flag a route that bypasses Mint policy or the Mint boundary.
+Flag a resolved value echoed to stdout or an error.
+A Mint placeholder can remain only when the provider contract names it.
+Never replace the placeholder with a real key.
 
 ### 2. Authorization
 
@@ -90,12 +92,14 @@ on attacker-reachable input.
 
 ### 5. Blast radius
 
-Flag any change widening what a credential, token, role, or process can
-reach, and name the widening explicitly (from X to Y), not "this could be
-risky": an Agent Vault service rule widened from a narrow host/path to an
-unneeded wildcard; a service account or DB role granted a broader
-verb/resource than the diff's purpose needs; or a child that gains arbitrary
-environment authority instead of the documented proxy/CA allowlist.
+Flag any change widening what a credential, token, role, or process can reach.
+Name the widening explicitly, from X to Y, instead of calling it "risky."
+Flag a Mint policy rule widened from a narrow actor, service, method, or path
+to an unneeded wildcard.
+Flag a service account or database role with a broader verb or resource than
+the diff needs.
+Flag a process that gains arbitrary outbound authority instead of a narrow
+Mint policy grant.
 
 ### 6. Weakened gate — always `blocking`
 

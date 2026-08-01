@@ -3,18 +3,18 @@ disable-model-invocation: true
 name: factory-apps
 description: >
   Route Misty Step factory application capabilities across Canary, Powder,
-  Landmark, Aesthetic, and the local Agent Vault wrapper. Use owned surfaces
+  Landmark, Aesthetic, and the Mint credential broker. Use owned surfaces
   for observability, work state, release intelligence, design law, and
   credentialed outbound calls. Mode B has no active workflow plane; do not
   invent a replacement. Trigger: /factory-apps, /factory-stack.
-argument-hint: "[canary|powder|landmark|aesthetic|agent-vault|audit]"
+argument-hint: "[canary|powder|landmark|aesthetic|mint|audit]"
 ---
 
 # /factory-apps
 
 Use the owned factory app before you invent local state, bespoke glue, or a
 generic third-party workflow.
-Product repos own the concrete skills and MCP servers.
+Product repos own the concrete skills and live CLI/API surfaces. Disabled MCP implementations are not runtime routes.
 omp-config imports those skills under `misty-*` aliases and manages MCP
 registration in `global/mcp.json`.
 
@@ -23,11 +23,11 @@ registration in `global/mcp.json`.
 | Need | App | First surface | Fallback |
 |---|---|---|---|
 | uptime, incidents, error timelines, health checks, service evidence, production debugging | Canary | `misty-canary`, `canary` on `PATH`, or API | the disabled Canary MCP is not a runtime route |
-| backlog, issue cards, claims, relations, operator input requests, work status | Powder | Powder MCP when configured | the Powder product skill, CLI, API |
+| backlog, issue cards, claims, relations, operator input requests, work status | Powder | `powder` CLI or API | Powder MCP is disabled and is not a runtime route |
 | release intelligence, versions, changelogs, release notes, release kit, fleet adoption | Landmark | `misty-landmark` and `landmark describe --json` / dry-run CLI/action paths | `docs/agent-integration.md`, `docs/fleet-integration-playbook.md` |
 | UI/UX, Misty Step design law, tokens, static design registry, rendered design gate | Aesthetic | `misty-aesthetic`, `@misty-step/aesthetic` package, static API, law gate | `docs/ADOPTING.md`, `DESIGN.md` |
 | event-triggered agents, reflex loops, durable runs | unavailable | Mode B has no active workflow plane; keep work in Mode A until a future product is named | do not invent a replacement |
-| outbound API call needing a credential (API key, token, secret) | Agent Vault-wrapped parent | Operator launches `agent-vault vault run --vault default -- omp` or the proxy-only `agent-vault run -- omp`; service rules own `Authorization` | Keep provider interfaces generic; no Agent Vault MCP or skill |
+| outbound API call needing a credential (API key, token, secret) | Mint broker | Route through `http://mint.tail5f5eb4.ts.net:4949/proxy/https/<host>/<path>` with a `__mint.<service>.<name>__` placeholder; Tailnet WhoIs identifies the caller; Mint policy grants access and owns `Authorization` | Keep provider interfaces generic; Mint policy controls access; this harness has no Mint MCP or skill |
 
 ## Operating Rule
 
@@ -44,10 +44,13 @@ Use the owned app first. Follow these constraints:
 - **Mode B** — No active event plane is available for triggered, scheduled,
   durable, reflexive, or other unattended work. Keep ad-hoc operator work in
   Mode A and do not invent a replacement workflow service.
-- **Agent Vault** — The local wrapper injects a scoped proxy session and the
-  documented proxy/CA variables. Its service rules own and replace
-  `Authorization`. It is not a sandbox, and this harness adds no Agent Vault
-  MCP or skill.
+- **Mint** — Mint is an egress proxy and typed-action broker at
+  `http://mint.tail5f5eb4.ts.net:4949`. Use a value-free
+  `__mint.<service>.<name>__` placeholder in each credential field.
+  Tailnet WhoIs identifies the caller. Mint policy at
+  `~/Development/mint/deploy/policy.yaml` is the grant and owns
+  `Authorization` at the upstream boundary. Mint is not a sandbox.
+  This harness adds no Mint MCP or skill.
 
 ## Current Audit
 

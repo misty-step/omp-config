@@ -308,25 +308,22 @@ class BuzzOmpTests(unittest.TestCase):
         self.assertIn('      - "openrouter/second:high"', config)
         self.assertIn('      - "openrouter/third:off"', config)
 
-    def test_provider_file_uses_upstream_url_and_agent_vault_sentinel(self) -> None:
+    def test_provider_file_uses_mint_proxy_and_placeholder(self) -> None:
         _, messages, _ = self.invoke(self.make_bundle(), self.session_request())
         models = next(message for message in messages if message["kind"] == "runtime")[
             "models"
         ]
         self.assertIn(
-            'baseUrl: "https://openrouter.ai/api/v1"',
+            'baseUrl: "http://mint.tail5f5eb4.ts.net:4949/proxy/https/openrouter.ai/api/v1"',
             models,
         )
-        self.assertIn('apiKey: "__OPENROUTER_API_KEY__"', models)
-        self.assertNotIn("http://100.108.0.89:4949", models)
-        self.assertNotIn("__mint.", models)
-        self.assertNotIn("MINT_BASE_URL", models)
+        self.assertIn('apiKey: "__mint.openrouter.default__"', models)
         self.assertNotRegex(models, r"sk-[A-Za-z0-9]{12,}")
 
-    def test_agent_vault_adds_no_mcp_or_skill(self) -> None:
+    def test_mint_adds_no_mcp_or_skill(self) -> None:
         catalog = json.loads((ROOT / "global" / "mcp.json").read_text())
-        self.assertNotIn("agent-vault", catalog["mcpServers"])
-        self.assertFalse((ROOT / "global" / "skills" / "agent-vault").exists())
+        self.assertNotIn("mint", catalog["mcpServers"])
+        self.assertFalse((ROOT / "global" / "skills" / "mint").exists())
 
     def test_validation_failures(self) -> None:
         base = {
@@ -452,18 +449,18 @@ class BuzzOmpTests(unittest.TestCase):
         self.assertIn("skill demo must not contain symlinks", message)
         self.assertIn("outside.md", message)
 
-    def test_agent_vault_proxy_and_ca_env_are_allowlisted(self) -> None:
+    def test_operator_proxy_and_ca_env_are_allowlisted(self) -> None:
         expected = {
-            "HTTP_PROXY": "http://agent-vault-proxy.test:14322",
-            "HTTPS_PROXY": "http://agent-vault-proxy.test:14322",
+            "HTTP_PROXY": "http://operator-proxy.test:14322",
+            "HTTPS_PROXY": "http://operator-proxy.test:14322",
             "NODE_USE_ENV_PROXY": "1",
             "NO_PROXY": "localhost,127.0.0.1",
-            "SSL_CERT_FILE": "/tmp/agent-vault-ca.pem",
-            "NODE_EXTRA_CA_CERTS": "/tmp/agent-vault-ca.pem",
-            "REQUESTS_CA_BUNDLE": "/tmp/agent-vault-ca.pem",
-            "CURL_CA_BUNDLE": "/tmp/agent-vault-ca.pem",
-            "GIT_SSL_CAINFO": "/tmp/agent-vault-ca.pem",
-            "DENO_CERT": "/tmp/agent-vault-ca.pem",
+            "SSL_CERT_FILE": "/tmp/operator-ca.pem",
+            "NODE_EXTRA_CA_CERTS": "/tmp/operator-ca.pem",
+            "REQUESTS_CA_BUNDLE": "/tmp/operator-ca.pem",
+            "CURL_CA_BUNDLE": "/tmp/operator-ca.pem",
+            "GIT_SSL_CAINFO": "/tmp/operator-ca.pem",
+            "DENO_CERT": "/tmp/operator-ca.pem",
             "ALL_PROXY": None,
         }
         with patch.dict(

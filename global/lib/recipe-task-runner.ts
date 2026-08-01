@@ -105,7 +105,7 @@ const SAFE_PREPARE_ENV = [
 	"LANG",
 	"LC_ALL",
 	"TERM",
-	// Agent Vault supplies this explicit proxy/CA set to the wrapped parent.
+	// This is a generic operator proxy/CA passthrough; Mint needs no environment.
 	// Keep the child boundary narrow; never inherit arbitrary environment.
 	"HTTP_PROXY",
 	"HTTPS_PROXY",

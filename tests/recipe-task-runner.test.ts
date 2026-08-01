@@ -6,7 +6,7 @@ import { startRecipeTask } from "../global/lib/recipe-task-runner.ts";
 
 const ROOT = resolve(import.meta.dir, "..");
 const FIXTURES = join(import.meta.dir, "fixtures/recipe-task");
-const OMP_SOURCE = "/Users/phaedrus/Development/oh-my-pi";
+const OMP_SOURCE = resolve(ROOT, "../oh-my-pi");
 const RPC_MODULE = join(OMP_SOURCE, "packages/coding-agent/src/modes/rpc/rpc-client.ts");
 const FAKE_CLI = join(FIXTURES, "fake-rpc-cli.ts");
 const COMPILER = join(ROOT, "bin/omp_recipe.py");
@@ -201,22 +201,22 @@ describe("recipe task runner", () => {
 		expect(childPidFileExistedAtCallTime).toBeFalse();
 	});
 
-	test("Agent Vault proxy and CA env survives the prepare filter", async () => {
-		const agentVaultEnv = {
-			HTTP_PROXY: "http://agent-vault-proxy.test:14322",
-			HTTPS_PROXY: "http://agent-vault-proxy.test:14322",
+	test("operator proxy and CA env survives the prepare filter", async () => {
+		const operatorProxyEnv = {
+			HTTP_PROXY: "http://operator-proxy.test:14322",
+			HTTPS_PROXY: "http://operator-proxy.test:14322",
 			NODE_USE_ENV_PROXY: "1",
 			NO_PROXY: "localhost,127.0.0.1",
-			SSL_CERT_FILE: "/tmp/agent-vault-ca.pem",
-			NODE_EXTRA_CA_CERTS: "/tmp/agent-vault-ca.pem",
-			REQUESTS_CA_BUNDLE: "/tmp/agent-vault-ca.pem",
-			CURL_CA_BUNDLE: "/tmp/agent-vault-ca.pem",
-			GIT_SSL_CAINFO: "/tmp/agent-vault-ca.pem",
-			DENO_CERT: "/tmp/agent-vault-ca.pem",
+			SSL_CERT_FILE: "/tmp/operator-ca.pem",
+			NODE_EXTRA_CA_CERTS: "/tmp/operator-ca.pem",
+			REQUESTS_CA_BUNDLE: "/tmp/operator-ca.pem",
+			CURL_CA_BUNDLE: "/tmp/operator-ca.pem",
+			GIT_SSL_CAINFO: "/tmp/operator-ca.pem",
+			DENO_CERT: "/tmp/operator-ca.pem",
 		};
-		const managedKeys = [...Object.keys(agentVaultEnv), "OMP_RECIPE_ARBITRARY"];
+		const managedKeys = [...Object.keys(operatorProxyEnv), "OMP_RECIPE_ARBITRARY"];
 		const prior = new Map(managedKeys.map(key => [key, process.env[key]]));
-		for (const [key, value] of Object.entries(agentVaultEnv)) process.env[key] = value;
+		for (const [key, value] of Object.entries(operatorProxyEnv)) process.env[key] = value;
 		process.env.OMP_RECIPE_ARBITRARY = "must-not-reach-child";
 		const bundle = join(scratch, "openrouter-bundle");
 		rmSync(bundle, { recursive: true, force: true });
@@ -236,7 +236,7 @@ describe("recipe task runner", () => {
 			const handle = await startRecipeTask({
 				...recipeOptions(bundle, "inspect"),
 				async onPrepared(descriptor) {
-					expect(descriptor.env).toMatchObject(agentVaultEnv);
+					expect(descriptor.env).toMatchObject(operatorProxyEnv);
 					expect(descriptor.env.OMP_RECIPE_ARBITRARY).toBeUndefined();
 				},
 			});

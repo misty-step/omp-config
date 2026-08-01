@@ -4,16 +4,20 @@ Query the user's Readwise Reader library for saved articles, highlights, and doc
 
 ## Authentication
 
-Run these commands only from an OMP process launched inside the operator's
-Agent Vault wrapper. Configure a service rule for `readwise.io/api/*`; the
-rule owns and replaces `Authorization` at the upstream boundary.
+Route all Readwise calls through the Mint broker:
 
 ```bash
-READWISE_BASE_URL="https://readwise.io"
+READWISE_BASE_URL="http://mint.tail5f5eb4.ts.net:4949/proxy/https/readwise.io"
 ```
 
-Do not set, print, or pass a Readwise credential from agent context. The
-commands below use the upstream URL and rely on the approved service rule.
+Each request carries `Authorization: Token __mint.readwise.default__`.
+This value follows the value-free `__mint.<service>.<name>__` grammar.
+Its alias is `secret://readwise/default`; neither form is a credential.
+Tailnet WhoIs identifies the caller. Mint policy at
+`~/Development/mint/deploy/policy.yaml` is the grant and owns
+`Authorization` at the upstream boundary.
+The policy currently grants `readwise.io` routes only to `phrazzld@github`.
+Other actors receive 403. Review Mint policy when a route is denied.
 
 ## Core Operations
 
@@ -23,6 +27,7 @@ No full-text search endpoint exists. Fetch documents, then filter them client-si
 
 ```bash
 curl -s "$READWISE_BASE_URL/api/v3/list/?limit=100" \
+  -H "Authorization: Token __mint.readwise.default__" \
   | jq '[.results[] | select(((.title // "") + " " + (.summary // "")) | test("TOPIC"; "i"))]
         | .[] | {title: (.title // "(untitled)"), source_url, summary: (.summary // ""), reading_progress, word_count, saved_at}'
 ```
@@ -33,6 +38,7 @@ Search all locations by default. Add `&location=later` or `&category=article` to
 
 ```bash
 curl -s "$READWISE_BASE_URL/api/v3/list/?location=new&limit=20" \
+  -H "Authorization: Token __mint.readwise.default__" \
   | jq '.results[] | {title: (.title // "(untitled)"), category, source_url, summary: (.summary // ""), saved_at, word_count}'
 ```
 
@@ -48,6 +54,7 @@ Locations: `new`, `later`, `shortlist`, `archive`, `feed`
 
 ```bash
 curl -s "$READWISE_BASE_URL/api/v3/tags/" \
+  -H "Authorization: Token __mint.readwise.default__" \
   | jq '.results[] | .name'
 ```
 
@@ -55,6 +62,7 @@ curl -s "$READWISE_BASE_URL/api/v3/tags/" \
 
 ```bash
 curl -s "$READWISE_BASE_URL/api/v3/list/?tag=TAG_NAME&limit=20" \
+  -H "Authorization: Token __mint.readwise.default__" \
   | jq '.results[] | {title: (.title // "(untitled)"), source_url, summary: (.summary // "")}'
 ```
 
@@ -64,6 +72,7 @@ Up to 5 `tag` params allowed. Empty `tag=` finds untagged documents.
 
 ```bash
 curl -s "$READWISE_BASE_URL/api/v3/list/?id=DOCUMENT_ID&withHtmlContent=1" \
+  -H "Authorization: Token __mint.readwise.default__" \
   | jq '.results[0].html_content'
 ```
 
@@ -73,6 +82,7 @@ Highlights are documents with `parent_id` pointing to the source document.
 
 ```bash
 curl -s "$READWISE_BASE_URL/api/v3/list/?category=highlight&limit=100" \
+  -H "Authorization: Token __mint.readwise.default__" \
   | jq '[.results[] | select(.parent_id == "DOCUMENT_ID")]
         | .[] | {title: (.title // "(untitled)"), summary: (.summary // ""), notes: (.notes // "")}'
 ```
@@ -86,7 +96,8 @@ CURSOR=""
 while true; do
   PARAMS="limit=100"
   [ -n "$CURSOR" ] && PARAMS="$PARAMS&pageCursor=$CURSOR"
-  RESPONSE=$(curl -s "$READWISE_BASE_URL/api/v3/list/?$PARAMS")
+  RESPONSE=$(curl -s "$READWISE_BASE_URL/api/v3/list/?$PARAMS" \
+    -H "Authorization: Token __mint.readwise.default__")
   echo "$RESPONSE" | jq '.results[]'
   CURSOR=$(echo "$RESPONSE" | jq -r '.nextPageCursor // empty')
   [ -z "$CURSOR" ] && break
@@ -115,6 +126,7 @@ On `429`, check `Retry-After` header.
 ### Save Something for Later
 ```bash
 curl -s -X POST "$READWISE_BASE_URL/api/v3/save/" \
+  -H "Authorization: Token __mint.readwise.default__" \
   -H "Content-Type: application/json" \
   -d '{"url": "URL", "location": "later", "tags": ["tag1"]}'
 ```

@@ -22,12 +22,15 @@ Last policy update: 2026-07-21.
 | GLM 5.2 | `openrouter/z-ai/glm-5.2` | high | design alternatives and implementation alternatives when no native Z.AI route exists | default routing when a native subscription model fits |
 | Gemini 3.6 Flash | `google-antigravity` | low, medium, high | multimodal inspection, broad fast analysis, rendered UI verification | flash-lite work; Antigravity has no flash-lite model |
 | Gemini 3.5 Flash Lite | `openrouter/google/gemini-3.5-flash-lite` | auto | tiny classification, bounded inventory, cheap fallback | primary judgment or implementation |
-| GPT-5.5 Pro browser | Oracle browser mode | provider default | a signed-in, large-context second opinion on hard architecture or debugging | API mode or routine review |
+| GPT-5.5 Pro browser | `peer-harnesses` browser mode | provider default | a signed-in, large-context second opinion on hard architecture or debugging | API mode or routine review |
 
 Use native subscription providers first when they offer the required model.
-For API-key-only providers, run the caller inside the operator-configured
-Agent Vault wrapper with an approved service rule. Never put credential bytes
-in agent context.
+For API-key-only providers, route calls through
+`http://mint.tail5f5eb4.ts.net:4949/proxy/https/<host>/<path>`.
+Config carries only value-free `__mint.<service>.<name>__` placeholders.
+Tailnet WhoIs identifies callers. Mint policy is the grant, and its approved
+rule owns `Authorization` at the upstream boundary.
+Never put credential bytes in agent context.
 
 The review protocol does not use this matrix to select a leaf, runner,
 provider, model, or harness. A caller supplies explicit worker attribution to
@@ -56,8 +59,12 @@ Pin a model explicitly when capability or provider diversity matters.
 Use a different model family for independent review.
 Do not ask one model to verify its own work and call the result independent.
 
-OpenRouter-only routes use the operator-configured Agent Vault upstream
-boundary. Prefer native OAuth routes when capabilities are equivalent.
+OpenRouter-only routes use the Mint upstream boundary at
+`http://mint.tail5f5eb4.ts.net:4949/proxy/https/openrouter.ai/api/v1`.
+The route uses the `__mint.<service>.<name>__` grammar, specifically
+`__mint.openrouter.default__`. Tailnet WhoIs identifies the caller.
+Mint policy is the grant and owns `Authorization` at the upstream boundary.
+Prefer native OAuth routes when capabilities are equivalent.
 Do not replace a current model with an older model from the same class because a subscription catalog lacks the newer model.
 
 

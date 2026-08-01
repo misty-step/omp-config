@@ -29,10 +29,10 @@ REASONING_LEVELS = {
     "max",
     "auto",
 }
-OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-# Agent Vault's service rule replaces the client-side Authorization value when
-# OMP runs inside an operator-configured vault wrapper.
-OPENROUTER_API_KEY = "__OPENROUTER_API_KEY__"
+OPENROUTER_BASE_URL = "http://mint.tail5f5eb4.ts.net:4949/proxy/https/openrouter.ai/api/v1"
+# Mint broker on the tailnet injects the real key via policy.
+# This value-free placeholder names the grant; the previous broker integration is retired.
+OPENROUTER_API_KEY = "__mint.openrouter.default__"
 _STATE_FILES = {
     "agent.db",
     "agent.db-shm",

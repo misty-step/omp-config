@@ -53,9 +53,7 @@ OMP_RECIPE_COMPILER
 OMP_RECIPE_PYTHON
 ```
 
-When OMP runs inside Agent Vault, the compiler forwards only its explicit
-proxy and CA trust allowlist. Arbitrary parent environment variables never
-reach a recipe child.
+Recipe children reach Mint directly over the tailnet. No credential environment is inherited. The explicit proxy and CA trust allowlist remains only as a generic operator-proxy passthrough. Arbitrary parent environment variables never reach a recipe child.
 
 ## Machine preparation boundary
 

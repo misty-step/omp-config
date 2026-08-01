@@ -59,7 +59,7 @@ Do not guess it from the repo path:
 ## Verification Commands
 
 Run these commands from local checkouts.
-Get credentials from the environment or the Agents vault:
+For credentialed API calls, use the Mint broker with a value-free placeholder:
 
 ```sh
 canary integrate status /path/to/repo \
@@ -74,14 +74,13 @@ landmark setup \
   --repo-root /path/to/repo \
   --dry-run --error-format json
 
-curl -fsS -H "Authorization: Bearer $POWDER_API_KEY" \
-  "$POWDER_API_BASE_URL/api/v1/cards?repo=misty-step%2F<repo>&limit=100"
+curl -fsS -H "Authorization: Bearer __mint.powder.default__" \
+  "http://mint.tail5f5eb4.ts.net:4949/proxy/https/${POWDER_API_HOST}/api/v1/cards?repo=misty-step%2F<repo>&limit=100"
 ```
 
-Set `$POWDER_API_BASE_URL` through the operator's private environment.
-Use the canonical deployed instance.
-Public doctrine names the environment contract, not one operator's host.
-Do not keep retired instance URLs or local proxies as fallbacks.
+Set `$POWDER_API_HOST` to the canonical deployed host.
+Public doctrine names the provider host, not one operator's host.
+Use the Mint route for every credentialed request.
 
 ## Waivers
 

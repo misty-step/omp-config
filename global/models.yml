@@ -1,6 +1,9 @@
-# OpenRouter uses the official upstream URL. Agent Vault's service rule owns
-# and replaces Authorization; this is a non-secret client-side sentinel.
+# OpenRouter egress is brokered by the Mint service on the tailnet
+# (http://mint.tail5f5eb4.ts.net:4949, host `mint`, Tailnet WhoIs auth).
+# The client carries only the value-free placeholder below.
+# Mint's policy injects the real key at the upstream boundary.
+# No local credential bytes enter this configuration.
 providers:
   openrouter:
-    baseUrl: "https://openrouter.ai/api/v1"
-    apiKey: "__OPENROUTER_API_KEY__"
+    baseUrl: "http://mint.tail5f5eb4.ts.net:4949/proxy/https/openrouter.ai/api/v1"
+    apiKey: "__mint.openrouter.default__"

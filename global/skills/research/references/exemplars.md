@@ -95,10 +95,11 @@ When the user provides a seed exemplar, find more projects like it.
 ## Discovery: xAI Social Signal
 
 Use the configured research provider surface for xAI X Search when the
-operator has enabled it. If the request needs vendor credentials, run the
-caller inside the Agent Vault wrapper with an approved service rule; the rule
-owns `Authorization`. This source does not define an xAI credential
-placeholder or expose provider keys in agent context.
+operator has enabled it. If the request needs vendor credentials, call xAI
+through `http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.x.ai/v1/<path>`.
+Put the value-free `__mint.xai.default__` placeholder in request credential
+fields. Tailnet WhoIs identifies the caller. Mint policy is the grant and owns
+`Authorization` at the upstream boundary.
 
 Social signal finds projects that benchmarks and READMEs miss.
 It finds projects that developers praise.

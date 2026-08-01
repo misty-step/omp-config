@@ -6,8 +6,8 @@ expires: 2026-08-15
 
 This skill routes capabilities across five live surfaces.
 It does not define stable single-task behavior.
-A useful eval needs fixture MCP configs or CLI surfaces for Canary, Powder,
-Landmark, and Aesthetic, plus a status-only local Agent Vault wrapper probe.
+A useful eval needs fixture CLI/API surfaces for Canary, Powder, Landmark, and
+Aesthetic, plus a status-only Mint `/healthz` probe.
 Without those surfaces, the eval only tests whether the model repeats the
 table.
 ## Disposition

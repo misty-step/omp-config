@@ -31,18 +31,25 @@ Do not limit Grok to social sentiment.
 
 ## API Access
 
-Base URL: `https://api.x.ai/v1`.
-Run the caller inside the operator-configured Agent Vault wrapper. An
-approved service rule for `api.x.ai` owns and replaces `Authorization`; this
-source does not define an xAI credential placeholder or expose provider keys
-in agent context.
+Base URL:
+`http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.x.ai/v1`.
+Use the value-free `__mint.xai.default__` placeholder in credential fields.
+It follows the `__mint.<service>.<name>__` grammar.
+Its alias is `secret://xai/default`; neither form is a credential.
+Tailnet WhoIs identifies the caller. Mint policy at
+`~/Development/mint/deploy/policy.yaml` is the grant and owns
+`Authorization` at the upstream boundary.
+The policy grants `phrazzld@github` these routes: `GET /v1/models`,
+`POST /v1/responses`, and `POST /v1/chat/completions`.
+Other actors receive 403. Review Mint policy when a route is denied.
 API: OpenAI Responses API compatible. Default model: `grok-4.3` unless the
 environment overrides it.
 
 ## Web Search
 
 ```bash
-curl "${XAI_BASE_URL:-https://api.x.ai/v1}/responses" \
+curl "${XAI_BASE_URL:-http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.x.ai/v1}/responses" \
+  -H "Authorization: Bearer __mint.xai.default__" \
   -H "Content-Type: application/json" \
   -d '{
   "model": "grok-4.3",
@@ -72,7 +79,8 @@ curl "${XAI_BASE_URL:-https://api.x.ai/v1}/responses" \
 ## X Search
 
 ```bash
-curl "${XAI_BASE_URL:-https://api.x.ai/v1}/responses" \
+curl "${XAI_BASE_URL:-http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.x.ai/v1}/responses" \
+  -H "Authorization: Bearer __mint.xai.default__" \
   -H "Content-Type: application/json" \
   -d '{
   "model": "grok-4.3",
@@ -109,10 +117,11 @@ curl "${XAI_BASE_URL:-https://api.x.ai/v1}/responses" \
 
 ## SDK Usage
 
-Use the provider's configured OpenAI-compatible client only inside the
-operator-configured Agent Vault wrapper. The approved service rule supplies
-the upstream `Authorization` value; this harness source does not provide an
-API-key argument or credential placeholder.
+Configure the OpenAI-compatible client with
+`http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.x.ai/v1` and the
+value-free `__mint.xai.default__` API-key placeholder.
+Tailnet WhoIs identifies the caller. Mint policy is the grant and owns
+`Authorization` at the upstream boundary.
 
 ## Citations
 
@@ -125,6 +134,6 @@ Responses include `response.citations` with source URLs. Always cite them.
 - Use `enable_video_understanding` only with X Search.
 - Do not combine `allowed_domains` and `excluded_domains` in one request.
 - Do not combine `allowed_x_handles` and `excluded_x_handles` in one request.
-- In this harness runtime, use xAI as a retrieval/discourse provider when
-  `XAI_BASE_URL` is set.
+- In this harness runtime, any `XAI_BASE_URL` value must use the Mint proxy
+  route above.
 - Route it before Exa for social/discourse queries and after Exa for recency corroboration.
