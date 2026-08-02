@@ -95,6 +95,45 @@ class DispatchRoutingTests(unittest.TestCase):
         self.assertNotIn("edit", self.fields["architect"]["tools"])
         self.assertEqual(self.fields["architect"].get("spawns", ""), "")
 
+    def test_role_model_order_and_openrouter_tail(self) -> None:
+        ladders = {
+            name: [part.strip() for part in fields["model"].split(",")]
+            for name, fields in self.fields.items()
+        }
+        self.assertEqual(
+            [name for name, models in ladders.items() if models[0].startswith("kimi-code/k3")],
+            ["designer"],
+        )
+        self.assertEqual(
+            ladders["verifier"][:2],
+            ["openai-codex/gpt-5.6-sol:max", "anthropic/claude-fable-5:xhigh"],
+        )
+        self.assertEqual(
+            ladders["researcher"][:3],
+            [
+                "google-antigravity/gemini-3.6-flash:high",
+                "xai-oauth/grok-4.5:high",
+                "openai-codex/gpt-5.6-luna:xhigh",
+            ],
+        )
+        expected_openrouter_models = [
+            "openrouter/deepseek/deepseek-v4-flash-0731",
+            "openrouter/openai/gpt-5.6-luna",
+            "openrouter/x-ai/grok-4.5",
+            "openrouter/z-ai/glm-5.2",
+        ]
+        for name, models in ladders.items():
+            openrouter_start = next(
+                index for index, model in enumerate(models) if model.startswith("openrouter/")
+            )
+            tail = models[openrouter_start:]
+            self.assertTrue(all(model.startswith("openrouter/") for model in tail), name)
+            self.assertEqual(
+                [model.rsplit(":", 1)[0] for model in tail],
+                expected_openrouter_models,
+                name,
+            )
+
     def test_every_scenario_names_a_catalog_agent(self) -> None:
         for scenario in self.fixture["scenarios"]:
             self.assertIn(scenario["route"], self.catalog)

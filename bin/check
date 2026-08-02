@@ -98,6 +98,48 @@ def yaml_setting(path: Path, dotted: str) -> object:
     raise ContractError(f"{relative(path)} omits required setting {dotted}")
 
 
+def yaml_mapping_keys(path: Path, dotted: str) -> list[str]:
+    wanted = dotted.split(".")
+    stack: list[tuple[int, str]] = []
+    lines = path.read_text().splitlines()
+    for index, line in enumerate(lines):
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        indent = len(line) - len(line.lstrip(" "))
+        stripped = line.strip()
+        if ":" not in stripped:
+            continue
+        key, raw = stripped.split(":", 1)
+        if not key or any(character.isspace() for character in key):
+            continue
+        while stack and indent <= stack[-1][0]:
+            stack.pop()
+        current = [entry[1] for entry in stack] + [key]
+        if current == wanted:
+            if raw.strip():
+                raise ContractError(f"{dotted} is not a YAML mapping")
+            child_indent: int | None = None
+            children: list[str] = []
+            for following in lines[index + 1 :]:
+                if not following.strip() or following.lstrip().startswith("#"):
+                    continue
+                following_indent = len(following) - len(following.lstrip(" "))
+                if following_indent <= indent:
+                    break
+                following_stripped = following.strip()
+                if following_stripped.startswith("- ") or ":" not in following_stripped:
+                    continue
+                child_key, _ = following_stripped.split(":", 1)
+                if child_indent is None:
+                    child_indent = following_indent
+                if following_indent == child_indent:
+                    children.append(child_key)
+            return children
+        if not raw.strip():
+            stack.append((indent, key))
+    raise ContractError(f"{relative(path)} omits required mapping {dotted}")
+
+
 def check_promptspace_config(contract: Contract, effective: dict[str, object]) -> None:
     settings = contract.surface("settings").source
     expected = {
@@ -324,11 +366,200 @@ EXPECTED_AGENT_SKILLS = {
 EXPECTED_AGENT_THINKING = {
     "architect": "max",
     "builder": "xhigh",
-    "verifier": "xhigh",
+    "verifier": "max",
     "researcher": "high",
     "designer": "max",
     "qa-user": "high",
     "qa-user-leaf": "high",
+}
+
+OPENROUTER_TAIL_XHIGH = [
+    EXACT_DEEPSEEK_ROUTE,
+    "openrouter/openai/gpt-5.6-luna:xhigh",
+    "openrouter/x-ai/grok-4.5:high",
+    "openrouter/z-ai/glm-5.2:high",
+]
+OPENROUTER_TAIL_HIGH = [
+    EXACT_DEEPSEEK_ROUTE,
+    "openrouter/openai/gpt-5.6-luna:high",
+    "openrouter/x-ai/grok-4.5:high",
+    "openrouter/z-ai/glm-5.2:high",
+]
+EXPECTED_AGENT_MODELS = {
+    "architect": [
+        "openai-codex/gpt-5.6-sol:max",
+        "anthropic/claude-fable-5:xhigh",
+        "anthropic/claude-opus-5:xhigh",
+        "openai-codex/gpt-5.6-luna:xhigh",
+        "kimi-code/k3:max",
+        "xai-oauth/grok-4.5:high",
+        "google-antigravity/gemini-3.6-flash:high",
+        *OPENROUTER_TAIL_XHIGH,
+    ],
+    "builder": [
+        "openai-codex/gpt-5.6-luna:xhigh",
+        "openai-codex/gpt-5.6-sol:xhigh",
+        "anthropic/claude-fable-5:xhigh",
+        "kimi-code/k3:high",
+        "xai-oauth/grok-4.5:high",
+        "google-antigravity/gemini-3.6-flash:high",
+        "anthropic/claude-opus-5:xhigh",
+        *OPENROUTER_TAIL_XHIGH,
+    ],
+    "verifier": [
+        "openai-codex/gpt-5.6-sol:max",
+        "anthropic/claude-fable-5:xhigh",
+        "anthropic/claude-opus-5:xhigh",
+        "openai-codex/gpt-5.6-luna:xhigh",
+        "xai-oauth/grok-4.5:high",
+        "google-antigravity/gemini-3.6-flash:high",
+        "kimi-code/k3:high",
+        *OPENROUTER_TAIL_XHIGH,
+    ],
+    "researcher": [
+        "google-antigravity/gemini-3.6-flash:high",
+        "xai-oauth/grok-4.5:high",
+        "openai-codex/gpt-5.6-luna:xhigh",
+        "openai-codex/gpt-5.6-sol:high",
+        "anthropic/claude-fable-5:high",
+        "kimi-code/k3:high",
+        "anthropic/claude-opus-5:high",
+        *OPENROUTER_TAIL_XHIGH,
+    ],
+    "designer": [
+        "kimi-code/k3:max",
+        "anthropic/claude-fable-5:xhigh",
+        "openai-codex/gpt-5.6-luna:xhigh",
+        "openai-codex/gpt-5.6-sol:xhigh",
+        "google-antigravity/gemini-3.6-flash:high",
+        "xai-oauth/grok-4.5:high",
+        "anthropic/claude-opus-5:xhigh",
+        *OPENROUTER_TAIL_XHIGH,
+    ],
+    "qa-user": [
+        "openai-codex/gpt-5.6-luna:high",
+        "google-antigravity/gemini-3.6-flash:high",
+        "xai-oauth/grok-4.5:high",
+        "anthropic/claude-fable-5:high",
+        "openai-codex/gpt-5.6-sol:high",
+        "kimi-code/k3:high",
+        "anthropic/claude-opus-5:high",
+        *OPENROUTER_TAIL_HIGH,
+    ],
+    "qa-user-leaf": [
+        "google-antigravity/gemini-3.6-flash:high",
+        "openai-codex/gpt-5.6-luna:high",
+        "xai-oauth/grok-4.5:high",
+        "anthropic/claude-fable-5:high",
+        "openai-codex/gpt-5.6-sol:high",
+        "kimi-code/k3:high",
+        "anthropic/claude-opus-5:high",
+        *OPENROUTER_TAIL_HIGH,
+    ],
+}
+
+EXPECTED_GLOBAL_MODEL_ROLES = {
+    "smol": EXACT_DEEPSEEK_ROUTE,
+    "vision": "google-antigravity/gemini-3.6-flash:high",
+    "commit": "google-antigravity/gemini-3.6-flash:high",
+    "task": "openai-codex/gpt-5.6-luna:max",
+    "slow": "anthropic/claude-fable-5:max",
+    "plan": "openai-codex/gpt-5.6-sol:max",
+    "advisor": "xai-oauth/grok-4.5:high",
+    "tiny": EXACT_DEEPSEEK_ROUTE,
+    "default": "anthropic/claude-fable-5:high",
+    "designer": "kimi-code/k3:max",
+}
+EXPECTED_GLOBAL_FALLBACK_CHAINS = {
+    "default": [
+        "openai-codex/gpt-5.6-sol:max",
+        "openai-codex/gpt-5.6-luna:xhigh",
+        "anthropic/claude-opus-5:xhigh",
+        "google-antigravity/gemini-3.6-flash:high",
+        "xai-oauth/grok-4.5:high",
+        "kimi-code/k3:high",
+        *OPENROUTER_TAIL_XHIGH,
+    ],
+    "plan": [
+        "anthropic/claude-fable-5:xhigh",
+        "anthropic/claude-opus-5:xhigh",
+        "openai-codex/gpt-5.6-luna:xhigh",
+        "kimi-code/k3:max",
+        "xai-oauth/grok-4.5:high",
+        "google-antigravity/gemini-3.6-flash:high",
+        *OPENROUTER_TAIL_XHIGH,
+    ],
+    "slow": [
+        "openai-codex/gpt-5.6-sol:max",
+        "anthropic/claude-opus-5:xhigh",
+        "openai-codex/gpt-5.6-luna:xhigh",
+        "kimi-code/k3:max",
+        "xai-oauth/grok-4.5:high",
+        "google-antigravity/gemini-3.6-flash:high",
+        *OPENROUTER_TAIL_XHIGH,
+    ],
+    "task": [
+        "openai-codex/gpt-5.6-sol:max",
+        "anthropic/claude-fable-5:xhigh",
+        "anthropic/claude-opus-5:xhigh",
+        "kimi-code/k3:high",
+        "xai-oauth/grok-4.5:high",
+        "google-antigravity/gemini-3.6-flash:high",
+        *OPENROUTER_TAIL_XHIGH,
+    ],
+    "smol": [
+        "openai-codex/gpt-5.6-luna:high",
+        "google-antigravity/gemini-3.6-flash:high",
+        "xai-oauth/grok-4.5:high",
+        "kimi-code/k3:high",
+        "anthropic/claude-fable-5:high",
+        "openai-codex/gpt-5.6-sol:high",
+        *OPENROUTER_TAIL_HIGH[1:],
+    ],
+    "vision": [
+        "kimi-code/k3:max",
+        "openai-codex/gpt-5.6-luna:xhigh",
+        "anthropic/claude-fable-5:xhigh",
+        "openai-codex/gpt-5.6-sol:xhigh",
+        "xai-oauth/grok-4.5:high",
+        "anthropic/claude-opus-5:xhigh",
+        *OPENROUTER_TAIL_XHIGH,
+    ],
+    "commit": [
+        "openai-codex/gpt-5.6-luna:high",
+        "xai-oauth/grok-4.5:high",
+        "openai-codex/gpt-5.6-sol:high",
+        "anthropic/claude-fable-5:high",
+        "kimi-code/k3:high",
+        *OPENROUTER_TAIL_HIGH,
+    ],
+    "tiny": [
+        "openai-codex/gpt-5.6-luna:high",
+        "google-antigravity/gemini-3.6-flash:high",
+        "xai-oauth/grok-4.5:high",
+        "kimi-code/k3:high",
+        "anthropic/claude-fable-5:high",
+        "openai-codex/gpt-5.6-sol:high",
+        *OPENROUTER_TAIL_HIGH[1:],
+    ],
+    "designer": [
+        "anthropic/claude-fable-5:xhigh",
+        "openai-codex/gpt-5.6-luna:xhigh",
+        "openai-codex/gpt-5.6-sol:xhigh",
+        "google-antigravity/gemini-3.6-flash:high",
+        "xai-oauth/grok-4.5:high",
+        "anthropic/claude-opus-5:xhigh",
+        *OPENROUTER_TAIL_XHIGH,
+    ],
+    "advisor": [
+        "anthropic/claude-fable-5:xhigh",
+        "openai-codex/gpt-5.6-sol:max",
+        "openai-codex/gpt-5.6-luna:xhigh",
+        "anthropic/claude-opus-5:xhigh",
+        "google-antigravity/gemini-3.6-flash:high",
+        "kimi-code/k3:high",
+        *OPENROUTER_TAIL_XHIGH,
+    ],
 }
 
 
@@ -356,6 +587,34 @@ def check_model_route_policy(
     if not saw_exact_deepseek:
         fail(f"configuration omits required DeepSeek route {EXACT_DEEPSEEK_ROUTE!r}")
 
+    expected_roles = set(EXPECTED_GLOBAL_MODEL_ROLES)
+    actual_roles = set(yaml_mapping_keys(settings, "modelRoles"))
+    if actual_roles != expected_roles:
+        fail(
+            "global model role inventory drift: "
+            f"expected={sorted(expected_roles)}, found={sorted(actual_roles)}"
+        )
+    actual_chain_roles = set(yaml_mapping_keys(settings, "retry.fallbackChains"))
+    if actual_chain_roles != expected_roles:
+        fail(
+            "global fallback role inventory drift: "
+            f"expected={sorted(expected_roles)}, found={sorted(actual_chain_roles)}"
+        )
+    for role, expected_primary in EXPECTED_GLOBAL_MODEL_ROLES.items():
+        primary = yaml_setting(settings, f"modelRoles.{role}")
+        if primary != expected_primary:
+            fail(
+                f"model role {role} primary drift: "
+                f"expected={expected_primary!r}, found={primary!r}"
+            )
+        chain = yaml_setting(settings, f"retry.fallbackChains.{role}")
+        expected_chain = EXPECTED_GLOBAL_FALLBACK_CHAINS[role]
+        if chain != expected_chain:
+            fail(
+                f"model role {role} fallback drift: "
+                f"expected={expected_chain}, found={chain}"
+            )
+
 
 
 def check_roster_policy(
@@ -375,6 +634,12 @@ def check_roster_policy(
     for name in sorted(DURABLE_AGENT_NAMES):
         fields = agent_fields[name]
         tools = split_csv(fields.get("tools", ""))
+        models = split_csv(fields.get("model", ""))
+        if models != EXPECTED_AGENT_MODELS[name]:
+            fail(
+                f"agent {name} model ladder drift: "
+                f"expected={EXPECTED_AGENT_MODELS[name]}, found={models}"
+            )
         if tools != EXPECTED_AGENT_TOOLS[name]:
             fail(
                 f"agent {name} tool envelope drift: "

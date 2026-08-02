@@ -12,17 +12,31 @@ The first route is the normal route.
 Later routes provide availability resilience after a provider failure.
 They are not per-task choices or independent opinions.
 
-| Agent | Native model ladder | Reasoning |
+Every agent appends this OpenRouter tail after its subscription routes:
+
+`openrouter/deepseek/deepseek-v4-flash-0731:high` →
+`openrouter/openai/gpt-5.6-luna:<role-effort>` →
+`openrouter/x-ai/grok-4.5:high` →
+`openrouter/z-ai/glm-5.2:high`.
+
+| Agent | Ordered subscription routes before the shared OpenRouter tail | Reasoning |
 |---|---|---:|
-| `architect` | `openai-codex/gpt-5.6-sol:max` → `anthropic/claude-fable-5:xhigh` → `kimi-code/k3:max` | `max` |
-| `builder` | `openai-codex/gpt-5.6-luna:xhigh` → `kimi-code/k3:high` → `openrouter/deepseek/deepseek-v4-flash-0731:high` | `xhigh` |
-| `verifier` | `kimi-code/k3:high` → `xai-oauth/grok-4.5:xhigh` → `openai-codex/gpt-5.6-sol:high` → `openrouter/deepseek/deepseek-v4-flash-0731:high` | `xhigh` |
-| `researcher` | `kimi-code/k3:high` → `openrouter/deepseek/deepseek-v4-flash-0731:high` → `openai-codex/gpt-5.6-luna:xhigh` → `anthropic/claude-fable-5:high` | `high` |
-| `designer` | `kimi-code/k3:max` → `anthropic/claude-fable-5:xhigh` → `anthropic/claude-opus-5:xhigh` → `openai-codex/gpt-5.6-luna:xhigh` | `max` |
-| `qa-user` | `kimi-code/k3:high` → `openai-codex/gpt-5.6-luna:xhigh` | `high` |
-| `qa-user-leaf` | `kimi-code/k3:high` → `openai-codex/gpt-5.6-luna:xhigh` | `high` |
+| `architect` | GPT-5.6 Sol → Fable 5 → Opus 5 → GPT-5.6 Luna → Kimi K3 → Grok 4.5 → Gemini 3.6 Flash | `max` |
+| `builder` | GPT-5.6 Luna → GPT-5.6 Sol → Fable 5 → Kimi K3 → Grok 4.5 → Gemini 3.6 Flash → Opus 5 | `xhigh` |
+| `verifier` | GPT-5.6 Sol → Fable 5 → Opus 5 → GPT-5.6 Luna → Grok 4.5 → Gemini 3.6 Flash → Kimi K3 | `max` |
+| `researcher` | Gemini 3.6 Flash → Grok 4.5 → GPT-5.6 Luna → GPT-5.6 Sol → Fable 5 → Kimi K3 → Opus 5 | `high` |
+| `designer` | Kimi K3 → Fable 5 → GPT-5.6 Luna → GPT-5.6 Sol → Gemini 3.6 Flash → Grok 4.5 → Opus 5 | `max` |
+| `qa-user` | GPT-5.6 Luna → Gemini 3.6 Flash → Grok 4.5 → Fable 5 → GPT-5.6 Sol → Kimi K3 → Opus 5 | `high` |
+| `qa-user-leaf` | Gemini 3.6 Flash → GPT-5.6 Luna → Grok 4.5 → Fable 5 → GPT-5.6 Sol → Kimi K3 → Opus 5 | `high` |
 
 ## Fixed policy
+
+Every listed favorite can perform every role.
+The order records preference and provider resilience, not a capability boundary.
+Kimi K3 is primary only for `designer`.
+`verifier` starts with GPT-5.6 Sol and Claude Fable 5.
+`researcher` starts with Gemini 3.6 Flash, Grok 4.5, and GPT-5.6 Luna.
+Subscription routes precede the shared OpenRouter tail.
 
 No active route uses Claude Sonnet 5.
 Every DeepSeek route must be exactly

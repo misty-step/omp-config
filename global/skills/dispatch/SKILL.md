@@ -57,17 +57,18 @@ They do not widen the declared tool authority.
 ## Model policy
 
 Use `high` as the minimum reasoning level for substantive work.
-Use GPT-5.6 Luna for routine implementation.
-Use DeepSeek V4 Flash 0731 for low-cost bounded work.
-Use Kimi K3 for security, design, and difficult repository work.
-Use GPT-5.6 Sol for architecture and formal reasoning.
-Use Fable or Opus for ambiguous high-consequence judgment.
+Treat every listed favorite as capable of every role.
+Use role order to express preference, not exclusivity.
+Kimi K3 is primary only for `designer`.
+`verifier` starts with GPT-5.6 Sol and falls back first to Claude Fable 5.
+`researcher` starts with Gemini 3.6 Flash, Grok 4.5, and GPT-5.6 Luna.
 
-DeepSeek must use this exact selector:
-`openrouter/deepseek/deepseek-v4-flash-0731:high`.
+Try subscription routes before OpenRouter unless DeepSeek is the selected low-cost primary.
+Every OpenRouter tail starts with DeepSeek V4 Flash 0731.
+Only OpenRouter GPT-5.6 Luna, Grok 4.5, and GLM 5.2 follow it.
+DeepSeek must use `openrouter/deepseek/deepseek-v4-flash-0731:high`.
 Do not route active work to Claude Sonnet 5.
-Treat later model entries as availability fallbacks after route failure.
-Do not treat a fallback as an independent review.
+Treat later entries as availability fallbacks, not independent reviews.
 
 ## Verification
 

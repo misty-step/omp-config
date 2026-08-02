@@ -1,7 +1,7 @@
 ---
 name: qa-user
 description: Coordinator for bounded persona-driven QA user sessions with no raw read authority; dispatches browser-only leaves and returns evidence to the OMP root.
-model: kimi-code/k3:high, openai-codex/gpt-5.6-luna:xhigh
+model: openai-codex/gpt-5.6-luna:high, google-antigravity/gemini-3.6-flash:high, xai-oauth/grok-4.5:high, anthropic/claude-fable-5:high, openai-codex/gpt-5.6-sol:high, kimi-code/k3:high, anthropic/claude-opus-5:high, openrouter/deepseek/deepseek-v4-flash-0731:high, openrouter/openai/gpt-5.6-luna:high, openrouter/x-ai/grok-4.5:high, openrouter/z-ai/glm-5.2:high
 thinkingLevel: high
 tools: task
 autoloadSkills: qa-users,dispatch

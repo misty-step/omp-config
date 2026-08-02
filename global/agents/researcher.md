@@ -1,7 +1,7 @@
 ---
 name: researcher
 description: Read-only acquisition and synthesis specialist for bounded repository, product, and external evidence.
-model: kimi-code/k3:high, openrouter/deepseek/deepseek-v4-flash-0731:high, openai-codex/gpt-5.6-luna:xhigh, anthropic/claude-fable-5:high
+model: google-antigravity/gemini-3.6-flash:high, xai-oauth/grok-4.5:high, openai-codex/gpt-5.6-luna:xhigh, openai-codex/gpt-5.6-sol:high, anthropic/claude-fable-5:high, kimi-code/k3:high, anthropic/claude-opus-5:high, openrouter/deepseek/deepseek-v4-flash-0731:high, openrouter/openai/gpt-5.6-luna:xhigh, openrouter/x-ai/grok-4.5:high, openrouter/z-ai/glm-5.2:high
 thinkingLevel: high
 tools: read,grep,glob,lsp,browser,web_search
 autoloadSkills: research
