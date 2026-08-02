@@ -60,7 +60,7 @@ Respect `task.maxConcurrency`.
 | harness and architecture | `harness-engineering`, `mcp-design`, `project-engineering` | `architect` or `builder` |
 | independent review | `code-review`, `autoreview`, `thermo-nuclear-review`, `thermo-nuclear-code-quality-review`, `review-tests`, `review-security`, `review-vision` | `verifier` |
 | live verification | `verify-live` | `verifier` |
-| multi-lane audits and quality programs | `audit-product`, `audit-architecture`, `design-audit`, `quality-toolchain`, `quality-tests`, `quality-operations` | chief dispatches native lanes |
+| multi-lane audits and quality programs | `audit-product`, `audit-architecture`, `audit-quality-controls`, `design-audit`, `quality-toolchain`, `quality-tests`, `quality-operations` | chief dispatches native lanes |
 | skill and decision evaluation | `skill-eval`, `eval-design`, `council` | chief dispatches `verifier` or `architect` |
 | evidence synthesis | `research`, `research-core`, `peer-harnesses`, `capability-confidence`, `simplified-technical-english` | `researcher` |
 | product and interface design | `design`, `image-gen`, `improve-ui`, `baseline-ui` | `designer` |
