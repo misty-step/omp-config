@@ -1,6 +1,6 @@
 # Quality Assessment Contract
 
-Durable output contract for audit-assess-remediate programs (`quality-toolchain`, `quality-tests`, and future siblings).
+Durable output contract for quality programs (`audit-quality-controls`, `quality-toolchain`, `quality-tests`, and future siblings).
 One assessment contains one machine-readable JSON file and one human-readable Markdown twin, generated from the same data.
 The assessment stores audits, decisions, remediation, and verification; every phase reads and writes it.
 Gate definitions and proof rules live in `global/references/quality-gates.md`.
@@ -8,7 +8,7 @@ Gate definitions and proof rules live in `global/references/quality-gates.md`.
 ## Location and durability
 
 - Write `.evidence/quality/<program>/assessment.json` and `assessment.md` in the audited repository.
-- Use the program id exactly: `quality-toolchain` or `quality-tests`, never a shortened slug.
+- Use the exact program id: `audit-quality-controls`, `quality-toolchain`, or `quality-tests`.
 - Commit both unless repository policy forbids it; then publish CI artifacts and record each artifact path in the run report.
 - Assessments ratchet. Carry every unresolved prior finding forward or resolve it with a decision. A silently dropped finding weakens the gate; it is not progress.
 

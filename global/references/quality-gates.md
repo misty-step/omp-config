@@ -19,6 +19,20 @@ Never gate a global average. Legacy can make it unmeetable or trivial to pass.
 
 ## Three tiers
 
+Place controls by latency before choosing hard-block, ratchet, or report:
+
+- **Pre-commit:** target 2 seconds warm, hard ceiling 5; offline and staged-file scoped.
+- **Pre-push:** target 60 seconds warm, hard ceiling 120; offline, cancellable,
+  range/affected-work scoped, and never the unbounded full suite.
+- **CI/ship:** exhaustive applicable checks with timeouts, cancellation, durable
+  evidence, and required enforcement. It repeats or subsumes every local invariant.
+
+Hook logic and installers are version-controlled; `.git/config` activation is
+reversible machine state. Preserve and chain existing hook systems. Use
+TruffleHog as the secret-scanning standard: staged and outbound-range scans
+locally, history plus Git/PR/release metadata in CI, immutable CI pins,
+fail-closed errors and missing tools, and redacted findings.
+
 Goodhart's law applies when a measurement becomes a target.
 People and agents then optimize the number instead of the measured quality.
 Treat most metrics as diagnostics, not gates.
