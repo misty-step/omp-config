@@ -64,7 +64,7 @@ Keep secrets and private customer data out of `/tmp`.
    Mechanical formatting is not a milestone.
    A step that you cannot test and commit independently is too large.
 4. **Live-test immediately.** Use the repo's verification path, dispatch
-   `qa`, or use the surface-specific route.
+   `verifier` with `verify-live`, or use the surface-specific route.
    Refactors can break integration seams.
    Unit tests alone do not close a milestone.
 5. **Autoreview the milestone** with fresh-context critique when substantive.
@@ -81,12 +81,13 @@ Keep secrets and private customer data out of `/tmp`.
 ## Delegation Judgment
 
 Delegate according to the Shared Operating Spine (Act).
-Useful lanes include an Explore lane to map ownership and coupling before edits,
-a critic lane to challenge the goal or a milestone diff, and a QA lane to
-exercise the live surface when the lead cannot drive it cheaply.
+Useful lanes include a `researcher` to map ownership and coupling before edits,
+a `verifier` with `thermo-nuclear-code-quality-review` to challenge the goal or
+a milestone diff, and a fresh `verifier` with `verify-live` to exercise the live
+surface when the lead cannot drive it cheaply.
 
-Default harsh critic: the canonical
-`thermo-nuclear-code-quality-review` leaf.
+Default harsh critique uses a `verifier` with
+`thermo-nuclear-code-quality-review`.
 Read the projected skill at
 `global/skills/thermo-nuclear-code-quality-review/SKILL.md`.
 It is standalone and does not require a special vendor harness.

@@ -2,8 +2,9 @@
 
 <!--
 This file declares applicability and points to repo-owned truth. It does not
-prescribe directory layout or repeat methods owned by `/ci`, `qa`,
-`/eval-design`, `/factory-apps`, codebase-design, or shared references.
+prescribe directory layout or repeat methods owned by `/ci`,
+`/verify-live`, `/eval-design`, `/factory-apps`, codebase-design, or shared
+references.
 
 Use one state: applicable | not-applicable | waived.
 Use `gap: <durable pointer>` when an applicable surface is missing.

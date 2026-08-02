@@ -21,11 +21,10 @@ This adapter adds OMP routing, acquisition, and closeout surfaces.
 ## OMP route
 
 Route `/research` by capability, not vendor.
-Use `/research [query]` for a bounded lookup or synthesis.
-Use `/research delegate [task]` to select a delegated research lane.
+The chief uses `/research [query]` for a bounded lookup or synthesis.
+The chief uses `/research delegate [task]` and native `researcher` lanes for independent angles.
+A `researcher` lane executes only its assigned angle and never redispatches.
 Keep the OMP slash-command triggers stable.
-Keep broad multi-angle delegation with OMP `magellan` through `/dispatch`.
-Do not rename or relocate OMP roles in this adapter.
 
 | Need | Load |
 |---|---|
@@ -39,9 +38,10 @@ Do not rename or relocate OMP roles in this adapter.
 | `xai` | `references/xai-search.md` |
 | `exemplars` | `references/exemplars.md` |
 
-If the user names a sub-capability, load its reference.
-Otherwise, load the default fanout for substantive research.
-For an explicit single-source request or simple fact/version lookup, use one source.
+If the chief receives a named sub-capability, load its reference.
+The chief loads the default fanout for substantive multi-angle research.
+A `researcher` lane loads only the acquisition reference needed for its assigned angle.
+Use one source for an explicit single-source request or simple fact lookup.
 
 ## OMP acquisition and local surfaces
 
@@ -57,8 +57,8 @@ Keep dates and citations required by the canonical core.
 
 Record the OMP provider lanes, queried tools and reasons, receipt ids,
 accepted and rejected outputs, failures, and source-coverage gaps in the research result.
-Let OMP `/dispatch` own full composition and role routing.
-Do not move that runtime into the core.
+The chief owns role routing through `/dispatch`, which uses native `task`.
+Do not move OMP routing into the core.
 Apply the canonical core's evidence labels and uncertainty statement before returning the result.
 
 See `global/AGENTS.md` for the OMP shared operating spine.

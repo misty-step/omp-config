@@ -30,7 +30,7 @@ class ProjectionContractTests(unittest.TestCase):
                 "review_packet_binary": "bin/review_packet.py",
                 "review_receipt_binary": "bin/review_receipt.py",
             }
-            self.assertEqual(len(contract.surfaces), 24)
+            self.assertEqual(len(contract.surfaces), 22)
             for name, relative in expected.items():
                 surface = contract.surface(name)
                 self.assertEqual(surface.source, ROOT / relative)

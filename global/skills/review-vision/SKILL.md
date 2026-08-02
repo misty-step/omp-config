@@ -2,7 +2,7 @@
 disable-model-invocation: true
 name: review-vision
 description: |
-  Static critique lens for code-critic: judge whether a change serves the
+  Static critique lens for `verifier`: judge whether a change serves the
   product's written intent, never an unwritten one. Check a diff against
   `VISION.md`, a card's acceptance criteria, a stated goal, or an ADR for scope
   drift, silent scope reduction, non-goal violations, premise decay,

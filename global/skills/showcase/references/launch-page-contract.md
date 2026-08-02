@@ -33,6 +33,6 @@ Use the repo's frontend stack when there is one. If none exists, shape first.
 
 ## Verification
 
-Run `/design` on the rendered page and dispatch `qa` on the route.
-The pass report must name viewport(s), screenshots, console/network status where
-relevant, and the evidence map status.
+Run `/design` on the rendered page and dispatch `verifier` with `verify-live`
+on the route. The pass report must name viewport(s), screenshots,
+console/network status where relevant, and the evidence map status.

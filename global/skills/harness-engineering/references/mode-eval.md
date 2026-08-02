@@ -54,6 +54,6 @@ Use a different model family for the grader and workers.
   No source edit ships without held-out tasks, the full omp-config gate, fresh
   critic review, and human approval.
   Candidate patches are artifacts, not self-merging workers.
-- Serious, repeated eval work, such as benchmarking agent compositions or
-  selecting models for a recurring workflow, belongs in Daedalus's arena loop,
-  not ad-hoc here.
+- Serious, repeated eval work, such as benchmarking agent routes or
+  selecting models for a recurring workflow, belongs in a chief-dispatched
+  `architect` evaluation lane, not ad-hoc here.

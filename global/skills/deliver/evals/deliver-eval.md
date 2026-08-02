@@ -22,7 +22,7 @@ Both arms can build, test, and review it end to end without a retired product re
 |---|---|---|---|---|
 | 1 | "Deliver: add a `--limit <N>` option to the fixture CLI's `recent` command." | seeded Rust CLI with parser, tests, and smoke script | unrelated modules | contract derivation, smallest change, live CLI proof |
 | 2 | "Deliver: fix the parser bug that treats a quoted comma as a delimiter." | seeded parser with a reproducible failure | files outside parser/tests | failing observable check, root-cause fix, regression proof |
-| 3 | "Deliver: add report mode so operators can list covered and missing checks without failing the process." | seeded gate with no acceptance criteria | files outside gate/tests | no-oracle stop, `curator` `/groom` route, closeout discipline |
+| 3 | "Deliver: add report mode so operators can list covered and missing checks without failing the process." | seeded gate with no acceptance criteria | files outside gate/tests | no-oracle stop, `designer` `/groom` route with chief/operator acceptance, closeout discipline |
 
 Two of three must show A>B.
 The fixtures cover a bounded feature, a regression, and an underspecified request that should not be implemented blindly.
@@ -42,7 +42,7 @@ The fixtures cover a bounded feature, a regression, and an underspecified reques
 - [ ] The repository gate passes after the last review-driven edit.
 - [ ] Closeout names exact proof, card/status disposition, deviation ledger,
       and residual risk.
-- [ ] Fixture 3 stops for an oracle or routes to `curator` for `/groom` before code changes.
+- [ ] Fixture 3 stops for an oracle or routes to `designer` for `/groom` with chief/operator acceptance before code changes.
 
 
 ## Rubric (1–5, blind, one-line justification each)

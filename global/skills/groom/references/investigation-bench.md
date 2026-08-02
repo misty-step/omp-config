@@ -18,9 +18,8 @@ stock list contains.
   boundary.
 - Inject project.md or CLAUDE.md context and relevant file paths.
 - Do NOT tell investigators to "explore everything". Give focused questions.
-- Use agent type `Explore` for all investigators (read-only).
-  - Use `Plan` for Simplifier (architecture design perspective).
-  - Use `general-purpose` for Scout (invokes /research).
+- Use the declared `researcher` for read-only investigators.
+  Use the declared `architect` for the Simplifier's architecture perspective.
 
 ## Structured Output Format (shared)
 
@@ -198,9 +197,9 @@ Single Recommendation
 >
 > Scope: architecture and design, not cosmetic style issues.
 
-### Scout
+### External Researcher
 
-> You are the **External Scout**. Find what the outside world knows that this
+> You are the **External Researcher**. Find what the outside world knows that this
 > codebase does not.
 >
 > For the target system, invoke `/research delegate` with a focused question

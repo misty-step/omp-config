@@ -10,10 +10,10 @@ speech_reference_last_researched: 2026-07-13
 
 # Model / Provider / Harness Index
 
-Factual context for composition design. This reference supplies evidence to a
+Factual context for dispatch design. This reference supplies evidence to a
 lead agent, not a routing policy. It must not prescribe role fit, preferred
 team shapes, or "best for X" judgments. The lead agent chooses each
-composition from the current task, current repo evidence, runtime probes,
+route from the current task, current repo evidence, runtime probes,
 receipts, and this factual sheet.
 
 ## Freshness Contract
@@ -133,7 +133,7 @@ fixture paths.
 
 Source: primary project documentation and repositories checked on 2026-07-13.
 
-Factual substrate distinctions to preserve in composition design:
+Factual substrate distinctions to preserve in dispatch design:
 
 - OpenCode exposes a client/server architecture, an HTTP/OpenAPI server, a generated
   SDK, sessions, built-in and custom tools, MCP servers, and configurable tool
@@ -180,10 +180,10 @@ Kimi K2.7 Code sentinel dispatch receipts on 2026-06-14:
 
 ## Focused Lane Harness Projection
 
-Compose a narrow lane as an OMP agent definition (`.omp/agents/<name>.md`,
-project or user scope) or as an explicit
-`agent(prompt, agent=..., model=...)` call. Promote recurring compositions to
-a declared agent in omp-config.
+Define a recurring lane as an OMP agent declaration in `.omp/agents/<name>.md`
+at project or user scope. Dispatch it through native `task` by its declared
+name. Keep task-specific methods in the brief instead of creating another
+declaration.
 
 The selected Harness owns execution. omp-config owns declarations and
 ephemeral projection only. Powder owns durable work evidence. omp-config writes
@@ -202,7 +202,8 @@ as locally proven. OpenRouter rows describe OpenRouter listings only. Do not
 infer local Codex, Claude Code, Antigravity, Cursor, or Grok CLI pricing or
 limits from them. `~...latest` ids are OpenRouter catalog aliases. Detailed
 sections below add source notes for selected rows. This table is the scannable
-catalog snapshot.
+catalog snapshot. The Claude Sonnet 5 row is a dated factual record only; it is
+retired from active dispatch and never supplies a role route.
 
 | OpenRouter id | Created | Context | Max completion | Input | Output | Cache read | Modalities | Supported parameters excerpt |
 |---|---:|---:|---:|---:|---:|---:|---|---|
@@ -221,8 +222,8 @@ catalog snapshot.
 | `x-ai/grok-4.3` | 2026-04-30 | 1,000,000 | unknown | `$1.25/M` | `$2.50/M` | `$0.20/M` | text+image+file -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
 | `openai/gpt-5.5` | 2026-04-24 | 1,050,000 | 128,000 | `$5.00/M` | `$30.00/M` | `$0.50/M` | file+image+text -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
 | `deepseek/deepseek-v4-pro` | 2026-04-24 | 1,048,576 | 384,000 | `$0.435/M` | `$0.87/M` | `$0.003625/M` | text -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
-| `deepseek/deepseek-v4-flash-0731` | unknown | 1,048,576 | 384,000 | `$0.14/M` | `$0.28/M` | `$0.0028/M` | text -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
-| `openai/gpt-5.6-luna` | unknown | 1,050,000 | 128,000 | `$0.10/M` | `$0.60/M` | `$0.01/M` | text+image -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
+| `deepseek/deepseek-v4-flash-0731` | 2026-07-31 | 1,048,576 | 384,000 | `$0.14/M` | `$0.28/M` | `$0.0028/M` | text -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
+| `openai/gpt-5.6-luna` | 2026-07-30 | 1,050,000 | 128,000 | `$0.10/M` | `$0.60/M` | `$0.01/M` | text+image -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
 | `moonshotai/kimi-k2.6` | 2026-04-20 | 262,144 | 262,144 | `$0.65/M` | `$3.41/M` | `$0.14/M` | text+image -> text | `tools`, `tool_choice`, `parallel_tool_calls`, `structured_outputs`, `reasoning` |
 | `z-ai/glm-5.1` | 2026-04-07 | 202,752 | 128,000 | `$0.966/M` | `$3.036/M` | `$0.1794/M` | text -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
 | `x-ai/grok-4.20` | 2026-03-31 | 2,000,000 | unknown | `$1.25/M` | `$2.50/M` | `$0.20/M` | text+image+file -> text | `tools`, `tool_choice`, `structured_outputs`, `reasoning` |
@@ -237,14 +238,15 @@ high reasoning levels. Treat provider catalog values as expiring evidence.
 
 ## Verified Model Facts
 
-### Anthropic Claude 5 family (Fable 5 / Mythos 5, Sonnet 5)
+### Historical Anthropic Claude 5 family (Fable 5 / Mythos 5, Sonnet 5)
 
 - `claude-fable-5`: released 2026-06-09; OpenRouter lists 1M context,
   input `$10.00/M`, output `$50.00/M`, cache read `$1.00/M` (2026-07-08).
   Fable 5 and Mythos 5 are the same underlying model; Fable is the GA lane
   with additional dual-use safety measures, Mythos is approved-organization
   access only. Mythos-class sits above Opus in capability.
-- `claude-sonnet-5`: released 2026-06-30; OpenRouter lists 1M context,
+- `claude-sonnet-5`: historical record only, not an active dispatch route;
+  released 2026-06-30; OpenRouter listed 1M context,
   `$2.00/M` in, `$10.00/M` out (2026-07-08); reported intro pricing —
   standard `$3/$15` after 2026-08-31 per pricing coverage (verify at that
   date).
@@ -514,8 +516,8 @@ high reasoning levels. Treat provider catalog values as expiring evidence.
   `openrouter/google/gemini-3.6-flash` with 1,048,576 context, 65,536 maximum
   output tokens, text+image input, minimal/low/medium/high reasoning levels,
   `$1.50/M` input, `$7.50/M` output, and `$0.15/M` cache reads.
-- A low sentinel for `openrouter/google/gemini-3.6-flash:high` passed on
-  2026-08-01.
+- A low-effort sentinel for `openrouter/google/gemini-3.6-flash` passed on
+  2026-08-01; the catalog separately confirms high-effort support.
 - The same catalog readback reports
   `openrouter/google/gemini-3.5-flash-lite` with 1,048,576 context, 65,536
   maximum output tokens, text+image input, minimal/low/medium/high reasoning
@@ -560,5 +562,5 @@ when a user asks for current model/provider/harness choices.
 6. Run omp-config `bin/check` and the affected provider's direct smoke probe.
 
 Do not add subjective labels such as role fit, taste, or task suitability to
-this file. Put task-specific composition rationale in the run's receipts,
+this file. Put task-specific dispatch rationale in the run's receipts,
 context packet, or final debrief.

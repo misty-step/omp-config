@@ -1,121 +1,83 @@
 ---
 name: dispatch
 description: |
-  Compose and supervise focused subagents for substantive work. Select the
-  declared role, model/provider/reasoning level, hidden skills, MCPs, tools,
-  verifier, and lane contract. Use when work can be delegated, a specialist
-  skill is needed, or the operator asks to route, compose, delegate, review,
-  investigate, build, verify, or groom. Trigger: /dispatch, /route, /delegate.
-argument-hint: "[task|card] [--manifest|--team]"
+  Route substantive work to five broad native OMP agents. Use when the operator
+  asks to delegate, investigate, build, verify, review, design, or research.
+  Trigger: /dispatch, /route, /delegate.
+argument-hint: "[task|card]"
 ---
 
 # /dispatch
 
-Keep the chief executive on intent, research, team design, supervision, and integration.
-Do not run a specialist workflow in the chief session when a focused lane can own it.
+Keep the chief on intent, decomposition, supervision, integration, and final judgment.
+Use native OMP task dispatch.
+Do not add a scheduler, process wrapper, generated agent, or task-specific declaration.
 
-The chief session sees only `research` and `dispatch` from the authored global catalog.
-Hidden skills remain technically reachable because OMP visibility is not an access boundary.
-Treat that as an implementation limit, not permission.
-Load a hidden specialist skill in the chief session only when the operator explicitly invokes it or when you edit that primitive.
+Read `references/primitive-routing.md` and
+`references/model-capabilities.md` before substantive dispatch.
 
+## Native agents
 
-## Live authority
+- `architect` owns read-only system boundaries, tradeoffs, and dependency order.
+- `builder` owns accepted repository mutation and live delivery.
+- `verifier` owns independent review, security, live QA, and incident evidence.
+- `researcher` owns read-only repository, library, API, and external research.
+- `designer` owns product and interface design through rendered proof.
 
-Before substantive dispatch:
+`qa-user` and `qa-user-leaf` are structural persona utilities.
+Persona QA always uses chief → `qa-user` → `qa-user-leaf`.
+The chief dispatches the coordinator directly.
+No executive dispatches persona QA.
 
-1. Read `references/model-capabilities.md` for model, provider, and reasoning policy.
-2. Read `references/primitive-routing.md` for skill, MCP, tool, and role routes.
-3. Use `references/agent-compositions.json` for exact declared-agent bundles.
-   `bin/check` rejects drift between this catalog and `global/agents/*.md`.
-4. Read the target repository and its work ledger rule before mutation.
+## Route
 
-Use fallback chains for resilience only.
-Never use a fallback chain as a capability ranking or a second opinion.
+1. State one accepted outcome and its oracle.
+2. Choose the broad agent that owns the outcome.
+3. Put task-specific method, scope, and evidence needs in the brief.
+4. Name any specialist skill the agent must read.
+5. Dispatch independent slices together.
+6. Keep shared decisions and integration with the chief.
 
+Do not create a specialist agent because a prompt can carry the method.
+Do not create a coordinator when the chief can supervise the lanes directly.
+Use one agent for coupled work.
+Use multiple agents only for independent evidence or independent mutable surfaces.
 
-## Composition rule
+## Native limits
 
-Each lane is one intentional composition:
+OMP 17.2.3 selects the model ladder from the named agent declaration.
+It cannot select a different model, tool list, or skill bundle for one native spawn.
+Accept that limit.
+Do not emulate it with a second process protocol.
 
-1. **Role** — choose the narrowest declared or bundled agent that owns the work shape.
-2. **Model** — choose the provider-native model that best fits the cognitive work.
-3. **Reasoning** — choose the lowest level that preserves the required judgment.
-4. **Skills** — use the declared `autoloadSkills` bundle plus task-specific hidden
-   skills named in the lane brief.
-5. **MCPs and tools** — use only the live systems and tool envelope the lane needs.
-6. **Contract** — define outcome, authority, scope, oracle, output, dependencies, and
-   non-goals.
+Every declaration has one explicit tool envelope and one short skill bundle.
+Task briefs may narrow work by instruction.
+They do not widen the declared tool authority.
 
+## Model policy
 
-Use a declared agent when its authority and bundle fit.
-Use an ad-hoc task lane for a one-time composition.
-Add a declared agent only when the composition recurs or needs a durable authority boundary.
+Use `high` as the minimum reasoning level for substantive work.
+Use GPT-5.6 Luna for routine implementation.
+Use DeepSeek V4 Flash 0731 for low-cost bounded work.
+Use Kimi K3 for security, design, and difficult repository work.
+Use GPT-5.6 Sol for architecture and formal reasoning.
+Use Fable or Opus for ambiguous high-consequence judgment.
 
-OMP task subagents inherit the session's discovered skill catalog.
-OMP does not support a strict per-task skill allowlist.
-`autoloadSkills` preloads a focused bundle.
-Hidden task-specific skills require an explicit `Read skill://<name> first` instruction.
-The pending composer extension must provide true per-agent add-and-subtract catalogs.
+DeepSeek must use this exact selector:
+`openrouter/deepseek/deepseek-v4-flash-0731:high`.
+Do not route active work to Claude Sonnet 5.
+Treat later model entries as availability fallbacks after route failure.
+Do not treat a fallback as an independent review.
 
+## Verification
 
-## Dispatch procedure
-
-1. Classify each independent slice as architecture, implementation, research,
-   review, verification, incident, backlog, design, or mechanical work.
-2. Select the narrowest role from `references/primitive-routing.md`.
-3. Select the model and reasoning level from `references/model-capabilities.md`.
-4. Add hidden skills, MCPs, and tools that the slice needs.
-   Do not load nearby capabilities for convenience.
-5. Add an independent verifier for medium-risk M+ work, all high-risk work, and
-   all unknown-risk work.
-6. Dispatch independent lanes together.
-   Keep shared architecture and final judgment in the chief session.
-7. Supervise active lanes.
-   Correct drift, replace failed routes, reconcile conflicts, and inspect evidence before integration.
-
-For XL implementation or design work, dispatch `daedalus` first to produce the
-dependency graph.
-Then fan out one `builder` or `designer` lane per independent slice.
-Keep recursion within the configured depth.
-
-
-## Required manifest
-
-Return these fields in this order before spawning a substantive lane:
-
-1. `role/agent`
-2. `model:reasoning`
-3. `skills to load`
-4. `MCPs and tools`
-5. `verifier lane`
-6. `contract and evidence return`
-
-Name the role, model, reasoning level, and primitive loadout in every substantive delegation brief.
-A generic prompt to a generic worker is not a composition.
-
-
-## Chief-session boundary
-
-The chief executive owns:
-
-- operator intent and acceptance;
-- shared architecture and cross-lane contracts;
-- team composition and supervision;
-- conflict resolution and final judgment;
-- integration and the final live proof.
-
-Specialist lanes own execution.
-Use `reviewer` for code-review programs, `code-critic` for one adversarial
-read-only review, `cassandra` for incidents and digital forensics, `qa` for live
-verification, `builder` for accepted implementation, `daedalus` for
-architecture, `magellan` for broad research, `curator` for full-board grooming,
-and `solomon` for contested decisions.
-
+For medium-risk work, add one independent verifier.
+For high-risk work, add a verifier and review before integration.
+The verifier uses a fresh non-mutating lane and a distinct oracle.
+The verifier reports findings and never repairs them.
 
 ## Completion
 
-A dispatch is complete only when every lane returns its named artifact or evidence.
-The chief resolves contradictions.
-The integrated outcome must pass the live oracle.
+A dispatch completes when each native lane returns its evidence.
+The chief resolves contradictions and exercises the integrated live oracle.
 Subagent confidence is not evidence.

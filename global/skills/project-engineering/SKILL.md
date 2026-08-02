@@ -17,10 +17,13 @@ applicability and evidence into one fitness function.
 
 ## Branch
 
+The chief assigns **Adopt** to `builder` and **Audit** to read-only `architect`.
+An architect reports proposed profile changes. A builder applies requested updates.
+
 | Trigger | Action | Completion criterion |
 |---|---|---|
 | **Adopt** — no project profile, or the operator asks to adopt the contract | Read the live repo, classify its obligations, and fill `templates/project-profile.md` at the repo's existing governance location. Record missing surfaces as gaps, not invented paths; do not force a filename or root layout. | Identity fields are complete; every obligation row is applicable, not applicable with a reason, or waived with complete waiver metadata; every applicable obligation resolves to a command, policy path, evidence path, service, or durable gap; every proof-map row resolves to evidence or a project-specific non-applicability reason. |
-| **Audit** — a profile exists, or the operator asks whether the repo conforms | Read `references/profile-contract.md`, execute safe declared commands and probes, resolve every pointer, and compare live evidence with the profile. Produce a proof-classed gap report; update the profile only when requested. | Every declared pointer is verified or named as stale/missing, every applicable obligation has current evidence or a gap, and no completion claim rests on declaration alone. |
+| **Audit** — a profile exists, or the operator asks whether the repo conforms | Read `references/profile-contract.md`, execute safe declared probes, resolve every pointer, and compare live evidence with the profile. Produce a proof-classed gap report and proposed profile changes without mutation. | Every declared pointer is verified or named as stale/missing, every applicable obligation has current evidence or a gap, and no completion claim rests on declaration alone. |
 
 ## Five proof classes
 
@@ -42,18 +45,18 @@ classify a repo, fill the template, or audit evidence.
 
 ## Routing
 
-Use the existing owner for each method. Keep this skill at the composition
-layer.
+Use the existing owner for each method.
+The chief dispatches additional lanes. Keep this skill at the contract layer.
 
 | Concern | Owner |
 |---|---|
 | Fast/full gates, coverage, mutation, supply chain | `global/skills/ci/SKILL.md` and `global/references/quality-gates.md` |
-| Runtime and user-boundary proof | `global/references/verification-system-first.md`; dispatch `qa` for independent live verification |
+| Runtime and user-boundary proof | `global/references/verification-system-first.md`; the chief dispatches `verifier` with `verify-live` |
 | Model or agent capability | `global/skills/eval-design/SKILL.md` |
 | Canary, Powder, Landmark | `global/skills/factory-apps/SKILL.md` |
 | Module depth, seams, dependency direction | `global/external/mattpocock-codebase-design/SKILL.md` |
 | Application-only obligations and waivers | `global/references/application-floor.md` |
 
-Return the populated profile and a gap report grouped by proof class. Route
-leaf implementation to the owning skill. Do not expand this audit into every
-remediation.
+Return the populated profile and a gap report grouped by proof class.
+The chief routes implementation to the owning native agent and skill.
+Do not expand this audit into every remediation.

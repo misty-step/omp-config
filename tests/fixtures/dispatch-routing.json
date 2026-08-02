@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "dispatch-routing-fixture.v1",
+  "scenarios": [
+    {"id": "accepted-implementation", "dispatch": "native-agent", "route": "builder", "requiredSkills": ["deliver", "ci"], "requiredTools": ["edit", "write"], "forbidden": ["qa-user"]},
+    {"id": "security-review", "dispatch": "native-agent", "route": "verifier", "requiredSkills": ["ci"], "requiredTools": ["read"], "forbidden": ["edit", "write", "qa-user"]},
+    {"id": "live-qa", "dispatch": "native-agent", "route": "verifier", "requiredSkills": ["verify-live"], "requiredTools": ["browser"], "forbidden": ["qa-user"]},
+    {"id": "incident-reproduction", "dispatch": "native-agent", "route": "verifier", "requiredSkills": ["verify-live"], "requiredTools": ["read"], "forbidden": ["edit", "write", "qa-user"]},
+    {"id": "broad-research", "dispatch": "native-agent", "route": "researcher", "requiredSkills": ["research"], "requiredTools": ["read", "web_search"], "forbidden": ["edit", "write"]},
+    {"id": "external-api-research", "dispatch": "native-agent", "route": "researcher", "requiredSkills": ["research"], "requiredTools": ["web_search"], "forbidden": ["edit", "write"]},
+    {"id": "ui-design", "dispatch": "native-agent", "route": "designer", "requiredSkills": ["design", "improve-ui"], "requiredTools": ["browser"], "forbidden": ["verifier"]},
+    {"id": "persona-qa", "dispatch": "direct-chief", "route": "qa-user", "chain": ["chief", "qa-user", "qa-user-leaf"], "requiredTools": ["task"], "forbidden": ["verifier"]},
+    {"id": "xl-architecture", "dispatch": "native-agent", "route": "architect", "requiredSkills": ["project-engineering"], "requiredTools": ["read", "lsp"], "forbidden": ["edit", "write", "builder", "verifier", "designer", "qa-user"]}
+  ]
+}

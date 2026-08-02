@@ -27,22 +27,23 @@ Route away:
   rule
 - lint, build, typecheck, and hook gates → `skill://quality-toolchain`
 - gate tiers and placement → `global/skills/ci/SKILL.md`
-- live persona or exploratory QA against running products → the QA lanes,
-  never this program
+- live persona QA against running products → chief → `qa-user` →
+  `qa-user-leaf`; exploratory or live behavior verification → `verifier` with
+  `verify-live`; never this program
 
 ## Program
 
-Compose lanes per `global/skills/dispatch/SKILL.md` and return its manifest
-fields before spawning each substantive lane. Dispatch independent lanes together.
+The chief dispatches every lane through `skill://dispatch`.
+Put the outcome, scope, task-specific skill, oracle, evidence, and non-goals in each brief. Dispatch independent lanes together.
 
 | Phase | Lane | Output | Completion criterion |
 |---|---|---|---|
-| 1. Inventory | `scout` per suite or framework; `sonic` for mechanical enumeration | `inventory.surfaces[]` in the assessment | every framework, suite, present test class, runtime and duration, CI wiring, coverage/mutation tool, seed source, fixture root, and CI flake history is listed; every absence is recorded as a fact |
+| 1. Inventory | `researcher` per suite or framework; include mechanical enumeration in the brief | `inventory.surfaces[]` in the assessment | every framework, suite, present test class, runtime and duration, CI wiring, coverage/mutation tool, seed source, fixture root, and CI flake history is listed; every absence is recorded as a fact |
 | 2. Target state | owning lane, no subagent | selected and refused classes in `targets[]` | every class in `references/test-classes.md` is selected with trigger evidence or refused with the failing selection rule |
 | 3. Audit | ad-hoc read-and-run lanes, one per selected class | `findings[]` with evidence | suites run with transcripts; `review-tests` checks 1–8 applied to the highest-risk contracts; durations measured against budgets; rerun-on-red flake sweep done |
 | 4. Assess | owning lane; operator for contested decisions | durable assessment per `global/references/quality-assessment.md` | every finding carries remediate, waive (reason + approver + expiry), or defer (ticket) |
-| 5. Remediate | `builder` or `fixer`, one per independent gap cluster | new or strengthened tests, fixed flakes | every accepted gap is closed or returned with a named blocker; no test weakened to pass |
-| 6. Verify | fresh `qa` lane, never a remediating lane | one `gates[]` entry per suite run — transcript in `report`, disclosed seed in `seed`, seeded-bug result in `falsifier_verified` | the suite runs green twice from a clean state with seeds disclosed, and each new test fails on its seeded bug — a mutation or the reverted fix — before passing |
+| 5. Remediate | `builder` for each independent gap cluster or one ranked findings packet with a two-round cap | new or strengthened tests, fixed flakes | every accepted gap is closed or returned with a named blocker; no test weakened to pass |
+| 6. Verify | fresh `verifier` with `verify-live`, never a remediating lane | one `gates[]` entry per suite run — transcript in `report`, disclosed seed in `seed`, seeded-bug result in `falsifier_verified` | the suite runs green twice from a clean state with seeds disclosed, and each new test fails on its seeded bug — a mutation or the reverted fix — before passing |
 
 `--audit-only` stops after phase 4.
 

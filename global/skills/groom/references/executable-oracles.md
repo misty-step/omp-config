@@ -53,7 +53,7 @@ Commands that must all exit 0:
 - `npm run typecheck` — no type errors introduced
 - `git diff --stat | wc -l | awk '$1 < 20'` — diff stays reviewable
 
-Observable outcomes (verified by human or /qa):
+Observable outcomes (verified by a human or `verifier`):
 - Login page renders the new OAuth button
 - Clicking it redirects to provider, then back with session
 ```

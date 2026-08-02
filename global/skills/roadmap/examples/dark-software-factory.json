@@ -94,13 +94,13 @@
     {
       "id": "R05",
       "horizon": "later",
-      "title": "Compile fresh agent compositions",
-      "outcome": "Select each role, model, tool, skill, context, authority, and verifier for one outcome.",
-      "proof": "Reproduce a composition from its digest. Compare achievement prompts with a null prompt on repeated hard tasks.",
-      "question": "Which composition and context choices improve results across repeated tasks?",
-      "research": "Test model, provider, reasoning, skill, tool, context, and ambition-prompt choices on repeated hard tasks.",
+      "title": "Evaluate native agent routes",
+      "outcome": "Select the broad native agent, task-specific skill, context, oracle, and evidence for one outcome.",
+      "proof": "Replay frozen dispatch fixtures. Compare the declared native route with a bare route on repeated hard tasks.",
+      "question": "Which native route and brief choices improve results across repeated tasks?",
+      "research": "Test agent, model ladder, skill, context, oracle, and brief choices on repeated hard tasks.",
       "coverage": [
-        "Agent composition from zero",
+        "Native dispatch from zero",
         "Ambition prompt",
         "Durable context underneath all work"
       ]

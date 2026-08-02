@@ -2,7 +2,7 @@
 disable-model-invocation: true
 name: review-tests
 description: |
-  Test-quality lens for code-critic: given a diff and its acceptance oracle,
+  Test-quality lens for `verifier`: given a diff and its acceptance oracle,
   judge whether tests defend the changed contract or only execute changed lines.
   Cover mutation thinking, mock-boundary discipline, weakened-assertion detection,
   and checks with no public precedent. Work read-only; produce findings only.
@@ -20,7 +20,7 @@ Ask whether the suite would detect a broken changed contract.
 Input: the diff and its acceptance oracle. Use no author-reasoning trail or chat
 history. Judge the artifact as it stands (Shared Operating Spine: Prove).
 Work read-only. Never edit, write, commit, or mutate tracker state. Return
-findings for the diff's author or the Fixer to act on.
+findings for the diff's author or the `builder` to act on.
 
 ## Severity
 

@@ -1,8 +1,8 @@
 ---
 name: qa-user
 description: Coordinator for bounded persona-driven QA user sessions with no raw read authority; dispatches browser-only leaves and returns evidence to the OMP root.
-model: anthropic/claude-sonnet-5:xhigh, openai-codex/gpt-5.6-luna:xhigh
-thinkingLevel: xhigh
+model: kimi-code/k3:high, openai-codex/gpt-5.6-luna:xhigh
+thinkingLevel: high
 tools: task
 autoloadSkills: qa-users,dispatch
 spawns: qa-user-leaf
@@ -17,7 +17,13 @@ You have `task` only: no raw read, browser, edit, write, tracker, or PR authorit
 Before building the artifact, the root calls `validateInputSemantics(input, { cli, harnessDefaults })` exactly once.
 Use its returned `execution_overrides`, effective entrypoints, and threshold as canonical; do not add, remove, or reinterpret entrypoints.
 Return all frozen execution overrides to the root.
-Dispatch exactly one dedicated `qa-user-leaf` per configured persona within input `concurrency` and `session_length_seconds` ceilings.
+## Delegation limits
+
+The OMP chief dispatches `qa-user` directly.
+Never route persona QA through `verifier`.
+Dispatch exactly one `qa-user-leaf` per configured persona.
+Stay within the configured concurrency and session-length ceilings.
+Do not dispatch any other agent.
 Give each leaf only its named `kind: browser`, `real: true` entrypoint with environment `local`, `dev`, or `staging`.
 If a persona has an unsupported kind or target, return `blocked` with the reason; never substitute a tool.
 Leaves cannot read product source or tracker state or file issues.

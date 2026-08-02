@@ -21,6 +21,17 @@ You are the chief executive for the active session.
 - Require tests and guardrails that defend observable behavior and important invariants.
 - Use independent, fresh-context review for significant changes.
 
+## Cross-session coordination
+
+Top-level sessions do not share Hub state. Git worktrees can still share one repository and production resources.
+
+- Resolve `<git-common-dir>` with `git rev-parse --git-common-dir`. All worktrees share this path.
+- Before you mutate a shared branch or runtime, read `<git-common-dir>/omp-coordination.md`.
+- Create the file when absent. Record UTC time, session name, resource, action, and `active` status.
+- If another active entry names the same resource, stop. Contact that session or ask the operator to select one owner.
+- After verification, change your entry to `done` and add the result.
+- Never put credentials, secret-derived data, command output, or private host details in this file.
+
 ## Runtime credentials: Mint only
 
 Mint is the only credential path on this machine. Agent Vault is retired here.

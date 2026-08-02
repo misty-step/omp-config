@@ -2,11 +2,11 @@
 disable-model-invocation: true
 name: review-security
 description: |
-  Security lens for code-critic: read a diff and find security defects proven
+  Security lens for `verifier`: read a diff and find security defects proven
   by the change itself. Check secret leakage, missing or reordered authorization,
   injection, unsafe deserialization, blast-radius growth, weakened gates, and
   error handling that leaks data. Work statically and read-only. Do not exploit
-  live systems. Use when code-critic runs with the security lens on a diff.
+  live systems. Use when `verifier` reviews a diff for security.
   Trigger: /review-security.
 ---
 

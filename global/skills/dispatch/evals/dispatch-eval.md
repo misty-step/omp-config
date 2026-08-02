@@ -1,71 +1,66 @@
-# /dispatch null-case eval
+# Native dispatch evaluation
 
 ## Claim
 
-Given a mixed-risk work item, `/dispatch` must produce a focused composition.
-It must select the correct role, model/provider/reasoning level, hidden skills, MCPs, tools, verifier, and lane contract.
-The chief must not execute specialist work.
-A bare prompt should lose on at least two of three fixtures.
-
-## Arms
-
-- A: same-model chief with `/dispatch` visible and invoked.
-- B: same-model chief with only the task and repository context.
-- Grade blind. Remove role and skill names only when they reveal the arm rather
-  than the decision quality.
+For each work item, `/dispatch` must choose the broad native agent that owns the
+observable outcome.
+The brief must carry task-specific method and evidence.
+The roster must not grow for one method.
 
 ## Fixtures
 
-1. Medium-risk API implementation with an accepted contract, Powder card, and
-   a new error path. Correct route: `builder` plus `deliver` and `ci`;
-   `powder` CLI/API through the `powder` skill; independent `qa` verifier.
-2. High-risk production latency incident with Canary evidence and an unknown
-   recent deploy. Correct route: `cassandra` plus `factory-apps` and
-   `estate-infrastructure`; Canary CLI/API; reproduce before repair.
-3. Meaningful structural diff that needs the canonical code-quality review leaf
-   and a release decision. Correct route: `reviewer` plus `code-review`,
-   `peer-harnesses`, and `ci`; use cross-family independent lanes and have
-   `qa` verify live claims.
+1. Accepted implementation → `builder`.
+   Name `deliver`, `ci`, `powder`, the product skill, and the live oracle.
+2. Security review → `verifier`.
+   Keep the lane read-only and require ranked reproducible findings.
+3. Live QA → `verifier`.
+   Require the real browser, HTTP, CLI, library, MCP, or job result.
+4. Incident reproduction → `verifier`.
+   Reproduce the original failure and do not repair it in this lane.
+5. Broad research → `researcher`.
+   Require cited repository and external evidence with uncertainty.
+6. External API research → `researcher`.
+   Require current primary documentation and a runnable request shape.
+7. UI design → `designer`.
+   Require accessible alternatives and rendered proof.
+8. Persona QA → chief → `qa-user` → `qa-user-leaf`.
+   The coordinator has `task`; each leaf has `browser` only.
+9. XL architecture → `architect`.
+   Require read-only boundaries, dependency order, risks, and reversal conditions.
 
 ## Objective checks
 
-Each output must:
+Every result must:
 
-- contain the six manifest fields in the documented order;
-- choose the expected primary role;
-- name a real preferred model/provider and supported reasoning level;
-- assign specialist skills to the lane, not the chief;
-- name only MCPs and tools required by the fixture;
-- add the required independent verifier;
-- state outcome, authority, scope, oracle, output, dependencies, and non-goals;
-- keep final integration and judgment with the chief.
+- select one of the five broad agents or the fixed persona route;
+- keep task-specific methods in the brief or a named skill;
+- use only the selected declaration's tools;
+- keep every executive child list empty;
+- keep the persona route chief → `qa-user` → `qa-user-leaf`;
+- reject `verifier` → `qa-user`;
+- keep substantive reasoning at `high`, `xhigh`, or `max`;
+- use only `openrouter/deepseek/deepseek-v4-flash-0731:high` for DeepSeek;
+- reject active Claude Sonnet 5 routes;
+- name an observable oracle and required evidence;
+- add an independent verifier when risk requires it.
 
-A nonexistent role, skill, model, provider, or MCP fails the fixture.
-A generic `task` worker fails when a declared role fits.
-
+A generic route fails when a broad authority is clear.
+A new durable specialist fails when a brief or skill can carry the method.
+A second process used only to select a model fails this evaluation.
 
 ## Rubric
 
-Score each dimension from 1 to 5:
+Score each fixture from 1 to 5 on:
 
-1. role and authority fit;
-2. model/provider/reasoning fit;
-3. primitive focus and absence of unrelated load;
-4. verification independence;
-5. executable lane contract;
-6. chief-versus-specialist boundary.
-
+1. native agent fit;
+2. method and skill fit;
+3. tool authority;
+4. persona and depth safety;
+5. oracle and evidence quality;
+6. roster simplicity;
+7. chief-versus-agent boundary.
 
 ## Decision
 
-Keep only when A wins at least two of three fixtures, no objective check fails,
-and the grader can select B.
-Adapt when routing misses.
-Remove the skill when current frontier models match the composition without it.
-
-
-## Cadence
-
-Run all fixtures after model palette, provider policy, agent frontmatter,
-primitive routes, or OMP skill-loading mechanics change.
-Also run after a major model release.
+Keep the roster only when all nine routes pass the objective checks.
+Re-run after a role, model, provider, skill-loading, or OMP task change.

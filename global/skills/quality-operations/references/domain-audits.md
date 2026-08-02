@@ -57,11 +57,12 @@ no gate mechanics, no monitor product, and no infrastructure authority.
   incident has an RCA record.
 - **Score:** binary per element (owner, rollback, route, RCA) × primary
   surfaces.
-- **Probe:** tabletop — dispatch a fresh `scout` with only the repository and
-  the question "how do you roll back the primary surface?"; grade its answer
+- **Probe:** tabletop — dispatch a fresh `researcher` with only the repository
+  and the question "how do you roll back the primary surface?"; grade its answer
   against the real path. Do not execute the rollback.
-- **Remediate:** `builder` writes or repairs the incident docs. A live
-  incident is never audit work: route it to `cassandra` immediately.
+- **Remediate:** `builder` writes or repairs the incident docs. A live incident
+  is never audit work: route it to a fresh `verifier` with `verify-live`
+  immediately.
 
 ## runbooks
 
@@ -71,11 +72,11 @@ no gate mechanics, no monitor product, and no infrastructure authority.
   commands; a dry run of each runbook passes on staging or a local
   environment.
 - **Score:** percentage of runbooks whose dry run passed this audit.
-- **Probe:** `qa` lane executes each runbook in dry-run or staging mode and
-  records every command and its exit status.
+- **Probe:** `verifier` with `verify-live` executes each runbook in dry-run or
+  staging mode and records every command and its exit status.
 - **Remediate:** `builder` regenerates the runbook from the real routes
-  (`harness-engineering` repo-local skill generation), then a fresh `qa` dry
-  run verifies it.
+  (`harness-engineering` repo-local skill generation), then a fresh `verifier`
+  with `verify-live` dry run verifies it.
 
 ## drills
 

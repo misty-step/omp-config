@@ -61,4 +61,4 @@ vs off" is a config diff, not an instruction that the worker can defy.
 
 Sanitize the packet to final artifacts and scored receipts only. Exclude
 secrets, raw provider logs, and customer data. Use one decision label:
-`keep` / `adapt` / `cut` / `needs-more-tasks` / `graduate-to-Daedalus`.
+`keep` / `adapt` / `cut` / `needs-more-tasks` / `graduate-to-architect`.

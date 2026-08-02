@@ -23,8 +23,9 @@ Make a real product showable without presenting weak product truth as proof.
 | Script | `templates/demo-script.md` |
 | Case study | `templates/case-study.md` |
 
-Use `curator` with `/groom` for unsettled direction, `/design` for visible
-critique, `qa` for live verification, and `builder` for the groomed slice.
+Use `designer` with `/groom` or `/vision` for unsettled direction, `/design`
+for visible critique, `verifier` with `verify-live` for live verification,
+and `builder` for the accepted slice. The chief or operator retains acceptance.
 
 ## Contract
 

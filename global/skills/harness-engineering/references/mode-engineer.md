@@ -72,7 +72,7 @@ line that says "don't delete files."
 Invest in hooks over prose.
 
 Keep harness-native hooks in the owning harness or consumer repository.
-omp-config composes session primitives (skills, agents, config, MCP).
+omp-config configures session primitives: skills, agents, config, and MCP.
 It does not install or manage per-repo hook surfaces.
 
 ## AGENTS.md is a map, not a manual
@@ -109,7 +109,7 @@ When multiple skills touch the same delivery lane, enforce strict layering:
 
 - **Leaf skills own one domain and run standalone.** Examples:
   `/ci`, `/research`.
-- **Composer skills orchestrate leaves around one bounded objective.**
+- **Chief workflows route leaf skills around one bounded objective.**
   Example: `/deliver`.
 - **Outer-loop / event workflows are Mode B**, but no active event plane is
   available. Keep them out of new skills until a future product is explicitly
@@ -118,10 +118,9 @@ When multiple skills touch the same delivery lane, enforce strict layering:
   Do not add a skill when a trigger alias on an existing one covers the request.
 
 Redundancy test:
-- If a composer explains a leaf skill's internal method in detail, that is
-  drift.
-  The composer should invoke or reference the leaf.
+- If a routing skill explains a leaf skill's internal method, that is drift.
+  The routing skill should invoke or reference the leaf.
   Add only the boundary judgment it owns.
 - If two skills can both claim authority for the same concern, the boundary is
   wrong.
-  Pick one owner and make the other compose it.
+  Pick one owner and make the chief route to it.

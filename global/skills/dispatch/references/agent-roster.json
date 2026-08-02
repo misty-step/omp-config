@@ -1,0 +1,111 @@
+{
+  "schema_version": "omp.dispatch.agent-roster.v1",
+  "agents": {
+    "architect": {
+      "when_to_use": "Resolve system boundaries, tradeoffs, and dependency order before implementation.",
+      "model": [
+        "openai-codex/gpt-5.6-sol:max",
+        "anthropic/claude-fable-5:xhigh",
+        "kimi-code/k3:max"
+      ],
+      "thinkingLevel": "max",
+      "tools": "read,grep,glob,lsp,web_search",
+      "autoloadSkills": [
+        "project-engineering"
+      ],
+      "spawns": []
+    },
+    "builder": {
+      "when_to_use": "One accepted implementation change taken to a live, gated, evidence-backed outcome.",
+      "model": [
+        "openai-codex/gpt-5.6-luna:xhigh",
+        "kimi-code/k3:high",
+        "openrouter/deepseek/deepseek-v4-flash-0731:high"
+      ],
+      "thinkingLevel": "xhigh",
+      "tools": "read,grep,glob,lsp,bash,edit,write,browser,web_search",
+      "autoloadSkills": [
+        "deliver",
+        "ci"
+      ],
+      "spawns": []
+    },
+    "designer": {
+      "when_to_use": "One product or interface change taken through accessible design and rendered proof.",
+      "model": [
+        "kimi-code/k3:max",
+        "anthropic/claude-fable-5:xhigh",
+        "anthropic/claude-opus-5:xhigh",
+        "openai-codex/gpt-5.6-luna:xhigh"
+      ],
+      "thinkingLevel": "max",
+      "tools": "read,grep,glob,lsp,browser,web_search,edit,write,inspect_image",
+      "autoloadSkills": [
+        "design",
+        "improve-ui",
+        "baseline-ui"
+      ],
+      "spawns": []
+    },
+    "qa-user": {
+      "when_to_use": "Coordinate one frozen persona-driven QA run and dispatch only browser-only leaves.",
+      "model": [
+        "kimi-code/k3:high",
+        "openai-codex/gpt-5.6-luna:xhigh"
+      ],
+      "thinkingLevel": "high",
+      "tools": "task",
+      "autoloadSkills": [
+        "qa-users",
+        "dispatch"
+      ],
+      "spawns": [
+        "qa-user-leaf"
+      ]
+    },
+    "qa-user-leaf": {
+      "when_to_use": "Exercise one configured real local, dev, or staging browser entrypoint as one persona without source, tracker, or child authority.",
+      "model": [
+        "kimi-code/k3:high",
+        "openai-codex/gpt-5.6-luna:xhigh"
+      ],
+      "thinkingLevel": "high",
+      "tools": "browser",
+      "autoloadSkills": [
+        "qa-users"
+      ],
+      "spawns": []
+    },
+    "researcher": {
+      "when_to_use": "Acquire and synthesize bounded repository, product, library, API, and external evidence without mutation authority.",
+      "model": [
+        "kimi-code/k3:high",
+        "openrouter/deepseek/deepseek-v4-flash-0731:high",
+        "openai-codex/gpt-5.6-luna:xhigh",
+        "anthropic/claude-fable-5:high"
+      ],
+      "thinkingLevel": "high",
+      "tools": "read,grep,glob,lsp,browser,web_search",
+      "autoloadSkills": [
+        "research"
+      ],
+      "spawns": []
+    },
+    "verifier": {
+      "when_to_use": "Independently review, reproduce, or verify one claimed outcome and return evidence without repairing findings.",
+      "model": [
+        "kimi-code/k3:high",
+        "xai-oauth/grok-4.5:xhigh",
+        "openai-codex/gpt-5.6-sol:high",
+        "openrouter/deepseek/deepseek-v4-flash-0731:high"
+      ],
+      "thinkingLevel": "xhigh",
+      "tools": "read,grep,glob,lsp,bash,browser,web_search",
+      "autoloadSkills": [
+        "verify-live",
+        "ci"
+      ],
+      "spawns": []
+    }
+  }
+}

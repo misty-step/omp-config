@@ -7,9 +7,10 @@ description: |
   Need a runnable screen or artifact plus intent. Use when: "improve the
   design", "redesign this", "polish the UI", "prototype this", "critique this
   screen", or any product-facing visual artifact. Options mode on request:
-  Use 2-4 blind parallel directions, each rendered and screenshot-verified.
+  the chief dispatches 2-4 blind directions, each rendered and screenshot-verified.
   Do not use when a mechanical style fix has no design decision; make the edit
-  directly. Do not use for behavior verification; dispatch `qa`. Trigger: /design.
+  directly. Do not use for behavior verification; the chief dispatches
+  `verifier` with `verify-live`. Trigger: /design.
 argument-hint: "<artifact-or-surface> [intent]"
 ---
 
@@ -72,7 +73,9 @@ paths in the completion message.
 
 ## 4. Options mode (only when the operator asks for directions)
 
-Fan out 2-4 blind parallel lanes. Give each lane the same brief and no shared
+The chief fans out 2-4 blind `designer` lanes.
+A designer lane never redispatches.
+Give each lane the same brief and no shared
 output. Each lane returns ONE direction: a modified copy with a render and
 screenshots at both widths. Include its token plan. Present screenshots side by
 side. Let the operator choose from pixels, never style names. Discard reskins:
@@ -81,12 +84,12 @@ count two lanes as one when they share a layout and differ only in paint.
 ## 5. Routing
 
 - Systematic UI audit of an existing app → `improve-ui`.
-- Whole-product audit → assessment → remediation program with dispatched
-  lanes and a `DESIGN.md` target state → `design-audit`.
+- Whole-product audit → chief-run assessment and remediation program with
+  native lanes and a `DESIGN.md` target state → `design-audit`.
 - Baseline hygiene rules for new UI → `baseline-ui`.
 - WCAG/ARIA/keyboard deep pass → `baseline-ui`.
 - Animation lag or scroll performance → `baseline-ui`.
-- Behavior verification and evidence capture → dispatch `qa`.
+- Behavior verification and evidence capture → the chief dispatches `verifier` with `verify-live`.
 
 Update `DESIGN.md` when a durable token or layout fact changes; keep its
 sections complete against the design-audit contract. Treat the lab

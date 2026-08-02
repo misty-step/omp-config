@@ -29,6 +29,8 @@ from launch_common import (
     validate_tools,
 )
 
+SEALED_EXTRA_BUILTIN_AGENTS = frozenset({"reviewer", "security-reviewer"})
+
 
 def load_profile(config_root: Path, profile: object, skills: tuple[str, ...]) -> str | None:
     if profile is None:
@@ -279,10 +281,6 @@ def resolve_contract(config_root: Path, contract_path: Path) -> CompiledLaunch:
 
     files: list[ResolvedFile] = [ResolvedFile("agent", agent, root_agent_path, Path("agent/agents") / root_agent_path.name)]
     for child in allowed_agents:
-        if child in load_contract(config_root).bundled_agents:
-            raise ContractError(
-                f"bundled subagent {child!r} has no source declaration to seal; unpack or declare it before compiling"
-            )
         _, child_path = agent_source(config_root, repository, child)
         child_fields, _ = agent_fields(child_path, child)
         child_spawns = child_fields.get("spawns", "").strip()
@@ -315,7 +313,16 @@ def resolve_contract(config_root: Path, contract_path: Path) -> CompiledLaunch:
             raise ContractError(f"skill {skill_path} declares name {skill_fields.get('name')!r}")
         skill_sources.append((skill, skill_path))
         files.append(ResolvedFile("skill", skill, skill_path, Path("agent/skills") / skill))
-    disabled_agents = tuple(sorted((set(load_contract(config_root).bundled_agents) | {agent}) - set(allowed_agents)))
+    disabled_agents = tuple(
+        sorted(
+            (
+                set(load_contract(config_root).bundled_agents)
+                | SEALED_EXTRA_BUILTIN_AGENTS
+                | {agent}
+            )
+            - set(allowed_agents)
+        )
+    )
 
     mcp = load_selected_mcp(config_root, repository, mcp_servers)
     global_instructions_path = config_root / "global" / "AGENTS.md"

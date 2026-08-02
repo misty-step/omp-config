@@ -13,24 +13,25 @@ argument-hint: "[ticket|description]"
 
 Read `../deliver-core/SKILL.md` before starting.
 That linked skill is the canonical delivery contract.
-This adapter keeps OMP's composer, route, review, gate, and Powder closeout surfaces local.
+This adapter keeps OMP's native routing, review, gate, and Powder closeout surfaces local.
 
 
-## OMP composition
+## OMP routing
 
-`/deliver` composes one routed work card from intent through durable proof.
+The chief routes one accepted work card from intent through durable proof.
+A `builder` lane executes its assigned implementation and never redispatches.
 Specialist skills own shaping, verification, review, CI, and closeout.
-Keep the OMP `/dispatch` runtime local.
-Do not move its composition or recipe behavior into the canonical core.
+Keep the native OMP `task` runtime local.
+Do not move OMP routing into the canonical core.
 
 
 | Signal | Route |
 |---|---|
-| Goal, acceptance, or tradeoff is unresolved | `curator` with `/groom` |
-| External facts would change the design | `magellan` with `/research` |
-| Product identity or long-lived direction is unsettled | `curator` with `/vision` |
-| Running behavior needs proof | `qa` |
-| Non-trivial diff needs fresh-context judgment | `reviewer` |
+| Goal, acceptance, or tradeoff is unresolved | `designer` with `/groom`; chief or operator retains acceptance |
+| External facts would change the design | `researcher` with `/research` (read-only) |
+| Product identity or long-lived direction is unsettled | `designer` with `/vision`; chief or operator retains acceptance |
+| Running behavior needs proof | `verifier` with `verify-live` |
+| Non-trivial diff needs fresh-context judgment | `verifier` with `code-review` |
 | The repository gate is absent, weak, or red | `/ci` |
 | Independent heavy lanes materially shorten the critical path | `/sprites` |
 | Delivery exposed a reusable repo-technical lesson | `/compound` after proof |
@@ -44,11 +45,10 @@ For public API, CLI, UI, performance, compatibility, migration, or operator-work
 
 Apply the canonical core's live-card, falsifier, clean-cutover, live-driver,
 review, and exact-proof requirements.
-OMP then:
+The chief then:
 
-- dispatches `qa` against the live surface and retains its reviewable evidence;
-- dispatches a fresh-context `reviewer` with the diff and oracle, resolves
-  blocking findings, and re-proves affected behavior;
+- dispatches `verifier` with `verify-live` against the live surface and retains its reviewable evidence;
+- dispatches a fresh-context, non-mutating `verifier` with `code-review` against the diff and oracle; the chief resolves blocking findings and re-proves affected behavior;
 - runs `/ci` after live behavior works and keeps its gate disposition;
 - reconciles the routed Powder card with exact proof links or commands,
   including deviation ledger, review and gate dispositions, and residual risk;

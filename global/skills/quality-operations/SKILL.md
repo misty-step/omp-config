@@ -22,7 +22,8 @@ tool version, and timestamp.
 - `references/domain-audits.md` — per-domain measurable targets, probes, and
   remediation routes, including the drill safety rule.
 
-Do not use this loop for one live production failure; route that to `cassandra`.
+Do not use this loop for one live production failure; route it to a `verifier`
+with `verify-live` and the named operations skill.
 Do not use it to design gate mechanics; `/ci` owns gates, and this loop consumes
 their reports as evidence.
 
@@ -49,27 +50,29 @@ Delegate per the Shared Operating Spine (Act) and the `dispatch` skill.
 Critics and auditors get the artifact and the oracle only — never the lead's
 reasoning trail (Shared Operating Spine: Prove).
 
-1. **Inventory.** Dispatch `scout` for a bounded map or `magellan` for a broad
-   sweep of current state per domain: report surfaces, ledgers, monitors,
-   incident docs, runbooks, drill records, and evidence directories. Lanes
-   return cited sources, not judgment.
+1. **Inventory.** Dispatch `researcher` with a bounded or broad scope for each
+   domain: report surfaces, ledgers, monitors, incident docs, runbooks, drill
+   records, and evidence directories. The brief states the scope. Lanes return
+   cited sources, not judgment.
 2. **Target.** The lead writes one measurable target state per domain from
    `references/domain-audits.md` and the committed `baseline.json`. A target
    without a number or a binary probe is not a target.
-3. **Audit.** Dispatch audit lanes per domain group. Live probes use `qa` with
-   `verify-live`. Observability queries use the Canary CLI/API through
-   `factory-apps`. Drills obey the safety rule in `references/domain-audits.md`.
-   Every finding carries evidence: exact command, output path, screenshot, or
-   log excerpt. A lane that cannot probe returns `missing` with a reason; it
-   never guesses a status.
+3. **Audit.** Dispatch `verifier` audit lanes per domain group. Live probes use
+   `verifier` with `verify-live`. Observability queries use the Canary CLI/API
+   through `factory-apps`. Drills obey the safety rule in
+   `references/domain-audits.md`. Every finding carries evidence: exact
+   command, output path, screenshot, or log excerpt. A lane that cannot probe
+   returns `missing` with a reason; it never guesses a status.
 4. **Assess.** The lead writes `run.json`, `findings.ndjson`, and
    `assessment.md`, then appends one row to `trends.ndjson`. Machine artifacts
    come first; the human report cites them.
 5. **Remediate.** The lead ranks accepted gaps into one findings packet.
-   Dispatch `fixer` for the packet. Dispatch `builder` for structural work that
-   a packet cannot carry. A waived finding records a reason and an expiry date.
-6. **Verify.** An independent `qa` lane re-runs the exact failed probes against
-   live behavior. An author lane never verifies its own remediation.
+   Dispatch `builder` for the ranked findings packet with a two-round cap, or
+   for structural work that a packet cannot carry. A waived finding records a
+   reason and an expiry date.
+6. **Verify.** An independent `verifier` with `verify-live` re-runs the exact
+   failed probes against live behavior. An author lane never verifies its own
+   remediation.
 7. **Delta audit.** Re-audit the remediated domains at the new SHA and append
    the delta row, so the trend store records the improvement as data.
 

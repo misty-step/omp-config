@@ -25,7 +25,7 @@ first-party eval, not a frozen routing exemplar.
    - **C (optional):** use a credible alternative primitive, such as an external skill or Ponytail for simplicity pressure, only when one exists.
    Drive runs with `references/run-recipe.md`. Native-subagent smoke is free; `council.sh` with decorrelated families is serious.
 4. **Grade blind.** Show artifacts and fixture, not arm identity. Use a different model family from workers. Run mechanical checks before taste.
-5. **Verdict.** Pass only when A beats B paired on the claim across ≥2 of 3 fixtures. Label `keep`, `adapt`, `cut`, `needs-more-tasks`, or `graduate-to-Daedalus`.
+5. **Verdict.** Pass only when A beats B paired on the claim across ≥2 of 3 fixtures. Label `keep`, `adapt`, `cut`, `needs-more-tasks`, or `graduate-to-architect`.
 
 ## Graders
 
@@ -49,7 +49,7 @@ A full pass costs about 15–18 runs; do not gate every edit on it.
 - Tie every rubric dimension to the claim; prefer objective checks.
 - Never use a self-graded family for the serious verdict.
 - Use ≥2 fixtures with distinct failure modes; one fixture proves no generalization.
-- Keep this skill minimal; send composition sweeps and model selection to Daedalus.
+- Keep this skill minimal; send dispatch sweeps and model selection to a chief-dispatched `architect`.
 - Grade outcomes, not packet prose.
 - Treat an unanchored agent judge as a proxy, not ground truth.
 

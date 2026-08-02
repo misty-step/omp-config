@@ -20,8 +20,9 @@ One row per scenario in the frozen scenario table:
 
 Execution rules:
 
-- `qa` lanes execute the table with the `verify-live` escalation ladder and
-  its evidence discipline. Do not restate that skill; apply it.
+Fresh, non-mutating `verifier` lanes execute the table with the
+`verify-live` escalation ladder and its evidence discipline. Do not restate
+that skill; apply it.
 - Verdict per row: PASS, WARN, FAIL, or SKIP, with the exact command or
   interaction and the observed result. SKIP names the blocker.
 - Deterministic means re-runnable: named preconditions, seeded data, no

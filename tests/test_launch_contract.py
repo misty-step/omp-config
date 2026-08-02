@@ -34,7 +34,7 @@ class LaunchContractTests(unittest.TestCase):
             self.assertTrue((first / "agent" / "agents" / "pico.md").is_file())
             self.assertEqual(json.loads((first / "agent" / "mcp.json").read_text())["mcpServers"], {})
             config = (first / "agent" / "config.yml").read_text()
-            self.assertIn('disabledAgents: ["conductor","designer","librarian","scout","sonic","task"]', config)
+            self.assertIn('disabledAgents: ["conductor","designer","librarian","reviewer","scout","security-reviewer","sonic","task"]', config)
             prompt = (first / "system-prompt.txt").read_text()
             sticky_rules = (ROOT / "global" / "RULES.md").read_text().strip()
             self.assertIn(f"<sticky-rules>\n{sticky_rules}\n</sticky-rules>", prompt)
@@ -137,11 +137,11 @@ class LaunchContractTests(unittest.TestCase):
             contract["repository"]["root"] = str(repository)
             contract["composition"].update(
                 {
-                    "agent": "daedalus",
+                    "agent": "architect",
                     "model": "openai-codex/gpt-5.6-sol",
-                    "thinking": "high",
+                    "thinking": "max",
                     "tools": ["read", "grep", "glob", "lsp", "web_search"],
-                    "skills": ["project-engineering"],
+                    "skills": ["project-engineering", "mcp-design", "vision"],
                     "subagents": {"allowed": [], "tools": [], "isolation": "inherit", "max_concurrency": 1},
                 }
             )
@@ -163,11 +163,11 @@ class LaunchContractTests(unittest.TestCase):
             contract["repository"]["root"] = str(repository)
             contract["composition"].update(
                 {
-                    "agent": "daedalus",
+                    "agent": "architect",
                     "model": "openai-codex/gpt-5.6-sol",
-                    "thinking": "high",
+                    "thinking": "max",
                     "tools": ["read", "grep", "glob", "lsp", "web_search"],
-                    "skills": ["project-engineering"],
+                    "skills": ["project-engineering", "mcp-design", "vision"],
                     "subagents": {"allowed": [], "tools": [], "isolation": "inherit", "max_concurrency": 1},
                 }
             )

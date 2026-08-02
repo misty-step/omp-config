@@ -144,6 +144,13 @@ task:
   maxConcurrency: 12
   maxRuntimeMs: 2700000
   maxRecursionDepth: 2
+  disabledAgents:
+    - task
+    - scout
+    - librarian
+    - sonic
+    - reviewer
+    - security-reviewer
   isolation: 
     mode: auto
 checkpoint: 

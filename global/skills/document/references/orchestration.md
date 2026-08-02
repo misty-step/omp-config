@@ -21,7 +21,7 @@ Each lane is outcome-shaped. The lane agent owns its decomposition. Give it an e
 
 ### Recon swarm (parallel, lens-blind)
 
-One scout per lens works without the other lenses, so one search angle cannot show full coverage:
+The chief dispatches one `researcher` lane per lens. Each lens stays independent, so one search angle cannot imply full coverage:
 
 - **entry-points** — main/handlers/CLI/jobs/cron; where execution begins.
 - **data-flow** — how data moves and persists.

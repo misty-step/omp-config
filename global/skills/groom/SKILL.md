@@ -19,7 +19,7 @@ vision-led backlog diff. Use prose only to justify that diff.
 
 Use `global/references/interrogate-first.md` for operator judgment. Read the
 codebase for facts and keep the investigation autonomous. Use
-`global/skills/dispatch/SKILL.md` for lane composition. Use julius-caveman only
+`global/skills/dispatch/SKILL.md` for native lane routing. Use julius-caveman only
 for interim synthesis; keep findings and artifacts in normal English.
 
 ## Project Vision
