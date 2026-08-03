@@ -106,9 +106,9 @@ class DispatchContractTests(unittest.TestCase):
     def test_model_policy_rejects_global_role_drift(self) -> None:
         source = (ROOT / "global" / "config.yml").read_text()
         mutations = {
-            "non-deepseek OpenRouter primary": (
+            "OpenRouter primary bypasses subscription": (
+                "  tiny: openai-codex/gpt-5.6-luna:medium",
                 f"  tiny: {EXACT_DEEPSEEK_ROUTE}",
-                "  tiny: openrouter/z-ai/glm-5.2:high",
             ),
             "non-designer Kimi primary": (
                 "  advisor: xai-oauth/grok-4.5:high",

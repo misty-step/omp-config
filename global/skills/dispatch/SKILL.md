@@ -63,7 +63,8 @@ Kimi K3 is primary only for `designer`.
 `verifier` starts with GPT-5.6 Sol and falls back first to Claude Fable 5.
 `researcher` starts with Gemini 3.6 Flash, Grok 4.5, and GPT-5.6 Luna.
 
-Try subscription routes before OpenRouter unless DeepSeek is the selected low-cost primary.
+Always use at least one appropriate subscription route before OpenRouter.
+Use GPT-5.6 Luna `medium` for `commit`, `smol`, and `tiny`.
 Every OpenRouter tail starts with DeepSeek V4 Flash 0731.
 Only OpenRouter GPT-5.6 Luna, Grok 4.5, and GLM 5.2 follow it.
 DeepSeek must use `openrouter/deepseek/deepseek-v4-flash-0731:high`.

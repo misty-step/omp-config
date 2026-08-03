@@ -36,7 +36,8 @@ The order records preference and provider resilience, not a capability boundary.
 Kimi K3 is primary only for `designer`.
 `verifier` starts with GPT-5.6 Sol and Claude Fable 5.
 `researcher` starts with Gemini 3.6 Flash, Grok 4.5, and GPT-5.6 Luna.
-Subscription routes precede the shared OpenRouter tail.
+Every native agent and global role tries a subscription route before OpenRouter.
+Use GPT-5.6 Luna `medium` as the cheap subscription primary.
 
 No active route uses Claude Sonnet 5.
 Every DeepSeek route must be exactly

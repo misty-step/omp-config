@@ -459,14 +459,14 @@ EXPECTED_AGENT_MODELS = {
 }
 
 EXPECTED_GLOBAL_MODEL_ROLES = {
-    "smol": EXACT_DEEPSEEK_ROUTE,
+    "smol": "openai-codex/gpt-5.6-luna:medium",
     "vision": "google-antigravity/gemini-3.6-flash:high",
-    "commit": "google-antigravity/gemini-3.6-flash:high",
+    "commit": "openai-codex/gpt-5.6-luna:medium",
     "task": "openai-codex/gpt-5.6-luna:max",
     "slow": "anthropic/claude-fable-5:max",
     "plan": "openai-codex/gpt-5.6-sol:max",
     "advisor": "xai-oauth/grok-4.5:high",
-    "tiny": EXACT_DEEPSEEK_ROUTE,
+    "tiny": "openai-codex/gpt-5.6-luna:medium",
     "default": "anthropic/claude-fable-5:high",
     "designer": "kimi-code/k3:max",
 }
@@ -514,7 +514,7 @@ EXPECTED_GLOBAL_FALLBACK_CHAINS = {
         "kimi-code/k3:high",
         "anthropic/claude-fable-5:high",
         "openai-codex/gpt-5.6-sol:high",
-        *OPENROUTER_TAIL_HIGH[1:],
+        *OPENROUTER_TAIL_HIGH,
     ],
     "vision": [
         "kimi-code/k3:max",
@@ -540,7 +540,7 @@ EXPECTED_GLOBAL_FALLBACK_CHAINS = {
         "kimi-code/k3:high",
         "anthropic/claude-fable-5:high",
         "openai-codex/gpt-5.6-sol:high",
-        *OPENROUTER_TAIL_HIGH[1:],
+        *OPENROUTER_TAIL_HIGH,
     ],
     "designer": [
         "anthropic/claude-fable-5:xhigh",
