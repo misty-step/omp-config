@@ -1,0 +1,246 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "omp.quality-assessment.v2",
+  "title": "OMP quality assessment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "domain",
+    "mode",
+    "repository",
+    "revision",
+    "dirty",
+    "generated_at",
+    "inventory",
+    "targets",
+    "findings",
+    "gates",
+    "strengths",
+    "domain_data",
+    "residual_risk"
+  ],
+  "properties": {
+    "schema_version": { "const": "omp.quality-assessment.v2" },
+    "domain": {
+      "enum": ["controls", "toolchain", "tests", "operations", "architecture", "product", "design"]
+    },
+    "mode": { "enum": ["full", "audit-only", "remediate", "verify"] },
+    "repository": { "type": "string", "minLength": 1 },
+    "revision": { "type": "string", "minLength": 1 },
+    "dirty": { "type": "boolean" },
+    "generated_at": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?Z$" },
+    "inventory": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/inventorySurface" }
+    },
+    "targets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/target" }
+    },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/finding" }
+    },
+    "gates": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/gate" }
+    },
+    "strengths": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "domain_data": { "type": "object" },
+    "residual_risk": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observed"],
+      "properties": {
+        "command": { "type": ["string", "null"] },
+        "path": { "type": ["string", "null"] },
+        "exit_code": { "type": ["integer", "null"] },
+        "observed": { "type": "string", "minLength": 1 }
+      },
+      "anyOf": [
+        { "properties": { "command": { "type": "string", "minLength": 1 } }, "required": ["command"] },
+        { "properties": { "path": { "type": "string", "minLength": 1 } }, "required": ["path"] }
+      ]
+    },
+    "inventorySurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "present", "evidence", "missing_reason"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "present": { "type": "boolean" },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidence" }
+        },
+        "missing_reason": { "type": ["string", "null"] }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "present": { "const": true } } },
+          "then": {
+            "properties": {
+              "evidence": { "type": "array", "minItems": 1 },
+              "missing_reason": { "type": "null" }
+            }
+          },
+          "else": { "properties": { "missing_reason": { "type": "string", "minLength": 1 } } }
+        }
+      ]
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "claim", "failure_mode", "falsifier", "selection", "reason"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "claim": { "type": "string", "minLength": 1 },
+        "failure_mode": { "type": "string", "minLength": 1 },
+        "falsifier": { "type": "string", "minLength": 1 },
+        "selection": { "enum": ["selected", "refused", "not-applicable"] },
+        "reason": { "type": ["string", "null"] }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "selection": { "const": "selected" } } },
+          "then": { "properties": { "reason": { "type": "null" } } },
+          "else": { "properties": { "reason": { "type": "string", "minLength": 1 } } }
+        }
+      ]
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "target",
+        "severity",
+        "observed",
+        "evidence",
+        "decision",
+        "waiver",
+        "ticket",
+        "rejection_reason",
+        "remediation",
+        "status"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "target": { "type": "string", "minLength": 1 },
+        "severity": { "enum": ["critical", "high", "medium", "low"] },
+        "observed": { "type": "string", "minLength": 1 },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/evidence" }
+        },
+        "decision": { "enum": ["remediate", "waive", "defer", "reject"] },
+        "waiver": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["reason", "approver", "expires"],
+              "properties": {
+                "reason": { "type": "string", "minLength": 1 },
+                "approver": { "type": "string", "minLength": 1 },
+                "expires": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+              }
+            }
+          ]
+        },
+        "ticket": { "type": ["string", "null"] },
+        "rejection_reason": { "type": ["string", "null"] },
+        "remediation": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["change", "verified_by", "evidence", "blocker"],
+              "properties": {
+                "change": { "type": ["string", "null"] },
+                "verified_by": { "type": ["string", "null"] },
+                "evidence": { "type": ["string", "null"] },
+                "blocker": { "type": ["string", "null"] }
+              }
+            }
+          ]
+        },
+        "status": { "enum": ["open", "remediated", "blocked"] }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "decision": { "const": "waive" } } },
+          "then": { "properties": { "waiver": { "type": "object" } } },
+          "else": { "properties": { "waiver": { "type": "null" } } }
+        },
+        {
+          "if": { "properties": { "decision": { "const": "defer" } } },
+          "then": { "properties": { "ticket": { "type": "string", "minLength": 1 } } },
+          "else": { "properties": { "ticket": { "type": "null" } } }
+        },
+        {
+          "if": { "properties": { "decision": { "const": "reject" } } },
+          "then": { "properties": { "rejection_reason": { "type": "string", "minLength": 1 } } },
+          "else": { "properties": { "rejection_reason": { "type": "null" } } }
+        },
+        {
+          "if": { "properties": { "status": { "const": "remediated" } } },
+          "then": {
+            "properties": {
+              "decision": { "const": "remediate" },
+              "remediation": {
+                "type": "object",
+                "properties": {
+                  "change": { "type": "string", "minLength": 1 },
+                  "verified_by": { "type": "string", "minLength": 1 },
+                  "evidence": { "type": "string", "minLength": 1 },
+                  "blocker": { "type": "null" }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "blocked" } } },
+          "then": {
+            "properties": {
+              "decision": { "const": "remediate" },
+              "remediation": {
+                "type": "object",
+                "properties": {
+                  "blocker": { "type": "string", "minLength": 1 }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "driver", "report", "exit_code", "seed", "falsifier_verified"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "driver": { "type": "string", "minLength": 1 },
+        "report": { "type": "string", "minLength": 1 },
+        "exit_code": { "type": ["integer", "null"] },
+        "seed": { "type": ["string", "integer", "null"] },
+        "falsifier_verified": { "type": "boolean" }
+      }
+    }
+  }
+}

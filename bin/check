@@ -30,6 +30,19 @@ SECRET_PATTERNS = {
     "OpenAI-style key": re.compile(r"\bsk-[A-Za-z0-9_-]{20,}"),
     "GitHub token": re.compile(r"\b(?:ghp|github_pat)_[A-Za-z0-9_]{20,}"),
 }
+RETIRED_SKILL_NAMES = frozenset(
+    {
+        "audit-architecture",
+        "audit-product",
+        "audit-quality-controls",
+        "deliver-core",
+        "design-audit",
+        "quality-operations",
+        "quality-tests",
+        "quality-toolchain",
+        "research-core",
+    }
+)
 
 
 def fail(message: str) -> None:
@@ -387,6 +400,12 @@ def check_task_settings(settings: Path) -> None:
         fail("task.disabledAgents must be a string list without duplicates")
 
 
+def check_retired_skill_names(skill_names: set[str]) -> None:
+    retired = sorted(skill_names & RETIRED_SKILL_NAMES)
+    if retired:
+        fail(f"retired skill directories reintroduced: {retired}")
+
+
 def check_tree(contract: Contract) -> None:
     settings = contract.surface("settings").source
     context = contract.surface("context").source
@@ -417,6 +436,7 @@ def check_tree(contract: Contract) -> None:
                 fail(f"{label} found in {relative(path)}")
 
     skill_names = {path.name for path in skill_dir.iterdir() if path.is_dir()}
+    check_retired_skill_names(skill_names)
     builtin_tool_names = omp_builtin_tool_names()
     agent_names: set[str] = set()
     agent_fields: dict[str, dict[str, str]] = {}

@@ -15,6 +15,7 @@ CHECK = runpy.run_path(str(BIN_DIR / "check"))
 check_model_selector = CHECK["check_model_selector"]
 check_model_routes = CHECK["check_model_routes"]
 check_task_settings = CHECK["check_task_settings"]
+check_retired_skill_names = CHECK["check_retired_skill_names"]
 
 
 class DispatchContractTests(unittest.TestCase):
@@ -76,6 +77,13 @@ class DispatchContractTests(unittest.TestCase):
 
         with self.assertRaises(SystemExit):
             check_task_settings(settings)
+
+    def test_retired_quality_skill_names_cannot_return(self) -> None:
+        with self.assertRaises(SystemExit):
+            check_retired_skill_names({"quality", "quality-tests"})
+
+        check_retired_skill_names({"quality", "deliver", "research"})
+
 
     def test_model_selectors_reject_invalid_shape(self) -> None:
         with self.assertRaises(SystemExit):

@@ -55,15 +55,16 @@ Respect `task.maxConcurrency`.
 
 | Outcome | Skills to name in the brief | Native agent |
 |---|---|---|
-| implementation and delivery | `deliver`, `deliver-core`, `ci`, `refactor`, `compound`, `powder`, `sprites` | `builder` |
+| implementation and delivery | `deliver`, `ci`, `refactor`, `compound`, `powder`, `sprites`, `verification` | `builder`; `verifier` proves generated live paths |
 | product and infrastructure operation | `factory-apps`, `estate-infrastructure`, `document`, `showcase` | `builder`; `verifier` proves |
 | harness and architecture | `harness-engineering`, `mcp-design`, `project-engineering` | `architect` or `builder` |
 | independent review | `code-review`, `autoreview`, `thermo-nuclear-review`, `thermo-nuclear-code-quality-review`, `review-tests`, `review-security`, `review-vision` | `verifier` |
 | live verification | `verify-live` | `verifier` |
-| multi-lane audits and quality programs | `audit-product`, `audit-architecture`, `audit-quality-controls`, `design-audit`, `quality-toolchain`, `quality-tests`, `quality-operations` | chief dispatches native lanes |
+| multi-lane audits and quality programs | `quality` | chief dispatches the selected domain lanes |
 | skill and decision evaluation | `skill-eval`, `eval-design`, `council` | chief dispatches `verifier` or `architect` |
-| evidence synthesis | `research`, `research-core`, `peer-harnesses`, `capability-confidence`, `simplified-technical-english` | `researcher` |
-| product and interface design | `design`, `image-gen`, `improve-ui`, `baseline-ui` | `designer` |
+| evidence synthesis | `research`, `peer-harnesses`, `capability-confidence`, `simplified-technical-english` | `researcher` |
+| communication shaping | `comms` | chief or the native agent that owns the artifact |
+| product and interface design | `design`, `image-gen`, `improve-ui`, `baseline-ui`, `prototype` | `designer`; chief dispatches parallel directions |
 | product direction | `vision`, `groom`, `roadmap` | chief; dispatch `designer`, `researcher`, or `architect` as needed |
 | persona browser QA | `qa-users` | chief → `qa-user` → `qa-user-leaf` |
 

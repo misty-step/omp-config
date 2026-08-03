@@ -58,14 +58,13 @@ The projected `bin/` directory is a runtime cotenant. Only the declared
 `review_gate.py` and `review_runner.py` links are owned by this repository;
 other installed bin entries remain untouched.
 
-## Owned skill cores
+## Owned skill contracts
 
-`omp-config` owns `research-core`, `deliver-core`, and `qa-users` as real local
-skill directories under `global/skills/`, each with its own `SKILL.md`.
-`research-core` and `deliver-core` provide harness-neutral contracts in this
-tree; OMP adapters add routing, acquisition, role, review, gate, and closeout
-behavior. `qa-users` is the local core for bounded persona-driven QA. There
-are no first-party package bootstrap prerequisites for `npm install`.
+`omp-config` owns `research`, `deliver`, and `qa-users` as local skill directories under `global/skills/`.
+`research` contains its evidence contract and OMP acquisition routes.
+`deliver` contains its delivery contract and OMP execution routes.
+`qa-users` is the local core for bounded persona-driven QA.
+There are no first-party package bootstrap prerequisites for `npm install`.
 
 ## Herdr runtime cotenant
 

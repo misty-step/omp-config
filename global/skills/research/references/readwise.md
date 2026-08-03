@@ -11,13 +11,11 @@ READWISE_BASE_URL="http://mint.tail5f5eb4.ts.net:4949/proxy/https/readwise.io"
 ```
 
 Each request carries `Authorization: Token __mint.readwise.default__`.
-This value follows the value-free `__mint.<service>.<name>__` grammar.
-Its alias is `secret://readwise/default`; neither form is a credential.
-Tailnet WhoIs identifies the caller. Mint policy at
-`~/Development/mint/deploy/policy.yaml` is the grant and owns
-`Authorization` at the upstream boundary.
-The policy currently grants `readwise.io` routes only to `phrazzld@github`.
-Other actors receive 403. Review Mint policy when a route is denied.
+This value follows the exact `__mint.<alias>__` marker grammar.
+Mint replaces it only in the request header.
+Mint does not authenticate or authorize callers.
+Any caller that reaches Mint can use the Readwise alias.
+A completed 403 is an upstream Readwise response, not a Mint policy decision.
 
 ## Core Operations
 

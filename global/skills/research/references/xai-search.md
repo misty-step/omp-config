@@ -33,15 +33,12 @@ Do not limit Grok to social sentiment.
 
 Base URL:
 `http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.x.ai/v1`.
-Use the value-free `__mint.xai.default__` placeholder in credential fields.
-It follows the `__mint.<service>.<name>__` grammar.
-Its alias is `secret://xai/default`; neither form is a credential.
-Tailnet WhoIs identifies the caller. Mint policy at
-`~/Development/mint/deploy/policy.yaml` is the grant and owns
-`Authorization` at the upstream boundary.
-The policy grants `phrazzld@github` these routes: `GET /v1/models`,
-`POST /v1/responses`, and `POST /v1/chat/completions`.
-Other actors receive 403. Review Mint policy when a route is denied.
+Use the value-free `__mint.xai.default__` marker in credential headers.
+It follows the exact `__mint.<alias>__` grammar.
+Mint replaces it only in the request header.
+Mint does not authenticate or authorize callers.
+Any caller that reaches Mint can use the xAI alias.
+A completed 403 is an upstream xAI response, not a Mint policy decision.
 API: OpenAI Responses API compatible. Default model: `grok-4.3` unless the
 environment overrides it.
 
@@ -119,9 +116,8 @@ curl "${XAI_BASE_URL:-http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.x.ai/v1
 
 Configure the OpenAI-compatible client with
 `http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.x.ai/v1` and the
-value-free `__mint.xai.default__` API-key placeholder.
-Tailnet WhoIs identifies the caller. Mint policy is the grant and owns
-`Authorization` at the upstream boundary.
+value-free `__mint.xai.default__` API-key marker.
+Mint replaces the marker in the request header and does not authorize the caller.
 
 ## Citations
 

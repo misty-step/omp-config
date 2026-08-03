@@ -17,8 +17,6 @@ from external_registry import ExternalRegistryError, check_external_skills
 
 
 LOCAL_SKILL_CORES = (
-    "research-core",
-    "deliver-core",
     "qa-users",
     "simplified-technical-english",
 )
