@@ -173,6 +173,19 @@ sources:
     consumers:
       - global/skills/project-engineering/SKILL.md
 
+  - repo: mattpocock/skills
+    ref: main
+    pin: 2ab958093e83e0ec752e6c1c5932da465bf23e0c
+    vendor_dir: mattpocock-writing-great-skills
+    layout: multi-root
+    skills_path: skills
+    alias_prefix: "mattpocock-"
+    include: [writing-great-skills]
+    license: MIT
+    license_path: LICENSE
+    consumers:
+      - global/references/skill-authoring-standard.md
+
   - repo: openclaw/agent-skills
     ref: main
     pin: fe588b1a6267eb47f785d0c748db9f6f3e9a3b4f
