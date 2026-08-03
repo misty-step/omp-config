@@ -36,7 +36,7 @@ curl -sS -X POST \
 ## Credentials
 
 Use `__mint.gemini.default__` for Gemini or `__mint.openai.default__` for OpenAI in the provider credential field.
-Tailnet WhoIs identifies the caller. Mint policy owns authorization. Never print or store resolved credential values.
+Mint does not authenticate or authorize callers. Tailnet reachability controls access. Never print or store resolved credential values.
 Save outputs under a scratch or work directory.
 
 ## Provider authority

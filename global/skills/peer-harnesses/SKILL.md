@@ -55,10 +55,10 @@ Each row shows its headless form.
 ### OpenRouter credentials: Mint, no env keys
 
 `pi`, `goose`, and `opencode` route OpenRouter through the Mint broker.
-Each tool holds only the value-free placeholder `__mint.openrouter.default__`
-and a Mint base URL; Mint policy injects the real key at egress.
+Each tool holds only the value-free marker `__mint.openrouter.default__`
+and a Mint base URL. Mint replaces the marker in the request header.
 No `OPENROUTER_API_KEY` environment variable exists on this machine.
-Never set one, and never replace a placeholder with a real key.
+Never set one, and never replace a marker with a real key.
 Verified live with `LANE_OK` completions on 2026-08-01:
 
 | CLI | Config file | Route |
@@ -67,9 +67,9 @@ Verified live with `LANE_OK` completions on 2026-08-01:
 | `goose` 1.45.0 | `~/.config/goose/config.yaml` + `secrets.yaml` | `OPENROUTER_HOST: http://mint.tail5f5eb4.ts.net:4949/proxy/https/openrouter.ai` (goose appends `/api/v1/...` itself); placeholder in `secrets.yaml` with `GOOSE_DISABLE_KEYRING: true` |
 | `opencode` 1.18.11 | `~/.config/opencode/opencode.json` | `provider.openrouter.options.baseURL` (Mint `/api/v1` URL) + `options.apiKey` placeholder |
 
-A 401 from these lanes means the config file lost its Mint route.
-A 403 means Mint policy denies the actor, method, or path; widen the grant in
-Mint policy, never work around the boundary.
+A 401 or 403 is an upstream response, not a Mint authorization decision.
+Mint has no grant to widen. Inspect the route, marker, upstream contract, and
+provider credential without exposing raw bytes.
 
 ### Oracle browser consult details
 

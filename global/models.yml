@@ -1,7 +1,7 @@
-# OpenRouter egress is brokered by the Mint service on the tailnet
-# (http://mint.tail5f5eb4.ts.net:4949, host `mint`, Tailnet WhoIs auth).
-# The client carries only the value-free placeholder below.
-# Mint's policy injects the real key at the upstream boundary.
+# OpenRouter egress uses the Mint service on the tailnet:
+# http://mint.tail5f5eb4.ts.net:4949, host `mint`.
+# Mint performs no caller authentication or authorization. Tailnet reachability is the network boundary.
+# The client carries only the value-free marker below. Mint replaces it in the request header.
 # No local credential bytes enter this configuration.
 providers:
   openrouter:

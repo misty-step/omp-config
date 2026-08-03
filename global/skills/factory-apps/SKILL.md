@@ -27,7 +27,7 @@ registration in `global/mcp.json`.
 | release intelligence, versions, changelogs, release notes, release kit, fleet adoption | Landmark | `misty-landmark` and `landmark describe --json` / dry-run CLI/action paths | `docs/agent-integration.md`, `docs/fleet-integration-playbook.md` |
 | UI/UX, Misty Step design law, tokens, static design registry, rendered design gate | Aesthetic | `misty-aesthetic`, `@misty-step/aesthetic` package, static API, law gate | `docs/ADOPTING.md`, `DESIGN.md` |
 | event-triggered agents, reflex loops, durable runs | unavailable | Mode B has no active workflow plane; keep work in Mode A until a future product is named | do not invent a replacement |
-| outbound API call needing a credential (API key, token, secret) | Mint broker | Route through `http://mint.tail5f5eb4.ts.net:4949/proxy/https/<host>/<path>` with a `__mint.<service>.<name>__` placeholder; Tailnet WhoIs identifies the caller; Mint policy grants access and owns `Authorization` | Keep provider interfaces generic; Mint policy controls access; this harness has no Mint MCP or skill |
+| outbound API call needing a credential (API key, token, secret) | Mint broker | Route through `http://mint.tail5f5eb4.ts.net:4949/proxy/https/<host>/<path>` with a `__mint.<alias>__` marker; Mint replaces valid markers only in request headers | Keep provider interfaces generic; Tailscale controls reachability; this harness has no Mint MCP or skill |
 
 ## Operating Rule
 
@@ -44,12 +44,12 @@ Use the owned app first. Follow these constraints:
 - **Mode B** — No active event plane is available for triggered, scheduled,
   durable, reflexive, or other unattended work. Keep ad-hoc operator work in
   Mode A and do not invent a replacement workflow service.
-- **Mint** — Mint is an egress proxy and typed-action broker at
+- **Mint** — Mint is an unrestricted credential proxy at
   `http://mint.tail5f5eb4.ts.net:4949`. Use a value-free
-  `__mint.<service>.<name>__` placeholder in each credential field.
-  Tailnet WhoIs identifies the caller. Mint policy at
-  `~/Development/mint/deploy/policy.yaml` is the grant and owns
-  `Authorization` at the upstream boundary. Mint is not a sandbox.
+  `__mint.<alias>__` marker in each credential header.
+  Mint does not authenticate or authorize callers.
+  Tailnet reachability and dedicated-host custody are the entire boundary.
+  Any reachable caller can use any loaded alias for any HTTP(S) destination.
   This harness adds no Mint MCP or skill.
 
 ## Current Audit

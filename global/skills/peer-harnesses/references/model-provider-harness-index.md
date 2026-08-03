@@ -32,8 +32,8 @@ Current OpenRouter facts come from the Mint-brokered catalog/API route and
 `omp models`; never use direct credentials.
 The route is
 `http://mint.tail5f5eb4.ts.net:4949/proxy/https/openrouter.ai/api/v1` with the
-value-free `__mint.openrouter.default__` placeholder. Mint owns upstream
-authorization.
+value-free `__mint.openrouter.default__` marker. Mint replaces the marker in
+the request header and does not authorize the caller.
 The current OpenRouter rows below were read on 2026-08-01 through that route
 and the local `omp models` catalog. OpenRouter scope applies only to those
 catalog rows; do not infer local Codex, Claude Code, Antigravity, Cursor, or

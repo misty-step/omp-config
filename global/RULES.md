@@ -13,7 +13,7 @@
 - Delete obsolete code, comments, tests, docs, and rules with every change.
 - Misty Step repositories use `master`, never `main`.
 - Mint (`http://mint.tail5f5eb4.ts.net:4949`) is the only credential broker on this machine. Agent Vault is retired.
-- Make credentialed vendor calls through `http://mint.tail5f5eb4.ts.net:4949/proxy/https/<host>/<path>` with a `__mint.<service>.<name>__` placeholder. Tailnet WhoIs is the caller identity; no wrapper, proxy env, or local key bytes.
+- Make credentialed vendor calls through `http://mint.tail5f5eb4.ts.net:4949/proxy/https/<host>/<path>` with a `__mint.<alias>__` marker. Mint does not authenticate or authorize callers. Tailnet reachability and host custody are the boundary.
 
 ## Capability stance
 

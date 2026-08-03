@@ -32,12 +32,11 @@ Select exactly one mode:
 - Local SQLite: set `POWDER_DB_PATH` to the instance database.
 - Remote API: set `POWDER_API_BASE_URL` to
   `http://mint.tail5f5eb4.ts.net:4949/proxy/https/<host>/<path>`.
-  Set `POWDER_API_KEY` to the value-free `__mint.powder.default__`
-  placeholder (alias `secret://powder/default`).
+  Set `POWDER_API_KEY` to the value-free `__mint.powder.default__` marker.
 
 No in-memory mode exists; claims and completions must survive exit.
-Mint identifies callers through Tailnet WhoIs.
-Mint policy owns authorization at the upstream boundary.
+Mint does not authenticate or authorize callers.
+Any caller that reaches Mint can use the Powder alias.
 Use no wrapper, proxy environment, CA environment, or local key bytes.
 `--db` selects SQLite and overrides remote variables; local smoke commands cannot mutate the deployed board.
 Run `powder-server` with `POWDER_DB_PATH`, `POWDER_AUTH_MODE=api-key`, and `POWDER_BIND_ADDR` for HTTP.

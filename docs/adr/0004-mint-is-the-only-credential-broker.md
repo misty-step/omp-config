@@ -15,24 +15,24 @@ Agent Vault was never ported and is retired.
 Every `openrouter/*` model failed with `401 Missing Authentication header`.
 
 Mint is the live Misty Step credential broker at
-`http://mint.tail5f5eb4.ts.net:4949` (tailnet-only; WireGuard is the
-transport encryption). Mint authenticates callers by Tailnet WhoIs,
-substitutes value-free placeholders at egress, scrubs responses, and audits
-each effect. Its policy file is the grant.
+`http://mint.tail5f5eb4.ts.net:4949` on the tailnet. Mint replaces valid
+markers only in request headers and relays upstream responses unchanged.
+It does not authenticate or authorize callers. Tailscale reachability and
+dedicated-host custody are the entire security boundary.
 
 ## Decision
 
 Mint is the only credential path for every agent on this machine.
 
 - Providers call Mint directly: `http://mint.tail5f5eb4.ts.net:4949/proxy/https/<host>/<path>`.
-- Configuration carries only `__mint.<service>.<name>__` placeholders.
+- Configuration carries only exact `__mint.<alias>__` markers.
 - The OpenRouter provider uses base URL
-  `.../proxy/https/openrouter.ai/api/v1` and key `__mint.openrouter.default__`.
+  `.../proxy/https/openrouter.ai/api/v1` and key marker `__mint.openrouter.default__`.
 - Sessions need no wrapper process, proxy environment, or CA trust environment.
-- The recipe runner keeps its proxy/CA environment allowlist as a generic
-  operator passthrough only; Mint does not require it.
-- A Mint 403 means the actor, service, method, or path is not authorized.
-  Widen the grant in Mint policy; never work around the boundary.
+- The recipe runner keeps its proxy and CA environment allowlist as a generic
+  operator passthrough only. Mint does not require it.
+- Any caller that reaches Mint can use any loaded alias for any HTTP(S) destination.
+- A completed 403 is an upstream response, not a Mint authorization decision.
 
 `global/RULES.md` and `global/AGENTS.md` state this contract for every
 session at every depth. All Agent Vault references in skills, docs, recipes,
@@ -40,14 +40,13 @@ and tests were replaced in the same change.
 
 ## Consequences
 
-- The workstation holds zero vendor credential bytes; that guarantee is
+- The workstation holds zero vendor credential bytes. This guarantee is
   unchanged from the Agent Vault design.
-- Credentialed calls work from any process on the tailnet host without a
-  launch wrapper; the 401 class of failure is gone.
-- Authorization moves from local service rules to central Mint policy;
-  changing a grant requires a Mint policy deploy.
-- Actor identity is per-host Tailnet WhoIs (`moomooskycow@github` on
-  Mirrodin); management routes stay with `phrazzld@github`.
+- Credentialed calls work from any process that can reach Mint without a
+  launch wrapper.
+- Mint adds no per-caller authorization. Tailscale controls reachability.
+- Mint records the observed TCP source address for value-free local audit only.
+- Provider and product systems keep their own authorization behavior.
 - Peer-harness lanes (pi, goose, opencode; council uses these) are
   Mint-routed per-tool: `~/.pi/agent/models.json`,
   `~/.config/goose/config.yaml` + `secrets.yaml`, and
@@ -62,6 +61,6 @@ returned a `LANE_OK` completion through the Mint route with no env vars.
 
 ## Reversal condition
 
-Replace this decision only when a successor broker gives the same or a
-stronger guarantee: zero local credential bytes, value-free client
-placeholders, per-caller identity, and an auditable central grant.
+Replace this decision only when a successor gives the same routine containment:
+zero local vendor credential bytes and value-free client markers. Stronger
+authorization requires a separate accepted product decision.

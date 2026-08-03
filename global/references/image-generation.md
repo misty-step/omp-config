@@ -16,8 +16,8 @@ Use these Mint routes:
 - Gemini: `http://mint.tail5f5eb4.ts.net:4949/proxy/https/generativelanguage.googleapis.com/v1beta/<path>`
 - OpenAI: `http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.openai.com/v1/<path>`
 
-Tailnet WhoIs identifies callers. Mint policy grants access and owns
-`Authorization`. Never print or store resolved credential values.
+Mint does not authenticate or authorize callers. Tailnet reachability controls access.
+Never print or store resolved credential values.
 
 ## Gemini request
 

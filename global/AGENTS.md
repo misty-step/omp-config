@@ -37,8 +37,9 @@ Top-level sessions do not share Hub state. Git worktrees can still share one rep
 Mint is the only credential path on this machine. Agent Vault is retired here.
 
 - Route every credentialed vendor call through the Mint broker: `http://mint.tail5f5eb4.ts.net:4949/proxy/https/<host>/<path>`.
-- Mint authenticates callers by Tailnet WhoIs. Sessions need no wrapper, no proxy env, and no CA env.
-- Send only value-free placeholders: `__mint.<service>.<name>__` (alias form `secret://<service>/<name>`). Mint policy injects the real value at egress.
-- OpenRouter is preconfigured in `models.yml`: base URL `.../proxy/https/openrouter.ai/api/v1`, key placeholder `__mint.openrouter.default__`.
-- Mint policy (`mint` repo, `deploy/policy.yaml`) is the grant. A 403 means the actor, host, method, or path is not authorized; do not work around it.
+- Mint does not authenticate or authorize callers. Tailnet reachability and dedicated-host custody are the entire security boundary.
+- Sessions need no wrapper, proxy environment, CA environment, or local credential bytes.
+- Send only value-free markers with the exact `__mint.<alias>__` shape. Mint replaces valid markers only in request headers.
+- OpenRouter is preconfigured in `models.yml`: base URL `.../proxy/https/openrouter.ai/api/v1`, key marker `__mint.openrouter.default__`.
+- Mint relays completed upstream statuses unchanged. A 403 is an upstream response, not a Mint policy decision.
 - Never place raw provider credentials in environment, config, source, or logs.
