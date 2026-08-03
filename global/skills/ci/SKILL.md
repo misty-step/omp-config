@@ -11,7 +11,7 @@ argument-hint: "[--audit-only|--run-only]"
 
 Get confidence in correctness without adding provider or Docker cost to local work.
 
-The harness source repo (`~/Development/omp-config`) uses `bin/check` for config-contract validation over `global/`.
+The harness source repo (`~/Development/misty-step/omp-config`) uses `bin/check` for config-contract validation over `global/`.
 Run it, then run `bin/install` after you change harness primitives.
 This is harness plumbing.
 Do not apply it as a framework in consumer repos.

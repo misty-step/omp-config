@@ -25,8 +25,8 @@ retry:
   enabled: true
   maxRetries: 3
   fallbackRevertPolicy: cooldown-expiry
-  fallbackChains:
-    default:
+  fallbackChains: 
+    default: 
       - openai-codex/gpt-5.6-sol:max
       - openai-codex/gpt-5.6-luna:xhigh
       - anthropic/claude-opus-5:xhigh
@@ -37,7 +37,7 @@ retry:
       - openrouter/openai/gpt-5.6-luna:xhigh
       - openrouter/x-ai/grok-4.5:high
       - openrouter/z-ai/glm-5.2:high
-    plan:
+    plan: 
       - anthropic/claude-fable-5:xhigh
       - anthropic/claude-opus-5:xhigh
       - openai-codex/gpt-5.6-luna:xhigh
@@ -48,7 +48,7 @@ retry:
       - openrouter/openai/gpt-5.6-luna:xhigh
       - openrouter/x-ai/grok-4.5:high
       - openrouter/z-ai/glm-5.2:high
-    slow:
+    slow: 
       - openai-codex/gpt-5.6-sol:max
       - anthropic/claude-opus-5:xhigh
       - openai-codex/gpt-5.6-luna:xhigh
@@ -59,7 +59,7 @@ retry:
       - openrouter/openai/gpt-5.6-luna:xhigh
       - openrouter/x-ai/grok-4.5:high
       - openrouter/z-ai/glm-5.2:high
-    task:
+    task: 
       - openai-codex/gpt-5.6-sol:max
       - anthropic/claude-fable-5:xhigh
       - anthropic/claude-opus-5:xhigh
@@ -70,7 +70,7 @@ retry:
       - openrouter/openai/gpt-5.6-luna:xhigh
       - openrouter/x-ai/grok-4.5:high
       - openrouter/z-ai/glm-5.2:high
-    smol:
+    smol: 
       - openai-codex/gpt-5.6-luna:high
       - google-antigravity/gemini-3.6-flash:high
       - xai-oauth/grok-4.5:high
@@ -81,7 +81,7 @@ retry:
       - openrouter/openai/gpt-5.6-luna:high
       - openrouter/x-ai/grok-4.5:high
       - openrouter/z-ai/glm-5.2:high
-    vision:
+    vision: 
       - kimi-code/k3:max
       - openai-codex/gpt-5.6-luna:xhigh
       - anthropic/claude-fable-5:xhigh
@@ -92,7 +92,7 @@ retry:
       - openrouter/openai/gpt-5.6-luna:xhigh
       - openrouter/x-ai/grok-4.5:high
       - openrouter/z-ai/glm-5.2:high
-    commit:
+    commit: 
       - openai-codex/gpt-5.6-luna:high
       - xai-oauth/grok-4.5:high
       - openai-codex/gpt-5.6-sol:high
@@ -102,7 +102,7 @@ retry:
       - openrouter/openai/gpt-5.6-luna:high
       - openrouter/x-ai/grok-4.5:high
       - openrouter/z-ai/glm-5.2:high
-    tiny:
+    tiny: 
       - openai-codex/gpt-5.6-luna:high
       - google-antigravity/gemini-3.6-flash:high
       - xai-oauth/grok-4.5:high
@@ -113,7 +113,7 @@ retry:
       - openrouter/openai/gpt-5.6-luna:high
       - openrouter/x-ai/grok-4.5:high
       - openrouter/z-ai/glm-5.2:high
-    designer:
+    designer: 
       - anthropic/claude-fable-5:xhigh
       - openai-codex/gpt-5.6-luna:xhigh
       - openai-codex/gpt-5.6-sol:xhigh
@@ -124,7 +124,7 @@ retry:
       - openrouter/openai/gpt-5.6-luna:xhigh
       - openrouter/x-ai/grok-4.5:high
       - openrouter/z-ai/glm-5.2:high
-    advisor:
+    advisor: 
       - anthropic/claude-fable-5:xhigh
       - openai-codex/gpt-5.6-sol:max
       - openai-codex/gpt-5.6-luna:xhigh
@@ -140,7 +140,7 @@ advisor:
   enabled: true
   subagents: false
 memory: 
-  backend: off
+  backend: "off"
 compaction: 
   strategy: snapcompact
   idleEnabled: true
@@ -214,7 +214,7 @@ task:
   maxConcurrency: 12
   maxRuntimeMs: 2700000
   maxRecursionDepth: 2
-  disabledAgents:
+  disabledAgents: 
     - task
     - scout
     - librarian

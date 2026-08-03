@@ -46,17 +46,18 @@ fake value. Real credentials never appear in a finding or this file.
 ### 1. Secret leakage — always `blocking`
 
 This workstation holds zero vendor credential bytes. The tailnet-only Mint
-broker at `http://mint.tail5f5eb4.ts.net:4949` owns and replaces
-`Authorization` at the upstream boundary. Tailnet WhoIs supplies caller
-identity. Mint policy at `~/Development/mint/deploy/policy.yaml` is the grant.
-Config carries only value-free `__mint.<service>.<name>__` placeholders.
+broker at `http://mint.tail5f5eb4.ts.net:4949` replaces valid markers in
+request headers and relays upstream responses unchanged.
+Mint does not authenticate or authorize callers.
+Tailnet reachability and dedicated-host custody are the entire boundary.
+Config carries only value-free `__mint.<alias>__` markers.
 OpenRouter uses `__mint.openrouter.default__`.
-These placeholders and `secret://<service>/<name>` aliases are not credentials.
+These markers are not credentials.
 Flag a literal credential in code, config, fixtures, tests, or logs.
-Flag a route that bypasses Mint policy or the Mint boundary.
+Flag a local credential path that bypasses Mint for a credentialed vendor call.
 Flag a resolved value echoed to stdout or an error.
-A Mint placeholder can remain only when the provider contract names it.
-Never replace the placeholder with a real key.
+A Mint marker can remain only when the provider contract names it.
+Never replace the marker with a real key.
 
 ### 2. Authorization
 
@@ -94,12 +95,12 @@ on attacker-reachable input.
 
 Flag any change widening what a credential, token, role, or process can reach.
 Name the widening explicitly, from X to Y, instead of calling it "risky."
-Flag a Mint policy rule widened from a narrow actor, service, method, or path
-to an unneeded wildcard.
+Flag a new Mint alias that has no operational need.
+Flag a process or device that gains Mint reachability.
+That access permits every loaded alias with any caller-selected HTTP(S) destination.
 Flag a service account or database role with a broader verb or resource than
 the diff needs.
-Flag a process that gains arbitrary outbound authority instead of a narrow
-Mint policy grant.
+Flag a provider credential with broader authority than the consumer needs.
 
 ### 6. Weakened gate — always `blocking`
 

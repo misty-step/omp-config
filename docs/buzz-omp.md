@@ -49,7 +49,7 @@ A recipe uses schema `omp.recipe.v1`.
 }
 ```
 
-The first model is the primary model. Later entries form the ordered fallback chain. Providers are not restricted to OpenRouter. When a recipe selects OpenRouter, the runtime renders `http://mint.tail5f5eb4.ts.net:4949/proxy/https/openrouter.ai/api/v1` and the value-free `__mint.openrouter.default__` placeholder. Mint policy owns `Authorization` at egress, and callers authenticate by Tailnet WhoIs. No broker skill or MCP exists, and Mint adds neither. Other provider names use OMP's generic provider configuration.
+The first model is the primary model. Later entries form the ordered fallback chain. Providers are not restricted to OpenRouter. When a recipe selects OpenRouter, the runtime renders `http://mint.tail5f5eb4.ts.net:4949/proxy/https/openrouter.ai/api/v1` and the value-free `__mint.openrouter.default__` marker. Mint replaces the marker in the request header. Mint does not authenticate or authorize callers. No broker skill or MCP exists, and Mint adds neither. Other provider names use OMP's generic provider configuration.
 
 Paths are relative to the recipe file's directory. `instructions` names one file. Each skill or task-skill `path` names a complete directory whose root contains `SKILL.md`; the compiler packages every nested file and directory. It rejects path traversal, symbolic links at any depth, hard-linked regular files at any depth, duplicate skill names, duplicate skill source paths, duplicate model entries, unknown keys, and malformed MCP entries.
 
