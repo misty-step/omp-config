@@ -155,7 +155,7 @@ skills:
   enabled: true
 symbolPreset: nerd
 theme: 
-  dark: light-ember
+  dark: dark-ember
   light: light-ember
 setupVersion: 1
 statusLine: 

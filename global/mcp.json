@@ -7,7 +7,6 @@
     }
   },
   "disabledServers": [
-    "cairn",
     "canary",
     "chrome-devtools",
     "computer-use",

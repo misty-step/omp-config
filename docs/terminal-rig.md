@@ -45,7 +45,7 @@ The table below is the complete 18-surface projection declared in `provenance.ya
 |global/extensions/recipe-task.ts|~/.omp/agent/extensions/recipe-task.ts|Temporary isolated `recipe_task` tool; native `task` remains unchanged.|
 |global/extensions/herdr-sidebar.ts|~/.omp/agent/extensions/herdr-sidebar.ts|Reports OMP model and repository identity to the Herdr sidebar.|
 |global/lib/|~/.omp/agent/lib/|Shared recipe-task runtime and Claude safety policy library.|
-|global/themes/|~/.omp/agent/themes/|Theme library. Kanagawa is the active dark theme. Kanagawa Lotus is the active light theme.|
+|global/themes/|~/.omp/agent/themes/|Theme library. Dark Ember is the active dark theme. Light Ember is the active light theme.|
 |global/presets/|~/.omp/agent/presets/|Launch overlays for lean, design, operations, and research work.|
 |global/hooks/review-gate.py|~/.omp/agent/hooks/review-gate.py|Projected review-gate entrypoint used by managed project hooks.|
 |bin/review_gate.py|~/.omp/agent/bin/review_gate.py|Canonical review-gate implementation used by the projected hook.|

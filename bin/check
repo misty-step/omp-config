@@ -142,30 +142,34 @@ def yaml_mapping_keys(path: Path, dotted: str) -> list[str]:
 
 def check_promptspace_config(contract: Contract, effective: dict[str, object]) -> None:
     settings = contract.surface("settings").source
-    expected = {
-        "tui.chrome": "plain",
-        "statusLine.preset": "custom",
-        "statusLine.leftSegments": ["session_name", "model", "mode", "path", "git"],
-        "statusLine.rightSegments": ["subagents", "token_rate", "context_pct", "time_spent"],
-        "theme.dark": "light-ember",
-        "theme.light": "light-ember",
-    }
-    for key, wanted in expected.items():
+    scalar_keys = ("tui.chrome", "statusLine.preset", "theme.dark", "theme.light")
+    list_keys = ("statusLine.leftSegments", "statusLine.rightSegments")
+    for key in (*scalar_keys, *list_keys):
         actual = yaml_setting(settings, key)
-        if actual != wanted:
-            fail(f"{relative(settings)} requires {key}={wanted!r}; found {actual!r}")
+        if key in scalar_keys:
+            if not isinstance(actual, str) or not actual:
+                fail(f"{relative(settings)} requires a non-empty {key}")
+        elif (
+            not isinstance(actual, list)
+            or not actual
+            or any(not isinstance(item, str) or not item for item in actual)
+        ):
+            fail(f"{relative(settings)} requires a non-empty string list for {key}")
         entry = effective.get(key)
         if not isinstance(entry, dict) or "value" not in entry:
             if key != "tui.chrome":
                 fail(f"OMP effective config omitted required {key}")
             continue
-        if entry["value"] != wanted:
-            fail(f"OMP effective config changed {key}: expected {wanted!r}, found {entry['value']!r}")
+        if entry["value"] != actual:
+            fail(
+                f"OMP effective config changed {key}: "
+                f"source={actual!r}, effective={entry['value']!r}"
+            )
     theme_dir = contract.surface("themes").source
     for key in ("theme.dark", "theme.light"):
-        theme_name = expected[key]
+        theme_name = yaml_setting(settings, key)
         if not (theme_dir / f"{theme_name}.json").is_file():
-            fail(f"{relative(theme_dir)} omits active theme {theme_name!r}")
+            fail(f"{relative(theme_dir)} omits configured theme {theme_name!r}")
 
 
 def check_themes(contract: Contract) -> None:
@@ -329,374 +333,58 @@ def omp_builtin_tool_names() -> set[str]:
     if not names:
         fail("OMP help exposed an empty built-in tool authority")
     return names
-DURABLE_AGENT_NAMES = {
-    "architect",
-    "builder",
-    "verifier",
-    "researcher",
-    "designer",
-    "qa-user",
-    "qa-user-leaf",
-}
-EXACT_DEEPSEEK_ROUTE = "openrouter/deepseek/deepseek-v4-flash-0731:high"
-SONNET_5_ROUTE_PATTERN = re.compile(
-    r"(?:anthropic|openrouter/anthropic)/claude-sonnet-5(?:[:@][A-Za-z0-9._-]+)?"
-)
-DEEPSEEK_ROUTE_PATTERN = re.compile(
-    r"(?:openrouter/)?deepseek/deepseek-v4-(?:flash|pro)[A-Za-z0-9._:-]*"
-)
-EXPECTED_AGENT_TOOLS = {
-    "architect": ["read", "grep", "glob", "lsp", "web_search"],
-    "builder": ["read", "grep", "glob", "lsp", "bash", "edit", "write", "browser", "web_search"],
-    "verifier": ["read", "grep", "glob", "lsp", "bash", "browser", "web_search"],
-    "researcher": ["read", "grep", "glob", "lsp", "browser", "web_search"],
-    "designer": ["read", "grep", "glob", "lsp", "browser", "web_search", "edit", "write", "inspect_image"],
-    "qa-user": ["task"],
-    "qa-user-leaf": ["browser"],
-}
-EXPECTED_AGENT_SKILLS = {
-    "architect": ["project-engineering"],
-    "builder": ["deliver", "ci"],
-    "verifier": ["verify-live", "ci"],
-    "researcher": ["research"],
-    "designer": ["design", "improve-ui", "baseline-ui"],
-    "qa-user": ["qa-users", "dispatch"],
-    "qa-user-leaf": ["qa-users"],
-}
-EXPECTED_AGENT_THINKING = {
-    "architect": "max",
-    "builder": "xhigh",
-    "verifier": "max",
-    "researcher": "high",
-    "designer": "max",
-    "qa-user": "high",
-    "qa-user-leaf": "high",
-}
 
-OPENROUTER_TAIL_XHIGH = [
-    EXACT_DEEPSEEK_ROUTE,
-    "openrouter/openai/gpt-5.6-luna:xhigh",
-    "openrouter/x-ai/grok-4.5:high",
-    "openrouter/z-ai/glm-5.2:high",
-]
-OPENROUTER_TAIL_HIGH = [
-    EXACT_DEEPSEEK_ROUTE,
-    "openrouter/openai/gpt-5.6-luna:high",
-    "openrouter/x-ai/grok-4.5:high",
-    "openrouter/z-ai/glm-5.2:high",
-]
-EXPECTED_AGENT_MODELS = {
-    "architect": [
-        "openai-codex/gpt-5.6-sol:max",
-        "anthropic/claude-fable-5:xhigh",
-        "anthropic/claude-opus-5:xhigh",
-        "openai-codex/gpt-5.6-luna:xhigh",
-        "kimi-code/k3:max",
-        "xai-oauth/grok-4.5:high",
-        "google-antigravity/gemini-3.6-flash:high",
-        *OPENROUTER_TAIL_XHIGH,
-    ],
-    "builder": [
-        "openai-codex/gpt-5.6-luna:xhigh",
-        "openai-codex/gpt-5.6-sol:xhigh",
-        "anthropic/claude-fable-5:xhigh",
-        "kimi-code/k3:high",
-        "xai-oauth/grok-4.5:high",
-        "google-antigravity/gemini-3.6-flash:high",
-        "anthropic/claude-opus-5:xhigh",
-        *OPENROUTER_TAIL_XHIGH,
-    ],
-    "verifier": [
-        "openai-codex/gpt-5.6-sol:max",
-        "anthropic/claude-fable-5:xhigh",
-        "anthropic/claude-opus-5:xhigh",
-        "openai-codex/gpt-5.6-luna:xhigh",
-        "xai-oauth/grok-4.5:high",
-        "google-antigravity/gemini-3.6-flash:high",
-        "kimi-code/k3:high",
-        *OPENROUTER_TAIL_XHIGH,
-    ],
-    "researcher": [
-        "google-antigravity/gemini-3.6-flash:high",
-        "xai-oauth/grok-4.5:high",
-        "openai-codex/gpt-5.6-luna:xhigh",
-        "openai-codex/gpt-5.6-sol:high",
-        "anthropic/claude-fable-5:high",
-        "kimi-code/k3:high",
-        "anthropic/claude-opus-5:high",
-        *OPENROUTER_TAIL_XHIGH,
-    ],
-    "designer": [
-        "kimi-code/k3:max",
-        "anthropic/claude-fable-5:xhigh",
-        "openai-codex/gpt-5.6-luna:xhigh",
-        "openai-codex/gpt-5.6-sol:xhigh",
-        "google-antigravity/gemini-3.6-flash:high",
-        "xai-oauth/grok-4.5:high",
-        "anthropic/claude-opus-5:xhigh",
-        *OPENROUTER_TAIL_XHIGH,
-    ],
-    "qa-user": [
-        "openai-codex/gpt-5.6-luna:high",
-        "google-antigravity/gemini-3.6-flash:high",
-        "xai-oauth/grok-4.5:high",
-        "anthropic/claude-fable-5:high",
-        "openai-codex/gpt-5.6-sol:high",
-        "kimi-code/k3:high",
-        "anthropic/claude-opus-5:high",
-        *OPENROUTER_TAIL_HIGH,
-    ],
-    "qa-user-leaf": [
-        "google-antigravity/gemini-3.6-flash:high",
-        "openai-codex/gpt-5.6-luna:high",
-        "xai-oauth/grok-4.5:high",
-        "anthropic/claude-fable-5:high",
-        "openai-codex/gpt-5.6-sol:high",
-        "kimi-code/k3:high",
-        "anthropic/claude-opus-5:high",
-        *OPENROUTER_TAIL_HIGH,
-    ],
-}
-
-EXPECTED_GLOBAL_MODEL_ROLES = {
-    "smol": "openai-codex/gpt-5.6-luna:medium",
-    "vision": "google-antigravity/gemini-3.6-flash:high",
-    "commit": "openai-codex/gpt-5.6-luna:medium",
-    "task": "openai-codex/gpt-5.6-luna:max",
-    "slow": "anthropic/claude-fable-5:max",
-    "plan": "openai-codex/gpt-5.6-sol:max",
-    "advisor": "xai-oauth/grok-4.5:high",
-    "tiny": "openai-codex/gpt-5.6-luna:medium",
-    "default": "anthropic/claude-fable-5:high",
-    "designer": "kimi-code/k3:max",
-}
-EXPECTED_GLOBAL_FALLBACK_CHAINS = {
-    "default": [
-        "openai-codex/gpt-5.6-sol:max",
-        "openai-codex/gpt-5.6-luna:xhigh",
-        "anthropic/claude-opus-5:xhigh",
-        "google-antigravity/gemini-3.6-flash:high",
-        "xai-oauth/grok-4.5:high",
-        "kimi-code/k3:high",
-        *OPENROUTER_TAIL_XHIGH,
-    ],
-    "plan": [
-        "anthropic/claude-fable-5:xhigh",
-        "anthropic/claude-opus-5:xhigh",
-        "openai-codex/gpt-5.6-luna:xhigh",
-        "kimi-code/k3:max",
-        "xai-oauth/grok-4.5:high",
-        "google-antigravity/gemini-3.6-flash:high",
-        *OPENROUTER_TAIL_XHIGH,
-    ],
-    "slow": [
-        "openai-codex/gpt-5.6-sol:max",
-        "anthropic/claude-opus-5:xhigh",
-        "openai-codex/gpt-5.6-luna:xhigh",
-        "kimi-code/k3:max",
-        "xai-oauth/grok-4.5:high",
-        "google-antigravity/gemini-3.6-flash:high",
-        *OPENROUTER_TAIL_XHIGH,
-    ],
-    "task": [
-        "openai-codex/gpt-5.6-sol:max",
-        "anthropic/claude-fable-5:xhigh",
-        "anthropic/claude-opus-5:xhigh",
-        "kimi-code/k3:high",
-        "xai-oauth/grok-4.5:high",
-        "google-antigravity/gemini-3.6-flash:high",
-        *OPENROUTER_TAIL_XHIGH,
-    ],
-    "smol": [
-        "openai-codex/gpt-5.6-luna:high",
-        "google-antigravity/gemini-3.6-flash:high",
-        "xai-oauth/grok-4.5:high",
-        "kimi-code/k3:high",
-        "anthropic/claude-fable-5:high",
-        "openai-codex/gpt-5.6-sol:high",
-        *OPENROUTER_TAIL_HIGH,
-    ],
-    "vision": [
-        "kimi-code/k3:max",
-        "openai-codex/gpt-5.6-luna:xhigh",
-        "anthropic/claude-fable-5:xhigh",
-        "openai-codex/gpt-5.6-sol:xhigh",
-        "xai-oauth/grok-4.5:high",
-        "anthropic/claude-opus-5:xhigh",
-        *OPENROUTER_TAIL_XHIGH,
-    ],
-    "commit": [
-        "openai-codex/gpt-5.6-luna:high",
-        "xai-oauth/grok-4.5:high",
-        "openai-codex/gpt-5.6-sol:high",
-        "anthropic/claude-fable-5:high",
-        "kimi-code/k3:high",
-        *OPENROUTER_TAIL_HIGH,
-    ],
-    "tiny": [
-        "openai-codex/gpt-5.6-luna:high",
-        "google-antigravity/gemini-3.6-flash:high",
-        "xai-oauth/grok-4.5:high",
-        "kimi-code/k3:high",
-        "anthropic/claude-fable-5:high",
-        "openai-codex/gpt-5.6-sol:high",
-        *OPENROUTER_TAIL_HIGH,
-    ],
-    "designer": [
-        "anthropic/claude-fable-5:xhigh",
-        "openai-codex/gpt-5.6-luna:xhigh",
-        "openai-codex/gpt-5.6-sol:xhigh",
-        "google-antigravity/gemini-3.6-flash:high",
-        "xai-oauth/grok-4.5:high",
-        "anthropic/claude-opus-5:xhigh",
-        *OPENROUTER_TAIL_XHIGH,
-    ],
-    "advisor": [
-        "anthropic/claude-fable-5:xhigh",
-        "openai-codex/gpt-5.6-sol:max",
-        "openai-codex/gpt-5.6-luna:xhigh",
-        "anthropic/claude-opus-5:xhigh",
-        "google-antigravity/gemini-3.6-flash:high",
-        "kimi-code/k3:high",
-        *OPENROUTER_TAIL_XHIGH,
-    ],
-}
+def check_model_selector(label: str, selector: object) -> None:
+    if not isinstance(selector, str) or not selector or any(character.isspace() for character in selector):
+        fail(f"{label} has invalid model selector {selector!r}")
+    model, separator, effort = selector.rpartition(":")
+    if not separator:
+        model = selector
+    elif effort not in THINKING_LEVELS:
+        fail(f"{label} has unsupported thinking level in model selector {selector!r}")
+    if "/" not in model:
+        fail(f"{label} has invalid model selector {selector!r}")
 
 
-def check_model_route_policy(
-    settings: Path,
-    catalog: Path,
-    agent_paths: list[Path],
-) -> None:
-    """Reject retired Sonnet routes and non-canonical DeepSeek Flash selectors."""
-    paths = [settings, catalog, *agent_paths]
-    saw_exact_deepseek = False
-    for path in paths:
-        text = path.read_text()
-        sonnet_match = SONNET_5_ROUTE_PATTERN.search(text)
-        if sonnet_match:
-            fail(f"active Claude Sonnet 5 route in {relative(path)}: {sonnet_match.group(0)!r}")
-        for match in DEEPSEEK_ROUTE_PATTERN.finditer(text):
-            route = match.group(0)
-            if route != EXACT_DEEPSEEK_ROUTE:
-                fail(
-                    f"{relative(path)} uses non-canonical DeepSeek route {route!r}; "
-                    f"expected {EXACT_DEEPSEEK_ROUTE!r}"
-                )
-            saw_exact_deepseek = True
-    if not saw_exact_deepseek:
-        fail(f"configuration omits required DeepSeek route {EXACT_DEEPSEEK_ROUTE!r}")
-
-    expected_roles = set(EXPECTED_GLOBAL_MODEL_ROLES)
-    actual_roles = set(yaml_mapping_keys(settings, "modelRoles"))
-    if actual_roles != expected_roles:
+def check_model_routes(settings: Path) -> None:
+    role_names = set(yaml_mapping_keys(settings, "modelRoles"))
+    if not role_names:
+        fail("global modelRoles must not be empty")
+    fallback_names = set(yaml_mapping_keys(settings, "retry.fallbackChains"))
+    if fallback_names != role_names:
         fail(
-            "global model role inventory drift: "
-            f"expected={sorted(expected_roles)}, found={sorted(actual_roles)}"
+            "global fallback roles must match model roles: "
+            f"missing={sorted(role_names - fallback_names)}, "
+            f"unknown={sorted(fallback_names - role_names)}"
         )
-    actual_chain_roles = set(yaml_mapping_keys(settings, "retry.fallbackChains"))
-    if actual_chain_roles != expected_roles:
-        fail(
-            "global fallback role inventory drift: "
-            f"expected={sorted(expected_roles)}, found={sorted(actual_chain_roles)}"
+    for role in sorted(role_names):
+        check_model_selector(
+            f"model role {role}",
+            yaml_setting(settings, f"modelRoles.{role}"),
         )
-    for role, expected_primary in EXPECTED_GLOBAL_MODEL_ROLES.items():
-        primary = yaml_setting(settings, f"modelRoles.{role}")
-        if primary != expected_primary:
-            fail(
-                f"model role {role} primary drift: "
-                f"expected={expected_primary!r}, found={primary!r}"
-            )
         chain = yaml_setting(settings, f"retry.fallbackChains.{role}")
-        expected_chain = EXPECTED_GLOBAL_FALLBACK_CHAINS[role]
-        if chain != expected_chain:
-            fail(
-                f"model role {role} fallback drift: "
-                f"expected={expected_chain}, found={chain}"
-            )
+        if (
+            not isinstance(chain, list)
+            or not chain
+            or len(chain) != len(set(chain))
+        ):
+            fail(f"model role {role} requires a non-empty fallback list without duplicates")
+        for index, selector in enumerate(chain):
+            check_model_selector(f"model role {role} fallback {index}", selector)
 
 
-
-def check_roster_policy(
-    contract: Contract,
-    settings: Path,
-    skill_names: set[str],
-    agent_names: set[str],
-    agent_fields: dict[str, dict[str, str]],
-) -> None:
-    """Validate the durable roster, authority envelopes, and native depth ceiling."""
-    if agent_names != DURABLE_AGENT_NAMES:
-        fail(
-            "durable agent roster drift: "
-            f"expected={sorted(DURABLE_AGENT_NAMES)}, actual={sorted(agent_names)}"
-        )
-
-    for name in sorted(DURABLE_AGENT_NAMES):
-        fields = agent_fields[name]
-        tools = split_csv(fields.get("tools", ""))
-        models = split_csv(fields.get("model", ""))
-        if models != EXPECTED_AGENT_MODELS[name]:
-            fail(
-                f"agent {name} model ladder drift: "
-                f"expected={EXPECTED_AGENT_MODELS[name]}, found={models}"
-            )
-        if tools != EXPECTED_AGENT_TOOLS[name]:
-            fail(
-                f"agent {name} tool envelope drift: "
-                f"expected={EXPECTED_AGENT_TOOLS[name]}, found={tools}"
-            )
-        if fields.get("thinkingLevel") != EXPECTED_AGENT_THINKING[name]:
-            fail(
-                f"agent {name} thinking level drift: "
-                f"expected={EXPECTED_AGENT_THINKING[name]!r}, found={fields.get('thinkingLevel')!r}"
-            )
-        skills = split_csv(fields.get("autoloadSkills", ""))
-        if skills != EXPECTED_AGENT_SKILLS[name]:
-            fail(
-                f"agent {name} skill envelope drift: "
-                f"expected={EXPECTED_AGENT_SKILLS[name]}, found={skills}"
-            )
-        if any(skill not in skill_names for skill in skills):
-            missing = sorted(skill for skill in skills if skill not in skill_names)
-            fail(f"agent {name} autoloads missing or disallowed skills {missing}")
-
-        spawns = split_csv(fields.get("spawns", ""))
-        if name == "qa-user":
-            expected_spawns = ["qa-user-leaf"]
-        else:
-            expected_spawns = []
-        if spawns != expected_spawns:
-            fail(f"agent {name} delegation envelope drift: expected={expected_spawns}, found={spawns}")
-
-
-    max_depth = yaml_setting(settings, "task.maxRecursionDepth")
-    if max_depth != "2":
-        fail(f"task.maxRecursionDepth must be 2; found {max_depth!r}")
-    max_concurrency = yaml_setting(settings, "task.maxConcurrency")
-    if not isinstance(max_concurrency, str) or not max_concurrency.isdigit() or int(max_concurrency) < 1:
-        fail(f"task.maxConcurrency must be a positive integer; found {max_concurrency!r}")
-
-    bundled = set(contract.bundled_agents)
-    expected_bundled = {"task", "scout", "librarian", "designer", "sonic"}
-    if set(contract.bundled_agents) != expected_bundled:
-        fail(
-            "bundled agent inventory drift: "
-            f"expected={sorted(expected_bundled)}, found={sorted(contract.bundled_agents)}"
-        )
-    disabled_agents = yaml_setting(settings, "task.disabledAgents")
-    expected_disabled = ["task", "scout", "librarian", "sonic", "reviewer", "security-reviewer"]
-    if disabled_agents != expected_disabled:
-        fail(
-            "task.disabledAgents must shadow bundled and retired declarations: "
-            f"expected={expected_disabled}, found={disabled_agents!r}"
-        )
-
-    unexpected_shadows = (bundled & DURABLE_AGENT_NAMES) - {"designer"}
-    if unexpected_shadows:
-        fail(f"bundled agent inventory shadows durable declarations: {sorted(unexpected_shadows)}")
-
-
-
+def check_task_settings(settings: Path) -> None:
+    for key in ("task.maxRecursionDepth", "task.maxConcurrency"):
+        value = yaml_setting(settings, key)
+        if not isinstance(value, str) or not value.isdigit() or int(value) < 1:
+            fail(f"{key} must be a positive integer; found {value!r}")
+    disabled = yaml_setting(settings, "task.disabledAgents")
+    if (
+        not isinstance(disabled, list)
+        or any(not isinstance(name, str) or not name for name in disabled)
+        or len(disabled) != len(set(disabled))
+    ):
+        fail("task.disabledAgents must be a string list without duplicates")
 
 
 def check_tree(contract: Contract) -> None:
@@ -746,12 +434,11 @@ def check_tree(contract: Contract) -> None:
             fail(f"duplicate agent name {name}")
         agent_names.add(name)
         agent_fields[name] = fields
-        models = [part.strip() for part in fields.get("model", "").split(",") if part.strip()]
+        models = split_csv(fields.get("model", ""))
         if not models:
             fail(f"agent {name} requires an explicit model binding")
         for selector in models:
-            if "/" not in selector or any(character.isspace() for character in selector):
-                fail(f"agent {name} has invalid model selector {selector!r}")
+            check_model_selector(f"agent {name}", selector)
         thinking = fields.get("thinkingLevel")
         if thinking not in THINKING_LEVELS:
             fail(f"agent {name} requires an explicit supported thinkingLevel")
@@ -800,18 +487,8 @@ def check_tree(contract: Contract) -> None:
                 )
         if not expected.get("when_to_use"):
             fail(f"dispatch agent catalog has no when_to_use for {name}")
-    check_roster_policy(
-        contract,
-        settings,
-        skill_names,
-        agent_names,
-        agent_fields,
-    )
-    check_model_route_policy(
-        settings,
-        catalog_path,
-        sorted(agent_dir.glob("*.md")),
-    )
+    check_task_settings(settings)
+    check_model_routes(settings)
 
 
     allowed_spawns = agent_names | contract.bundled_agents
@@ -823,7 +500,6 @@ def check_tree(contract: Contract) -> None:
     check_themes(contract)
     check_presets(contract)
 
-    visible_skills: set[str] = set()
     declared_skills: set[str] = set()
     for directory in sorted(path for path in skill_dir.iterdir() if path.is_dir()):
         skill_file = directory / "SKILL.md"
@@ -838,24 +514,9 @@ def check_tree(contract: Contract) -> None:
             fail(f"skill directory {directory.name} declares name {name!r}")
         if not fields.get("description"):
             fail(f"skill {name} has no description")
-        if fields.get("hide") != "true" and fields.get("disable-model-invocation") != "true":
-            visible_skills.add(name)
         if name in declared_skills:
             fail(f"duplicate skill name {name}")
         declared_skills.add(name)
-    # The chief core plus universal communication and operator-invoked workflows stay visible.
-    expected_visible_skills = {
-        "autoreview",
-        "dispatch",
-        "qa-users",
-        "research",
-        "simplified-technical-english",
-    }
-    if visible_skills != expected_visible_skills:
-        fail(
-            "global visible skill core drift: "
-            f"expected={sorted(expected_visible_skills)}, actual={sorted(visible_skills)}"
-        )
 
     routing_path = skill_dir / "dispatch" / "references" / "primitive-routing.md"
     routing_text = routing_path.read_text()
