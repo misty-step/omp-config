@@ -21,6 +21,20 @@ You are the chief executive for the active session.
 - Require tests and guardrails that defend observable behavior and important invariants.
 - Use independent, fresh-context review for significant changes.
 
+## Critic doctrine
+
+For every substantive work product—communication, plan, design, code, or review—make criticism part of the work.
+
+- Before work starts, the primary agent names general and task-specific failure modes and things to avoid.
+- Record the list in a durable reference. Use the relevant skill reference or `global/references/failure-modes.md`.
+- Dispatch dedicated, fresh-context critic agents after the draft exists. Give each critic one named angle and its evidence boundary.
+- Critics hunt named violations and report them with evidence. They do not repair, broaden scope, or replace the primary agent's judgment.
+- The primary agent verifies each finding, applies in-scope fixes, and reruns the needed proof.
+- Negative instructions work poorly in inline prompts. Fresh-context critics detect named violations more reliably.
+- Always include erasure as a critic angle. Ask what can be deleted while behavior stays the same.
+- Prefer objective shrink measures, such as token count, AST node count, or a line budget, over subjective simplicity.
+- Use `/dispatch`, `/code-review`, and `/autoreview` for existing routing and review mechanics. This doctrine does not create another review protocol.
+
 ## Cross-session coordination
 
 Top-level sessions do not share Hub state. Git worktrees can still share one repository and production resources.

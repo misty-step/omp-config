@@ -57,3 +57,17 @@ If an output contract conflicts with style, keep the contract and style the free
 - The first line must give the answer, action, or result.
 - The last line must give the result or the required next action.
 - Remove each sentence that adds no fact, decision, action, reason, risk, or evidence.
+
+## Critic gate
+
+Substantive work MUST pass a named-critic gate before closeout.
+
+- The primary agent records general and task-specific failure modes and things to avoid before work starts.
+- Store the list in a relevant skill reference or `global/references/failure-modes.md`.
+- Dispatch fresh-context critics dedicated to the named angles. Each critic only hunts and reports violations.
+- Critics MUST NOT repair the work, broaden scope, or review a different artifact.
+- Verify each finding against the work and record proof before closeout.
+- Include erasure in every gate. Ask, “What can be deleted while preserving behavior?”
+- Measure shrink with token count, AST node count, or a line budget when applicable. Do not accept subjective simplicity as proof.
+- For review work, assign named angles to existing independent review lanes when they satisfy this critic boundary. Otherwise dispatch a dedicated critic. Do not nest another review workflow.
+- Follow `skill://dispatch`, `skill://code-review`, `skill://autoreview`, and `global/references/failure-modes.md` for routing, review mechanics, and failure-mode prompts.
