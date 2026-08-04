@@ -32,3 +32,15 @@ Include erasure in every critic brief. Ask: “What can be deleted while preserv
 - Treat the metric as evidence, not as a substitute for behavior proof.
 - The primary agent inspects for compensating additions after each deletion and removes them when behavior remains preserved.
 - Use `global/references/delete-first.md` for the broader deletion and simplification sequence.
+
+
+## Olympus simple operational cutover (2026-08-04)
+
+- Do not replace a deleted subsystem with another queue, ledger, receipt, wrapper, or configuration path.
+- Do not remove preproduction, combine agent hosts, or weaken exact-revision, authority, credential, budget, drain, or durability gates.
+- Keep Habitat auto-selection, owner assignment, cooldown, and daily-cap behavior while removing runtime policy editing.
+- Never await Asclepius from the Argus execution path. Route persisted review results through independent reconciliation.
+- Dispatch CI repair only for the current open `auto/*` head with a current failed check and trusted repository authority.
+- Keep GitHub as pull-request and merge authority. Do not duplicate branch protection or required-check policy in another store.
+- Prove every agent on its own Sprite in preproduction before exact-digest production promotion.
+- Require a net reduction in lines, modules, tables, jobs, or dependencies. Reject compensating growth.
