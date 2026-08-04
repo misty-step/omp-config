@@ -92,3 +92,4 @@ For tiny mechanical changes, use a focused structural gate or exact inspection a
 - **QA without evidence:** “looked good” has no screenshot, transcript, or path.
 - **Missing instrumentation:** no post-ship signal reveals behavior breaking.
 - **Author-only judgment:** the builder grades an open-ended outcome without held-out artifacts or fresh critique.
+- **Review-free ship:** a completion claim carries no verified review receipt, or cites one frozen against a superseded range.

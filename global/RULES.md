@@ -72,3 +72,16 @@ Substantive work MUST pass a named-critic gate before closeout.
 - Measure shrink with token count, AST node count, or a line budget when applicable. Do not accept subjective simplicity as proof.
 - For review work, assign named angles to existing independent review lanes when they satisfy this critic boundary. Otherwise dispatch a dedicated critic. Do not nest another review workflow.
 - Follow `skill://dispatch`, `skill://code-review`, `skill://autoreview`, and `global/references/failure-modes.md` for routing, review mechanics, and failure-mode prompts.
+
+### Ship gate
+
+Code changes MUST hold a clean, verified review receipt before any completion claim.
+
+- The claim set covers done, shipped, ready to merge, ready to deploy, and PR-ready.
+- Required reviewers, in canonical order: `autoreview`, `thermo-nuclear-review`, `thermo-nuclear-code-quality-review`.
+- All three review skills set `disable-model-invocation: true`. Load each one by path. Auto-discovery does not surface them.
+- Proof is `.omp/review-receipt.json` and a passing `verify`. Report the `bundle_digest`.
+- Fix, then refreeze and collect all three submissions again. A receipt for a superseded range is not a receipt.
+- A critic from the section above does not satisfy this gate. One clean reviewer does not. A self-authored summary does not.
+- `skill://code-review` owns the protocol, the waiver route for an inert prose range, and the per-repository pre-push backstop.
+- If the gate cannot run, name the blocker and do not claim done.
