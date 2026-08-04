@@ -78,10 +78,8 @@ Substantive work MUST pass a named-critic gate before closeout.
 Code changes MUST hold a clean, verified review receipt before any completion claim.
 
 - The claim set covers done, shipped, ready to merge, ready to deploy, and PR-ready.
-- Required reviewers, in canonical order: `autoreview`, `thermo-nuclear-review`, `thermo-nuclear-code-quality-review`.
-- All three review skills set `disable-model-invocation: true`. Load each one by path. Auto-discovery does not surface them.
-- Proof is `.omp/review-receipt.json` and a passing `verify`. Report the `bundle_digest`.
-- Fix, then refreeze and collect all three submissions again. A receipt for a superseded range is not a receipt.
+- `skill://code-review` owns the reviewer set, the protocol, the receipt, the waiver route, and the pre-push backstop. Load it by path. It does not auto-surface.
+- Report the receipt `bundle_digest` with the completion claim.
 - A critic from the section above does not satisfy this gate. One clean reviewer does not. A self-authored summary does not.
-- `skill://code-review` owns the protocol, the waiver route for an inert prose range, and the per-repository pre-push backstop.
+- Fix, then refreeze and run the protocol again. A receipt for a superseded range is not a receipt.
 - If the gate cannot run, name the blocker and do not claim done.
