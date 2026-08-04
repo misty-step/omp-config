@@ -30,9 +30,7 @@ For every substantive work product—communication, plan, design, code, or revie
 - Dispatch dedicated, fresh-context critic agents after the draft exists. Give each critic one named angle and its evidence boundary.
 - Critics hunt named violations and report them with evidence. They do not repair, broaden scope, or replace the primary agent's judgment.
 - The primary agent verifies each finding, applies in-scope fixes, and reruns the needed proof.
-- Negative instructions work poorly in inline prompts. Fresh-context critics detect named violations more reliably.
-- Always include erasure as a critic angle. Ask what can be deleted while behavior stays the same.
-- Prefer objective shrink measures, such as token count, AST node count, or a line budget, over subjective simplicity.
+- Every substantive critic gate includes one fresh `ponytail` agent. It audits the change and its surrounding shipped system.
 - Use `/dispatch`, `/code-review`, and `/autoreview` for existing routing and review mechanics. This doctrine does not create another review protocol.
 
 ## Cross-session coordination
