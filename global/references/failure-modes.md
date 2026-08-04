@@ -33,7 +33,6 @@ Include erasure in every critic brief. Ask: “What can be deleted while preserv
 - The primary agent inspects for compensating additions after each deletion and removes them when behavior remains preserved.
 - Use `global/references/delete-first.md` for the broader deletion and simplification sequence.
 
-
 ## Olympus simple operational cutover (2026-08-04)
 
 - Do not replace a deleted subsystem with another queue, ledger, receipt, wrapper, or configuration path.
