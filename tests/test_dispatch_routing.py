@@ -91,46 +91,33 @@ class DispatchRoutingTests(unittest.TestCase):
         self.assertEqual(scenario["route"], "architect")
         self.assertIn("architect", self.fields)
         self.assertIn("architect", self.catalog)
-        self.assertEqual(self.fields["architect"]["model"].split(",")[0], "openai-codex/gpt-5.6-sol:max")
+        self.assertEqual(
+            self.fields["architect"]["model"].split(",")[0],
+            "openrouter/openai/gpt-5.6-luna:xhigh",
+        )
         self.assertNotIn("edit", self.fields["architect"]["tools"])
         self.assertEqual(self.fields["architect"].get("spawns", ""), "")
 
-    def test_role_model_order_and_openrouter_tail(self) -> None:
+    def test_role_model_order_and_workhorse_heads(self) -> None:
         ladders = {
             name: [part.strip() for part in fields["model"].split(",")]
             for name, fields in self.fields.items()
+            if "," in fields["model"]
         }
+        luna = "openrouter/openai/gpt-5.6-luna"
+        deepseek = "openrouter/deepseek/deepseek-v4-flash-0731"
+        deepseek_first = {"researcher", "qa-user", "qa-user-leaf"}
         self.assertEqual(
             [name for name, models in ladders.items() if models[0].startswith("kimi-code/k3")],
             ["designer"],
         )
-        self.assertEqual(
-            ladders["verifier"][:2],
-            ["openai-codex/gpt-5.6-sol:max", "anthropic/claude-fable-5:xhigh"],
-        )
-        self.assertEqual(
-            ladders["researcher"][:3],
-            [
-                "google-antigravity/gemini-3.6-flash:high",
-                "xai-oauth/grok-4.5:high",
-                "openai-codex/gpt-5.6-luna:xhigh",
-            ],
-        )
-        expected_openrouter_models = [
-            "openrouter/deepseek/deepseek-v4-flash-0731",
-            "openrouter/openai/gpt-5.6-luna",
-            "openrouter/x-ai/grok-4.5",
-            "openrouter/z-ai/glm-5.2",
-        ]
         for name, models in ladders.items():
-            openrouter_start = next(
-                index for index, model in enumerate(models) if model.startswith("openrouter/")
-            )
-            tail = models[openrouter_start:]
-            self.assertTrue(all(model.startswith("openrouter/") for model in tail), name)
+            head = models[1:3] if name == "designer" else models[:2]
+            expected = [deepseek, luna] if name in deepseek_first else [luna, deepseek]
+            self.assertEqual([model.rsplit(":", 1)[0] for model in head], expected, name)
             self.assertEqual(
-                [model.rsplit(":", 1)[0] for model in tail],
-                expected_openrouter_models,
+                [model.rsplit(":", 1)[0] for model in models[-2:]],
+                ["openrouter/x-ai/grok-4.5", "openrouter/z-ai/glm-5.2"],
                 name,
             )
 
