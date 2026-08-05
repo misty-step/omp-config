@@ -24,13 +24,11 @@ class ProjectionContractTests(unittest.TestCase):
             require_projection(contract)
             expected = {
                 "review_gate_binary": "bin/review_gate.py",
-                "review_runner_binary": "bin/review_runner.py",
                 "review_common_binary": "bin/review_common.py",
                 "review_bundle_binary": "bin/review_bundle.py",
-                "review_packet_binary": "bin/review_packet.py",
                 "review_receipt_binary": "bin/review_receipt.py",
             }
-            self.assertEqual(len(contract.surfaces), 22)
+            self.assertEqual(len(contract.surfaces), 20)
             for name, relative in expected.items():
                 surface = contract.surface(name)
                 self.assertEqual(surface.source, ROOT / relative)

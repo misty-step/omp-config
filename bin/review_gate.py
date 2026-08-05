@@ -30,6 +30,7 @@ from review_common import (
     RECEIPT_RELATIVE,
     RECEIPT_SCHEMA,
     REVIEW_SPECS,
+    REVIEWERS,
     GateError,
     ZERO_OID,
     mapping,
@@ -37,10 +38,8 @@ from review_common import (
     review_scope,
     write_json,
 )
-from review_packet import prepare_packet
 from review_receipt import load_receipt, record_receipt, submit_result, verify_receipt
-
-REVIEW_SEQUENCE = "freeze -> prepare -> submit -> record -> verify"
+REVIEW_SEQUENCE = "freeze -> submit -> record -> verify"
 EXIT_CLEAN = 0
 EXIT_NON_CLEAN = 1
 EXIT_PROTOCOL = 2
@@ -54,15 +53,6 @@ def _receipt_file(repo: Path) -> Path:
     return repo / RECEIPT_RELATIVE
 
 
-@contextmanager
-def _gate_owned_packet() -> Iterator[None]:
-    """Prevent a caller environment from relocating the packet authority."""
-    override = os.environ.pop("OMP_REVIEW_PACKET", None)
-    try:
-        yield
-    finally:
-        if override is not None:
-            os.environ["OMP_REVIEW_PACKET"] = override
 
 
 def _scope(paths: list[str]) -> str:
@@ -71,28 +61,26 @@ def _scope(paths: list[str]) -> str:
 
 def freeze(args: argparse.Namespace) -> int:
     repo = repo_root(args.repo)
-    output = _freeze_file(repo)
-    identity = bundle_from_git(repo, args.old_oid, args.new_oid, check_worktree=True)
-    document = {
-        "schema": FREEZE_SCHEMA,
-        "kind": "freeze",
-        **identity,
-        "created_at": now(),
-        "freeze_path": output.relative_to(repo).as_posix(),
-    }
-    write_json(output, document)
-    print(f"review freeze written: {output}")
+    old_oid = getattr(args, "old_oid", None) or feature_base(repo, getattr(args, "new_oid", None) or "HEAD", getattr(args, "remote", None))
+    new_oid = getattr(args, "new_oid", None) or "HEAD"
+    identity = bundle_from_git(repo, old_oid, new_oid, check_worktree=not getattr(args, "no_worktree_check", False))
+    freeze_file = _freeze_file(repo)
+    pass_dir = repo / Path(".omp/review-passes")
+    if pass_dir.is_dir():
+        for item in pass_dir.glob("*.json"):
+            item.unlink(missing_ok=True)
+    receipt = _receipt_file(repo)
+    if receipt.is_file():
+        receipt.unlink(missing_ok=True)
+    document = {"schema": FREEZE_SCHEMA, "kind": "freeze", **identity, "created_at": now()}
+    write_json(freeze_file, document)
     return EXIT_CLEAN
 
 
 def prepare(args: argparse.Namespace) -> int:
     repo = repo_root(args.repo)
-    freeze_file = _freeze_file(repo)
-    with _gate_owned_packet():
-        prepare_packet(repo, freeze_file)
-    print(f"review packet prepared: {repo / '.omp' / 'review-packet' / 'manifest.json'}")
+    _freeze_file(repo)
     return EXIT_CLEAN
-
 
 def _read_result(args: argparse.Namespace) -> dict[str, Any]:
     source = args.result
@@ -115,9 +103,8 @@ def _read_result(args: argparse.Namespace) -> dict[str, Any]:
 def submit(args: argparse.Namespace) -> int:
     repo = repo_root(args.repo)
     reviewer = args.reviewer
-    spec = REVIEW_SPECS.get(reviewer)
-    if spec is None or not spec.get("direct_submission"):
-        raise GateError("submit accepts only the two direct canonical leaf reviewers")
+    if reviewer not in REVIEW_SPECS:
+        raise GateError(f"submit accepts only canonical reviewers ({', '.join(REVIEWERS)})")
     result = _read_result(args)
     attribution = {
         "actor": args.actor,
@@ -126,8 +113,7 @@ def submit(args: argparse.Namespace) -> int:
         "run_id": args.run_id,
     }
     freeze_file = _freeze_file(repo)
-    with _gate_owned_packet():
-        output = submit_result(repo, freeze_file, reviewer, attribution, result)
+    output = submit_result(repo, freeze_file, reviewer, attribution, result)
     status = result.get("status")
     print(f"review pass submitted: {output}")
     if status != "clean":
@@ -139,8 +125,7 @@ def record(args: argparse.Namespace) -> int:
     repo = repo_root(args.repo)
     freeze_file = _freeze_file(repo)
     output = _receipt_file(repo)
-    with _gate_owned_packet():
-        record_receipt(repo, freeze_file, output)
+    record_receipt(repo, freeze_file, output)
     print(f"review receipt written: {output}")
     return EXIT_CLEAN
 
@@ -206,8 +191,7 @@ def verify(
         raise GateError(f"missing final review receipt {output}; run {REVIEW_SEQUENCE}")
     document, receipt_identity = load_receipt(repo, output)
     assert_same_identity(receipt_identity, identity, "review receipt")
-    with _gate_owned_packet():
-        verify_receipt(repo, document, identity, _scope)
+    verify_receipt(repo, document, identity, _scope)
     if not quiet:
         if document.get("kind") == "waiver":
             actor = mapping(document.get("waiver"), "review receipt waiver").get("actor")
@@ -326,15 +310,16 @@ def parser() -> argparse.ArgumentParser:
 
     freeze_parser = sub.add_parser("freeze", help="freeze a committed range")
     freeze_parser.add_argument("--repo", default=".")
-    freeze_parser.add_argument("--old-oid", required=True)
-    freeze_parser.add_argument("--new-oid", required=True)
-
+    freeze_parser.add_argument("--old-oid")
+    freeze_parser.add_argument("--new-oid")
+    freeze_parser.add_argument("--remote")
+    freeze_parser.add_argument("--no-worktree-check", action="store_true")
     prepare_parser = sub.add_parser("prepare", help="prepare the gate-owned review packet")
     prepare_parser.add_argument("--repo", default=".")
 
     submit_parser = sub.add_parser("submit", help="submit one direct leaf review result")
     submit_parser.add_argument("--repo", default=".")
-    submit_parser.add_argument("--reviewer", choices=tuple(name for name, spec in REVIEW_SPECS.items() if spec.get("direct_submission")), required=True)
+    submit_parser.add_argument("--reviewer", choices=REVIEWERS, required=True)
     submit_parser.add_argument("--actor", required=True)
     submit_parser.add_argument("--harness", required=True)
     submit_parser.add_argument("--model", required=True)

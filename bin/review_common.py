@@ -31,6 +31,7 @@ REVIEWERS = (
     "autoreview",
     "thermo-nuclear-review",
     "thermo-nuclear-code-quality-review",
+    "ponytail",
 )
 SKILL_RELATIVE = Path("SKILL.md")
 
@@ -39,19 +40,21 @@ REVIEW_SPECS: dict[str, dict[str, Any]] = {
         "skill_path": Path("global/skills/autoreview/SKILL.md"),
         "vendor_path": Path("global/external/openclaw-autoreview/SKILL.md"),
         "payload_key": "SKILL.md",
-        "direct_submission": False,
     },
     "thermo-nuclear-review": {
         "skill_path": Path("global/skills/thermo-nuclear-review/SKILL.md"),
         "vendor_path": Path("global/external/cursor-thermos/thermo-nuclear-review/SKILL.md"),
         "payload_key": "thermo-nuclear-review/SKILL.md",
-        "direct_submission": True,
     },
     "thermo-nuclear-code-quality-review": {
         "skill_path": Path("global/skills/thermo-nuclear-code-quality-review/SKILL.md"),
         "vendor_path": Path("global/external/cursor-thermos/thermo-nuclear-code-quality-review/SKILL.md"),
         "payload_key": "thermo-nuclear-code-quality-review/SKILL.md",
-        "direct_submission": True,
+    },
+    "ponytail": {
+        "skill_path": Path("global/skills/ponytail/SKILL.md"),
+        "vendor_path": Path("global/external/dietrich-ponytail/SKILL.md"),
+        "payload_key": "SKILL.md",
     },
 }
 
@@ -71,6 +74,44 @@ POLICY_ROOTS = (Path("global/agents"), Path("global/references"), Path("global/s
 POLICY_DIRECTORY_NAMES = frozenset({"bin", "config", "hooks", "routing", "scripts", "workflows"})
 POLICY_FILENAMES_CASEFOLDED = frozenset(name.casefold() for name in {"AGENTS.md", "RULES.md", "SKILL.md"})
 
+HIGH_STAKES_KEYWORDS = ("auth", "secret", "gate", "migration", "harness", "hook", "install")
+
+
+def floor_plan(paths: list[str]) -> list[str]:
+    """Compute the required minimum reviewer lanes based on changed file paths."""
+    scope = review_scope(paths)
+    if scope == "trivial":
+        return []
+
+    has_code = False
+    has_high_stakes = False
+
+    for raw in paths:
+        path = Path(raw)
+        ext = path.suffix.casefold()
+        parts = [part.casefold() for part in path.parts]
+
+        if any(kw in raw.casefold() for kw in HIGH_STAKES_KEYWORDS):
+            has_high_stakes = True
+
+        if ext in {".py", ".ts", ".js", ".sh", ".go", ".rs", ".mjs", ".cjs"} or "bin" in parts or "hooks" in parts:
+            has_code = True
+
+    lanes = ["autoreview"]
+    if has_code:
+        lanes.extend(["thermo-nuclear-review", "ponytail"])
+        if has_high_stakes:
+            lanes.append("thermo-nuclear-code-quality-review")
+    else:
+        lanes.append("thermo-nuclear-code-quality-review")
+
+    seen: set[str] = set()
+    result: list[str] = []
+    for lane in lanes:
+        if lane not in seen and lane in REVIEW_SPECS:
+            seen.add(lane)
+            result.append(lane)
+    return result
 
 def _is_policy_path(path: Path) -> bool:
     normalized = Path(*(part.casefold() for part in path.parts))

@@ -8,8 +8,8 @@ argument-hint: "[branch|diff|files]"
 # /code-review
 
 Run the harness-neutral substantive review protocol. Callers load review skills,
-supply worker attribution, and submit v1 results. The gate owns range, packet,
-passes, receipt, and verification. Leaves own no orchestration, provider, model,
+supply worker attribution, and submit v1 results. The gate owns range, passes,
+receipt, and verification. Leaves own no orchestration, provider, model,
 or invocation route.
 
 Review order:
@@ -31,7 +31,7 @@ Neither invokes `/code-review`, another workflow, or a nested reviewer.
 ## Sequence and CLI
 
 ```text
-freeze -> prepare -> submit -> record -> verify
+freeze -> submit -> record -> verify
 ```
 
 No aggregate substantive invocation command exists.
@@ -40,7 +40,7 @@ No aggregate substantive invocation command exists.
 |---|---|
 | `classify` | Classify range: `trivial` or `substantive`. |
 | `freeze` | Recompute range; write fixed `.omp/review-freeze.json`. |
-| `prepare` | Load freeze; write gate-owned `.omp/review-packet/manifest.json` and bounded datasets. |
+
 | `submit` | Read `omp.review-result.v1` from file or stdin for either official leaf; require attribution; write gate-owned pass. |
 | `record` | Discover exactly three canonical passes; write `.omp/review-receipt.json`. |
 | `verify` | Recompute range, packets, passes, receipt, and skill digest. |
@@ -59,19 +59,19 @@ NEW_OID="$(git rev-parse HEAD)"
 
 python3 "$GATE" freeze --repo "$REPO" \
   --old-oid "$OLD_OID" --new-oid "$NEW_OID"
-python3 "$GATE" prepare --repo "$REPO"
 
-python3 bin/review_runner.py run-one --repo "$REPO" \
-  --reviewer autoreview --engine "$ENGINE" \
+python3 "$GATE" submit --repo "$REPO" \
+  --reviewer autoreview \
   --actor "$AUTOREVIEW_ACTOR" --harness "$AUTOREVIEW_HARNESS" \
-  --model "$AUTOREVIEW_MODEL" --run-id "$AUTOREVIEW_RUN_ID"
+  --model "$AUTOREVIEW_MODEL" --run-id "$AUTOREVIEW_RUN_ID" \
+  --result "$AUTOREVIEW_RESULT"
 python3 "$GATE" submit --repo "$REPO" \
   --reviewer thermo-nuclear-review \
   --actor "$LEAF_ACTOR_A" --harness "$LEAF_HARNESS_A" \
   --model "$LEAF_MODEL_A" --run-id "$LEAF_RUN_ID_A" \
   --result "$LEAF_RESULT_A"
 python3 "$GATE" submit --repo "$REPO" \
-  --reviewer thermo-nuclear-code-quality-review \
+  --reviewer ponytail \
   --actor "$LEAF_ACTOR_B" --harness "$LEAF_HARNESS_B" \
   --model "$LEAF_MODEL_B" --run-id "$LEAF_RUN_ID_B" \
   --result "$LEAF_RESULT_B"
@@ -105,18 +105,10 @@ sorted changed paths, and `bundle_digest` (`sha256:` plus 64 lowercase hexadecim
 Never reuse freeze, packet, pass, or receipt after the range changes. Commit the
 fix, freeze, prepare, collect all three submissions, record, and verify again.
 
-## Packet and artifacts
+## Artifacts and Worktrees
 
-`prepare` creates one deterministic redacted packet at `.omp/review-packet/`.
-It contains freeze identity, exact committed diff, bounded dataset views/digests,
-evidence policy, and exactly three assignments. Deleted files retain path and
-removed-line count, not body. Credential-shaped values and lines naming
-credential primitives become explicit omission markers.
-
-Workers receive only the packet and declared inputs in a temporary packet-only
-workspace. They must not inspect detached repository, mutable worktree, host
-paths, or unrelated network state. Manifest and datasets are read-only and digest-bound.
-
+Workers execute in read-only worktrees checked out at `new_oid`. They read `git diff` directly.
+No packet re-serialization or byte redaction layer exists.
 `submit` normalizes `omp.review-result.v1`, rejects missing, malformed,
 non-integer, or negative finding counts, and never coerces invalid data to zero.
 It writes exactly one gate-owned `omp.review-pass.v3` per canonical reviewer:
@@ -136,18 +128,12 @@ digest, validates skill identity, and checks attribution.
 
 | Module | Owns |
 |---|---|
-| `bin/review_common.py` | `REVIEW_SPECS`, v1/v2/v3 schema names, digest/identity validation, `skill_identity`, explicit `worker_attribution`; no defaults. |
-| `bin/review_bundle.py` | Git range identity, bundle digest, confined artifact paths, freeze loading, committed-range checks. |
-| `bin/review_packet.py` | `prepare_packet`, `load_packet`, `verify_packet`, redaction, bounded datasets, manifest, packet digests. |
+| `bin/review_common.py` | `REVIEW_SPECS`, `floor_plan`, v1/v2/v3 schema names, digest/identity validation, `skill_identity`, explicit `worker_attribution`; no defaults. |
+| `bin/review_bundle.py` | Git range identity, bundle digest, planned lanes, confined artifact paths, freeze loading, committed-range checks. |
 | `bin/review_receipt.py` | `submit_result`, v3 passes, `record_receipt`, `verify_receipt`, binding, clean enforcement. |
-| `bin/review_runner.py` | Optional one-worker adapter; attribution and v1 result through `submit_result`; no leaf/model/provider/harness semantics. |
-| `bin/review_gate.py` | Public `classify`, `freeze`, `prepare`, `submit`, `record`, `verify`, `waive`, `hook`; core composition, no defaults. |
+| `bin/review_gate.py` | Public `classify`, `freeze`, `submit`, `record`, `verify`, `waive`, `hook`; core composition, no defaults. |
 
 ```python
-review_packet.prepare_packet(repo, freeze_file)
-review_packet.load_packet(repo, freeze_identity)
-review_packet.verify_packet(repo, packet, freeze_identity)
-
 review_receipt.submit_result(
     repo, freeze_file, reviewer, attribution, result, adapter=None
 )
@@ -155,6 +141,7 @@ review_receipt.record_receipt(repo, freeze_file, output=None)
 review_receipt.verify_receipt(repo, document, identity, scope_for_paths)
 
 review_common.REVIEW_SPECS
+review_common.floor_plan(paths)
 review_common.skill_identity(reviewer)
 review_common.worker_attribution(actor, harness, model, run_id)
 ```

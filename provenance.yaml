@@ -106,9 +106,9 @@
         "kind": "file",
         "origin": "local"
       },
-      "review_runner_binary": {
-        "source": "bin/review_runner.py",
-        "target": "bin/review_runner.py",
+      "review_common_binary": {
+        "source": "bin/review_common.py",
+        "target": "bin/review_common.py",
         "kind": "file",
         "origin": "local"
       },
@@ -121,12 +121,6 @@
       "review_bundle_binary": {
         "source": "bin/review_bundle.py",
         "target": "bin/review_bundle.py",
-        "kind": "file",
-        "origin": "local"
-      },
-      "review_packet_binary": {
-        "source": "bin/review_packet.py",
-        "target": "bin/review_packet.py",
         "kind": "file",
         "origin": "local"
       },

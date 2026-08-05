@@ -10,16 +10,18 @@ from typing import Any
 from review_common import (
     BUNDLE_SCHEMA,
     DIGEST_PATTERN,
+    FREEZE_RELATIVE,
     FREEZE_SCHEMA,
     PACKET_RELATIVE,
     PASS_DIRECTORY,
-    FREEZE_RELATIVE,
-    GateError,
-    OID_PATTERN,
     PROTECTED_BRANCHES,
     RECEIPT_RELATIVE,
+    REVIEW_SPECS,
     ZERO_OID,
+    GateError,
+    OID_PATTERN,
     confined_path,
+    floor_plan,
     read_json,
 )
 
@@ -190,8 +192,13 @@ def paths_for_commit(repo: Path, commit: str) -> set[Path]:
 
 
 def bundle_digest(identity: dict[str, Any]) -> str:
+    canonical_identity = {
+        key: identity[key]
+        for key in ("repository", "old_oid", "new_oid", "commits", "paths", "planned_lanes")
+        if key in identity
+    }
     canonical = json.dumps(
-        {"schema": BUNDLE_SCHEMA, **identity},
+        {"schema": BUNDLE_SCHEMA, **canonical_identity},
         ensure_ascii=False,
         separators=(",", ":"),
         sort_keys=True,
@@ -251,12 +258,14 @@ def bundle_from_git(repo: Path, old_oid: str, new_oid: str, *, check_worktree: b
         validate_tree_contents(repo, commit)
         paths.update(paths_for_commit(repo, commit))
     path_list = sorted(paths, key=lambda item: item.as_posix())
+    planned_lanes = floor_plan([path.as_posix() for path in path_list])
     identity: dict[str, Any] = {
         "repository": str(repo),
         "old_oid": old_oid,
         "new_oid": new_oid,
         "commits": commits,
         "paths": [path.as_posix() for path in path_list],
+        "planned_lanes": planned_lanes,
     }
     identity["bundle_digest"] = bundle_digest(identity)
     if check_worktree:
@@ -270,6 +279,7 @@ def identity_from_document(document: dict[str, Any], label: str) -> dict[str, An
     new_oid = document.get("new_oid")
     commits = document.get("commits")
     paths = document.get("paths")
+    planned_lanes = document.get("planned_lanes")
     digest = document.get("bundle_digest")
     if not isinstance(repository, str) or not repository:
         raise GateError(f"{label}.repository must be a non-empty string")
@@ -284,6 +294,9 @@ def identity_from_document(document: dict[str, Any], label: str) -> dict[str, An
     normalized_paths = [path_from_git(item).as_posix() for item in paths]
     if normalized_paths != sorted(set(normalized_paths)):
         raise GateError(f"{label}.paths must be sorted and unique")
+    if planned_lanes is not None:
+        if not isinstance(planned_lanes, list) or not all(isinstance(item, str) and item in REVIEW_SPECS for item in planned_lanes):
+            raise GateError(f"{label}.planned_lanes must be a list of valid reviewer names")
     if not isinstance(digest, str) or not DIGEST_PATTERN.fullmatch(digest):
         raise GateError(f"{label}.bundle_digest must be a sha256 digest")
     identity = {
@@ -292,12 +305,13 @@ def identity_from_document(document: dict[str, Any], label: str) -> dict[str, An
         "new_oid": new_oid,
         "commits": list(commits),
         "paths": normalized_paths,
-        "bundle_digest": digest,
     }
-    if bundle_digest({key: identity[key] for key in ("repository", "old_oid", "new_oid", "commits", "paths")}) != digest:
+    if planned_lanes is not None:
+        identity["planned_lanes"] = planned_lanes
+    identity["bundle_digest"] = digest
+    if bundle_digest(identity) != digest:
         raise GateError(f"{label}.bundle_digest does not match its canonical identity")
     return identity
-
 
 def assert_same_identity(expected: dict[str, Any], actual: dict[str, Any], label: str) -> None:
     if expected != actual:

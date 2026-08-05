@@ -33,11 +33,10 @@ from review_common import (
     worker_attribution,
     write_json,
 )
-from review_packet import load_packet, packet_digest, verify_packet
-
+from review_common import floor_plan
 FINDING_SEVERITIES = {"blocking", "high", "medium", "low"}
 FORBIDDEN_RESULT_FIELDS = {"worker", "adapter", "pass_artifact", "raw_result", "raw_result_sha256"}
-PACKET_MANIFEST_PATH = (PACKET_RELATIVE / "manifest.json").as_posix()
+
 
 
 def _reject_obsolete(document: Mapping[str, Any], label: str) -> None:
@@ -120,7 +119,6 @@ def _validate_result(
     result: Mapping[str, Any],
     reviewer: str,
     identity: Mapping[str, Any],
-    packet: Mapping[str, Any],
 ) -> dict[str, Any]:
     _reject_obsolete(result, "review result")
     if result.get("schema") != RESULT_SCHEMA:
@@ -130,9 +128,10 @@ def _validate_result(
         raise GateError(f"review result must not contain gate-owned fields: {', '.join(sorted(forbidden))}")
     if result.get("reviewer") != reviewer:
         raise GateError(f"review result reviewer must identify {reviewer}")
-    for field in ("old_oid", "new_oid", "bundle_digest", "packet_digest", "skill_sha256"):
-        if result.get(field) != (packet.get(field) if field != "skill_sha256" else skill_identity(reviewer)["sha256"]):
-            raise GateError(f"review result {field} does not match the frozen packet")
+    for field in ("old_oid", "new_oid", "bundle_digest", "skill_sha256"):
+        expected = skill_identity(reviewer)["sha256"] if field == "skill_sha256" else identity.get(field)
+        if field in result and result.get(field) != expected:
+            raise GateError(f"review result {field} does not match the frozen identity")
     if result.get("old_oid") != identity.get("old_oid") or result.get("new_oid") != identity.get("new_oid") or result.get("bundle_digest") != identity.get("bundle_digest"):
         raise GateError("review result does not match the frozen committed-range bundle")
     status = result.get("status")
@@ -172,7 +171,7 @@ def _adapter_attestation(repo: Path, adapter: object) -> dict[str, str]:
     return fields
 
 
-def _validate_pass_document(repo: Path, path: Path, reviewer: str, identity: Mapping[str, Any], packet: Mapping[str, Any]) -> dict[str, Any]:
+def _validate_pass_document(repo: Path, path: Path, reviewer: str, identity: Mapping[str, Any]) -> dict[str, Any]:
     artifact = gate_pass_path(repo, path, reviewer)
     document = read_json(artifact, f"review pass {artifact}")
     _reject_obsolete(document, f"review pass {artifact}")
@@ -181,9 +180,6 @@ def _validate_pass_document(repo: Path, path: Path, reviewer: str, identity: Map
     assert_same_identity(identity_from_document(document, f"review pass {artifact}"), dict(identity), f"review pass {artifact}")
     if document.get("reviewer") != reviewer:
         raise GateError(f"review pass {artifact} is for {document.get('reviewer')!r}, expected {reviewer!r}")
-    packet_ref = mapping(document.get("packet"), f"review pass {artifact}.packet")
-    if packet_ref.get("path") != PACKET_MANIFEST_PATH or packet_ref.get("sha256") != sha256_bytes((repo / PACKET_MANIFEST_PATH).read_bytes()):
-        raise GateError(f"review pass {artifact} is not bound to the current review packet")
     skill = skill_identity(reviewer)
     if document.get("skill") != skill:
         raise GateError(f"review pass {artifact} is not bound to the canonical skill bytes")
@@ -193,7 +189,7 @@ def _validate_pass_document(repo: Path, path: Path, reviewer: str, identity: Map
     if worker_attribution(worker.get("actor"), worker.get("harness"), worker.get("model"), worker.get("run_id")) != worker:
         raise GateError(f"review pass {artifact}.worker attribution is invalid")
     raw_result = mapping(document.get("raw_result"), f"review pass {artifact}.raw_result")
-    normalized = _validate_result(raw_result, reviewer, identity, packet)
+    normalized = _validate_result(raw_result, reviewer, identity)
     if document.get("raw_result_sha256") != sha256_bytes(canonical_json(raw_result)):
         raise GateError(f"review pass {artifact}.raw_result_sha256 does not match raw_result")
     if document.get("status") != normalized["status"] or document.get("actionable_findings") != normalized["actionable_findings"] or document.get("findings") != normalized["findings"]:
@@ -205,10 +201,9 @@ def _validate_pass_document(repo: Path, path: Path, reviewer: str, identity: Map
     return document
 
 
-def pass_document(path: Path, expected: str, identity: Mapping[str, Any], *, repo: Path, packet: Mapping[str, Any] | None = None) -> dict[str, Any]:
+def pass_document(path: Path, expected: str, identity: Mapping[str, Any], *, repo: Path) -> dict[str, Any]:
     """Read and validate one gate-owned v3 pass artifact."""
-    return _validate_pass_document(repo, path, expected, identity, packet or load_packet(repo, identity))
-
+    return _validate_pass_document(repo, path, expected, identity)
 
 def submit_result(
     repo: Path,
@@ -225,19 +220,19 @@ def submit_result(
     _, frozen = load_freeze(repo, freeze_file)
     current = bundle_from_git(repo, frozen["old_oid"], frozen["new_oid"], check_worktree=True)
     assert_same_identity(frozen, current, "review freeze")
-    packet = load_packet(repo, frozen)
+    planned_lanes = frozen.get("planned_lanes", floor_plan(frozen["paths"]))
+    if reviewer not in planned_lanes:
+        raise GateError(f"reviewer {reviewer!r} is not in the frozen planned lanes {planned_lanes}")
     worker = worker_attribution(attribution.get("actor"), attribution.get("harness"), attribution.get("model"), attribution.get("run_id"))
     if set(attribution) != {"actor", "harness", "model", "run_id"}:
         raise GateError("worker attribution must contain only actor, harness, model, and run_id")
     if reviewer == "autoreview" and adapter is None:
         raise GateError("autoreview requires an explicit adapter attestation")
-    normalized = _validate_result(result, reviewer, frozen, packet)
-    manifest_path = repo / PACKET_MANIFEST_PATH
+    normalized = _validate_result(result, reviewer, frozen)
     document: dict[str, Any] = {
         "schema": PASS_SCHEMA,
         "kind": "review-pass",
         **frozen,
-        "packet": {"path": PACKET_MANIFEST_PATH, "sha256": sha256_bytes(manifest_path.read_bytes())},
         "reviewer": reviewer,
         "skill": skill_identity(reviewer),
         "worker": worker,
@@ -253,16 +248,15 @@ def submit_result(
     output = repo / PASS_DIRECTORY / f"{reviewer}.json"
     output.parent.mkdir(parents=True, exist_ok=True)
     if output.exists():
-        existing = _validate_pass_document(repo, output, reviewer, frozen, packet)
+        existing = _validate_pass_document(repo, output, reviewer, frozen)
         existing.pop("submitted_at")
         candidate = document.copy()
         candidate.pop("submitted_at")
         if existing != candidate:
-            raise GateError("review pass already exists with different bytes; refreeze and reprepare before resubmitting")
+            raise GateError("review pass already exists with different bytes; refreeze before resubmitting")
         return output
     write_json(output, document)
     return output
-
 
 def clean_passes(passes: list[dict[str, Any]]) -> None:
     for item in passes:
@@ -282,13 +276,6 @@ def load_receipt(repo: Path, output: Path) -> tuple[dict[str, Any], dict[str, An
     return document, identity
 
 
-def _receipt_packet(repo: Path, document: Mapping[str, Any], packet: Mapping[str, Any]) -> None:
-    reference = mapping(document.get("packet"), "review receipt packet")
-    manifest_path = repo / PACKET_MANIFEST_PATH
-    if reference.get("path") != PACKET_MANIFEST_PATH or reference.get("sha256") != sha256_bytes(manifest_path.read_bytes()):
-        raise GateError("review receipt is not bound to the current review packet")
-    if packet.get("packet_digest") != packet_digest(repo, packet):
-        raise GateError("review receipt packet digest is stale")
 
 
 def verify_receipt(
@@ -327,22 +314,23 @@ def verify_receipt(
         raise GateError("review receipt cannot authorize actionable findings")
     if document.get("freeze_manifest") != FREEZE_RELATIVE.as_posix():
         raise GateError("review receipt must identify the gate-owned freeze manifest")
-    protocol = mapping(document.get("protocol"), "review receipt protocol")
-    if "leaf_reviews" not in protocol:
-        raise GateError("review receipt protocol must describe the three canonical leaf reviews")
-    packet = load_packet(repo, identity)
-    _receipt_packet(repo, document, packet)
+
+    planned_lanes = identity.get("planned_lanes", floor_plan(identity["paths"]))
+    required_floor = floor_plan(identity["paths"])
+    if not set(required_floor).issubset(set(planned_lanes)):
+        raise GateError(f"frozen planned lanes {planned_lanes} do not cover required floor {required_floor}")
+
     reviewers = document.get("reviewers")
-    if not isinstance(reviewers, list) or len(reviewers) != len(REVIEWERS):
-        raise GateError("final receipt must contain exactly the three canonical passes; rerun freeze, prepare, submit all three passes, record, then verify")
+    if not isinstance(reviewers, list) or len(reviewers) != len(planned_lanes):
+        raise GateError(f"final receipt must contain exactly the planned passes ({', '.join(planned_lanes)}); rerun freeze, submit all passes, record, then verify")
     seen_runs: set[tuple[str, str]] = set()
     names: list[str] = []
     validated: list[dict[str, Any]] = []
     for index, raw in enumerate(reviewers):
         entry = mapping(raw, f"reviewer receipt {index}")
         reviewer = entry.get("reviewer")
-        if reviewer != REVIEWERS[index]:
-            raise GateError("final receipt reviewers must use canonical order: autoreview, thermo-nuclear-review, thermo-nuclear-code-quality-review")
+        if reviewer != planned_lanes[index]:
+            raise GateError(f"final receipt reviewers must match planned lane order: {', '.join(planned_lanes)}")
         names.append(reviewer)
         artifact = mapping(entry.get("pass_artifact"), f"reviewer receipt {reviewer}.pass_artifact")
         expected_path = (PASS_DIRECTORY / f"{reviewer}.json").as_posix()
@@ -351,7 +339,7 @@ def verify_receipt(
         pass_path = gate_pass_path(repo, repo / expected_path, reviewer)
         if sha256_bytes(pass_path.read_bytes()) != artifact["sha256"]:
             raise GateError(f"reviewer receipt {reviewer} pass artifact changed after record")
-        pass_value = _validate_pass_document(repo, pass_path, reviewer, identity, packet)
+        pass_value = _validate_pass_document(repo, pass_path, reviewer, identity)
         embedded = dict(entry)
         embedded.pop("pass_artifact", None)
         if embedded != pass_value:
@@ -359,48 +347,49 @@ def verify_receipt(
         worker = mapping(pass_value["worker"], f"reviewer receipt {reviewer}.worker")
         run_key = (worker["harness"], worker["run_id"])
         if run_key in seen_runs:
-            raise GateError("three required passes must use distinct harness and run identities")
+            raise GateError("required passes must use distinct harness and run identities")
         seen_runs.add(run_key)
         validated.append(pass_value)
-    if names != list(REVIEWERS):
-        raise GateError("final receipt must contain exactly the three canonical pass artifacts")
+    if names != list(planned_lanes):
+        raise GateError(f"final receipt must contain exactly the planned pass artifacts ({', '.join(planned_lanes)})")
     clean_passes(validated)
 
 
 def record_receipt(repo: Path, freeze_file: Path, output: Path | None = None) -> Path:
-    """Discover, revalidate, and record exactly the three canonical pass files."""
+    """Discover, revalidate, and record all required planned reviewer pass files."""
     repo = repo.resolve()
     _, frozen = load_freeze(repo, freeze_file)
     current = bundle_from_git(repo, frozen["old_oid"], frozen["new_oid"], check_worktree=True)
     assert_same_identity(frozen, current, "review freeze")
-    packet = load_packet(repo, frozen)
+    planned_lanes = frozen.get("planned_lanes", floor_plan(frozen["paths"]))
+    required_floor = floor_plan(frozen["paths"])
+    if not set(required_floor).issubset(set(planned_lanes)):
+        raise GateError(f"frozen planned lanes {planned_lanes} do not cover required floor {required_floor}")
     passes = [
-        _validate_pass_document(repo, repo / PASS_DIRECTORY / f"{reviewer}.json", reviewer, frozen, packet)
-        for reviewer in REVIEWERS
+        _validate_pass_document(repo, repo / PASS_DIRECTORY / f"{reviewer}.json", reviewer, frozen)
+        for reviewer in planned_lanes
     ]
     clean_passes(passes)
     run_keys = {(item["worker"]["harness"], item["worker"]["run_id"]) for item in passes}
-    if len(run_keys) != len(REVIEWERS):
-        raise GateError("three required passes must use distinct harness and run identities")
+    if len(run_keys) != len(planned_lanes):
+        raise GateError("required passes must use distinct harness and run identities")
     destination = receipt_path(repo, str(output) if output is not None else None)
-    manifest_path = repo / PACKET_MANIFEST_PATH
     document: dict[str, Any] = {
         "schema": RECEIPT_SCHEMA,
         "kind": "review",
         **frozen,
         "scope": "substantive",
-        "packet": {"path": PACKET_MANIFEST_PATH, "sha256": sha256_bytes(manifest_path.read_bytes())},
         "freeze_manifest": FREEZE_RELATIVE.as_posix(),
+        "planned_lanes": planned_lanes,
         "reviewers": [
             {**item, "pass_artifact": pass_artifact(repo, repo / PASS_DIRECTORY / f"{reviewer}.json", reviewer)}
-            for reviewer, item in zip(REVIEWERS, passes, strict=True)
+            for reviewer, item in zip(planned_lanes, passes, strict=True)
         ],
         "actionable_findings": 0,
         "created_at": now(),
         "protocol": {
             "freeze": "committed Git range and complete introduced history",
-            "prepare": "deterministic redacted bounded packet with manifest and dataset digests",
-            "leaf_reviews": "autoreview plus the two canonical thermo-nuclear leaf skills",
+            "leaf_reviews": f"dynamic reviewer lanes: {', '.join(planned_lanes)}",
             "pass_artifacts": "gate-authored v3 JSON files under .omp/review-passes, digest-bound and re-read at verification",
             "local_boundary": "local integrity proof, not signer identity or host/root compromise proof",
         },

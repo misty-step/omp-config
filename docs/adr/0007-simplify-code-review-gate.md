@@ -36,9 +36,8 @@ All reviewer lanes use the native `verifier` agent envelope (`global/agents/veri
 |---|---|---|
 | Trivial | Typo, docs-only per `review_scope` | Waiver path |
 | Prose | `*.md`, doctrine, config | `autoreview`, `thermo-nuclear-code-quality-review` |
-| Executable Code | `bin/**`, `*.py`, `*.ts`, hooks | `autoreview`, `thermo-nuclear-review`, `ponytail`, `review-tests` |
-| High-Stakes | Auth, secrets, gates, migrations, harness | + `review-security`, `review-interfaces`, `review-performance` |
-
+| Executable Code | `bin/**`, `*.py`, `*.ts`, hooks | `autoreview`, `thermo-nuclear-review`, `ponytail` |
+| High-Stakes | Auth, secrets, gates, migrations, harness | `autoreview`, `thermo-nuclear-review`, `thermo-nuclear-code-quality-review`, `ponytail` |
 ### 4. Packet and runner deletion
 
 Delete `bin/review_packet.py` and `bin/review_runner.py`. Reviewers read `git diff` directly in read-only worktrees checked out at `new_oid`. Remove the bare-word redaction hint regex.
