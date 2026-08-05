@@ -163,54 +163,18 @@ sources:
 
   - repo: mattpocock/skills
     ref: main
-    pin: 66898f60e8c744e269f8ce06c2b2b99ce7660d5f
-    vendor_dir: mattpocock-codebase-design
+    pin: 8b36d4fb2635b3c21998dcd8144439c9e5ba7302
+    vendor_dir: mattpocock-skills
     layout: multi-root
     skills_path: skills
     alias_prefix: "mattpocock-"
-    include: [codebase-design]
+    include: [ask-matt, code-review, codebase-design, diagnosing-bugs, domain-modeling, grill-with-docs, implement, improve-codebase-architecture, prototype, research, resolving-merge-conflicts, setup-matt-pocock-skills, tdd, to-spec, to-tickets, triage, wayfinder, wizard, claude-handoff, loop-me, setup-ts-deep-modules, writing-beats, writing-fragments, writing-shape, git-guardrails-claude-code, migrate-to-shoehorn, scaffold-exercises, setup-pre-commit, grill-me, grilling, handoff, teach, to-questionnaire, wait-what, writing-for-agents]
     license: MIT
     license_path: LICENSE
     consumers:
       - global/skills/project-engineering/SKILL.md
-
-  - repo: mattpocock/skills
-    ref: main
-    pin: 2ab958093e83e0ec752e6c1c5932da465bf23e0c
-    vendor_dir: mattpocock-writing-great-skills
-    layout: multi-root
-    skills_path: skills
-    alias_prefix: "mattpocock-"
-    include: [writing-great-skills]
-    license: MIT
-    license_path: LICENSE
-    consumers:
       - global/references/skill-authoring-standard.md
-
-  - repo: mattpocock/skills
-    ref: main
-    pin: 2ab958093e83e0ec752e6c1c5932da465bf23e0c
-    vendor_dir: mattpocock-wayfinder
-    layout: multi-root
-    skills_path: skills
-    alias_prefix: "mattpocock-"
-    include: [wayfinder]
-    license: MIT
-    license_path: LICENSE
-    consumers:
       - global/skills/wayfinder
-
-  - repo: mattpocock/skills
-    ref: main
-    pin: 2ab958093e83e0ec752e6c1c5932da465bf23e0c
-    vendor_dir: mattpocock-grilling
-    layout: multi-root
-    skills_path: skills
-    alias_prefix: "mattpocock-"
-    include: [grilling]
-    license: MIT
-    license_path: LICENSE
-    consumers:
       - global/skills/grilling
 
   - repo: openclaw/agent-skills

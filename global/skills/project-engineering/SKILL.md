@@ -54,7 +54,7 @@ The chief dispatches additional lanes. Keep this skill at the contract layer.
 | Runtime and user-boundary proof | `global/references/verification-system-first.md`; the chief dispatches `verifier` with `verify-live` |
 | Model or agent capability | `global/skills/eval-design/SKILL.md` |
 | Canary, Powder, Landmark | `global/skills/factory-apps/SKILL.md` |
-| Module depth, seams, dependency direction | `global/external/mattpocock-codebase-design/SKILL.md` |
+| Module depth, seams, dependency direction | `global/external/mattpocock-skills/codebase-design/SKILL.md` (`mattpocock-codebase-design`) |
 | Application-only obligations and waivers | `global/references/application-floor.md` |
 
 Return the populated profile and a gap report grouped by proof class.
