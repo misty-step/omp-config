@@ -11,6 +11,7 @@ Each native agent owns one bounded lane.
 | system architecture | `architect` | `project-engineering`, `mcp-design`, or `vision` when needed | boundary proposal, dependency graph, and reversal condition |
 | accepted implementation | `builder` | `deliver`, `ci`, and domain skills named in the brief | real entrypoint plus required repository gate |
 | security or code review | `verifier` | `review-security`, `code-review`, or `review-tests` | ranked finding with a reproducible trigger or static evidence |
+| complexity audit | `ponytail` | `ponytail` | ranked deletion list with net line, module, and dependency counts |
 | live QA | `verifier` | `verify-live` | live result against the acceptance oracle |
 | incident reproduction | `verifier` | `verify-live` and the named operations skill | original failure replay plus live signal |
 | broad research | `researcher` | `research`; add `peer-harnesses` for model facts | cited source packet and uncertainty statement |
@@ -21,6 +22,7 @@ Each native agent owns one bounded lane.
 The five broad agents are `architect`, `builder`, `verifier`, `researcher`, and
 `designer`.
 `qa-user` and `qa-user-leaf` exist only for the required persona depth.
+`ponytail` exists only for the required deletion lens in a critic gate.
 
 ## Method consolidation
 

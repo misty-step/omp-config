@@ -135,8 +135,8 @@ sources:
       - global/skills/thermo-nuclear-code-quality-review
 
   - repo: DietrichGebert/ponytail
-    ref: adad50d9b393926b2dd5ed7225dcb1848b9df408
-    pin: adad50d9b393926b2dd5ed7225dcb1848b9df408
+    ref: 16f29800fd2681bdf24f3eb4ccffe38be3baec6b
+    pin: 16f29800fd2681bdf24f3eb4ccffe38be3baec6b
     vendor_dir: dietrich-ponytail
     layout: flat
     skills_path: skills
@@ -146,6 +146,7 @@ sources:
     license_path: LICENSE
     consumers:
       - global/skills/refactor/SKILL.md
+      - global/skills/ponytail
 
   - repo: NousResearch/hermes-agent
     ref: main
@@ -185,6 +186,32 @@ sources:
     license_path: LICENSE
     consumers:
       - global/references/skill-authoring-standard.md
+
+  - repo: mattpocock/skills
+    ref: main
+    pin: 2ab958093e83e0ec752e6c1c5932da465bf23e0c
+    vendor_dir: mattpocock-wayfinder
+    layout: multi-root
+    skills_path: skills
+    alias_prefix: "mattpocock-"
+    include: [wayfinder]
+    license: MIT
+    license_path: LICENSE
+    consumers:
+      - global/skills/wayfinder
+
+  - repo: mattpocock/skills
+    ref: main
+    pin: 2ab958093e83e0ec752e6c1c5932da465bf23e0c
+    vendor_dir: mattpocock-grilling
+    layout: multi-root
+    skills_path: skills
+    alias_prefix: "mattpocock-"
+    include: [grilling]
+    license: MIT
+    license_path: LICENSE
+    consumers:
+      - global/skills/grilling
 
   - repo: openclaw/agent-skills
     ref: main

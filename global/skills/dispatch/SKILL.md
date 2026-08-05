@@ -23,6 +23,7 @@ Read `references/primitive-routing.md` and
 - `verifier` owns independent review, security, live QA, and incident evidence.
 - `researcher` owns read-only repository, library, API, and external research.
 - `designer` owns product and interface design through rendered proof.
+- `ponytail` owns the read-only deletion and reuse lens inside a critic gate.
 
 `qa-user` and `qa-user-leaf` are structural persona utilities.
 Persona QA always uses chief → `qa-user` → `qa-user-leaf`.
