@@ -12,6 +12,12 @@ supply worker attribution, and submit v1 results. The gate owns range, passes,
 receipt, and verification. Leaves own no orchestration, provider, model,
 or invocation route.
 
+Review is **encouraged, not enforced**. The pre-push `hook` runs in advisory
+mode by default: it warns with the exact commands when a range lacks a clean
+receipt and lets the push through. Repositories that want hard blocking opt in
+with `--enforce`. When the sequence IS run, its artifacts are immutable and
+gate-verified — the receipt remains the evidence standard for completion claims.
+
 Review order:
 
 1. `autoreview`
@@ -45,11 +51,31 @@ No aggregate substantive invocation command exists.
 | `record` | Discover exactly three canonical passes; write `.omp/review-receipt.json`. |
 | `verify` | Recompute range, packets, passes, receipt, and skill digest. |
 | `waive` | Write actor-attributed waiver for an inert trivial prose/config-only range. |
-| `hook` | Enforce one unique pushed range and freeze/prepare/submit/record/verify. |
+| `hook` | Advisory pre-push check (default): warn with guidance when the receipt is missing; `--enforce` blocks the push. Safety failures (malformed ref updates, protected-branch deletion) always block. |
 
 Exit status: `0` clean evidence; `1` valid non-clean `submit` result; `2`
 protocol, schema, range, or artifact failure. `record` and `verify` return `2`
 for an incomplete or non-clean required set.
+
+## Enforcement model
+
+- **Advisory (default):** the pre-push hook computes the pushed range and
+  prints one of three outcomes: clean receipt, trivial-waiver guidance, or
+  the exact `freeze -> submit -> record -> verify` commands to record
+  evidence. It exits 0 either way. The push is never blocked for missing
+  review evidence.
+- **Enforced (opt-in):** `python3 bin/review_gate.py hook --repo . --enforce`
+  (or a repo-local wrapper) restores the hard block for ranges without a
+  clean receipt or waiver. Use it for release trains, high-risk surfaces,
+  or operator-mandated repositories.
+- **Safety always enforced:** malformed pre-push input and deleting a
+  protected default branch fail the push in both modes.
+- When the sequence runs, the gate fails closed if frozen range, result
+  shape, attribution, passes, receipt, or projected skill digest changes. A
+  clean substantive receipt requires three `clean` submissions, zero
+  actionable findings, empty findings, and distinct `(harness, run_id)`
+  pairs. A non-clean result requires fix, refreeze, and the complete
+  sequence. Malformed or stale artifacts are protocol failures.
 
 ```bash
 REPO=.

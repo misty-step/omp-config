@@ -224,28 +224,39 @@ def _waiver_command(repo: Path, freeze_file: Path, actor: str) -> str:
     )
 
 
-def _ensure_review(args: argparse.Namespace, repo: Path, old_oid: str, new_oid: str) -> None:
+def _review_gap(args: argparse.Namespace, repo: Path, old_oid: str, new_oid: str) -> tuple[str, str]:
+    """Probe review evidence for a range without raising.
+
+    Returns (status, guidance) with status in {"clean", "trivial", "missing"}.
+    """
     output = _receipt_file(repo)
     range_pair = [(old_oid, new_oid)]
     if output.is_file():
         try:
             verify(args, quiet=True, push_ranges=range_pair)
-            return
+            return ("clean", "")
         except GateError:
             pass
     identity = bundle_from_git(repo, old_oid, new_oid, check_worktree=True)
     freeze_args = argparse.Namespace(repo=str(repo), old_oid=old_oid, new_oid=new_oid)
     freeze(freeze_args)
     if _scope(identity["paths"]) == "trivial":
-        freeze_file = _freeze_file(repo)
-        actor = _waiver_actor(repo)
-        raise GateError(
+        return (
+            "trivial",
             "trivial review range requires an explicit, actor-attributed waiver; "
-            f"run: {_waiver_command(repo, freeze_file, actor)}"
+            f"run: {_waiver_command(repo, _freeze_file(repo), _waiver_actor(repo))}",
         )
-    raise GateError(
-        f"review gate has no clean receipt for this range; complete {REVIEW_SEQUENCE}"
+    return (
+        "missing",
+        f"review gate has no clean receipt for this range; complete {REVIEW_SEQUENCE}",
     )
+
+
+def _ensure_review(args: argparse.Namespace, repo: Path, old_oid: str, new_oid: str) -> None:
+    """Enforce mode: raise when the range lacks clean review evidence."""
+    status, guidance = _review_gap(args, repo, old_oid, new_oid)
+    if status != "clean":
+        raise GateError(guidance)
 
 
 def hook(args: argparse.Namespace) -> int:
@@ -286,10 +297,30 @@ def hook(args: argparse.Namespace) -> int:
     if not unique_ranges:
         print("review gate skipped: push contains no non-deletion branch updates")
         return EXIT_CLEAN
+    enforce = getattr(args, "enforce", False)
     if len(unique_ranges) != 1:
-        raise GateError("pre-push review requires one unique old/new object range")
-    _ensure_review(args, repo, *unique_ranges[0])
-    return verify(args, push_ranges=unique_ranges)
+        if enforce:
+            raise GateError("pre-push review requires one unique old/new object range")
+        print(
+            "review-gate (advisory): multiple push ranges in one push; "
+            "review evidence is optional here",
+            file=sys.stderr,
+        )
+        return EXIT_CLEAN
+    status, guidance = _review_gap(args, repo, *unique_ranges[0])
+    if status == "clean":
+        return verify(args, push_ranges=unique_ranges)
+    if enforce:
+        raise GateError(guidance)
+    # Encouraged, not enforced: warn with the exact commands and let the
+    # push through. The freeze written by the probe is the starting point.
+    print(f"review-gate (advisory): {guidance}", file=sys.stderr)
+    print(
+        "review-gate (advisory): push allowed without review evidence; "
+        "run the sequence (freeze, prepare, submit, record, verify) to record it",
+        file=sys.stderr,
+    )
+    return EXIT_CLEAN
 
 
 def classify_command(args: argparse.Namespace) -> int:
@@ -339,9 +370,17 @@ def parser() -> argparse.ArgumentParser:
     waive_parser.add_argument("--actor", required=True)
     waive_parser.add_argument("--reason", required=True)
 
-    hook_parser = sub.add_parser("hook", help="verify a protected push from pre-push input")
+    hook_parser = sub.add_parser(
+        "hook",
+        help="advisory pre-push review check (warn, never block); --enforce opts into blocking",
+    )
     hook_parser.add_argument("--repo", default=".")
     hook_parser.add_argument("--remote")
+    hook_parser.add_argument(
+        "--enforce",
+        action="store_true",
+        help="fail the push when the range lacks a clean receipt or waiver",
+    )
     return root
 
 

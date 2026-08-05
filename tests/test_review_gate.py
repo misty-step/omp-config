@@ -345,5 +345,73 @@ class ReviewGateProtocolTests(unittest.TestCase):
         with self.assertRaises(review_common.GateError):
             self.verify()
 
+    def _push_input(self, old_oid: str, new_oid: str) -> str:
+        return f"refs/heads/master {new_oid} refs/heads/master {old_oid}\n"
+
+    def _hook_commit(self, message: str, content: str) -> str:
+        path = self.repo / "hooks.txt"
+        path.write_text(content, encoding="utf-8")
+        return self.commit(message, "hooks.txt")
+
+    def test_hook_advisory_allows_push_without_receipt(self) -> None:
+        new_oid = self._hook_commit("advisory change", "advisory payload\n")
+        result = self.run_command(
+            sys.executable,
+            str(GATE),
+            "hook",
+            "--repo",
+            str(self.repo),
+            input_text=self._push_input(self.base_oid, new_oid),
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("advisory", result.stderr)
+
+    def test_hook_enforce_blocks_push_without_receipt(self) -> None:
+        new_oid = self._hook_commit("enforced change", "enforced payload\n")
+        result = self.run_command(
+            sys.executable,
+            str(GATE),
+            "hook",
+            "--repo",
+            str(self.repo),
+            "--enforce",
+            input_text=self._push_input(self.base_oid, new_oid),
+        )
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        # A prose-only change needs a waiver; a substantive change needs the
+        # full sequence — both block in enforce mode without evidence.
+        self.assertIn("review-gate:", result.stderr)
+        self.assertTrue(
+            "waiver" in result.stderr or "no clean receipt" in result.stderr,
+            result.stderr,
+        )
+
+    def test_hook_advisory_clean_receipt_still_verifies(self) -> None:
+        identity = self.freeze_and_prepare()
+        self.submit_all(reviewers=identity.get("planned_lanes", list(REVIEWERS)))
+        self.record()
+        result = self.run_command(
+            sys.executable,
+            str(GATE),
+            "hook",
+            "--repo",
+            str(self.repo),
+            input_text=self._push_input(self.base_oid, str(identity["new_oid"])),
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("clean", result.stdout)
+
+    def test_hook_safety_failures_block_in_advisory_mode(self) -> None:
+        result = self.run_command(
+            sys.executable,
+            str(GATE),
+            "hook",
+            "--repo",
+            str(self.repo),
+            input_text="refs/heads/master deadbeef refs/heads/master\n",
+        )
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn("malformed", result.stderr)
+
 if __name__ == "__main__":
     unittest.main()
