@@ -15,7 +15,7 @@
 - R90 (`~/Development/r90`) and Misty Step (`~/Development/misty-step`) are separate organizations with separate GitHub orgs, infrastructure accounts, and work ledgers (Habitat for R90, Powder for Misty Step). Never mix them; follow the org root AGENTS.md.
 - Mint (`http://mint.tail5f5eb4.ts.net:4949`) is the only credential broker on this machine. Agent Vault is retired.
 - Make credentialed vendor calls through `http://mint.tail5f5eb4.ts.net:4949/proxy/https/<host>/<path>` with a `__mint.<alias>__` marker. Mint does not authenticate or authorize callers. Tailnet reachability and host custody are the boundary.
-- Top-level sessions share git worktrees. Before mutating a shared branch or runtime, read and update `<git-common-dir>/omp-coordination.md`.
+- Top-level sessions share git worktrees. Before mutating a shared branch or runtime, follow `global/references/cross-session-coordination.md` to record status in `<git-common-dir>/omp-coordination.md`.
 
 ## Capability stance
 
@@ -71,6 +71,7 @@ Substantive work MUST pass a named-critic gate before closeout.
 - Verify each finding against the work and record proof before closeout.
 - Include erasure in every gate. Ask, “What can be deleted while preserving behavior?”
 - Measure shrink with token count, AST node count, or a line budget when applicable. Do not accept subjective simplicity as proof.
+- Every substantive critic gate includes one fresh `ponytail` agent. It audits the change and its surrounding shipped system.
 - For review work, assign named angles to existing independent review lanes when they satisfy this critic boundary. Otherwise dispatch a dedicated critic. Do not nest another review workflow.
 - Follow `skill://dispatch`, `skill://code-review`, `skill://autoreview`, and `global/references/failure-modes.md` for routing, review mechanics, and failure-mode prompts.
 

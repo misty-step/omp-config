@@ -34,7 +34,7 @@ Mint is the only credential path for every agent on this machine.
 - Any caller that reaches Mint can use any loaded alias for any HTTP(S) destination.
 - A completed 403 is an upstream response, not a Mint authorization decision.
 
-`global/RULES.md` and `global/AGENTS.md` state this contract for every
+`global/RULES.md` states this contract for every
 session at every depth. All Agent Vault references in skills, docs, recipes,
 and tests were replaced in the same change.
 
