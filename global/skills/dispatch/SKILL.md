@@ -59,17 +59,25 @@ They do not widen the declared tool authority.
 Use `high` as the minimum reasoning level for substantive work.
 Treat every listed favorite as capable of every role.
 Use role order to express preference, not exclusivity.
-Kimi K3 is primary only for `designer`.
-`verifier` starts with GPT-5.6 Sol and falls back first to Claude Fable 5.
-`researcher` starts with Gemini 3.6 Flash, Grok 4.5, and GPT-5.6 Luna.
 
-Always use at least one appropriate subscription route before OpenRouter.
+Two OpenRouter routes are the primary workhorses for dispatched work:
+
+1. `openrouter/openai/gpt-5.6-luna:xhigh` — deep-reasoning workhorse.
+2. `openrouter/deepseek/deepseek-v4-flash-0731:high` — fast bulk workhorse.
+
+OpenRouter spend is accepted. It preserves premium subscription tokens
+(GPT-5.6 Sol, Claude Fable 5, Claude Opus 5, and other subscription quotas).
+Premium subscription routes remain in every ladder as escalation and
+availability fallbacks, not as the normal route.
+`researcher`, `qa-user`, and `qa-user-leaf` lead with DeepSeek V4 Flash 0731.
+All other agents lead with GPT-5.6 Luna `xhigh`.
+Kimi K3 stays primary only for `designer`; it spends no premium quota.
+
 Use GPT-5.6 Luna `medium` for `commit`, `smol`, and `tiny`.
-Every OpenRouter tail starts with DeepSeek V4 Flash 0731.
-Only OpenRouter GPT-5.6 Luna, Grok 4.5, and GLM 5.2 follow it.
 DeepSeek must use `openrouter/deepseek/deepseek-v4-flash-0731:high`.
+Do not use unversioned or provider-alias DeepSeek selectors.
 Do not route active work to Claude Sonnet 5.
-Treat later entries as availability fallbacks, not independent reviews.
+Treat later ladder entries as availability fallbacks, not independent reviews.
 
 ## Verification
 

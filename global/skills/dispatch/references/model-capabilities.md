@@ -12,32 +12,38 @@ The first route is the normal route.
 Later routes provide availability resilience after a provider failure.
 They are not per-task choices or independent opinions.
 
-Every agent appends this OpenRouter tail after its subscription routes:
+Two OpenRouter routes are the primary workhorses for dispatched work:
 
-`openrouter/deepseek/deepseek-v4-flash-0731:high` →
-`openrouter/openai/gpt-5.6-luna:<role-effort>` →
-`openrouter/x-ai/grok-4.5:high` →
+1. `openrouter/openai/gpt-5.6-luna:xhigh` — deep-reasoning workhorse.
+2. `openrouter/deepseek/deepseek-v4-flash-0731:high` — fast bulk workhorse.
+
+Every agent ladder starts with these two routes.
+`researcher`, `qa-user`, and `qa-user-leaf` lead with DeepSeek; the rest lead
+with Luna. `designer` keeps Kimi K3 first because it spends no premium quota.
+Subscription routes follow as escalation and availability fallbacks.
+Every ladder ends with `openrouter/x-ai/grok-4.5:high` →
 `openrouter/z-ai/glm-5.2:high`.
 
-| Agent | Ordered subscription routes before the shared OpenRouter tail | Reasoning |
-|---|---|---:|
-| `architect` | GPT-5.6 Sol → Fable 5 → Opus 5 → GPT-5.6 Luna → Kimi K3 → Grok 4.5 → Gemini 3.6 Flash | `max` |
-| `builder` | GPT-5.6 Luna → GPT-5.6 Sol → Fable 5 → Kimi K3 → Grok 4.5 → Gemini 3.6 Flash → Opus 5 | `xhigh` |
-| `verifier` | GPT-5.6 Sol → Fable 5 → Opus 5 → GPT-5.6 Luna → Grok 4.5 → Gemini 3.6 Flash → Kimi K3 | `max` |
-| `researcher` | Gemini 3.6 Flash → Grok 4.5 → GPT-5.6 Luna → GPT-5.6 Sol → Fable 5 → Kimi K3 → Opus 5 | `high` |
-| `designer` | Kimi K3 → Fable 5 → GPT-5.6 Luna → GPT-5.6 Sol → Gemini 3.6 Flash → Grok 4.5 → Opus 5 | `max` |
-| `qa-user` | GPT-5.6 Luna → Gemini 3.6 Flash → Grok 4.5 → Fable 5 → GPT-5.6 Sol → Kimi K3 → Opus 5 | `high` |
-| `qa-user-leaf` | Gemini 3.6 Flash → GPT-5.6 Luna → Grok 4.5 → Fable 5 → GPT-5.6 Sol → Kimi K3 → Opus 5 | `high` |
+| Agent | Workhorse head | Subscription fallbacks after the head | Reasoning |
+|---|---|---|---:|
+| `architect` | Luna → DeepSeek | GPT-5.6 Sol → Fable 5 → Opus 5 → GPT-5.6 Luna (codex) → Kimi K3 → Grok 4.5 → Gemini 3.6 Flash | `xhigh` |
+| `builder` | Luna → DeepSeek | GPT-5.6 Luna (codex) → GPT-5.6 Sol → Fable 5 → Kimi K3 → Grok 4.5 → Gemini 3.6 Flash → Opus 5 | `xhigh` |
+| `verifier` | Luna → DeepSeek | GPT-5.6 Sol → Fable 5 → Opus 5 → GPT-5.6 Luna (codex) → Grok 4.5 → Gemini 3.6 Flash → Kimi K3 | `xhigh` |
+| `researcher` | DeepSeek → Luna | Gemini 3.6 Flash → Grok 4.5 → GPT-5.6 Luna (codex) → GPT-5.6 Sol → Fable 5 → Kimi K3 → Opus 5 | `high` |
+| `designer` | Kimi K3 → Luna → DeepSeek | Fable 5 → GPT-5.6 Luna (codex) → GPT-5.6 Sol → Gemini 3.6 Flash → Grok 4.5 → Opus 5 | `max` |
+| `qa-user` | DeepSeek → Luna | GPT-5.6 Luna (codex) → Gemini 3.6 Flash → Grok 4.5 → Fable 5 → GPT-5.6 Sol → Kimi K3 → Opus 5 | `high` |
+| `qa-user-leaf` | DeepSeek → Luna | Gemini 3.6 Flash → GPT-5.6 Luna (codex) → Grok 4.5 → Fable 5 → GPT-5.6 Sol → Kimi K3 → Opus 5 | `high` |
 
 ## Fixed policy
 
 Every listed favorite can perform every role.
 The order records preference and provider resilience, not a capability boundary.
+OpenRouter spend is accepted: the two workhorse routes preserve premium
+subscription tokens (GPT-5.6 Sol, Claude Fable 5, Claude Opus 5, and other
+subscription quotas). Premium routes are escalation and availability
+fallbacks, not the normal route.
 Kimi K3 is primary only for `designer`.
-`verifier` starts with GPT-5.6 Sol and Claude Fable 5.
-`researcher` starts with Gemini 3.6 Flash, Grok 4.5, and GPT-5.6 Luna.
-Every native agent and global role tries a subscription route before OpenRouter.
-Use GPT-5.6 Luna `medium` as the cheap subscription primary.
+Use GPT-5.6 Luna `medium` as the cheap route for `commit`, `smol`, and `tiny`.
 
 No active route uses Claude Sonnet 5.
 Every DeepSeek route must be exactly

@@ -2,7 +2,7 @@
 name: ponytail
 description: Read-only complexity critic. Finds what to delete, inline, or replace with existing platform features.
 thinkingLevel: max
-model: openai-codex/gpt-5.6-sol:max, anthropic/claude-fable-5:xhigh, anthropic/claude-opus-5:xhigh, openai-codex/gpt-5.6-luna:xhigh, xai-oauth/grok-4.5:high, google-antigravity/gemini-3.6-flash:high, kimi-code/k3:high, openrouter/deepseek/deepseek-v4-flash-0731:high, openrouter/openai/gpt-5.6-luna:xhigh, openrouter/x-ai/grok-4.5:high, openrouter/z-ai/glm-5.2:high
+model: openrouter/openai/gpt-5.6-luna:xhigh, openrouter/deepseek/deepseek-v4-flash-0731:high, openai-codex/gpt-5.6-sol:max, anthropic/claude-fable-5:xhigh, anthropic/claude-opus-5:xhigh, openai-codex/gpt-5.6-luna:xhigh, xai-oauth/grok-4.5:high, google-antigravity/gemini-3.6-flash:high, kimi-code/k3:high, openrouter/x-ai/grok-4.5:high, openrouter/z-ai/glm-5.2:high
 tools: read,grep,glob,lsp,bash
 spawns: ''
 readSummarize: true
