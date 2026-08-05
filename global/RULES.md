@@ -15,6 +15,7 @@
 - R90 (`~/Development/r90`) and Misty Step (`~/Development/misty-step`) are separate organizations with separate GitHub orgs, infrastructure accounts, and work ledgers (Habitat for R90, Powder for Misty Step). Never mix them; follow the org root AGENTS.md.
 - Mint (`http://mint.tail5f5eb4.ts.net:4949`) is the only credential broker on this machine. Agent Vault is retired.
 - Make credentialed vendor calls through `http://mint.tail5f5eb4.ts.net:4949/proxy/https/<host>/<path>` with a `__mint.<alias>__` marker. Mint does not authenticate or authorize callers. Tailnet reachability and host custody are the boundary.
+- Top-level sessions share git worktrees. Before mutating a shared branch or runtime, read and update `<git-common-dir>/omp-coordination.md`.
 
 ## Capability stance
 
