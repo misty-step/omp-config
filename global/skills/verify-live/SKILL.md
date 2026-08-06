@@ -19,6 +19,9 @@ in the claim. Capture the command, screenshot, snapshot, or log that shows it.
 Never repair the artifact under verification: make no edits, writes, commits,
 or tracker mutations. State what you exercised and what you did not as clearly
 as the verdict itself.
+The shared test doctrine in `global/references/testing-principles.md` defines
+structural test quality. A passing suite is structural evidence; this skill
+supplies the live oracle that doctrine requires for user-visible claims.
 
 ## Escalation ladder
 

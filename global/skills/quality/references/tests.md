@@ -2,6 +2,10 @@
 
 Load this branch only when `/quality` selects `tests`. It governs the repo-owned automated test system: class selection and depth, suite rigor, flake control, timing budgets, and failure artifacts.
 
+The shared test doctrine lives in `global/references/testing-principles.md`.
+This branch does not restate it. Load that reference first, then apply the
+inventory, selection, evidence, and completion rules here.
+
 ## Inventory
 
 Enumerate every test framework and suite. Record each present class, runtime and duration, CI wiring, coverage and mutation tools, seed source, fixture root, and CI flake history. Record each absent surface as an explicit fact.
@@ -26,35 +30,7 @@ Refuse a class that fails any rule. Record the failed rule and its evidence. Ref
 
 A missing current gate is a wiring gap, not an automatic refusal, when an executed probe proves the class can meet its named target tier.
 
-### Class targets
-
-#### Unit
-
-- **Detects:** Broken logic contracts at a function or module boundary.
-- **Select when:** Logic-bearing code exists, almost always.
-- **Refuse when:** Only pure plumbing exists, such as re-exports, type-only modules, or config threading.
-- **Target:** Fast tier. Make core logic mutation-resistant. Assert observable contracts, boundaries, transitions, precedence, and real errors.
-
-#### Integration
-
-- **Detects:** Broken seams between repo-owned modules, storage, or services.
-- **Select when:** The repository owns a seam that a unit test would mock away.
-- **Refuse when:** Every seam is third-party. Use contract or replay tests at that boundary instead.
-- **Target:** Exercise real internal seams. Mock external I/O only. Use fast or full tier according to duration.
-
-#### End-to-end
-
-- **Detects:** Broken user-visible flows across the wired system.
-- **Select when:** A user-facing UI, API, or CLI exists.
-- **Refuse when:** No user-visible surface exists, or an integration test already covers the same wiring.
-- **Target:** Keep only the few highest-value paths in the full tier. Require failure artifacts: screenshots, video, or trace for UI; transcripts for API and CLI.
-
-#### Property
-
-- **Detects:** Invariant violations across a generated input space.
-- **Select when:** Inputs have algebraic structure, such as parsers, serializers, codecs, normalizers, round-trips, or idempotent operations.
-- **Refuse when:** No invariant exists beyond matching an example. Use a table-driven unit test instead.
-- **Target:** Enable shrinking. Persist every failing case as a permanent regression fixture. Log and replay the seed.
+The light classes are the four rows in the shared doctrine table: unit, integration, end-to-end, and property. This branch adds the heavy classes.
 
 #### Mutation
 
@@ -74,7 +50,7 @@ A missing current gate is a wiring gap, not an automatic refusal, when an execut
 
 - **Detects:** Latency, throughput, or footprint regressions against a stated contract.
 - **Select when:** A performance contract exists, or a regression would be user-visible.
-- **Refuse when:** Nobody can state the threshold. A benchmark without a baseline and threshold is decoration; use [`verification-system-first`](../../../references/verification-system-first.md) for the threshold contract.
+- **Refuse when:** Nobody can state the threshold. A benchmark without a baseline and threshold is decoration; use `global/references/verification-system-first.md` for the threshold contract.
 - **Target:** Fix the workload, commit the baseline and threshold, record a variance note, and archive raw output. Use the full or scheduled tier.
 
 #### Torture (soak / stress)
@@ -90,23 +66,15 @@ Apply these constraints to every selected class. One behavior belongs in one tes
 
 #### F.I.R.S.T. floor
 
-- **Fast:** The fast-tier suite runs in seconds, or nobody runs it.
-- **Independent:** Run any subset in any order and in parallel. No test consumes another test's state.
-- **Repeatable:** Get the same result on any machine, at any time of day, offline.
-- **Self-validating:** Pass or fail without human log reading.
-- **Timely:** Land a new observable contract with its tests in the same change.
+Apply the F.I.R.S.T. standard: fast, independent, repeatable, self-validating, timely. The shared doctrine states the mechanics for fast, repeatable, and offline tests. This branch adds the independence rule: no test consumes another test's state, and every new observable contract lands with its tests in the same change.
 
 #### Determinism and seeds
 
-Ban wall clocks, unseeded random values, live network calls, shared ports, shared mutable fixtures, and sleep-based synchronization inside tests.
-
-Controlled randomness for property, jitter, or fuzz tests logs its seed on every run and replays from an environment variable or flag. Reproduce every failure from its artifact alone: exact command, seed, and fixture snapshot. Treat a failure that cannot be replayed as a finding.
+The shared doctrine bans non-deterministic inputs and requires seed replay. This branch adds the evidence rule: reproduce every failure from its artifact alone — exact command, seed, and fixture snapshot. Treat a failure that cannot be replayed as a finding.
 
 #### Flake protocol
 
-Use a CI rerun-on-red sweep to detect flakes. A pass on retry is flaky. Never blanket auto-retry to green; it hides the defect.
-
-Treat a flaky test as a defect. Quarantine it in an explicit skipped-with-ticket list, keep that list as a shrink-only ratchet, and set a fix-or-delete deadline. A non-deterministic gate is not a gate.
+Use a CI rerun-on-red sweep to detect flakes. A pass on retry is flaky. The shared doctrine states the quarantine rule: skip-with-ticket list, shrink-only, never blanket auto-retry. This branch adds a fix-or-delete deadline for every quarantined test. A non-deterministic gate is not a gate.
 
 #### Timing budgets
 
@@ -128,9 +96,9 @@ On every failure, persist the exact command, seed, and logs. Also persist:
 
 Make every shipped defect a permanent fixture-backed regression test.
 
-For each new or strengthened test, run a seeded-bug falsifier before declaring it protective. Introduce one concrete mutation or temporarily revert the fix. The test must fail. Restore the fix and rerun the test to pass. Record the mutation or reverted change, exact command, seed, exit code, and artifact path.
+For each new or strengthened test, close the falsifier loop in the shared doctrine. Record the seeded defect, exact command, seed, exit code, and artifact path in the domain assessment.
 
-Record, for every selected or refused class, the selection rule and evidence. Record suite commands, durations against budgets, exit codes, seeds, artifacts, and flake disposition. Record each mutation or reverted-fix falsifier in the domain assessment.
+Record, for every selected or refused class, the selection rule and evidence. Record suite commands, durations against budgets, exit codes, seeds, artifacts, and flake disposition.
 
 ## Leaf routes
 
@@ -139,7 +107,7 @@ Load the narrow method instead of reproducing its program:
 | Need | Pointer |
 |---|---|
 | Gate tiers and placement | [`skill://ci`](../../ci/SKILL.md) |
-| Diff-scoped test judgment and fix-vs-weaken authority (checks 1–8 on highest-risk contracts) | [`global/skills/review-tests/SKILL.md`](../../review-tests/SKILL.md) |
+| Diff-scoped test judgment and fix-vs-weaken authority (checks 1–11 on highest-risk contracts) | [`global/skills/review-tests/SKILL.md`](../../review-tests/SKILL.md) |
 | Exploratory or live behavior verification by a fresh verifier | [`skill://verify-live`](../../verify-live/SKILL.md) |
 | Live persona QA | [`skill://qa-users`](../../qa-users/SKILL.md) |
 | Rendered design proof and design leaves | `quality` → `design` → `references/design.md` |

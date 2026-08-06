@@ -22,6 +22,7 @@ Strengthen the repo-owned gate.
 This skill gives CI judgment.
 The consumer repo owns the implementation.
 Use the standing quality floor in `global/references/quality-gates.md` for gate scope.
+Apply `global/references/testing-principles.md` for suite composition and the fast-local tier.
 Read `references/host-agnostic-ci.md` for CI architecture and Dagger tradeoffs.
 
 

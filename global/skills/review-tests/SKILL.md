@@ -14,6 +14,8 @@ description: |
 
 Judge test defense, not test presence. A passing suite proves nothing by itself.
 Ask whether the suite would detect a broken changed contract.
+The shared test doctrine in `global/references/testing-principles.md` defines
+what a good test is. Judge the diff against that doctrine, not local taste.
 
 ## Scope
 
@@ -104,6 +106,30 @@ every changed line is defended. Do not invent findings to justify the pass.
    default. *Example:* a prior exact-value assertion becomes a loose range check
    with no linked ticket or stated contract change in the diff. Treat it as
    hiding a failure until the diff proves otherwise.
+
+9. **Fragmented journey.** Reject one workflow split into many tiny tests
+   that only pass together, or tests whose setup hides the journey in shared
+   hooks. One journey belongs in one test with its related assertions.
+   *Example:* a `POST /orders` flow covered by five tests that each call a
+   private step helper and rely on a shared `beforeEach` that seeds the same
+   store. A defect in the middle of the journey corrupts the setup state, so
+   the tests fail together or pass alone and never defend the flow. Important.
+
+10. **Copy-pinned assertions.** Flag assertions that only pin prose or
+    configuration: a message string, a tool description, a usage hint, a
+    warning line, or a config value. They break on copy edits and protect
+    nothing. Prefer structured output, user-visible outcomes, or stable
+    public contracts. *Example:*
+    `expect(handler.description).toContain("creates a report")` fails when
+    copy changes and proves nothing about behavior. Important when it is the
+    only test guarding that contract.
+
+11. **Blanket output silencing.** Flag a blanket stub over a log, console, or
+    sink that hides unexpected output. A silent stub hides real regressions.
+    *Example:* `vi.spyOn(console, "error").mockImplementation(() => {})` at
+    the top of a spec with no allowlist and no assertion on the calls. Any
+    later `console.error` regression sails through. Important; blocking when
+    the silenced sink is the only guard over that failure class.
 
 ## Fix vs. weaken
 

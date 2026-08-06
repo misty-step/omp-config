@@ -55,6 +55,8 @@ One-line pointers instead of local rewordings:
 - Verification loops: point at
   `global/references/verification-system-first.md` — do not
   re-derive it.
+- Testing: point at `global/references/testing-principles.md` for how any
+  skill or its tooling is tested — do not re-derive it.
 - Simplicity: the delete-first/Ponytail load trigger lives inside
   `global/references/delete-first.md`; skills just point there.
 - Structural skill creation or rewrites: read `global/external/mattpocock-skills/writing-for-agents/SKILL.md` and its disclosed `SKILL-MECHANICS.md` (`mattpocock-writing-for-agents`).
