@@ -10324,10 +10324,15 @@ def ensure_omp_isolation_supported(args: argparse.Namespace, repo: Path) -> str:
 
 def run_omp(args: argparse.Namespace, repo: Path, prompt: str) -> str:
     omp_bin = ensure_omp_isolation_supported(args, repo)
+    schema_text = json.dumps(SCHEMA, separators=(",", ":"), ensure_ascii=True)
     system_prompt = (
         "You are an isolated code-review engine. Review only the supplied bundle. "
         "Do not invent repository context outside the prompt. "
-        "Return only one JSON object that matches the requested review schema. "
+        "Return only one JSON object that validates against this exact JSON Schema: "
+        f"{schema_text} "
+        "Every finding must include non-empty title and body strings, priority in "
+        "P0|P1|P2|P3, confidence in [0,1], category, and code_location.file_path plus line. "
+        "If there are no findings, return findings as an empty array. "
         "No markdown fences, no preamble, no trailing commentary."
     )
     cmd = [
@@ -12126,7 +12131,7 @@ def run_reviewer(
     input_truncated: bool = False,
 ) -> dict[str, Any]:
     ensure_reviewer_input_complete(args, input_truncated)
-    attempts = 3 if args.engine == "cursor" else 1
+    attempts = 3 if args.engine in {"cursor", "omp"} else 1
     for attempt in range(1, attempts + 1):
         raw = run_engine(args, repo, prompt)
         try:
