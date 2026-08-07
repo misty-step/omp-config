@@ -4,8 +4,7 @@ name: foundation
 description: |
   Establish everything every project must have: application floor, access faces,
   gates, tests, release, onboarding, and Factory hooks. Always full audit then
-  remediate. Hand-only. Trigger: /foundation, /establish-baseline,
-  /project-engineering.
+  remediate. Hand-only. Trigger: /foundation, /establish-baseline.
 argument-hint: "[repo-path]"
 ---
 
@@ -34,6 +33,24 @@ SSOT for score rows and severity: `references/foundation-checklist.md`.
 Compose with `/document`, `/showcase`, `/vision`, `/ci`, and
 `mattpocock-codebase-design` (`global/external/mattpocock-skills/codebase-design/SKILL.md`)
 when a gap needs that owner. Stay on this skill for the run.
+
+## Proof
+
+Keep these five classes distinct. Never substitute a weaker class for a stronger
+one. A path that exists is only a **declaration**.
+
+1. **Declaration** — applicability, policy path, command name, service identity,
+   owner, waiver metadata.
+2. **Deterministic gate** — formatting, lint, types, tests, supply chain,
+   coverage/mutation thresholds; the command ran and the report exists.
+3. **Live probe** — real CLI, browser, API, consumer, runtime, restore, or
+   production boundary exercised; receipt required.
+4. **Capability eval** — held-out task, fresh model/agent output, grader score.
+5. **Fresh judgment** — artifact-only critic for irreducible architecture or
+   product judgment.
+
+Use a declaration to route proof. Do not mark `pass` on declaration alone when
+the dimension requires a gate, live probe, eval, or judgment.
 
 ## Contract
 
@@ -73,7 +90,8 @@ when a gap needs that owner. Stay on this skill for the run.
 ## Boundaries
 
 - Out of scope: portfolio positioning strategy; optional brand chrome.
-- `/project-engineering` is retired into this skill (redirect stub only).
+- Full remediate is chief/builder work. Architect may score read-only; it does
+  not own the foundation run.
 - Deep reference IA stays `/document`; this skill still requires a linked docs
   surface.
 - Capability evals and fresh-judgment seams: declare and wire when the repo has

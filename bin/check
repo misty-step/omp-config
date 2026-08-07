@@ -37,6 +37,7 @@ RETIRED_SKILL_NAMES = frozenset(
         "audit-quality-controls",
         "deliver-core",
         "design-audit",
+        "project-engineering",
         "quality-operations",
         "quality-tests",
         "quality-toolchain",

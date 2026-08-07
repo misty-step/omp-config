@@ -55,8 +55,8 @@ Respect `task.maxConcurrency`.
 | Outcome | Skills to name beyond the kit | Native agent |
 |---|---|---|
 | implementation and delivery | `deliver`, `ci`, `powder`, `sprites`, `refactor`, `compound`, `verification`, `bdd-pipeline` | `builder`; `verifier` proves |
-| product and infrastructure operation | `factory-apps`, `estate-infrastructure`, `document`, `showcase`, `foundation`, `project-engineering` | `builder`; `verifier` proves |
-| harness and architecture | `harness-engineering`, `mcp-design`, `foundation` | `architect` or `builder` |
+| product and infrastructure operation | `factory-apps`, `estate-infrastructure`, `document`, `showcase`, `foundation` | `builder`; `verifier` proves |
+| harness and architecture | `harness-engineering`, `mcp-design` | `architect` or `builder` |
 | independent review | `verify`, `verify-live`, `code-review`, `autoreview`, `thermo-nuclear-review`, `thermo-nuclear-code-quality-review`, `review-tests`, `review-security`, `review-vision` | `verifier` |
 | multi-lane audits and quality programs | `quality` | chief dispatches selected domain lanes |
 | skill and decision evaluation | `skill-eval`, `eval-design`, `council` | chief dispatches `verifier` or `architect` |

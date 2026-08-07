@@ -6,6 +6,21 @@ Cite paths, commands, URLs, or receipts. Absence without reason is `gap`.
 Product law: `global/references/application-floor.md`.  
 This file is the operational scorecard for `/foundation`.
 
+## Proof
+
+Five classes — do not substitute:
+
+| Class | Counts as evidence |
+|---|---|
+| Declaration | Path, command name, policy, waiver row exists |
+| Deterministic gate | Gate command ran; report/artifact proves outcome |
+| Live probe | Real boundary exercised; receipt |
+| Capability eval | Fresh task output + grader |
+| Fresh judgment | Artifact-only critic report |
+
+`pass` needs the strongest class the dimension implies. Declaration alone does
+not pass a gate, live, eval, or judgment row.
+
 ## Core files
 
 | Dimension | Pass rule |
