@@ -29,6 +29,7 @@ sources:
     license_path: LICENSE
     consumers:
       - global/skills/foundation/SKILL.md
+      - global/skills/factory-apps/SKILL.md
 
   - repo: misty-step/landmark
     ref: 393e15c2f816036c1edd0985696ba4d2a64772d4
@@ -42,6 +43,7 @@ sources:
     license_path: LICENSE
     consumers:
       - global/skills/foundation/SKILL.md
+      - global/skills/factory-apps/SKILL.md
 
   - repo: anthropics/skills
     ref: main

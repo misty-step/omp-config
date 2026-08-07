@@ -17,14 +17,13 @@ Keep the shared program here. Load only the selected domain reference.
 
 | Need | Use instead |
 |---|---|
-| Every-project floor, faces, onboarding, factory surfaces | `skill://foundation` |
-| Broad architecture reshape toward a goal | `skill://refactor` + `skill://prune` |
-| Single frozen-range review | `skill://code-review` |
-| Persona browser QA | `skill://qa-users` |
-| Live smoke of one claim | `skill://verify-live` |
+| Every-project floor, faces, onboarding, factory surfaces | `'/home/phaedrus/.omp/agent/skills/foundation'` |
+| Broad architecture reshape toward a goal | `'/home/phaedrus/.omp/agent/skills/refactor'` + `'/home/phaedrus/.omp/agent/skills/prune'` |
+| Single frozen-range review | `'/home/phaedrus/.omp/agent/skills/code-review'` |
+| Persona browser QA | `'/home/phaedrus/.omp/agent/skills/qa-users'` |
+| Live smoke of one claim | `'/home/phaedrus/.omp/agent/skills/verify-live'` |
 
 Do not run `/quality` as a second foundation scorecard.
-Do not load every domain reference "just in case".
 
 ## Select the domain
 
@@ -38,32 +37,38 @@ Do not load every domain reference "just in case".
 | `product` | `references/product.md` |
 | `design` | `references/design.md` |
 
-Reject a missing or unknown domain.
+Reject a missing or unknown domain. Do not load other domain references.
 
 ## Select the mode
 
 - Default `full`: steps 1–6.
-- `--audit-only`: stop after assess.
-- `--remediate`: load latest assessment; remediate + verify accepted findings.
-- `--verify`: independent proof only for remediated findings.
+- `--audit-only`: stop after step 4.
+- `--remediate`: load latest assessment; run steps 5–6 for `remediate` findings.
+- `--verify`: run step 6 for remediated findings.
 - `--trends`: operations only; recompute trends without a new audit.
 
 ## Ratchet program
 
-1. **Scope.** Repo, revision, dirty state, domain, mode. Inventory required surfaces.
+1. **Scope.** Record repo, revision, dirty state, domain, and mode. Load the domain reference.
+   Done when every required inventory surface has evidence or an explicit missing reason.
 2. **Target.** Freeze measurable targets and falsifiers before judgment.
+   Done when every inventoried surface has a selected target, reasoned refusal, or n/a.
 3. **Audit.** Dispatch read-only `researcher`, `verifier`, or `designer` lanes as the domain directs.
-4. **Assess.** Write `.evidence/quality/<domain>/assessment.json`. Validate with
+   Done when every selected target has `pass`, `gap`, or `missing` evidence.
+4. **Assess.** Write `.evidence/quality/<domain>/assessment.json`. Run
    `python3 "${PI_CODING_AGENT_DIR:-$HOME/.omp/agent}/skills/quality/scripts/validate-assessment.py" <assessment.json>`,
-   then render `assessment.md`. Each finding: `remediate` | `waive` | `defer` | `reject`.
-5. **Remediate.** `builder` slices for `remediate` findings. Preserve strengths.
+   then render `assessment.md`.
+   Done when validation passes and every finding has one decision:
+   `remediate` | `waive` | `defer` | `reject`.
+5. **Remediate.** Give `remediate` findings to `builder` by independent slice.
+   Done when each has a landed change or evidence-backed blocker.
 6. **Verify.** Fresh non-mutating `verifier` (or `designer` for rendered design).
+   Done when every remediated finding has independent evidence and preserved strengths hold.
 
-A finding without evidence is not a finding.
-Weakening a gate is not remediation.
+A finding without evidence is not a finding. Weakening a gate is not remediation.
 
 ## Completion Gate
 
 Apply `global/references/verification-system-first.md` and `references/assessment.md`.
 Report domain, mode, assessment paths, findings by decision, exact proof,
-preserved strengths, blockers, residual risk.
+preserved strengths, blockers, and residual risk.

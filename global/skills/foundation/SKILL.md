@@ -33,8 +33,8 @@ SSOT for score rows and severity: `references/foundation-checklist.md`.
 | Factory surfaces (Canary, Powder, Landmark, Mint) | this skill, section Factory surfaces |
 
 Compose with `/document`, `/showcase`, `/groom` (vision), `/ci`, and
-`global/external/mattpocock-skills/codebase-design/SKILL.md` when a gap needs
-that owner. Stay on this skill for the run.
+`mattpocock-codebase-design` (`global/external/mattpocock-skills/codebase-design/SKILL.md`)
+when a gap needs that owner. Stay on this skill for the run.
 
 
 ## Factory surfaces (Canary, Powder, Landmark, Mint)
