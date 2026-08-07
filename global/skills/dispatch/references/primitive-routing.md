@@ -63,7 +63,7 @@ Respect `task.maxConcurrency`.
 | evidence synthesis | `research`, `peer-harnesses`, `capability-confidence`, `simplified-technical-english` | `researcher` |
 | communication shaping | `comms` | chief or owning agent |
 | product and interface design | `design`, `image-gen`, `improve-ui`, `baseline-ui`, `prototype` | `designer` |
-| product direction | `vision`, `groom`, `roadmap`, `wayfinder` | chief; dispatch designer/researcher/architect as needed |
+| product direction | `vision`, `groom`, `roadmap`, `wayfinder`, `domain-modeling`, `setup-matt-pocock-skills` | chief; dispatch designer/researcher/architect as needed |
 | skill authoring | `writing-for-agents` | chief or `architect` |
 | persona browser QA | `qa-users`, `qa-persona` | chief → `qa-master` → `qa-persona` |
 | sharp critique of a plan | `grilling` | chief or `designer` |
