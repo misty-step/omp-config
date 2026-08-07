@@ -69,6 +69,9 @@ Respect `task.maxConcurrency`.
 | product and interface design | `design`, `image-gen`, `improve-ui`, `baseline-ui`, `prototype` | `designer`; chief dispatches parallel directions |
 | product direction | `vision`, `groom`, `roadmap` | chief; dispatch `designer`, `researcher`, or `architect` as needed |
 | persona browser QA | `qa-users` | chief → `qa-user` → `qa-user-leaf` |
+| sharp critique of a plan or decision | `grilling` | chief or `designer` |
+| complexity and bloat audit | `ponytail` | `ponytail` |
+| large work shaped into decision tickets | `wayfinder` | chief or `architect` |
 
 ## MCP and tool routes
 
