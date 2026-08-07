@@ -53,9 +53,9 @@ Reject a missing or unknown domain.
 1. **Scope.** Repo, revision, dirty state, domain, mode. Inventory required surfaces.
 2. **Target.** Freeze measurable targets and falsifiers before judgment.
 3. **Audit.** Dispatch read-only `researcher`, `verifier`, or `designer` lanes as the domain directs.
-4. **Assess.** Write `.evidence/quality/<domain>/assessment.json`, validate with
-   `scripts/validate-assessment.py`, render `assessment.md`. Each finding:
-   `remediate` | `waive` | `defer` | `reject`.
+4. **Assess.** Write `.evidence/quality/<domain>/assessment.json`. Validate with
+   `python3 "${PI_CODING_AGENT_DIR:-$HOME/.omp/agent}/skills/quality/scripts/validate-assessment.py" <assessment.json>`,
+   then render `assessment.md`. Each finding: `remediate` | `waive` | `defer` | `reject`.
 5. **Remediate.** `builder` slices for `remediate` findings. Preserve strengths.
 6. **Verify.** Fresh non-mutating `verifier` (or `designer` for rendered design).
 
@@ -64,5 +64,6 @@ Weakening a gate is not remediation.
 
 ## Completion Gate
 
+Apply `global/references/verification-system-first.md` and `references/assessment.md`.
 Report domain, mode, assessment paths, findings by decision, exact proof,
 preserved strengths, blockers, residual risk.

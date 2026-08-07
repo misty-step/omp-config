@@ -48,7 +48,7 @@ Prefer MCP first, local CLI wrapper second, direct Mint REST third.
 | Local `.docx`/`.pdf`/`.xlsx`/CSV | `anydoc` | Firecrawl Parse only for scanned OCR with operator OK |
 | Broad web discovery | Exa or Parallel Search | Firecrawl search |
 | Dynamic or logged-in page | `browser` / `agent-browser` | operator artifact |
-| Model pricing or availability | dated web sources via Exa + official pages | global/references/model-provider-harness-index.md, then verify live |
+| Model pricing or availability | dated web sources via Exa + official pages | global/skills/harness-engineering/references/model-provider-harness-index.md, then verify live |
 
 ## Report shape
 

@@ -2,7 +2,7 @@
 
 This reference owns agent-model fit.
 It does not own model facts.
-Read `global/references/model-provider-harness-index.md` for
+Read `global/skills/harness-engineering/references/model-provider-harness-index.md` for
 dated availability, price, context, and harness evidence.
 
 ## Agent ladders

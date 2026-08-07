@@ -34,7 +34,7 @@ This skill is for **omp-config work**, not product feature delivery.
 | doctrine, gates, hooks | `references/mode-engineer.md` |
 | open-model defaults | `references/open-model-roster.md` |
 | stack defaults | `references/preferred-stack.md` |
-| model/provider facts | `global/references/model-provider-harness-index.md` |
+| model/provider facts | `global/skills/harness-engineering/references/model-provider-harness-index.md` |
 | every-project floor | `skill://foundation` |
 | route work to agents | `skill://dispatch` |
 | repo-local skill scaffold | `references/repo-local-skill-generation.md` + `templates/repo-local-skill/` |
