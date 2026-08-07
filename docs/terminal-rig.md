@@ -29,7 +29,7 @@ The rig runs against stock OMP APIs. It does not patch the OMP package.
 
 ## Repository surfaces
 
-The table below is the complete 18-surface projection declared in `provenance.yaml`.
+The table below is the complete 20-surface projection declared in `provenance.yaml`.
 
 |Surface|Authority|Purpose|
 |---|---|---|
@@ -48,15 +48,17 @@ The table below is the complete 18-surface projection declared in `provenance.ya
 |global/themes/|~/.omp/agent/themes/|Theme library. Dark Ember is the active dark theme. Light Ember is the active light theme.|
 |global/presets/|~/.omp/agent/presets/|Launch overlays for lean, design, operations, and research work.|
 |global/hooks/review-gate.py|~/.omp/agent/hooks/review-gate.py|Projected review-gate entrypoint used by managed project hooks.|
-|bin/review_gate.py|~/.omp/agent/bin/review_gate.py|Canonical review-gate implementation used by the projected hook.|
-|bin/review_runner.py|~/.omp/agent/bin/review_runner.py|Canonical multi-review runner used by the gate.|
 |global/hooks/claude-safety.py|~/.omp/agent/hooks/claude-safety.py|Claude safety hook.|
+|bin/review_gate.py|~/.omp/agent/bin/review_gate.py|Canonical review-gate implementation used by the projected hook.|
+|bin/review_common.py|~/.omp/agent/bin/review_common.py|Shared review-gate helpers used by freeze, submit, and verify.|
+|bin/review_bundle.py|~/.omp/agent/bin/review_bundle.py|Frozen-range bundle identity for the review gate.|
+|bin/review_receipt.py|~/.omp/agent/bin/review_receipt.py|Review pass and receipt recording for the review gate.|
 
-`bin/install` creates all 18 live links, verifies their digests, and may back up conflicting authority targets. It does not copy runtime state into this repository. `bin/install --project PATH` additionally installs an idempotent managed `pre-push` hook at Git's active hooks path; that hook runs any backed-up foreign hook first and then the projected review gate, whose sibling `../bin/review_gate.py` is the declared canonical implementation.
+`bin/install` creates all 20 live links, verifies their digests, and may back up conflicting authority targets. It does not copy runtime state into this repository. `bin/install --project PATH` additionally installs an idempotent managed `pre-push` hook at Git's active hooks path; that hook runs any backed-up foreign hook first and then the projected review gate, whose sibling `../bin/review_gate.py` is the declared canonical implementation.
 
 The projected `bin/` directory is a runtime cotenant. Only the declared
-`review_gate.py` and `review_runner.py` links are owned by this repository;
-other installed bin entries remain untouched.
+`review_gate.py`, `review_common.py`, `review_bundle.py`, and `review_receipt.py`
+links are owned by this repository; other installed bin entries remain untouched.
 
 ## Owned skill contracts
 
