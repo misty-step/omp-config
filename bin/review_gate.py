@@ -197,7 +197,7 @@ def verify(
             actor = mapping(document.get("waiver"), "review receipt waiver").get("actor")
             print(f"review gate clean: explicit trivial waiver by {actor}")
         else:
-            print(f"review gate clean: planned review passes verified for the frozen Git range ({", ".join(document.get("planned_lanes") or [])})")
+            print('review gate clean: planned review passes verified for the frozen Git range (' + ', '.join(document.get('planned_lanes') or []) + ')')
     return EXIT_CLEAN
 
 
