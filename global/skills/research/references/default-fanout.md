@@ -27,6 +27,7 @@ Run a lane when relevant. Otherwise keep it as `skipped` with the reason.
 | Codebase | live repo patterns and contracts | `rg`, `git`, `read` |
 | Discovery | find candidate sources | Exa MCP, Parallel Search |
 | Extraction | page and site text | Firecrawl scrape / map / crawl |
+| Documents | local office/PDF/CSV text | `anydoc` |
 | Interaction | dynamic or authenticated UI | builtin `browser`, `agent-browser` |
 | Synthesis | answer over gathered evidence | lead synthesis with citations |
 | Critique | local fit and contradictions | `delegate.md` contradiction lane |
@@ -44,6 +45,7 @@ Prefer MCP first, local CLI wrapper second, direct Mint REST third.
 | Known URL text | Firecrawl scrape | Exa fetch |
 | Site map or docs corpus | Firecrawl map | manual link list |
 | Bounded docs crawl | Firecrawl crawl with `limit` | map + selective scrape |
+| Local `.docx`/`.pdf`/`.xlsx`/CSV | `anydoc` | Firecrawl Parse only for scanned OCR with operator OK |
 | Broad web discovery | Exa or Parallel Search | Firecrawl search |
 | Dynamic or logged-in page | `browser` / `agent-browser` | operator artifact |
 | Model pricing or availability | dated web sources via Exa + official pages | peer-harnesses index, then verify live |

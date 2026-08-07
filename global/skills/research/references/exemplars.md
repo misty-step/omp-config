@@ -53,6 +53,16 @@ curl -s http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.exa.ai/search \
   }'
 ```
 
+## Local document
+
+```bash
+anydoc ./spec.docx > /tmp/spec.md
+# or large files:
+anydoc ./deck.pptx -o /tmp/deck.md
+```
+
+Cite the source path. Do not paste an entire large conversion into the answer when a section is enough.
+
 ## Dynamic page fallback
 
 When scrape returns empty shell HTML:

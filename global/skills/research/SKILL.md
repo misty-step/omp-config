@@ -32,6 +32,7 @@ Complete acquisition when every consequential claim has direct support or an exp
 | Fetch known URLs into clean text | Firecrawl scrape (`firecrawl-mint`) | Exa fetch |
 | Map or crawl a docs site | Firecrawl map / crawl | selective Exa fetch |
 | Broad web search | Exa or Parallel Search | Firecrawl search |
+| Local office/PDF/CSV to markdown | `anydoc` CLI | hosted Firecrawl Parse (OCR only, operator OK) |
 | Dynamic or logged-in UI | builtin `browser` or `agent-browser` | operator artifact |
 | Local repo truth | `rg`, `git`, `read` | operator-provided context |
 
@@ -39,6 +40,7 @@ Route by capability, not vendor.
 
 - **Exa:** find and rank sources; code and technical discovery.
 - **Firecrawl:** turn known URLs and site trees into agent-readable text.
+- **anydoc:** convert local Word, Excel, PowerPoint, PDF, EPUB, CSV, and related files to markdown.
 - **Browser / agent-browser:** interact with pages. Do not use them as the default static fetcher.
 - **Mint:** every paid vendor call uses a value-free `__mint.<alias>__` marker. Never put raw API keys in the environment or transcript.
 
@@ -51,6 +53,7 @@ The chief uses native `researcher` lanes for independent angles. Each lane runs 
 | multi-angle research | `references/default-fanout.md` |
 | Exa search, fetch, code context | `references/exa-tools.md` |
 | Firecrawl scrape, map, crawl, search | `references/firecrawl-tools.md` |
+| local documents to markdown | `references/anydoc.md` |
 | browser fallback for dynamic pages | `references/browser-fallback.md` |
 | delegated multi-lane work | `references/delegate.md` |
 | examples and curl recipes | `references/exemplars.md` |
