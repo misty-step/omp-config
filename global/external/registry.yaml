@@ -163,7 +163,7 @@ sources:
     layout: multi-root
     skills_path: skills
     alias_prefix: "mattpocock-"
-    include: [codebase-design, grilling, improve-codebase-architecture, wayfinder, writing-for-agents]
+    include: [codebase-design, domain-modeling, grilling, improve-codebase-architecture, setup-matt-pocock-skills, wayfinder, writing-for-agents]
     license: MIT
     license_path: LICENSE
     consumers:

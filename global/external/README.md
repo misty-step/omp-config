@@ -17,7 +17,7 @@ Copied upstream skill bodies. Not local authorship.
 | cursor-thermos | Review gate leaves |
 | openclaw-autoreview | Review gate autoreview helper |
 | dietrich-ponytail | `/ponytail` + refactor |
-| mattpocock-skills | Only: writing-for-agents, grilling, wayfinder, codebase-design, improve-codebase-architecture |
+| mattpocock-skills | writing-for-agents, grilling, wayfinder, codebase-design, improve-codebase-architecture, plus domain-modeling and setup-matt-pocock-skills (required by wayfinder) |
 | misty-aesthetic/canary/landmark | factory-apps |
 | anthropic-frontend-design | document/render |
 | vercel-agent-browser + dogfood | verify-live / harness create |
