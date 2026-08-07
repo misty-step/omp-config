@@ -17,7 +17,6 @@ Prefer these canonical replacements for disabled names:
 | Disabled server | Canonical replacement | Rationale |
 |---|---|---|
 | `canary` | `misty-canary`, `canary` CLI, or Canary API | The product-owned CLI/API carries operational health and incident queries without an always-on server. |
-| `powder` | `powder` CLI or Powder API through the `powder` skill | Powder MCP stays disabled; the CLI/API owns durable work state. |
 | `chrome-devtools` | builtin `browser` or `agent-browser` CLI | Browser paths are selected per job; no standing DevTools MCP. |
 | `crucible` | Crucible CLI and persisted run records | Evaluation commands own validation, execution, comparison, and evidence. |
 | `monologue` | repository search and the owning product CLI/API | No OMP skill has a live Monologue MCP contract; do not invent one. |

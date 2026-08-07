@@ -23,7 +23,7 @@ registration in `global/mcp.json`.
 | Need | App | First surface | Fallback |
 |---|---|---|---|
 | uptime, incidents, error timelines, health checks, service evidence, production debugging | Canary | `misty-canary`, `canary` on `PATH`, or API | the disabled Canary MCP is not a runtime route |
-| backlog, issue cards, claims, relations, operator input requests, work status | Powder | `powder` CLI or API | Powder MCP is disabled and is not a runtime route |
+| backlog, issue cards, claims, relations, operator input requests, work status | Powder | `powder` CLI or API | no MCP route; skill + CLI/API only |
 | release intelligence, versions, changelogs, release notes, release kit, fleet adoption | Landmark | `misty-landmark` and `landmark describe --json` / dry-run CLI/action paths | `docs/agent-integration.md`, `docs/fleet-integration-playbook.md` |
 | UI/UX, Misty Step design law, tokens, static design registry, rendered design gate | Aesthetic | `misty-aesthetic`, `@misty-step/aesthetic` package, static API, law gate | `docs/ADOPTING.md`, `DESIGN.md` |
 | event-triggered agents, reflex loops, durable runs | unavailable | Mode B has no active workflow plane; keep work in Mode A until a future product is named | do not invent a replacement |

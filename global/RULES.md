@@ -16,6 +16,12 @@
 - Mint (`http://mint.tail5f5eb4.ts.net:4949`) is the only credential broker on this machine. Agent Vault is retired.
 - Make credentialed vendor calls through `http://mint.tail5f5eb4.ts.net:4949/proxy/https/<host>/<path>` with a `__mint.<alias>__` marker. Mint does not authenticate or authorize callers. Tailnet reachability and host custody are the boundary.
 - Top-level sessions share git worktrees. Before mutating a shared branch or runtime, follow `global/references/cross-session-coordination.md` to record status in `<git-common-dir>/omp-coordination.md`.
+- Powder is the Misty Step work ledger. Habitat is the R90 work ledger.
+- Record substantive agent work as a Powder card before or at claim time.
+- Backlog holds unshaped ideas. The board holds dispatchable work only.
+- Every board card in `ready` or `in_progress` MUST have an active claim while an agent works it.
+- Use only the `powder` CLI or HTTP API through the powder skill. Never register or call a Powder MCP surface.
+- Do not keep durable work state in chat, local ticket files, or a second ledger.
 
 ## Capability stance
 

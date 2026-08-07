@@ -4,13 +4,14 @@ Scope: This snapshot covers live local checkouts for Canary, Powder, Landmark,
 Aesthetic, Harness Kit, and the local Codex config.
 Use it as an audit snapshot, not as a product status source. A former
 event-plane capability is intentionally omitted; Mode B has no active owner.
+Harness route update 2026-08-07: Powder MCP is not a runtime route. Use the `powder` skill with CLI/API only.
 
 ## Summary Matrix
 
 | App | Role | Skills | MCP | SDK | Harness/system state | Gap |
 |---|---|---|---|---|---|---|
 | Canary | observability, uptime, incidents, health checks, error timelines | product root `SKILL.md`, imported as `misty-canary`; repo-local `canary-qa` and `canary-deploy` | implemented via `bin/canary mcp-server`; historically registered in factory MCP `global` profile | TypeScript SDK in `clients/typescript` | trusted project path exists; the global MCP catalog is authoritative | 2026-07-11: complete launcher entry; retired profile materializer is out of contract |
-| Powder | backlog, issues/cards, claims, relations, operator input | root product `SKILL.md`, imported as the Powder product skill; repo-local `powder-qa` | implemented in `crates/powder-mcp`; historically profile-gated for non-Adminifi/non-r90 repos | no SDK observed | trusted project path exists; the global MCP catalog and launcher are authoritative | SDK absent; 2026-07-11 retired profile materializer is out of contract |
+| Powder | backlog, issues/cards, claims, relations, operator input | root product `SKILL.md`, imported as the Powder product skill; repo-local `powder-qa` | product crate `powder-mcp` existed at audit time; harness does not register it | no SDK observed | trusted project path exists; skill + CLI/API is the harness route | SDK absent; harness MCP route removed 2026-08-07 |
 | Landmark | release intelligence, versions, changelogs, release kit, fleet adoption | product root `SKILL.md`, imported as `misty-landmark`; dogfood skill remains contributor-facing | no MCP observed | no SDK observed | trusted project path exists; Harness preferred stack now says Landmark | no MCP/SDK; current product-owned surface is skill + CLI/action |
 | Aesthetic | UI/UX system, Misty Step law, tokens, static registry | product root `SKILL.md`, imported as `misty-aesthetic` | no MCP observed | package/static API via `@misty-step/aesthetic` | trusted project path exists; Harness Kit imports product skill | CLI/MCP intentionally later per local vision |
 
@@ -59,10 +60,9 @@ Register an MCP only when you know the real instance and auth source:
   through a secret-free launcher that inherits env or reads
   `op://Agents/CANARY_ENDPOINT/credential` and
   `op://Agents/CANARY_API_KEY/credential`.
-- Powder: `powder-mcp`; registered for the `non-adminifi-non-r90` profile and
-  configured from the Agents vault with `POWDER_API_BASE_URL` from
-  `op://Agents/POWDER_ENDPOINT/URL` and `POWDER_API_KEY` from
-  `op://Agents/POWDER_API_KEY__bridge/credential`.
+- Powder: harness uses `powder` CLI/API through the product skill. Do not
+  register `powder-mcp`. At audit time a vault-backed MCP profile existed; that
+  is not the current runtime route.
 - Landmark: no MCP server observed; use CLI/action until the product exposes
   one.
 - Aesthetic: no MCP server observed; use package/static API/law gate until the
@@ -90,7 +90,7 @@ Register an MCP only when you know the real instance and auth source:
 Resolve these gaps on clean product-repo branches or with concrete deployment
 credentials:
 
-- Decide whether Powder needs a small SDK or whether API/CLI/MCP is sufficient.
+- Decide whether Powder needs a small SDK or whether API/CLI is sufficient. MCP is not the harness route.
 - Decide whether Landmark earns an MCP or whether CLI/action remains the right
   agent surface.
 - Decide whether Aesthetic earns an MCP after repeated adoption work shows that

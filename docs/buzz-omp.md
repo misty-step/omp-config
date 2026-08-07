@@ -42,7 +42,7 @@ A recipe uses schema `omp.recipe.v1`.
   "taskSkills": [],
   "mcpServers": [
     {
-      "name": "powder",
+      "name": "fixture-tools",
       "url": "http://127.0.0.1:8105/mcp"
     }
   ]
@@ -144,7 +144,7 @@ Run a direct ACP smoke test against a compiled bundle. Verify the response marke
 
 The prototype used two bundles:
 
-- `~/.local/share/buzz-omp/bundles/omp-alpha`: Alpha skill, Powder MCP, Luna primary model.
+- `~/.local/share/buzz-omp/bundles/omp-alpha`: Alpha skill, fixture MCP, Luna primary model.
 - `~/.local/share/buzz-omp/bundles/omp-beta`: Beta skill, no MCP server, Sonnet primary model.
 
-The direct ACP proof showed that Alpha could read only the Alpha marker and call Powder. Beta could read only the Beta marker and had no MCP server. A saved Alpha session loaded after an adapter restart and retained its marker.
+The direct ACP proof showed that Alpha could read only the Alpha marker and call its fixture MCP. Beta could read only the Beta marker and had no MCP server. A saved Alpha session loaded after an adapter restart and retained its marker.

@@ -10,7 +10,7 @@ argument-hint: "[list-ready|claim|update-status|update-relations|request-input|c
 
 # Powder
 
-Powder is a self-hostable work board exposed through the `powder` CLI and API.
+Powder is a self-hostable work board exposed through the `powder` CLI and HTTP API.
 Use it for durable cards, claims, relations, runs, operator input, audit events, and closeout.
 Treat cards as context objects with acceptance criteria and proof, not status rows.
 Store cards in the deployed database, not this repository, chat, TODO prose, or ad-hoc markdown.
@@ -20,8 +20,11 @@ Read `VISION.md` before changing scope, card/run model, runner boundary, or self
 
 - Use Powder for ordinary Misty Step work state, cards, claims, relations, input requests, and status.
 - Use Habitat for Adminifi and R90 work. Never use Powder for the R90 work ledger.
-- Powder MCP is disabled and is not a runtime route. Use the `powder` CLI or API.
-- Claim one card before mutation. Use the full repository label, such as `misty-step/canary`.
+- Never register or call a Powder MCP surface. Use only the `powder` CLI or HTTP API.
+- Backlog is the idea pool. The board (`ready`, `in_progress`, `awaiting_input`) is the dispatch queue.
+- Record substantive agent work as a Powder card before or at claim time.
+- Claim one board card before mutation. An unclaimed board card under active work is a contract violation.
+- Use the full repository label, such as `misty-step/canary`.
 - Keep production health and incidents in Canary. Keep release intelligence in Landmark.
 - Do not create local ticket files or a second durable work ledger.
 
