@@ -49,11 +49,6 @@ Use the owned app first. Follow these constraints:
   Any reachable caller can use any loaded alias for any HTTP(S) destination.
   This harness adds no Mint MCP or skill.
 
-## Current Audit
-
-`references/capability-audit-2026-07-03.md` is a historical capability audit.
-Read `global/mcp.json` and the active harness config for current registration
-truth before you change product repos or system config.
 
 ## Fleet Integration Standard
 
