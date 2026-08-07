@@ -176,6 +176,7 @@ sources:
       - global/references/skill-authoring-standard.md
       - global/skills/wayfinder
       - global/skills/grilling
+      - global/skills/writing-for-agents
 
   - repo: openclaw/agent-skills
     ref: main

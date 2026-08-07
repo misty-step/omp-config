@@ -59,7 +59,7 @@ One-line pointers instead of local rewordings:
   skill or its tooling is tested — do not re-derive it.
 - Simplicity: the delete-first/Ponytail load trigger lives inside
   `global/references/delete-first.md`; skills just point there.
-- Structural skill creation or rewrites: read `global/external/mattpocock-skills/writing-for-agents/SKILL.md` and its disclosed `SKILL-MECHANICS.md` (`mattpocock-writing-for-agents`).
+- Structural skill creation or rewrites: read `global/skills/writing-for-agents/SKILL.md` and its disclosed `SKILL-MECHANICS.md` (`mattpocock-writing-for-agents`).
 
 A skill that needs a *different* rule than the shared line says is making a
 claim — state the delta explicitly and say why, next to the pointer.
