@@ -51,7 +51,7 @@ One-line pointers instead of local rewordings:
 - Compression: `julius-caveman for interim synthesis only; findings, code,
   commits, and final artifacts stay normal English.`
 - Vision: `Read root VISION.md when present; if missing or stale, route to
-  /vision.`
+  `/groom` vision mode.`
 - Verification loops: point at
   `global/references/verification-system-first.md` — do not
   re-derive it.
