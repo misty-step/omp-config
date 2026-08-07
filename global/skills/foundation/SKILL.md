@@ -4,7 +4,8 @@ name: foundation
 description: |
   Establish everything every project must have: application floor, access faces,
   gates, tests, release, onboarding, and factory surfaces (Canary, Powder,
-  Landmark, Mint). Always full audit then remediate. Hand-only.
+  Landmark, Mint). Full runs audit then remediate; factory-only args answer
+  from the factory table. Hand-only.
   Trigger: /foundation, /establish-baseline, /factory-apps, /factory-stack.
 argument-hint: "[repo-path|canary|powder|landmark|mint]"
 ---
@@ -32,8 +33,8 @@ SSOT for score rows and severity: `references/foundation-checklist.md`.
 | Factory surfaces (Canary, Powder, Landmark, Mint) | this skill, section Factory surfaces |
 
 Compose with `/document`, `/showcase`, `/groom` (vision), `/ci`, and
-`mattpocock-codebase-design` when a gap needs that owner. Stay on this skill
-for the run.
+`global/external/mattpocock-skills/codebase-design/SKILL.md` when a gap needs
+that owner. Stay on this skill for the run.
 
 
 ## Factory surfaces (Canary, Powder, Landmark, Mint)
