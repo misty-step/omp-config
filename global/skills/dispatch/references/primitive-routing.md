@@ -54,15 +54,15 @@ Respect `task.maxConcurrency`.
 
 | Outcome | Skills to name beyond the kit | Native agent |
 |---|---|---|
-| implementation and delivery | `deliver`, `ci`, `powder`, `sprites`, `refactor`, `compound`, `verification` | `builder`; `verifier` proves |
+| implementation and delivery | `deliver`, `ci`, `powder`, `sprites`, `refactor`, `verification` | `builder`; `verifier` proves |
 | product and infrastructure operation | `factory-apps`, `estate-infrastructure`, `document`, `showcase`, `foundation` | `builder`; `verifier` proves |
 | harness and architecture | `harness-engineering`, `mcp-design` | `architect` or `builder` |
 | independent review | `verify`, `verify-live`, `code-review`, `autoreview`, `thermo-nuclear-review`, `thermo-nuclear-code-quality-review`, `review-tests`, `review-security`, `review-vision` | `verifier` |
 | multi-lane audits and quality programs | `quality` | chief dispatches selected domain lanes |
-| skill and decision evaluation | `skill-eval`, `eval-design`, `council` | chief dispatches `verifier` or `architect` |
+| skill and decision evaluation | `skill-eval`, `eval-design` | chief dispatches `verifier` or `architect` |
 | evidence synthesis | `research`, `peer-harnesses`, `capability-confidence` | `researcher` |
 | communication shaping | `comms` | chief or owning agent |
-| product and interface design | `design`, `image-gen`, `improve-ui`, `baseline-ui`, `prototype` | `designer` |
+| product and interface design | `design`, `improve-ui`, `baseline-ui`, `prototype` | `designer` |
 | product direction | `vision`, `groom`, `roadmap`, `wayfinder` | chief; dispatch designer/researcher/architect as needed |
 | skill authoring | `writing-for-agents` | chief or `architect` |
 | persona browser QA | `qa-users`, `qa-persona` | chief → `qa-master` → `qa-persona` |

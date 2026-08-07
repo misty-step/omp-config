@@ -6,7 +6,7 @@ expires: 2026-09-15
 
 The skill uses conversational, multi-turn interrogation to produce VISION.md. A
 single scripted fixture cannot replay the back-and-forth faithfully. It needs a
-human-anchor design, the same class as `council`.
+human-anchor design, the same class as multi-model skill-eval runs.
 
 ## Disposition
 

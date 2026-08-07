@@ -114,7 +114,7 @@ This skill is the designer autoload kit. Load branch skills only when the route 
 - Whole-product audit → `skill://quality` with the `design` domain.
 - New UI baseline, WCAG, keyboard, or motion-performance pass →
   `skill://baseline-ui`.
-- Informational image or concept raster → `skill://image-gen`.
+- Informational image or concept raster → `global/references/image-generation.md` (Mint provider call).
 - Animation or interaction behavior verification → dispatch `verifier` with
   live proof through `skill://verify`.
 

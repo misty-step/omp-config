@@ -23,7 +23,7 @@ first-party eval, not a frozen routing exemplar.
    - **A:** install and invoke the skill.
    - **B:** use the bare sharp-operator instruction with the same repo access and no skill.
    - **C (optional):** use a credible alternative primitive, such as an external skill or Ponytail for simplicity pressure, only when one exists.
-   Drive runs with `references/run-recipe.md`. Native-subagent smoke is free; `council.sh` with decorrelated families is serious.
+   Drive runs with `references/run-recipe.md`. Native-subagent smoke is free; `scripts/council.sh` with decorrelated families is serious.
 4. **Grade blind.** Show artifacts and fixture, not arm identity. Use a different model family from workers. Run mechanical checks before taste.
 5. **Verdict.** Pass only when A beats B paired on the claim across ≥2 of 3 fixtures. Label `keep`, `adapt`, `cut`, `needs-more-tasks`, or `graduate-to-architect`.
 

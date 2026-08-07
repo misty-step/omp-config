@@ -27,13 +27,13 @@ It does not certify the margin. The serious run must establish the margin.
 
 ## Serious run (paid, decorrelated)
 
-For contract changes and model-upgrade re-audits, use `council.sh`. It runs the
+For contract changes and model-upgrade re-audits, use `scripts/council.sh` (decorrelated multi-model helper). It runs the
 arms and grader on *different model families* from one another.
 
 - Write each arm's full task to one file. Lanes are cold. Include the fixture,
   repo context, forbidden edits, and what "done" means.
 - `members.tsv` = one line per arm/grader: `label  cli  model  persona`.
-- `global/skills/council/scripts/council.sh --task /tmp/<arm>.txt --members
+- `global/skills/skill-eval/scripts/council.sh --task /tmp/<arm>.txt --members
   /tmp/members.tsv --outdir .evidence/harness-evals/<skill>/<date>/<arm>`
 - Pull live slugs (roster index / OpenRouter MCP). Never hardcode them. An
   instantly failing lane usually has a dead slug or auth lapse, not a verdict.
