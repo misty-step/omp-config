@@ -43,9 +43,11 @@ Establish and remediate the floor with `/foundation` (full scorecard every run).
    (c) the few golden user paths are exercised behaviorally (click → visible state change) at desktop and ~390px widths.
    Substring assertions against rendered HTML do not cover the code inside it.
    They test the transcript, not the program.
-8. **Rust — or the strongest static typing the platform boundary allows.**
-   Maximize compile-time correctness guarantees. Every non-Rust surface
-   names its constraint.
+8. **Strong static typing — best tool for the job.** Prefer languages agents
+   and compilers both handle well. **Go and Rust are first-line defaults.**
+   TypeScript is a distant third when the platform forces the web/TS ecosystem.
+   Maximize compile-time correctness. Every weaker-typed surface names its
+   constraint and why a stronger option was wrong.
 9. **Frictionless onboarding.** Use one click-to-copy command from zero to fully working wherever possible.
    Include daemons, agents, and indicators that run, not only install.
    When self-hosting is the design, such as Canary, containerize it, document it, and ship agent-ready setup prompts.

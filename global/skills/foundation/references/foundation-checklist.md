@@ -79,7 +79,7 @@ Functional core behind one robust API. Required faces over that core:
 |---|---|
 | Deep modules | Boundaries favor deep modules; no shallow pass-through layering as the design |
 | Infra agnosticism | Deploy targets are not the architecture; host coupling is not load-bearing |
-| Static typing | Rust or strongest static option the platform allows; non-Rust constraint named |
+| Static typing | Go or Rust by default; TypeScript only when the platform forces it; weaker stacks name constraint + why |
 
 ## Release and onboarding
 

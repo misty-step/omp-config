@@ -112,7 +112,7 @@ Shared Operating Spine (`Prove`; Durable State and Closeout) first. Then:
   real-engine tiers where applicable
 - Release: Landmark (or documented equivalent) path proven, or n/a with reason
 - Onboarding: zero-to-running path + doctor (or waiver)
-- Typing: Rust or strongest static option named; non-Rust constraint stated
+- Typing: Go/Rust default (TS distant third); weaker stack constraint named
 - Factory: work ledger + Canary applicability declared with proof or n/a
 - Residuals: Powder cards listed with owners; no silent gaps
 ```
