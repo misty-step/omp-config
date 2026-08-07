@@ -24,9 +24,12 @@ Prefer independent proof families for substantive work:
 | Live oracle | Does changed behavior work in reality? | browser walk, CLI run, request replay, migration dry run, consumer build |
 | Structural gate | Did repo automation catch regressions? | tests, lint, typecheck, harness gate, generated-doc drift |
 | Eval / benchmark | Does agent, model, or performance claim survive held-out tasks or workload pressure? | skill eval, raw-vs-harness comparison, latency/throughput benchmark |
+| Process campaign | Does a multi-agent protocol hold under fault and illegal order? | FSM transition tests, multi-seed gate runs, Iron Forest `forest sim` |
 | Fresh critic | Did a fresh reviewer refute the claim? | diff + oracle review, design, security, or architecture lens |
+
 Independence matters. Three commands at one unit boundary form one proof method; a critic inheriting the author's reasoning is not fresh. Use multiple systems when one boundary cannot see the failure.
-Unit tests, typechecks, and lint catch structural regressions; QA, evals, benchmarks, and probes catch runtime, judgment, scale, or integration failures.
+Unit tests, typechecks, and lint catch structural regressions; QA, evals, benchmarks, process campaigns, and probes catch runtime, judgment, scale, integration, or protocol failures.
+
 | surface | verification system |
 |---|---|
 | Web UI | dev/preview URL, scripted or manual browser path, console/network check, screenshots or video |

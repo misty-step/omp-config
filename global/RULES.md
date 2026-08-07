@@ -81,6 +81,7 @@ Code changes MUST hold a clean, verified review receipt before any completion cl
 
 - The claim set covers done, shipped, ready to merge, ready to deploy, and PR-ready.
 - `skill://code-review` owns the reviewer set, the protocol, the receipt, the waiver route, and the pre-push backstop. Load it by path. It does not auto-surface.
+- Fixed protocol states: `global/references/review-gate-fsm.md`.
 - Report the receipt `bundle_digest` with the completion claim.
 - A critic from the section above does not satisfy this gate. One clean reviewer does not. A self-authored summary does not.
 - Fix, then refreeze and run the protocol again. A receipt for a superseded range is not a receipt.

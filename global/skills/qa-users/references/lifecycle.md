@@ -1,6 +1,8 @@
 # Lifecycle
 
-A run is a bounded state machine. `qa-master` records each transition through freeze and synthesis. The chief records tracker and PR transitions after the packet returns.
+A run is a bounded state machine. State table and illegal transitions:
+[`fsm.md`](fsm.md). `qa-master` records each transition through freeze and
+synthesis. The chief records tracker and PR transitions after the packet returns.
 
 1. **Explore and mint.** `qa-master` explores repository and product docs, routes, scripts, project rules, and live non-production entrypoints. Browser use on the master is limited to entrypoint smoke or later reproduction confirmation. Mint personas from product evidence. Each persona includes mission, knowledge, and blind_spots. Ask the operator only for persona, access, or entrypoint facts tools cannot establish.
 2. **Freeze.** Validate `input.v1` once with [`input-semantic.mjs`](input-semantic.mjs) and its fixture contract, passing the same `{ cli, harnessDefaults }` options used by the harness. The validator performs duplicate and membership checks, resolves execution overrides, and returns the effective entrypoint set, threshold, and structured provenance. Reject duplicate persona IDs, duplicate entrypoint IDs, undeclared IDs, persona references outside the final set, missing environments, and any environment other than `local`, `dev`, or `staging`.

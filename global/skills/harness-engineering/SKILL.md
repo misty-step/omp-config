@@ -118,6 +118,12 @@ and concrete oracles. Put long mode detail in `references/`. Wire scripts,
 hooks, and evals into gates. Require each new mechanism to have a gate, eval,
 benchmark, QA path, smoke path, or falsifiable probe.
 
+When the change is a multi-agent process (dispatch graph, review gate, qa-users
+lifecycle, recipe protocol), apply
+`global/references/process-adversarial-testing.md`. Name illegal transitions and
+add deterministic protocol tests. Do not ship orchestrator changes on a single
+golden-path test alone.
+
 After changes, record live evidence and the acceptance source. Record proof and
 the exact command or route. Record an artifact sha256 or a no-artifact statement.
 Record the contract-change reason or none. Confirm source and projection agree.

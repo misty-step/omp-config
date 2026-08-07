@@ -133,6 +133,12 @@ Before you declare a test protective, prove the loop closes:
 
 Complete when the test fails on the defect and passes after the restore.
 
+## Multi-agent protocols
+
+When the system under test is a gate, lifecycle, or multi-agent workflow, also
+apply `global/references/process-adversarial-testing.md`. Defend illegal
+transitions and multi-run invariants, not only a single happy path.
+
 ## Sources
 
 Adapted from Kent C. Dodds, `kody`, `docs/contributing/testing-principles.md`,
