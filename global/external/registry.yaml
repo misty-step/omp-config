@@ -16,11 +16,6 @@
 # byte. Consumers are paths, not aspirational catalog notes.
 
 sources:
-  - repo: misty-step/harness-kit
-    default: true
-    layout: flat
-    skills_path: skills
-
   - repo: misty-step/aesthetic
     ref: 0d4cf9a4a7b50fab5e00491daab35fa8cbef93ce
     pin: 0d4cf9a4a7b50fab5e00491daab35fa8cbef93ce
@@ -168,7 +163,7 @@ sources:
     layout: multi-root
     skills_path: skills
     alias_prefix: "mattpocock-"
-    include: [ask-matt, code-review, codebase-design, diagnosing-bugs, domain-modeling, grill-with-docs, implement, improve-codebase-architecture, prototype, research, resolving-merge-conflicts, setup-matt-pocock-skills, tdd, to-spec, to-tickets, triage, wayfinder, wizard, claude-handoff, loop-me, setup-ts-deep-modules, writing-beats, writing-fragments, writing-shape, git-guardrails-claude-code, migrate-to-shoehorn, scaffold-exercises, setup-pre-commit, grill-me, grilling, handoff, teach, to-questionnaire, wait-what, writing-for-agents]
+    include: [codebase-design, grilling, improve-codebase-architecture, wayfinder, writing-for-agents]
     license: MIT
     license_path: LICENSE
     consumers:

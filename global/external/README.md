@@ -1,15 +1,33 @@
 # Vendored external skills
 
-Skills under this directory are copied bodies of externally owned skills, not
-locally authored content. `registry.yaml` is the canonical provenance ledger.
+Copied upstream skill bodies. Not local authorship.
 
-Each committed vendor directory has one `.sync-meta.json` receipt. The receipt
-pins the upstream commit, license bytes, payload file list, and SHA-256 for
-every payload file. The matching registry entry names the vendor directory,
-redistribution license, and live consumer paths. `bin/check` rejects registry,
-receipt, payload, license, symlink, and consumer drift.
+## Rules
 
-To advance a pin, fetch upstream at the new immutable SHA, copy the payload,
-update its receipt and registry entry together, then run the source gate. Do
-not edit a vendored payload in place; an edited copy is a fork and must not
-pretend to be an upstream pin.
+1. `registry.yaml` lists every committed vendor pin.
+2. Each vendor dir has `.sync-meta.json` (commit, license hash, payload hashes).
+3. Every pin names live consumers under `global/`.
+4. `bin/check` fails on registry/receipt/payload/license/consumer drift.
+5. Do not edit vendored payload bytes in place. Re-pin upstream instead.
+
+## Keep set (2026-08-07)
+
+| Vendor | Why |
+|---|---|
+| cursor-thermos | Review gate leaves |
+| openclaw-autoreview | Review gate autoreview helper |
+| dietrich-ponytail | `/ponytail` + refactor |
+| mattpocock-skills | Only: writing-for-agents, grilling, wayfinder, codebase-design, improve-codebase-architecture |
+| misty-aesthetic/canary/landmark | factory-apps |
+| anthropic-frontend-design | document/render |
+| vercel-agent-browser + dogfood | verify-live / harness create |
+| julius-caveman | groom/refactor tone |
+| nous-creative-ideation | groom optional creative pass |
+
+## Explicit non-goals
+
+Do not vendor bulk catalogs (full Matt pack, obra packs, Leon kits, random OpenAI skill zoos) without a named consumer path in this repo. Prefer a thin local skill over a fat upstream tree.
+
+## Advance a pin
+
+Fetch upstream at an immutable SHA, replace payload + `.sync-meta.json` + registry pin together, run `bin/check`.
