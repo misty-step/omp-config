@@ -1,6 +1,6 @@
 # Landmark floor
 
-Use Landmark as the release-intelligence source of truth via `/factory-apps`.
+Use Landmark as the release-intelligence source of truth via `/foundation` factory surfaces.
 
 ## Required evidence for versioned products
 

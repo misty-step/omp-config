@@ -127,7 +127,7 @@ Load the narrow method instead of reproducing it:
 | Need | Pointer |
 |---|---|
 | Gate design or gate evidence | [`skill://ci`](../../ci/SKILL.md) |
-| Canary CLI/API and deployed-surface probes | [`skill://factory-apps`](../../factory-apps/SKILL.md) |
+| Canary CLI/API and deployed-surface probes | [`skill://foundation`](../../foundation/SKILL.md) |
 | Live runbook, incident, or drill verification | [`skill://verify-live`](../../verify-live/SKILL.md) |
 | Harness-owned integration paths | [`skill://harness-engineering`](../../harness-engineering/SKILL.md) |
 

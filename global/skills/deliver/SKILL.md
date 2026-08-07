@@ -26,7 +26,7 @@ The chief owns intent, acceptance, integration, and final judgment. A `builder` 
 |---|---|
 | Goal, acceptance, or tradeoff remains unresolved | `designer` with `groom`; chief or operator accepts |
 | External facts can change the design | read-only `researcher` with `research` |
-| Product identity or durable direction remains unsettled | `designer` with `vision`; chief or operator accepts |
+| Product identity or durable direction remains unsettled | `designer` with `groom` (vision); chief or operator accepts |
 | Running behavior needs proof | `verifier` with `verify-live` |
 | A substantive diff needs independent judgment | non-mutating `verifier` with `code-review` |
 | The repository gate is absent, weak, or red | `ci` |

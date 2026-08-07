@@ -23,7 +23,7 @@ Make a real product showable without presenting weak product truth as proof.
 | Script | `templates/demo-script.md` |
 | Case study | `templates/case-study.md` |
 
-Use `designer` with `/groom` or `/vision` for unsettled direction, `/design`
+Use `designer` with `/groom` or `/groom` (vision mode) for unsettled direction, `/design`
 for visible critique, `verifier` with `verify-live` for live verification,
 and `builder` for the accepted slice. The chief or operator retains acceptance.
 

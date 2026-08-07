@@ -3,9 +3,10 @@ disable-model-invocation: true
 name: foundation
 description: |
   Establish everything every project must have: application floor, access faces,
-  gates, tests, release, onboarding, and Factory hooks. Always full audit then
-  remediate. Hand-only. Trigger: /foundation, /establish-baseline.
-argument-hint: "[repo-path]"
+  gates, tests, release, onboarding, and factory surfaces (Canary, Powder,
+  Landmark, Mint). Always full audit then remediate. Hand-only.
+  Trigger: /foundation, /establish-baseline, /factory-apps, /factory-stack.
+argument-hint: "[repo-path|canary|powder|landmark|mint]"
 ---
 
 # /foundation
@@ -28,11 +29,34 @@ SSOT for score rows and severity: `references/foundation-checklist.md`.
 | Audit packet shape | `references/audit-packet.md` |
 | Gate design | `global/references/quality-gates.md`, `/ci` |
 | Live proof design | `global/references/verification-system-first.md` |
-| Factory method (Canary, Powder, Landmark) | `/factory-apps` |
+| Factory surfaces (Canary, Powder, Landmark, Mint) | this skill, section Factory surfaces |
 
-Compose with `/document`, `/showcase`, `/vision`, `/ci`, and
-`mattpocock-codebase-design` (`global/external/mattpocock-skills/codebase-design/SKILL.md`)
-when a gap needs that owner. Stay on this skill for the run.
+Compose with `/document`, `/showcase`, `/groom` (vision), `/ci`, and
+`mattpocock-codebase-design` when a gap needs that owner. Stay on this skill
+for the run.
+
+
+## Factory surfaces (Canary, Powder, Landmark, Mint)
+
+Use the owned factory app before inventing local state or third-party glue.
+Product repos own concrete skills and CLI/API surfaces.
+
+| Need | App | First surface |
+|---|---|---|
+| uptime, incidents, health, production debugging | Canary | `misty-canary`, `canary` on PATH, or API |
+| backlog, cards, claims, operator input | Powder | `powder` CLI or API (no MCP route) |
+| release intelligence, versions, changelogs | Landmark | `misty-landmark`, `landmark describe --json` |
+| credentialed outbound HTTP | Mint | `http://mint.tail5f5eb4.ts.net:4949/proxy/https/<host>/<path>` with `__mint.<alias>__` |
+| event-triggered / Mode B workflows | unavailable | keep work in Mode A; do not invent a replacement |
+
+Rules:
+
+- Query Canary before a repo-local production hypothesis.
+- Keep durable work state in Powder, never only in chat.
+- Ask Landmark to describe the repo; do not invent release notes from memory.
+- Mint does not authenticate callers. Tailnet reachability is the boundary.
+- For fleet integration evidence, load `references/fleet-integration-standard.md`.
+- Check `global/mcp.json` before claiming MCP availability. Prefer no MCP over a stub.
 
 ## Proof
 

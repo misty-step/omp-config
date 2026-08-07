@@ -1,6 +1,7 @@
 # ADR 0003: Add a project roadmap application
 
-- Status: Accepted
+- Status: Superseded (2026-08-07)
+- Superseded-by: `/groom` + Powder; ROADMAP.html skill removed
 - Date: 2026-07-30
 
 ## Context
@@ -13,7 +14,7 @@ A backlog makes these items look more complete than they are.
 
 ## Decision
 
-Add a hand-only `/roadmap` skill with `disable-model-invocation: true`.
+Add a hand-only `/groom` skill with `disable-model-invocation: true`.
 The skill creates or updates root `ROADMAP.html` and opens it in a browser.
 The artifact summarizes and links `VISION.md` when that file exists.
 The artifact does not replace `VISION.md` or a work ledger.

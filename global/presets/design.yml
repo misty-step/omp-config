@@ -4,16 +4,13 @@
 skills:
   ignoredSkills:
     - estate-infrastructure
-    - factory-apps
     - sprites
     - powder
     - research
-    - peer-harnesses
     - harness-engineering
     - mcp-design
     - skill-eval
     - eval-design
     - showcase
-    - vision
     - groom
     - document

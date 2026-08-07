@@ -26,7 +26,7 @@ search.
 
 If none exist, or the available artifact says nothing relevant to this diff,
 return exactly one `advisory` finding. State that intent is unstated. Name the
-document that would settle it (usually "no `VISION.md`; create one via `/vision`"
+document that would settle it (usually "no `VISION.md`; create one via `/groom` (vision mode)"
 or "card has no acceptance criteria"). Stop there. Do not infer intent and grade
 the diff against that inference. An invented standard is not authority. A
 finding based on it is fabricated, not discovered.
@@ -94,7 +94,7 @@ nothing to test. Do not create a finding.
 
 ## Non-goals
 
-- Rewriting `VISION.md` or proposing roadmap. Route that to `/vision` or
+- Rewriting `VISION.md` or proposing roadmap. Route that to `/groom` (vision mode) or
   `/groom`.
 - Arguing strategy the operator already settled. Reopening an accepted
   decision is not this lens's job.

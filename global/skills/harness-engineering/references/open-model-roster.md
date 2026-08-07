@@ -30,7 +30,7 @@ Grok Build's default moved to grok-4.5 on 2026-07-08 (Opus-class at `$2/$6`,
 with `--best-of-n` and `--check` self-verification).
 When a proprietary lane's price/capability crosses into open-model territory,
 re-run the comparison instead of citing the old verdict.
-Facts: `global/skills/peer-harnesses/references/model-provider-harness-index.md`.
+Facts: `global/references/model-provider-harness-index.md`.
 
 ## Local Smoke Evidence
 
@@ -179,7 +179,7 @@ Source: https://openrouter.ai/docs/cookbook/coding-agents/opencode-integration.
   probe, and at least one real local smoke receipt.
   Record the receipt in the table above.
 - Keep model facts in
-  `global/skills/peer-harnesses/references/model-provider-harness-index.md`.
+  `global/references/model-provider-harness-index.md`.
   Keep role-fit policy here and in shared doctrine.
 - Do not add a new provider wrapper when Pi/Goose/OpenCode plus model variants
   cover the failure mode.
