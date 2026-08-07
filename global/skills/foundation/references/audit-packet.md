@@ -1,36 +1,45 @@
 # Audit packet
 
-Write one packet per repo foundation run.
+Write one packet per `/foundation` run. Score every checklist dimension.
 
 ```markdown
 # Foundation audit — <repo> — <date>
 
+## Kind
+- project kind:
+- public product: yes/no
+
 ## Inventory
 - core files:
-- marketing:
-- docs:
-- readme media:
-- landmark:
-- release CI:
+- faces (API/CLI/MCP/skill/UI/SDK):
+- gates (fast/full/CI):
+- tests (unit/integration/e2e/HTML tiers):
+- docs / marketing / proof media:
+- release / Landmark:
+- onboarding / doctor / live services:
+- Factory (ledger, Canary):
+- typing / architecture notes:
 
 ## Scores
+Copy every row from `foundation-checklist.md`. Leave none out.
+
 | Dimension | Score | Evidence |
 |---|---|---|
-| VISION.md |  |  |
-| README.md |  |  |
-| Pitch |  |  |
-| Screenshots/GIFs |  |  |
-| Marketing site |  |  |
-| Docs site |  |  |
-| Landmark present |  |  |
-| Automated versioning |  |  |
-| Release notes |  |  |
-| Changelog |  |  |
-| CI wiring |  |  |
+| (all checklist dimensions) | pass/gap/n/a/waived | path, command, URL, or reason |
 
-## Ordered remediation
-1.
+## Remediation log
+| Dimension was | Change | Proof |
+|---|---|---|
+| | | |
 
 ## Waivers
--
+| Dimension | Owner | Reason | Evidence | Review | Expiry |
+|---|---|---|---|---|---|
+| | | | | | |
+
+## Deferred cards
+- Powder ids:
+
+## Gate
+Paste the Foundation Gate block with evidence filled.
 ```

@@ -8,7 +8,7 @@ Each native agent owns one bounded lane and one kit.
 
 | Outcome | Native agent | Method or skill | Oracle |
 |---|---|---|---|
-| system architecture | `architect` | kit `project-engineering`; brief `mcp-design` or `eval-design` when needed | boundary proposal, dependency graph, and reversal condition |
+| system architecture | `architect` | brief `codebase-design`; `mcp-design` or `eval-design` when needed | boundary proposal, dependency graph, and reversal condition |
 | accepted implementation | `builder` | kit `deliver` + `ci` | real entrypoint plus required repository gate |
 | security or code review | `verifier` | kit `verify` with lens `security`, `tests`, `vision`, or `review` | ranked finding with a reproducible trigger or static evidence |
 | structure and simplicity critique | `sculptor` | kit `prune` | ranked deletion or deepen list with net counts |
@@ -55,8 +55,8 @@ Respect `task.maxConcurrency`.
 | Outcome | Skills to name beyond the kit | Native agent |
 |---|---|---|
 | implementation and delivery | `deliver`, `ci`, `powder`, `sprites`, `refactor`, `compound`, `verification`, `bdd-pipeline` | `builder`; `verifier` proves |
-| product and infrastructure operation | `factory-apps`, `estate-infrastructure`, `document`, `showcase`, `foundation` | `builder`; `verifier` proves |
-| harness and architecture | `harness-engineering`, `mcp-design`, `project-engineering` | `architect` or `builder` |
+| product and infrastructure operation | `factory-apps`, `estate-infrastructure`, `document`, `showcase`, `foundation`, `project-engineering` | `builder`; `verifier` proves |
+| harness and architecture | `harness-engineering`, `mcp-design`, `foundation` | `architect` or `builder` |
 | independent review | `verify`, `verify-live`, `code-review`, `autoreview`, `thermo-nuclear-review`, `thermo-nuclear-code-quality-review`, `review-tests`, `review-security`, `review-vision` | `verifier` |
 | multi-lane audits and quality programs | `quality` | chief dispatches selected domain lanes |
 | skill and decision evaluation | `skill-eval`, `eval-design`, `council` | chief dispatches `verifier` or `architect` |

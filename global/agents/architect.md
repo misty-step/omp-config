@@ -4,7 +4,7 @@ description: Read-only systems architect for boundaries, tradeoffs, and executab
 model: openrouter/openai/gpt-5.6-luna:xhigh, openrouter/deepseek/deepseek-v4-flash-0731:high, openai-codex/gpt-5.6-sol:max, anthropic/claude-fable-5:xhigh, anthropic/claude-opus-5:xhigh, openai-codex/gpt-5.6-luna:xhigh, kimi-code/k3:max, xai-oauth/grok-4.5:high, google-antigravity/gemini-3.6-flash:high, openrouter/x-ai/grok-4.5:high, openrouter/z-ai/glm-5.2:high
 thinkingLevel: max
 tools: read,grep,glob,lsp,web_search
-autoloadSkills: project-engineering
+autoloadSkills: ''
 spawns: ''
 readSummarize: true
 ---

@@ -2,73 +2,82 @@
 disable-model-invocation: true
 name: foundation
 description: |
-  Audit, plan, and remediate a repo's public and agent foundation: core files,
-  marketing site, docs site, README proof assets, and Landmark release
-  automation. Hand-only. Trigger: /foundation, /establish-baseline.
-argument-hint: "[audit|plan|remediate|check] [repo-path]"
+  Establish everything every project must have: application floor, access faces,
+  gates, tests, release, onboarding, and Factory hooks. Always full audit then
+  remediate. Hand-only. Trigger: /foundation, /establish-baseline,
+  /project-engineering.
+argument-hint: "[repo-path]"
 ---
 
 # /foundation
 
-Establish a checkable product foundation for one repository. Ignore Misty Step
-aesthetic chrome and DESIGN.md brand-kit adoption. Focus on truth, proof, and
-release machinery.
+Bring one repository up to the **every-project floor**. No modes. Every run
+scores **every** dimension, then remediates accepted gaps until the gate holds
+or each residual has a named waiver.
 
-Structural skill shape follows `/writing-for-agents` (projected
-`mattpocock-writing-for-agents`).
+SSOT for product obligations: `global/references/application-floor.md`.  
+SSOT for score rows and severity: `references/foundation-checklist.md`.
 
 ## Route
 
 | Need | Load |
 |---|---|
-| Checklist dimensions, severity, and pass rules | `references/foundation-checklist.md` |
-| Marketing + docs site minimum contract | `references/public-surfaces.md` |
-| Landmark versioning, notes, changelog, CI | `references/landmark-floor.md` |
+| Full scorecard (every dimension) | `references/foundation-checklist.md` |
+| Product floor law | `global/references/application-floor.md` |
+| Marketing + docs minimum | `references/public-surfaces.md` |
+| Landmark / release path | `references/landmark-floor.md` |
 | Audit packet shape | `references/audit-packet.md` |
+| Gate design | `global/references/quality-gates.md`, `/ci` |
+| Live proof design | `global/references/verification-system-first.md` |
+| Factory method (Canary, Powder, Landmark) | `/factory-apps` |
 
-Compose with `/document` for reference docs, `/showcase` for public proof
-assets, `/factory-apps` → Landmark for release intelligence, and `/vision` when
-`VISION.md` is missing or stale.
+Compose with `/document`, `/showcase`, `/vision`, `/ci`, and codebase-design
+when a gap needs that owner. Stay on this skill for the run; do not switch to a
+second “profile-only” skill.
 
 ## Contract
 
-- Work one repo at a time. Default to the current checkout.
-- Produce an audit packet before remediation. Do not polish without a gap list.
-- Remediate only accepted gaps. Prefer the smallest change that closes a check.
-- Map every public claim to a file, route, screenshot, GIF, or Landmark artifact.
-- Require Landmark integration for automated versioning, release notes, and
-  changelogs when the repo ships versions.
-- Do not require Aesthetic tokens, house CSS, or DESIGN.md brand adoption.
-- Keep `disable-model-invocation` skills hand-fired; do not invent auto loops.
+- One repo per run. Default: current checkout.
+- **Full front every time.** Score every checklist dimension. Do not sample.
+- **Audit before patch.** Write the packet, then remediate.
+- **Remediate in the same run** for accepted gaps. File a Powder card only when
+  the gap is blocked on secrets, human policy, or multi-PR scope the operator
+  defers.
+- Prefer the smallest change that closes a dimension.
+- `n/a` and `waived` need a project-specific reason. Silence is a gap.
+- Incomplete face (including stub MCP) is a gap. Prefer deleting a stub over
+  claiming the face.
+- Do not require Aesthetic brand-kit adoption. Pitch and proof still required
+  for public products.
+- Do not invent paths or commands to green a row. `gap: <card-or-path>` is
+  honest; a fake pointer is not.
 
 ## Steps
 
-1. **Recon** — Inventory root files, `site/` or public pages, `docs/`, README
-   media, Landmark config/workflows, and release history.
-   Done when the inventory names every foundation surface that exists or is
-   absent.
-2. **Audit** — Score each checklist dimension from
-   `references/foundation-checklist.md`.
-   Done when every dimension is `pass`, `gap`, or `n/a` with evidence paths.
-3. **Plan** — Order remediation by user-visible risk, then release risk, then
-   docs depth.
-   Done when the plan lists ordered cards or patches with an oracle each.
-4. **Remediate** — Close accepted gaps only. Use `/document`, `/showcase`, and
-   Landmark surfaces instead of one-off invention.
-   Done when each accepted gap has proof or an explicit waiver.
-5. **Check** — Re-run the checklist against the working tree.
+1. **Recon** — Inventory root files, faces (API/CLI/MCP/skill/UI), gates, tests,
+   docs/site, release/Landmark, onboarding/doctor, deploy targets, Factory
+   hooks, and typing stack.
+   Done when every checklist dimension has a candidate path, command, or
+   explicit absence.
+2. **Score** — Mark each dimension `pass`, `gap`, `n/a`, or `waived` with
+   evidence. Run safe probes (help, doctor, gate dry commands, URL checks).
+   Done when the packet covers **every** checklist row with evidence or reason.
+3. **Remediate** — Close gaps in severity order from the checklist. Use owning
+   methods (`/ci`, `/document`, `/showcase`, Landmark, codebase-design) inside
+   this run.
+   Done when each former gap is `pass`, `waived` with metadata, or deferred on
+   a Powder card the operator accepted.
+4. **Recheck** — Re-score the full checklist against the tree.
    Done when the completion gate below is filled with evidence.
 
 ## Boundaries
 
-- Out of scope: Misty Step aesthetic kit adoption, token rethemes, DESIGN.md as
-  brand law, and portfolio positioning strategy beyond a clear product pitch.
-- `/showcase` owns demo video and consulting packaging. This skill owns the
-  durable foundation those assets stand on.
-- `/document` owns deep reference IA. This skill requires a public or committed
-  docs surface and links it from README/marketing.
-- Do not mark Landmark done from memory. Use `landmark describe --json` or the
-  live workflow evidence named in `references/landmark-floor.md`.
+- Out of scope: portfolio positioning strategy; optional brand chrome.
+- `/project-engineering` is retired into this skill (redirect stub only).
+- Deep reference IA stays `/document`; this skill still requires a linked docs
+  surface.
+- Capability evals and fresh-judgment seams: declare and wire when the repo has
+  model decisions; otherwise `n/a` with reason — still score the row.
 
 ## Completion Gate
 
@@ -76,15 +85,16 @@ Shared Operating Spine (`Prove`; Durable State and Closeout) first. Then:
 
 ```markdown
 ## Foundation Gate
-- Core files: VISION.md, README.md present and current; DESIGN.md noted only if
-  already present (not required by this skill).
-- Pitch: one outsider-legible pitch in README and/or marketing site.
-- Proof media: screenshot and/or GIF present in README and/or marketing site,
-  or explicit n/a with reason.
-- Marketing site: public URL or in-repo site/ with deploy path, or n/a waiver.
-- Docs site: committed docs/ or published docs URL linked from README/marketing.
-- Landmark: automated versioning + release notes/changelog path proven, or n/a
-  for non-releasing repos with reason.
-- Gaps closed or waived: list with evidence.
-- Follow-ups: Powder cards filed for deferred work, if any.
+- Packet: every checklist dimension scored with evidence or reason
+- Floor: application-floor items 1–9 closed, waived, or deferred on cards
+- Faces: API + CLI + MCP + skill + UI cover core verbs (or waiver per face);
+  no stub MCP
+- Gates: fast + full commands real; CI runs the full gate; no weakened gate
+- Tests: unit / integration / e2e applicability proven; HTML surfaces use
+  real-engine tiers where applicable
+- Release: Landmark (or documented equivalent) path proven, or n/a with reason
+- Onboarding: zero-to-running path + doctor (or waiver)
+- Typing: Rust or strongest static option named; non-Rust constraint stated
+- Factory: work ledger + Canary applicability declared with proof or n/a
+- Residuals: Powder cards listed with owners; no silent gaps
 ```

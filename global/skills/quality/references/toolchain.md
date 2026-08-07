@@ -74,7 +74,7 @@ re-enforces the same repository-owned contract.
 - Route automated test-system depth to `tests` and diff-scoped test judgment to
   `review-tests`.
 - Route CI architecture, gate placement, tiering, and gate execution to `/ci`.
-- Route whole-repository fitness profiles to `project-engineering`.
+- Route the every-project floor (full audit + remediate) to `/foundation`.
 - Use `global/references/quality-gates.md` for the standing gate floor.
 - Route live behavior to a `verifier` using `verify-live`.
 - Route runtime operations to the `operations` domain.

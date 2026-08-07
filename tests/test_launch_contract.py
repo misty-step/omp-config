@@ -141,7 +141,7 @@ class LaunchContractTests(unittest.TestCase):
                     "model": "openai-codex/gpt-5.6-sol",
                     "thinking": "max",
                     "tools": ["read", "grep", "glob", "lsp", "web_search"],
-                    "skills": ["project-engineering", "mcp-design", "vision"],
+                    "skills": ["foundation", "mcp-design", "vision"],
                     "subagents": {"allowed": [], "tools": [], "isolation": "inherit", "max_concurrency": 1},
                 }
             )
@@ -167,7 +167,7 @@ class LaunchContractTests(unittest.TestCase):
                     "model": "openai-codex/gpt-5.6-sol",
                     "thinking": "max",
                     "tools": ["read", "grep", "glob", "lsp", "web_search"],
-                    "skills": ["project-engineering", "mcp-design", "vision"],
+                    "skills": ["foundation", "mcp-design", "vision"],
                     "subagents": {"allowed": [], "tools": [], "isolation": "inherit", "max_concurrency": 1},
                 }
             )

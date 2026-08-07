@@ -5,6 +5,7 @@ Apply these items in all circumstances.
 This is the floor, not the ceiling.
 Grooming sessions treat a missing item as a backlog gap.
 `/shape` packets for new products include each floor item or name an explicit waiver per item.
+Establish and remediate the floor with `/foundation` (full scorecard every run).
 
 ## The floor
 
@@ -15,15 +16,13 @@ Grooming sessions treat a missing item as a backlog gap.
    Weave for weave-family products). Program epic: powder `misty-step-910`;
    kit: `aesthetic-907`. Evidence bar per `/showcase`: no public claim
    without a screenshot, command, or demo path behind it.
-2. **The five faces.** One core, every face (operator ratification,
-   2026-07-04: "every single application needs its core functionality,
-   needs the API, and unless there is a strong reason for an exception,
-   they should pretty much all also have an MCP and a CLI and a skill that
-   they ship and a UI"). Concretely: **API + CLI + MCP server + shipped
-   skill + UI** over one core; add SDK where external consumers exist.
-   Complete a face only when it covers core verbs.
-   An MCP that reads but cannot write (powder, 2026-07-04: no `create_card`, groom fell back to raw HTTP) violates the floor; it is not complete.
-   Name exceptions as waivers per face. Never omit them silently.
+2. **The five faces.** Functional core behind one robust API. Required faces
+   over that core: **API + CLI + MCP + shipped skill + UI**. Add an SDK only
+   when external consumers exist. A face passes only when it covers core verbs.
+   Prefer no MCP over a stub MCP — incomplete or read-only core MCP is a gap.
+   Name a waiver per missing face. Never omit a required face silently.
+   (Operator ratification 2026-07-04. Fleet matrix epic weave-013 abandoned;
+   establish faces through `/foundation`, not a separate grind card.)
 3. **Documentation.** Let an operator go from the repo to productive use alone.
    Provide a README quickstart, an operator walkthrough for any UI or serve mode, and honest help text.
 4. **CI and quality gates.** Run the repo gate in CI and gate the diff.

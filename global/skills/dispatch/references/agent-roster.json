@@ -18,9 +18,7 @@
       ],
       "thinkingLevel": "max",
       "tools": "read,grep,glob,lsp,web_search",
-      "autoloadSkills": [
-        "project-engineering"
-      ],
+      "autoloadSkills": [],
       "spawns": []
     },
     "builder": {

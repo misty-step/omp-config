@@ -40,7 +40,7 @@ No other build, code-generation, or synchronization step exists.
 | task-specific model, agent, and primitive routing | `../dispatch/SKILL.md` |
 | open-model defaults | `references/open-model-roster.md` |
 | preferred stack / infrastructure defaults | `references/preferred-stack.md` |
-| adopt or audit a repo engineering fitness function | `../project-engineering/SKILL.md` |
+| every-project floor (faces, gates, release, onboarding) | `../foundation/SKILL.md` (`/foundation`) |
 | factory app capability routing | `../factory-apps/SKILL.md` |
 | generate a focused repo-local skill for a domain agent | `references/repo-local-skill-generation.md` + `templates/repo-local-skill/` |
 | public-surface "works" critique | `../../shared/references/works-critique.md` |
