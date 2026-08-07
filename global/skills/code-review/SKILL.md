@@ -30,7 +30,6 @@ GATE=bin/review_gate.py
 OLD_OID="$(git merge-base <base-ref> HEAD)"
 NEW_OID="$(git rev-parse HEAD)"
 
-python3 "$GATE" classify --repo . --old-oid "$OLD_OID" --new-oid "$NEW_OID"
 python3 "$GATE" freeze --repo . --old-oid "$OLD_OID" --new-oid "$NEW_OID"
 # read planned_lanes from .omp/review-freeze.json, then for each lane:
 python3 "$GATE" submit --repo . \
@@ -42,9 +41,11 @@ python3 "$GATE" record --repo .
 python3 "$GATE" verify --repo .
 ```
 
+Optional: `classify` prints scope and planned lanes without writing artifacts.
+
 | Command | Contract |
 |---|---|
-| `classify` | Scope: `trivial` or `substantive`. |
+| `classify` | Optional preview of scope and planned lanes. |
 | `freeze` | Bind range, paths, `planned_lanes`, and `bundle_digest`. Clear stale passes/receipt. |
 | `submit` | One canonical reviewer from `REVIEW_SPECS`. Require actor, harness, model, run_id. |
 | `record` | Build receipt from exactly the planned passes. |
@@ -56,28 +57,24 @@ Exit: `0` clean; `1` valid non-clean submit; `2` protocol/schema/range failure.
 
 ## Dynamic floor
 
-`review_common.floor_plan(paths)` picks the minimum lanes. Freeze stores that
-list in `planned_lanes` and binds it into `bundle_digest`. Submit only those
-lanes, in order. Do not drop a floor lane. Do not invent a reviewer outside
-`REVIEW_SPECS`.
+Source of truth: `review_common.floor_plan` and `review_scope` in
+`bin/review_common.py` (see also ADR 0007). Freeze copies the result into
+`planned_lanes` and binds it into `bundle_digest`.
+
+Submit only the freeze `planned_lanes`, in order. Do not drop a floor lane.
+Do not invent a reviewer outside `REVIEW_SPECS`.
+
+Summary of the live floor (if this disagrees with code, trust the code):
 
 | Range | `planned_lanes` |
 |---|---|
 | Trivial prose/config (not policy) | `[]` → `waive` |
 | Substantive non-code | `autoreview`, `thermo-nuclear-code-quality-review` |
-| Code (`.py`/`.ts`/…, `bin/`, `hooks/`) | `autoreview`, `thermo-nuclear-review`, `ponytail` |
-| Code + high-stakes path keyword | above + `thermo-nuclear-code-quality-review` |
+| Code | `autoreview`, `thermo-nuclear-review`, `ponytail` |
+| Code + high-stakes path | above + `thermo-nuclear-code-quality-review` |
 
-High-stakes path keywords: `auth`, `secret`, `gate`, `migration`, `harness`,
-`hook`, `install`.
-
-Policy paths stay substantive even when the bytes are prose:
-`global/skills/**`, `global/agents/**`, `global/references/**`, `AGENTS.md`,
-`RULES.md`, `SKILL.md`, `bin/`, hooks, and related policy directories.
-`.gitattributes` stays substantive (evidence rendering).
-
-Trivial waiver never authorizes policy, executable, or evidence-rendering
-changes.
+Policy paths and `.gitattributes` stay substantive. Trivial waiver never
+authorizes policy, executable, or evidence-rendering changes.
 
 ```bash
 python3 bin/review_gate.py waive --repo . \
