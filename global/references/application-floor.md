@@ -15,13 +15,12 @@ Grooming sessions treat a missing item as a backlog gap.
    Weave for weave-family products). Program epic: powder `misty-step-910`;
    kit: `aesthetic-907`. Evidence bar per `/showcase`: no public claim
    without a screenshot, command, or demo path behind it.
-2. **Faces.** Functional core behind one robust API. Required faces over that
-   core: **CLI + UI + shipped skill**. **MCP is optional** — add it when agents
-   need tool-protocol access beyond skill and CLI; skip it when they do not.
-   Add an SDK only when external consumers exist. A face passes only when it
-   covers core verbs. Prefer no MCP over a stub MCP. Name a waiver per missing
-   required face. Never omit a required face silently.
-   (Operator 2026-08-07: MCP drops from required; weave-013 matrix epic abandoned.)
+2. **The five faces.** Functional core behind one robust API. Required faces
+   over that core: **API + CLI + MCP + shipped skill + UI**. Add an SDK only
+   when external consumers exist. A face passes only when it covers core verbs.
+   Prefer no MCP over a stub MCP — a read-only or incomplete MCP is a gap, not
+   a pass. Name a waiver per missing face. Never omit a required face silently.
+   (Ratified 2026-07-04; weave-013 matrix epic abandoned — doctrine lives here.)
 3. **Documentation.** Let an operator go from the repo to productive use alone.
    Provide a README quickstart, an operator walkthrough for any UI or serve mode, and honest help text.
 4. **CI and quality gates.** Run the repo gate in CI and gate the diff.

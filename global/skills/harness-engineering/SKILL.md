@@ -43,7 +43,7 @@ No other build, code-generation, or synchronization step exists.
 | adopt or audit a repo engineering fitness function | `../project-engineering/SKILL.md` |
 | factory app capability routing | `../factory-apps/SKILL.md` |
 | generate a focused repo-local skill for a domain agent | `references/repo-local-skill-generation.md` + `templates/repo-local-skill/` |
-| product access faces (API+CLI+UI+skill; MCP optional) | `global/references/application-floor.md` item Faces; audited via `/foundation` |
+| five faces (API+CLI+MCP+skill+UI; stub MCP fails) | `global/references/application-floor.md` item The five faces; audit via `/project-engineering` |
 | public-surface "works" critique | `../../shared/references/works-critique.md` |
 | model-native product boundary | `../../shared/references/model-native-product-primitives.md` |
 | loop readiness / Mode B handoff | `../../shared/references/loop-readiness.md` |

@@ -30,27 +30,10 @@ Aesthetic/brand-kit adoption is intentionally absent.
 | Changelog | Changelog or equivalent release history is generated or updated on release |
 | CI wiring | Release workflow is real in GitHub Actions or documented equivalent |
 
-## Access faces
-
-SSOT: `global/references/application-floor.md` item **Faces**.
-Shape: functional core → robust API → required faces over the API.
-
-| Dimension | Pass rule |
-|---|---|
-| Functional core + API | Domain rules live behind one durable API (or library API for pure libs); no second business-logic copy in a face |
-| CLI | Primary core verbs reachable from a CLI with honest `--help` / doctor path |
-| UI | Operator-facing UI for core verbs, or waiver (library/daemon-only with reason) |
-| Skill | Shipped skill (repo or omp-config) teaches agents the real CLI/API; not a parallel protocol |
-| MCP | Optional. `pass` if core verbs covered; `n/a` if absent by choice; `gap` only if present but incomplete/stub |
-
-Required faces: CLI, UI, skill. Optional: MCP, SDK.
-Incomplete face = gap. Prefer absent MCP over stub MCP.
-
 ## Severity guide
 
 1. Missing VISION/README or false public claims
-2. Required face missing (CLI, UI, or skill) without waiver; or stub MCP kept as if complete
-3. No Landmark release path on a versioned product
-4. No pitch or proof media on a public product
-5. Docs surface missing or unlinked
-6. Marketing site missing when the product is meant to be public
+2. No Landmark release path on a versioned product
+3. No pitch or proof media on a public product
+4. Docs surface missing or unlinked
+5. Marketing site missing when the product is meant to be public

@@ -55,7 +55,7 @@ The chief dispatches additional lanes. Keep this skill at the contract layer.
 | Model or agent capability | `global/skills/eval-design/SKILL.md` |
 | Canary, Powder, Landmark | `global/skills/factory-apps/SKILL.md` |
 | Module depth, seams, dependency direction | `global/external/mattpocock-skills/codebase-design/SKILL.md` (`mattpocock-codebase-design`) |
-| Application-only obligations and waivers | `global/references/application-floor.md` |
+| Application floor (marketing, five faces, docs, gates, …) and waivers | `global/references/application-floor.md` |
 
 Return the populated profile and a gap report grouped by proof class.
 The chief routes implementation to the owning native agent and skill.

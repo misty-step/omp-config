@@ -2,17 +2,17 @@
 disable-model-invocation: true
 name: foundation
 description: |
-  Audit, plan, and remediate a repo's product foundation: core files, access
-  faces (API+CLI+UI+skill; MCP optional), marketing/docs, proof assets, and
-  Landmark release automation. Hand-only. Trigger: /foundation, /establish-baseline.
+  Audit, plan, and remediate a repo's public and agent foundation: core files,
+  marketing site, docs site, README proof assets, and Landmark release
+  automation. Hand-only. Trigger: /foundation, /establish-baseline.
 argument-hint: "[audit|plan|remediate|check] [repo-path]"
 ---
 
 # /foundation
 
 Establish a checkable product foundation for one repository. Ignore Misty Step
-aesthetic chrome and DESIGN.md brand-kit adoption. Focus on truth, proof, access
-faces, and release machinery.
+aesthetic chrome and DESIGN.md brand-kit adoption. Focus on truth, proof, and
+release machinery.
 
 Structural skill shape follows `/writing-for-agents` (projected
 `mattpocock-writing-for-agents`).
@@ -22,9 +22,9 @@ Structural skill shape follows `/writing-for-agents` (projected
 | Need | Load |
 |---|---|
 | Checklist dimensions, severity, and pass rules | `references/foundation-checklist.md` |
-| Access faces (API, CLI, UI, skill; MCP optional) | `global/references/application-floor.md` item Faces |
 | Marketing + docs site minimum contract | `references/public-surfaces.md` |
 | Landmark versioning, notes, changelog, CI | `references/landmark-floor.md` |
+| Audit packet shape | `references/audit-packet.md` |
 
 Compose with `/document` for reference docs, `/showcase` for public proof
 assets, `/factory-apps` → Landmark for release intelligence, and `/vision` when
@@ -43,9 +43,8 @@ assets, `/factory-apps` → Landmark for release intelligence, and `/vision` whe
 
 ## Steps
 
-1. **Recon** — Inventory root files, API/CLI/UI/skill/MCP surfaces, `site/` or
-   public pages, `docs/`, README media, Landmark config/workflows, and release
-   history.
+1. **Recon** — Inventory root files, `site/` or public pages, `docs/`, README
+   media, Landmark config/workflows, and release history.
    Done when the inventory names every foundation surface that exists or is
    absent.
 2. **Audit** — Score each checklist dimension from
@@ -79,9 +78,6 @@ Shared Operating Spine (`Prove`; Durable State and Closeout) first. Then:
 ## Foundation Gate
 - Core files: VISION.md, README.md present and current; DESIGN.md noted only if
   already present (not required by this skill).
-- Faces: functional core behind a robust API; CLI + UI + skill cover core verbs
-  (or named waiver per missing required face); MCP present-and-complete or
-  intentionally absent (`n/a`), never a stub.
 - Pitch: one outsider-legible pitch in README and/or marketing site.
 - Proof media: screenshot and/or GIF present in README and/or marketing site,
   or explicit n/a with reason.
