@@ -15,15 +15,13 @@ Grooming sessions treat a missing item as a backlog gap.
    Weave for weave-family products). Program epic: powder `misty-step-910`;
    kit: `aesthetic-907`. Evidence bar per `/showcase`: no public claim
    without a screenshot, command, or demo path behind it.
-2. **The five faces.** One core, every face (operator ratification,
-   2026-07-04: "every single application needs its core functionality,
-   needs the API, and unless there is a strong reason for an exception,
-   they should pretty much all also have an MCP and a CLI and a skill that
-   they ship and a UI"). Concretely: **API + CLI + MCP server + shipped
-   skill + UI** over one core; add SDK where external consumers exist.
-   Complete a face only when it covers core verbs.
-   An MCP that reads but cannot write (powder, 2026-07-04: no `create_card`, groom fell back to raw HTTP) violates the floor; it is not complete.
-   Name exceptions as waivers per face. Never omit them silently.
+2. **Faces.** Functional core behind one robust API. Required faces over that
+   core: **CLI + UI + shipped skill**. **MCP is optional** — add it when agents
+   need tool-protocol access beyond skill and CLI; skip it when they do not.
+   Add an SDK only when external consumers exist. A face passes only when it
+   covers core verbs. Prefer no MCP over a stub MCP. Name a waiver per missing
+   required face. Never omit a required face silently.
+   (Operator 2026-08-07: MCP drops from required; weave-013 matrix epic abandoned.)
 3. **Documentation.** Let an operator go from the repo to productive use alone.
    Provide a README quickstart, an operator walkthrough for any UI or serve mode, and honest help text.
 4. **CI and quality gates.** Run the repo gate in CI and gate the diff.
