@@ -23,7 +23,7 @@ Make a real product showable without presenting weak product truth as proof.
 | Script | `templates/demo-script.md` |
 | Case study | `templates/case-study.md` |
 
-Use `designer` with `/groom` or `/groom` (vision mode) for unsettled direction, `/design`
+Use `designer` with `/groom` for unsettled direction, `/design`
 for visible critique, `verifier` with `verify-live` for live verification,
 and `builder` for the accepted slice. The chief or operator retains acceptance.
 
@@ -31,7 +31,7 @@ and `builder` for the accepted slice. The chief or operator retains acceptance.
 
 - Establish product truth before copy, brand, or video; polish follows proof.
 - Provide a one-command demo path: command, route, fixture, or seed/reset flow that recreates visible state and writes evidence.
-- Map each public assertion to a route, command, screenshot, video frame, CI run, dogfood packet, customer example, or `vision` label.
+- Map each public assertion to a route, command, screenshot, video frame, CI run, dogfood packet, customer example, or `groom`/vision label.
 - Show taste, technical judgment, operator empathy, and working software from ambiguous AI systems.
 - Keep demo mode honest: synthetic data preserves real constraints and failure modes; seed the hard edge.
 - Remove agent-process leakage, caveats, apologies, and `if published` text from public copy.

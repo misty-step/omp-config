@@ -94,8 +94,7 @@ nothing to test. Do not create a finding.
 
 ## Non-goals
 
-- Rewriting `VISION.md` or proposing roadmap. Route that to `/groom` (vision mode) or
-  `/groom`.
+- Rewriting `VISION.md` or proposing roadmap. Route that to `/groom`.
 - Arguing strategy the operator already settled. Reopening an accepted
   decision is not this lens's job.
 - Aesthetic opinion, naming preference, or architectural taste with no
