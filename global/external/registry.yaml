@@ -16,18 +16,6 @@
 # byte. Consumers are paths, not aspirational catalog notes.
 
 sources:
-  - repo: misty-step/aesthetic
-    ref: 0d4cf9a4a7b50fab5e00491daab35fa8cbef93ce
-    pin: 0d4cf9a4a7b50fab5e00491daab35fa8cbef93ce
-    vendor_dir: misty-aesthetic
-    layout: root
-    skills_path: "."
-    skill_name: aesthetic
-    alias_prefix: "misty-"
-    license: MIT
-    license_path: LICENSE
-    consumers:
-      - global/skills/factory-apps/SKILL.md
 
   - repo: misty-step/canary
     ref: e9bce96a5c24654c2692ae701a6db596f5966471
@@ -54,7 +42,6 @@ sources:
     license_path: LICENSE
     consumers:
       - global/skills/factory-apps/SKILL.md
-
 
   - repo: anthropics/skills
     ref: main
@@ -142,19 +129,6 @@ sources:
     consumers:
       - global/skills/refactor/SKILL.md
       - global/skills/ponytail
-
-  - repo: NousResearch/hermes-agent
-    ref: main
-    pin: a6a28ce3e2174c0be494f553ab5fd79b7039190f
-    vendor_dir: nous-creative-ideation
-    layout: flat
-    skills_path: optional-skills/creative
-    alias_prefix: "nous-"
-    include: [creative-ideation]
-    license: MIT
-    license_path: LICENSE
-    consumers:
-      - global/skills/groom/SKILL.md
 
   - repo: mattpocock/skills
     ref: main

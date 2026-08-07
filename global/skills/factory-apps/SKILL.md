@@ -3,11 +3,11 @@ disable-model-invocation: true
 name: factory-apps
 description: >
   Route Misty Step factory application capabilities across Canary, Powder,
-  Landmark, Aesthetic, and the Mint credential broker. Use owned surfaces
-  for observability, work state, release intelligence, design law, and
-  credentialed outbound calls. Mode B has no active workflow plane; do not
-  invent a replacement. Trigger: /factory-apps, /factory-stack.
-argument-hint: "[canary|powder|landmark|aesthetic|mint|audit]"
+  Landmark, and the Mint credential broker. Use owned surfaces for
+  observability, work state, release intelligence, and credentialed outbound
+  calls. Mode B has no active workflow plane; do not invent a replacement.
+  Trigger: /factory-apps, /factory-stack.
+argument-hint: "[canary|powder|landmark|mint|audit]"
 ---
 
 # /factory-apps
@@ -25,7 +25,6 @@ registration in `global/mcp.json`.
 | uptime, incidents, error timelines, health checks, service evidence, production debugging | Canary | `misty-canary`, `canary` on `PATH`, or API | the disabled Canary MCP is not a runtime route |
 | backlog, issue cards, claims, relations, operator input requests, work status | Powder | `powder` CLI or API | no MCP route; skill + CLI/API only |
 | release intelligence, versions, changelogs, release notes, release kit, fleet adoption | Landmark | `misty-landmark` and `landmark describe --json` / dry-run CLI/action paths | `docs/agent-integration.md`, `docs/fleet-integration-playbook.md` |
-| UI/UX, Misty Step design law, tokens, static design registry, rendered design gate | Aesthetic | `misty-aesthetic`, `@misty-step/aesthetic` package, static API, law gate | `docs/ADOPTING.md`, `DESIGN.md` |
 | event-triggered agents, reflex loops, durable runs | unavailable | Mode B has no active workflow plane; keep work in Mode A until a future product is named | do not invent a replacement |
 | outbound API call needing a credential (API key, token, secret) | Mint broker | Route through `http://mint.tail5f5eb4.ts.net:4949/proxy/https/<host>/<path>` with a `__mint.<alias>__` marker; Mint replaces valid markers only in request headers | Keep provider interfaces generic; Tailscale controls reachability; this harness has no Mint MCP or skill |
 
@@ -39,8 +38,6 @@ Use the owned app first. Follow these constraints:
   ad-hoc markdown list.
 - **Landmark** — Ask it to describe the repo. Do not write release intelligence
   from memory.
-- **Aesthetic** — Use its tokens, recipes, registry, and law gate before you add
-  one-off CSS vocabulary.
 - **Mode B** — No active event plane is available for triggered, scheduled,
   durable, reflexive, or other unattended work. Keep ad-hoc operator work in
   Mode A and do not invent a replacement workflow service.

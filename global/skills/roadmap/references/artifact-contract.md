@@ -88,6 +88,6 @@ Check all conditions before you open the file:
 5. Confirm that exactly one item is current.
 6. Confirm that every item has each required field.
 7. Confirm that each supplied concern appears once or has an exclusion.
-8. Check all visible prose with `skill://simplified-technical-english`.
+8. Check all visible prose with `skill://comms`.
 9. Open the file at desktop and mobile widths.
 10. Check content, filters, expansion controls, JavaScript errors, and horizontal overflow.

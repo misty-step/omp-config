@@ -8,7 +8,7 @@
 - Names install or get-started path.
 - Deploys through a documented public path (Pages, static host, or product host).
 
-Do not require Aesthetic tokens or house chrome.
+Do not require a shared design-system package or house chrome.
 
 ## Docs site minimum
 

@@ -64,7 +64,7 @@ the dimension requires a gate, live probe, eval, or judgment.
 - `n/a` and `waived` need a project-specific reason. Silence is a gap.
 - Incomplete face (including stub MCP) is a gap. Prefer deleting a stub over
   claiming the face.
-- Do not require Aesthetic brand-kit adoption. Pitch and proof still required
+- Do not require a shared brand-kit package. Pitch and proof still required
   for public products.
 - Do not invent paths or commands to green a row. `gap: <card-or-path>` is
   honest; a fake pointer is not.

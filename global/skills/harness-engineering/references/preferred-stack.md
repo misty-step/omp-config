@@ -139,29 +139,17 @@ they sleep most of the time or can be rewritten to Workers/D1.
 
 ## Design And Artifact Surfaces
 
-- **Aesthetic first** for Misty Step-facing UI, generated HTML plans, docs
-  artifacts, dashboards, and internal tools that should feel part of the same
-  system.
-- Use Aesthetic's package/static API/law gate when a rendered or packaged
-  surface exists.
-  Do not encode the design system as prose-only taste.
-- Extend Aesthetic slowly only when repeated artifacts force a missing primitive.
-  Avoid one-off CSS inventions that should become kit vocabulary.
+- **Repo `DESIGN.md` first** for product identity: palette, type, spacing,
+  motion, and non-goals. Prefer one deliberate direction over house chrome.
+- Use `/design`, `/prototype`, and `/improve-ui` for net-new or existing
+  surfaces. Use `anthropic-frontend-design` when the risk is templated-default
+  UI.
 - **When agents author the UI, the design system must enforce itself.**
   A rules file (`AGENTS.md`/`CLAUDE.md`) rots and loses to nearby examples.
-  Use a closed, intent-named token layer, a CI gate that fails on off-system
-  values, a small golden directory of canonical implementations that run in CI
-  and break loudly, and a machine-readable token spec (DTCG) for cross-tool/
-  agent ingestion.
-  Aesthetic is the worked example; its law gates the rendered DOM in CI.
+  Prefer a closed, intent-named token layer and a CI gate that fails on
+  off-system values when the repo has a real design system package.
 - **Prefer gating the rendered output** where a live surface exists.
-  It is framework-agnostic and catches the violation however the author
-  created it.
-  Lint authored source (stylelint token-guards) where no surface can render.
-  Reject the authoring-time-only mechanism: a typed-prop compiler with banned
-  raw primitives (StyleX `<Box>`, no raw `<div>`), unless a repo is already
-  React-monorepo-locked at a scale that earns it.
-  That mechanism trades portability for keystroke prevention.
+  Lint authored source where no surface can render.
 - For non-trivial plans and specs, use local HTML as the thinking medium.
   Open it for review before execution when the browser can load it.
 

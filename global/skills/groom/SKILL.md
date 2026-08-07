@@ -71,9 +71,8 @@ Calibrate scope to frontier-agent execution, not human staffing. Describe the
 best whole project, then backchain into epics, deletions, sequencing, and first
 pickups. Compose repo-specific perspectives; invert premises, borrow from
 adjacent domains, and ask what competitors, operators, and new users notice.
-Run fresh independent lanes in parallel. If findings remain obvious, route
-`nous-creative-ideation` with lateral, analogy/biomimicry, and premortem-
-and-inversion methods.
+Run fresh independent lanes in parallel. If findings remain obvious, run a
+second independent lane with inverted premises and adjacent-domain analogies.
 
 Describe software that is elegant, changeable, personalizable, delightful,
 operationally boring, and valuable. Treat the gap to that target as backlog.

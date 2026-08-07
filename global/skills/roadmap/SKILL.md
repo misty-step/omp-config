@@ -59,7 +59,7 @@ template marker.
 
 ### 5. Prove and open
 
-Read `skill://simplified-technical-english` and apply it to visible artifact prose.
+Read `skill://comms` and apply it to visible artifact prose.
 From this skill directory, run:
 
 ```bash

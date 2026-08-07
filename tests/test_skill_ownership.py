@@ -18,7 +18,6 @@ from external_registry import ExternalRegistryError, check_external_skills
 
 LOCAL_SKILL_CORES = (
     "qa-users",
-    "simplified-technical-english",
 )
 DEPENDENCY_SECTIONS = (
     "dependencies",

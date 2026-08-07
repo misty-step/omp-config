@@ -9,13 +9,12 @@ Establish and remediate the floor with `/foundation` (full scorecard every run).
 
 ## The floor
 
-1. **Marketing site.** Branded, deployed publicly. Misty Step aesthetic via
-   the shared site kit, per-repo `DESIGN.md` brand identity, strong pitch,
-   real screenshots/GIF walkthroughs, user-facing release notes (Landmark),
-   footer link contract (GitHub repo when public, mistystep.io always,
-   Weave for weave-family products). Program epic: powder `misty-step-910`;
-   kit: `aesthetic-907`. Evidence bar per `/showcase`: no public claim
-   without a screenshot, command, or demo path behind it.
+1. **Marketing site.** Branded, deployed publicly. Per-repo `DESIGN.md` brand
+   identity, strong pitch, real screenshots/GIF walkthroughs, user-facing
+   release notes (Landmark), footer link contract (GitHub repo when public,
+   mistystep.io always, Weave for weave-family products). Program epic: powder
+   `misty-step-910`. Evidence bar per `/showcase`: no public claim without a
+   screenshot, command, or demo path behind it.
 2. **The five faces.** Functional core behind one robust API. Required faces
    over that core: **API + CLI + MCP + shipped skill + UI**. Add an SDK only
    when external consumers exist. A face passes only when it covers core verbs.

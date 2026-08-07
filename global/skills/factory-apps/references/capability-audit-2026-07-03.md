@@ -1,5 +1,7 @@
 # Factory App Capability Audit - 2026-07-03
 
+Note (2026-08-07): Aesthetic external pin retired from omp-config; design routes through `/design`, repo `DESIGN.md`, and anthropic-frontend-design where needed.
+
 Scope: This snapshot covers live local checkouts for Canary, Powder, Landmark,
 Aesthetic, Harness Kit, and the local Codex config.
 Use it as an audit snapshot, not as a product status source. A former
