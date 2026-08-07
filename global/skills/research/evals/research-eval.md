@@ -1,84 +1,52 @@
 # /research eval
 
-The `/research` skill must earn one claim:
-Given a drift-prone or comparison-shaped question, `/research` returns a synthesized answer.
-Tie every load-bearing claim to a dated source or live-repo fact.
-Name residual uncertainty and stale or skipped sources.
-A bare "look this up for me" prompt on the same model does not meet this standard.
-It answers from training-data memory and states no dates, no source list, and no uncertainty.
+Claim: given a drift-prone or comparison-shaped question, `/research` returns a synthesized answer with dated sources, residual uncertainty, and no silent single-source overfitting.
 
-This is a `mode-eval` A/B run, not a directory shape.
-Arms: A = `/research` installed and invoked; B = raw same-model ("research this and tell me the answer", no skill, same tool access); C = single-WebSearch-call baseline
-(tests whether multi-source fan-out earns its cost over one lookup).
-Grade blind. Check objective checks first.
-Use a different model family for the judge than for the workers.
+Arms:
+
+- A = `/research` installed and invoked
+- B = raw same-model prompt with same tools, no skill
+- C = single search call only
+
+Grade blind. Run objective checks first. Use a different model family for the judge.
 
 ## Fixtures
 
-| # | Prompt | Repo/context | Forbidden edits | What it stresses |
-|---|---|---|---|---|
-| 1 | "Which model is best for cheap, high-volume OpenRouter calls right now — compare 2–3 candidates on price, context, and tool-calling support." | none (pure web research) | any file edit | drift-prone fact, dated sourcing, ranked recommendation (`references/exemplars.md`/model-provider index pattern) |
-| 2 | "What are people actually saying about Anthropic's skills feature since the June 2026 blog post — is the reception positive?" | none (social/discourse) | any file edit | discourse/social synthesis, source diversity, distinguishing signal from noise |
-| 3 | "Does this repo's `check-eval-coverage` gate duplicate anything already shipped upstream in a well-known OSS skill-eval framework? Check the repo first, then the web." | `harness-kit@c6e01b9` (`crates/harness-kit-checks/src/eval_coverage.rs`) | any source edit | repo-truth-first ordering (read local before external), mixed repo+web synthesis |
+| # | Prompt | Stress |
+|---|---|---|
+| 1 | Compare 2–3 cheap high-volume OpenRouter models on price, context, and tool calling right now. Rank one pick. | drift-prone facts, dated sources, ranked recommendation |
+| 2 | Extract the current Firecrawl scrape request shape from official docs and quote the required fields. | Exa discover + Firecrawl extract, primary docs |
+| 3 | Does this repo's research skill still mention Context7, Brave, or Perplexity as live routes? Check the repo first. | repo-truth-first |
 
 Two of three must show A>B for a pass.
-The fixtures span a pure external lookup, a discourse/social scan, and a repo-grounded question.
-The repo-grounded question should start with local evidence under the skill's contract.
 
-## Objective checks (scriptable, pass/fail, ~free — run on every `global/skills/research/**` edit)
+## Objective checks
 
-- [ ] Every load-bearing factual claim carries a citation (URL, file path, or
-      command output) — no bare assertion.
-- [ ] At least one cited source carries an explicit date, and the report
-      states the research date/recency window.
-- [ ] Fixture 1 lists ≥2 candidates with a ranked recommendation, not a menu
-      with no pick.
-- [ ] Fixture 3: the report reads the live repo (`eval_coverage.rs` or its
-      test file) before or alongside the web search — repo-truth-first is
-      violated if the report answers from web sources alone.
-- [ ] Skipped, failed, or stale sources are named explicitly, not silently
-      omitted.
-- [ ] A residual-uncertainty line is present (what the report could not
-      confirm).
-- [ ] No claim is sourced only from the model's training-data memory when a
-      current source was reasonably available.
+- Every load-bearing claim has a citation (URL, path, or command output).
+- At least one cited source has an explicit date; report states research date or recency window.
+- Fixture 1 ranks ≥2 candidates and picks one.
+- Fixture 2 uses a primary docs URL, not only a search snippet.
+- Fixture 3 reads local `global/skills/research/**` before or with any web claim.
+- Skipped, failed, or stale sources are named.
+- Residual uncertainty line is present.
 
-## Rubric (1–5, blind, one-line justification each — judgment-heavy delta only)
+## Rubric (1–5)
 
 | Dimension | 5 | 1 |
 |---|---|---|
-| Source grounding | every claim traceable to a dated source or repo fact | confident answer, no citations |
-| Recommendation quality (fixture 1) | ranked pick with stated tradeoffs | describes options, picks nothing |
-| Repo-truth ordering (fixture 3) | reads local repo before concluding | answers purely from general knowledge of "typical" eval frameworks |
-| Honesty about gaps | names what's unverified or stale | smooths over missing evidence |
+| Source grounding | every claim traceable | no citations |
+| Tool fit | Exa for find, Firecrawl for extract when needed | browser used for static docs |
+| Repo-truth (fixture 3) | reads local skill files | answers from memory only |
+| Honesty about gaps | names unverified or stale items | smooths over gaps |
 
 ## Pass condition
 
-Arm A beats arm B on source grounding and residual-uncertainty reporting
-across **≥2 of 3** fixtures, AND ties-or-wins every objective check. A
-no-op "research" (equivalent to raw prompting) fails because the raw arm
-reliably answers from memory with no dates, no source list, and no stated
-uncertainty — exactly the gap the objective checks catch without a judge.
-
-## Human anchor
-
-The operator blind-grades fixture 1 (model comparison — verifiable against
-the operator's own current knowledge of pricing/availability). Record the
-verdict and match/mismatch here once run. **PENDING — no run yet.**
+Arm A beats arm B on grounding and uncertainty on ≥2 of 3 fixtures, and passes every objective check.
 
 ## Cadence
 
-- Edit-time: 1-fixture native-subagent smoke (fixture 1) on any
-  `global/skills/research/**` change.
-- Contract change (the source-ordering rule, the fan-out defaults, or the
-  residual-uncertainty requirement moves): full A/B, all 3 fixtures,
-  decorrelated families.
-- Major model release: re-audit — a stronger bare model with better built-in
-  search grounding may close `/research`'s edge on drift-prone facts first.
+- Edit-time: fixture 1 smoke on any `global/skills/research/**` change.
+- Contract change to source order or tool stack: full A/B.
+- Major model release: re-audit.
 
-**No run yet.** Revisit when this skill changes.
-`/research` is the third-highest-usage first-party skill (27 recorded
-invocations per the 2026-07-01 groom telemetry read) and had no eval coverage
-before this.
-A run counts only when it fires both arms and uses a falsifiable grader.
-This entry is a placeholder, not a verdict.
+**No full run yet.** Record verdicts here when executed.

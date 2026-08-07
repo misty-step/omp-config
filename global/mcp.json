@@ -9,6 +9,11 @@
       "type": "stdio",
       "command": "${HOME}/.omp/agent/skills/research/scripts/exa_mcp_stdio.py",
       "timeout": 120000
+    },
+    "firecrawl-mint": {
+      "type": "stdio",
+      "command": "${HOME}/.omp/agent/skills/research/scripts/firecrawl_mcp_stdio.py",
+      "timeout": 180000
     }
   },
   "disabledServers": [

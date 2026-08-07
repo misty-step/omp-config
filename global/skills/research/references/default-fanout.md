@@ -1,121 +1,85 @@
-# Default Fanout
+# Default fanout
 
 Multi-source triangulation for substantive research.
 
 ## Use
 
-Load this reference when the user asks for broad research, comparison, architecture prior art, or model/provider investigation.
-Also load it for "what are people saying" or any question where a single lookup would overfit one source.
+Load this reference for broad research, comparison, prior art, model or provider investigation, discourse scans, or any question where one lookup would overfit one source.
 
-Use single-source research only when the user names the source or requests a narrow fact/version lookup.
+Use single-source research only when the user names the source or asks for a narrow fact.
 
-## Context Packet
+## Context packet
 
-Capture the packet before launching lanes:
+Capture before launching lanes:
 
-- Objective: fact lookup, prior-art scan, architecture comparison, discourse
-  scan, or decision support.
-- Scope: repos, files, domains, products, dates, jurisdictions, or excluded
-  areas.
-- Freshness tolerance: latest/current, date-bounded, or stable background.
-- Acceptance oracle: decision to support, risk to refute, artifact to produce,
-  or explicit absence.
-- Tool constraints: unavailable credentials, provider limits, offline mode, or
-  user-named sources.
+- Objective: fact lookup, prior-art scan, architecture comparison, discourse scan, or decision support.
+- Scope: repos, files, domains, products, dates, jurisdictions, exclusions.
+- Freshness: latest, date-bounded, or stable background.
+- Acceptance oracle: decision to support, risk to refute, artifact to produce, or explicit absence.
+- Tool constraints: missing credentials, offline mode, or user-named sources.
 
-## Source Invariant
+## Source matrix
 
-Account for these capability lanes in default research.
-Run a lane when relevant; otherwise keep it in the matrix as `skipped` with the reason.
+Run a lane when relevant. Otherwise keep it as `skipped` with the reason.
 
-| Lane | Capability | Primary refs |
+| Lane | Capability | Primary tools |
 |---|---|---|
-| Codebase | live repo patterns, existing contracts, local prior art | `rg`, `git`, local files |
-| Docs | library/API docs and official references | Context7, official docs, `web-search.md` |
-| Retrieval | web, papers, reference implementations | `web-search.md`, `exa-tools.md` |
-| Agentic acquisition | optional async broad research, list building, entity enrichment | `web-search.md`, `exa-tools.md` |
-| Extraction | known URL fetch, page extraction, site maps, crawls | `exa-tools.md`, `extraction-tools.md`, `/browser` |
-| Recency / discourse | current web, X/social discourse, contradiction checks | `xai-search.md` |
-| Synthesis | concise answer over gathered evidence | Perplexity/Exa deep/lead synthesis |
-| Repo-aware critique | local fit, architecture tradeoffs, second opinion | `delegate.md` |
+| Codebase | live repo patterns and contracts | `rg`, `git`, `read` |
+| Discovery | find candidate sources | Exa MCP, Parallel Search |
+| Extraction | page and site text | Firecrawl scrape / map / crawl |
+| Interaction | dynamic or authenticated UI | builtin `browser`, `agent-browser` |
+| Synthesis | answer over gathered evidence | lead synthesis with citations |
+| Critique | local fit and contradictions | `delegate.md` contradiction lane |
 
-If a lane fails, times out, lacks credentials, or is intentionally skipped by scope, keep its section and label its status.
-Do not silently collapse failed lanes into synthesis.
+If a lane fails, times out, or lacks credentials, keep its section and label the status. Do not silently drop it into synthesis.
 
-Capability lanes do not replace the roster floor.
-For substantive research, follow the chief contract in `../../../AGENTS.md` unless a documented waiver applies.
+## Capability routing
 
-## Capability Routing
-
-For each capability, prefer the most agent-native verified surface.
-Use MCP tool first, local CLI wrapper second, direct REST/API call third, and
-built-in WebSearch last.
-Report substitutions explicitly.
-Keep the local wrapper surface intentionally thin and JSON-emitting when installed:
-`exa-search`, `exa-fetch`, `brave-search`, `firecrawl-fetch`, and
-`xai-search web|x`. MCP-only surfaces such as `parallel-search` still belong
-at the first step in the chain.
+Prefer MCP first, local CLI wrapper second, direct Mint REST third.
 
 | Intent | Prefer | Fallback |
 |---|---|---|
-| Local repo truth | `rg`, git, local files | user-provided context |
-| Code examples or reference implementations | Exa code context | GitHub/source search, web search |
-| Library docs or API usage | docs capability such as Context7 | official docs via web search |
-| Known URL or generated docs extraction | Exa fetch / Firecrawl scrape | browser agent |
-| Site discovery, sitemap, or crawl | Tavily/Firecrawl map/crawl | browser/manual link walk |
-| Broad multi-hop research, entity enrichment, or list building | Optional Exa Agent lane for `web-deep` | Exa deep / lead synthesis |
-| Model releases, pricing, CVEs, deprecations | recency-filtered web/xAI | Exa recency, official sources |
-| Social sentiment or public discourse | xAI X Search | web results that cite public posts |
-| Grounded answer synthesis | Perplexity/Exa deep after retrieval | lead synthesis over cited sources |
-| Repo architecture or local tradeoffs | roster lanes | scoped grep plus lead analysis |
-| Saved user reading/highlights | Readwise | local notes or explicit web search |
+| Local repo truth | `rg`, git, local files | operator context |
+| Code or reference implementations | Exa code / neural search | GitHub search |
+| Known URL text | Firecrawl scrape | Exa fetch |
+| Site map or docs corpus | Firecrawl map | manual link list |
+| Bounded docs crawl | Firecrawl crawl with `limit` | map + selective scrape |
+| Broad web discovery | Exa or Parallel Search | Firecrawl search |
+| Dynamic or logged-in page | `browser` / `agent-browser` | operator artifact |
+| Model pricing or availability | dated web sources via Exa + official pages | peer-harnesses index, then verify live |
 
-Route by capability.
-Treat vendor names as implementation details.
-If a named provider is unavailable, use the closest source and report the substitution.
-Do not add a vendor to the prose unless a script, command recipe, or explicit manual fallback can invoke it.
-
-## Report Shape
-
-Use this shape for default fanout reports:
+## Report shape
 
 ```markdown
 ## Synthesis
-[Lead conclusion, confidence, decision impact, and residual uncertainty.]
+[Conclusion, confidence, decision impact, residual uncertainty.]
 
-## Source Matrix
-| Source lane | Status | What it contributed | Key refs |
+## Source matrix
+| Lane | Status | Contribution | Key refs |
 |---|---|---|---|
-| Codebase | complete/partial/failed/skipped | ... | file:line/commands |
-| Docs | complete/partial/failed/skipped | ... | URLs/artifacts |
-| Retrieval | complete/partial/failed/skipped | ... | URLs/artifacts |
-| Agentic acquisition | complete/partial/failed/skipped | ... | `response.agentic`, run id, URLs/artifacts |
-| Extraction | complete/partial/failed/skipped | ... | URLs/artifacts |
-| Recency / discourse | complete/partial/failed/skipped | ... | URLs/citations |
-| Synthesis | complete/partial/failed/skipped | ... | citation refs |
-| Repo-aware critique | complete/partial/failed/skipped | ... | receipt ids/output dir |
+| Codebase | complete/partial/failed/skipped | ... | path or command |
+| Discovery | ... | ... | URLs |
+| Extraction | ... | ... | URLs |
+| Interaction | ... | ... | evidence refs |
+| Synthesis | ... | ... | citation refs |
+| Critique | ... | ... | notes |
 
 ## Conflicts
-[Disagreements across sources and the lead's resolution.]
+[Disagreements and the lead resolution.]
 
 ## Evidence
-[Grouped citations, commands, receipts, local files, or artifacts.]
+[Grouped citations, commands, artifacts.]
 
-## Residual Risk
-[Stale facts, missing providers, unqueried sources, or none with reason.]
+## Residual risk
+[Stale facts, missing providers, unqueried sources, or none.]
 ```
 
-For source-heavy reports, keep per-source detail below the matrix.
-Readers must identify each lane's independent contribution.
+## Failure labels
 
-## Failure Labels
+- `complete`: usable evidence inside scope
+- `partial`: some artifacts only
+- `failed`: attempted, no usable evidence
+- `skipped`: out of scope, forbidden, or impossible
+- `stale`: may be outdated for the freshness requirement
 
-- `complete`: lane produced usable evidence inside scope.
-- `partial`: lane started but only some artifacts or results exist.
-- `failed`: lane was attempted and produced no usable evidence.
-- `skipped`: lane was out of scope, user-forbidden, or impossible due missing
-  credentials/tooling.
-- `stale`: evidence may be outdated for the requested freshness tolerance.
-
-Test every recommendation without the weakest source.
-If it fails, label the recommendation low confidence.
+Test every recommendation without the weakest source. If it fails, label confidence low.

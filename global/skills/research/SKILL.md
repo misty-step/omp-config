@@ -4,52 +4,69 @@ description: |
   Research current facts through primary sources, independent angles, and
   auditable evidence. Use for bounded lookup, comparison, model selection,
   discourse analysis, or delegated external research. Trigger: /research.
-argument-hint: "[query|web-search|web-deep|web-news|web-docs|delegate|introspect|readwise|xai|exemplars] [args]"
+argument-hint: "[query|web|extract|map|crawl|delegate] [args]"
 ---
 
 # /research
 
-Research one question through evidence that another reviewer can audit.
+Research one question through evidence another reviewer can audit.
 
 ## Evidence contract
 
-1. Frame two to four independent angles. Each angle needs a distinct claim, source path, or falsifier; wording changes are not independent.
-2. Prefer primary sources: official documentation, specifications, repositories, release notes, direct measurements, and first-party records. Search summaries only locate evidence.
-3. Read the source behind each consequential claim. Capture the supporting passage, stable URL or path, publication date when available, and retrieval date. Never fabricate a citation.
-4. Triangulate consequential, comparative, and fast-changing claims across independent publishers or source types. Preserve conflicts.
-5. Separate observed facts, source claims, inferences, and recommendations. Label a layer when readers can confuse it with another.
-6. Date facts that can change, including availability, prices, versions, benchmarks, and policies.
-7. Record rejected evidence. Name stale, secondary, partial, inaccessible, conflicting, or weak sources and state the limitation.
-8. State unresolved conflicts, unverified assumptions, missing primary evidence, and the cheapest next probe. Absence of search results is not evidence of absence.
+1. Frame two to four independent angles. Each angle needs a distinct claim, source path, or falsifier.
+2. Prefer primary sources: official docs, specs, repos, release notes, direct measurements, first-party records.
+3. Read the source behind each consequential claim. Capture the supporting passage, stable URL or path, publication date when available, and retrieval date.
+4. Triangulate consequential and fast-changing claims across independent publishers or source types. Preserve conflicts.
+5. Separate observed facts, source claims, inferences, and recommendations.
+6. Date facts that can change: availability, prices, versions, benchmarks, policies.
+7. Record rejected evidence and the reason.
+8. State unresolved conflicts, missing primary evidence, and the cheapest next probe.
 
 Complete acquisition when every consequential claim has direct support or an explicit coverage gap.
 
+## Tool stack
+
+| Need | Prefer | Fallback |
+|---|---|---|
+| Discover technical pages, papers, code | Exa MCP (`exa-mint`) | `exa-search` / Parallel Search |
+| Fetch known URLs into clean text | Firecrawl scrape (`firecrawl-mint`) | Exa fetch |
+| Map or crawl a docs site | Firecrawl map / crawl | selective Exa fetch |
+| Broad web search | Exa or Parallel Search | Firecrawl search |
+| Dynamic or logged-in UI | builtin `browser` or `agent-browser` | operator artifact |
+| Local repo truth | `rg`, `git`, `read` | operator-provided context |
+
+Route by capability, not vendor.
+
+- **Exa:** find and rank sources; code and technical discovery.
+- **Firecrawl:** turn known URLs and site trees into agent-readable text.
+- **Browser / agent-browser:** interact with pages. Do not use them as the default static fetcher.
+- **Mint:** every paid vendor call uses a value-free `__mint.<alias>__` marker. Never put raw API keys in the environment or transcript.
+
 ## OMP route
 
-Route by capability, not vendor. The chief uses native `researcher` lanes for independent angles. Each lane executes only its assigned angle.
+The chief uses native `researcher` lanes for independent angles. Each lane runs only its assigned angle.
 
 | Need | Load |
 |---|---|
-| broad comparison, prior art, or discourse scan | `references/default-fanout.md` |
-| `web-search`, `web-deep`, `web-news`, or `web-docs` | `references/web-search.md` |
-| Exa search, fetch, or code context | `references/exa-tools.md` |
-| extraction, site maps, or crawls | `references/extraction-tools.md` |
-| delegated research | `references/delegate.md` |
-| introspection | `references/introspect.md` |
-| Readwise | `references/readwise.md` |
-| xAI search | `references/xai-search.md` |
-| exemplars | `references/exemplars.md` |
+| multi-angle research | `references/default-fanout.md` |
+| Exa search, fetch, code context | `references/exa-tools.md` |
+| Firecrawl scrape, map, crawl, search | `references/firecrawl-tools.md` |
+| browser fallback for dynamic pages | `references/browser-fallback.md` |
+| delegated multi-lane work | `references/delegate.md` |
+| examples and curl recipes | `references/exemplars.md` |
 
 Load the default fanout for substantive multi-angle research. Use one source only for a named-source request or simple fact lookup.
 
-## OMP acquisition
+## Acquisition order
 
-Keep Exa, xAI, Brave, Perplexity, Context7, Tavily, Firecrawl, browser agents, and provider lanes behind the evidence contract.
+1. Read local repo truth when the question touches this codebase.
+2. Discover candidate sources with Exa or Parallel Search.
+3. Extract page text with Firecrawl scrape. Map or crawl only with an explicit bound.
+4. Use browser or `agent-browser` only when extraction fails on dynamic or authenticated UI.
+5. Synthesize over cited sources. Do not treat search snippets as final evidence.
 
-For model selection, start with `global/skills/peer-harnesses/references/model-provider-harness-index.md`. Then verify availability, price, context, and tool support through current provider lanes.
-
-## Completion Gate
+## Completion gate
 
 Return a bounded conclusion with inline citations and exact supporting passages for consequential claims. Include publication and retrieval dates for volatile claims.
 
-Record queried tools and reasons, provider lanes, receipt identifiers, accepted and rejected evidence, failures, coverage gaps, residual uncertainty, and the next probe.
+Record queried tools, accepted and rejected evidence, failures, coverage gaps, residual uncertainty, and the next probe.

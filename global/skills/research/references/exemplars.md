@@ -1,127 +1,74 @@
-# Exemplar Discovery
+# Research exemplars
 
-Find best-in-class implementations for techniques that a project should study.
-Use cross-language and cross-domain sources, not only same-domain prior art.
+## Discover then extract
 
-## The `exemplars.md` Convention
+1. Exa search for candidates.
+2. Firecrawl scrape the top primary sources.
+3. Cite passages with URLs and dates.
 
-Keep `exemplars.md` at project root as a curated list of reference implementations.
-Organize entries by technique, not language or domain.
+```bash
+# 1. discover
+curl -s http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.exa.ai/search \
+  -H "x-api-key: __mint.exa.default__" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "OpenRouter tool calling pricing 2026",
+    "type": "auto",
+    "numResults": 5,
+    "startPublishedDate": "2026-01-01",
+    "contents": { "text": { "maxCharacters": 800 } }
+  }'
 
-```markdown
-# Exemplars
-
-## Search / Indexing
-- [fff.nvim](https://github.com/dmtrKovalenko/fff.nvim) (Zig)
-  **Technique:** SIMD-accelerated fuzzy finding, cache-oblivious memory layout
-  **Study for:** hardware-aware search optimization
-  **Key file:** `src/simd_search.zig` — core matching loop
-
-## Concurrency
-- [crossbeam](https://github.com/crossbeam-rs/crossbeam) (Rust)
-  **Technique:** Lock-free data structures, epoch-based memory reclamation
-  **Study for:** concurrent data structure design
-  **Key file:** `crossbeam-epoch/src/internal.rs` — epoch reclamation
+# 2. extract one official page
+curl -s http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.firecrawl.dev/v1/scrape \
+  -H "Authorization: Bearer __mint.firecrawl.default__" \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://openrouter.ai/docs","formats":["markdown"],"onlyMainContent":true}'
 ```
 
-### Entry fields
+## Docs corpus
 
-- **Technique** — What it does exceptionally well. Hardware-aware optimization,
-  algorithmic breakthrough, elegant API design, etc.
-- **Study for** — Why it matters to *this* project. Show the cross-domain transfer.
-- **Key file** — Where to look first. Agents read this file, not the whole repo.
-  Keep one file per entry. Add a second file only when one file cannot show the full technique.
+```bash
+# map first
+curl -s http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.firecrawl.dev/v1/map \
+  -H "Authorization: Bearer __mint.firecrawl.default__" \
+  -H "Content-Type: application/json" \
+  -d '{"url":"https://docs.firecrawl.dev","limit":15}'
 
-### What makes a good exemplar
+# crawl only when map is too large to scrape selectively
+# firecrawl-crawl --limit 10 --depth 2 https://docs.example.com
+```
 
-- **Disproportionate performance** — much faster than expected.
-  Choose projects with unusually strong performance.
-- **Hardware-aware design** — exploits modern hardware: SIMD, cache-oblivious
-  algorithms, io_uring, lock-free concurrency, massive parallelism (64+ cores),
-  NVMe-optimized I/O, large memory (256GB+) data structures.
-- **Cross-domain transferability** — the technique teaches something applicable
-  beyond the project's specific domain. A Zig fuzzy finder can teach a Rust
-  search library. A Go scheduler can teach a Python task queue.
-- **Readable excellence** — structured enough for an agent to clone and read the key file.
-  Require the agent to extract the core insight in under 5 minutes.
-
-## What is NOT an exemplar
-
-- Projects that are popular but only competent.
-- Projects valuable only for their API surface, not implementation.
-- Frameworks whose value comes from ecosystem, not technique.
-- Abandoned projects without a maintenance signal.
-
-## Discovery: Exa Queries
-
-### Find best-in-class implementations
+## Code reference search
 
 ```bash
 curl -s http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.exa.ai/search \
   -H "x-api-key: __mint.exa.default__" \
   -H "Content-Type: application/json" \
   -d '{
-    "query": "fastest [DOMAIN] implementation [TECHNIQUE]",
-    "type": "code",
-    "numResults": 10,
-    "useAutoprompt": true,
-    "contents": { "text": { "maxCharacters": 2000 } }
+    "query": "open source agent browser visual regression playwright",
+    "type": "auto",
+    "numResults": 5,
+    "contents": { "text": { "maxCharacters": 1500 } }
   }'
 ```
 
-Good query patterns:
-- `"fastest [domain] implementation"` — finds performance-focused projects
-- `"SIMD [domain] rust OR zig OR c++"` — finds hardware-aware implementations
-- `"zero-copy [domain] implementation"` — finds allocation-conscious designs
-- `"lock-free [domain]"` — finds concurrent data structures
-- `"io_uring [domain]"` — finds modern I/O designs
-- `"cache-oblivious [domain]"` — finds memory-hierarchy-aware algorithms
+## Dynamic page fallback
 
-### Expand from a known exemplar
+When scrape returns empty shell HTML:
 
 ```bash
-curl -s http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.exa.ai/findSimilar \
-  -H "x-api-key: __mint.exa.default__" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "url": "https://github.com/KNOWN_EXEMPLAR",
-    "numResults": 10,
-    "contents": { "text": { "maxCharacters": 1000 } }
-  }'
+agent-browser skills get core
+agent-browser open https://example.com/app
+agent-browser snapshot
+agent-browser close --all
 ```
 
-When the user provides a seed exemplar, find more projects like it.
+## Report minimum
 
-## Discovery: xAI Social Signal
+Every exemplar-style answer must include:
 
-Use the configured research provider surface for xAI X Search when the
-operator has enabled it. If the request needs vendor credentials, call xAI
-through `http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.x.ai/v1/<path>`.
-Put the value-free `__mint.xai.default__` marker in the request credential
-header. Mint does not authenticate or authorize callers. Tailnet reachability
-controls access.
-
-Social signal finds projects that benchmarks and READMEs miss.
-It finds projects that developers praise.
-
-## Output Format
-
-Format results for direct inclusion in `exemplars.md`.
-
-```markdown
-## [Technique Domain]
-- [Project Name](URL) (Language)
-  **Technique:** [what it does exceptionally well]
-  **Study for:** [why it matters to the target project]
-  **Key file:** `[path]` — [what to learn from this file]
-```
-
-When updating an existing `exemplars.md`, preserve existing entries.
-Add new entries under existing sections or create new sections.
-Remove entries only when the user requests removal or the project is dead or archived.
-
-## Integration with Default Fanout
-
-When standard `/research` fanout finds exemplary implementations through Exa code search, format implementation-worthy results with the convention above.
-These results often answer queries about "how to build X" or "best approach for Y".
-If `exemplars.md` exists at project root, offer to add discoveries to it.
+- ranked conclusion or decision
+- citations with URLs
+- retrieval date for volatile facts
+- residual uncertainty line

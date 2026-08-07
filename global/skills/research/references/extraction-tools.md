@@ -1,35 +1,24 @@
-# Extraction Tools
+# Extraction tools
 
-Use extraction tools when the research task names a URL, site, crawl, sitemap,
-or page-content target.
-Do not route ordinary broad research here by default.
+Use extraction when the task names a URL, site, crawl, sitemap, or page-content target.
 
-## Capability Routing
+Do not route ordinary broad discovery here.
+
+## Route table
 
 | Need | Prefer | Fallback |
 |---|---|---|
-| Fetch known URL into context | Exa `web_fetch_exa` or `/contents` | browser snapshot |
-| Extract clean markdown from a page | Firecrawl scrape/extract | Exa fetch |
-| Map a site or docs corpus | Tavily Map or Firecrawl Map | manual link walk |
-| Crawl a bounded docs site | Firecrawl Crawl | targeted search + fetch |
-| Dynamic or logged-in page | browser automation (`agent-browser`, Playwright, or Chrome DevTools MCP) | manual operator-provided artifact |
+| Fetch known URL | Firecrawl scrape | Exa fetch |
+| Clean markdown from a page | Firecrawl scrape | browser snapshot |
+| Map a site or docs corpus | Firecrawl map | manual link walk |
+| Crawl a bounded docs site | Firecrawl crawl with `limit` | map + selective scrape |
+| Dynamic or logged-in page | builtin `browser` or `agent-browser` | operator artifact |
 
-## Harness Contract
+Load `firecrawl-tools.md` for commands. Load `browser-fallback.md` for interaction.
 
-- Bound crawls by domain, path, max pages, and time budget.
+## Rules
+
+- Bound crawls by domain, path, max pages, and time.
 - Emit source URLs and extraction status.
-- Do not treat an extracted summary without its source URL as evidence.
 - Prefer official docs or repo-local files before paid extraction.
-- Use browser agents as the fallback for dynamic pages, not the default for
-  static pages.
-
-## Smoke Shape
-
-Gate live provider smoke tests with env vars.
-Offline evals assert routing and must not call paid APIs.
-
-- `map this docs site` routes to map/crawl capability.
-- `extract this URL` routes to fetch/extract capability.
-- `what are people saying` does not route to extraction.
-- `latest model pricing` does not route to extraction unless a target URL is
-  named.
+- Browser is the fallback for dynamic pages, not the default for static pages.

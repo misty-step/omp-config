@@ -108,13 +108,27 @@ def run_fetch(argv: list[str]) -> int:
     )
 
 
-def main(argv: list[str] | None = None) -> int:
+def resolve_command(argv: list[str] | None) -> tuple[str, list[str]]:
+    args = list(sys.argv[1:] if argv is None else argv)
     name = Path(sys.argv[0]).name
+    known = {"exa-search", "exa-fetch"}
+    if name in known:
+        return name, args
+    if args and args[0] in known:
+        return args[0], args[1:]
+    return name, args
+
+
+def main(argv: list[str] | None = None) -> int:
+    name, args = resolve_command(argv)
     if name == "exa-search":
-        return run_search(argv if argv is not None else sys.argv[1:])
+        return run_search(args)
     if name == "exa-fetch":
-        return run_fetch(argv if argv is not None else sys.argv[1:])
-    print("Invoke this launcher as exa-search or exa-fetch", file=sys.stderr)
+        return run_fetch(args)
+    print(
+        "Invoke as exa-search|exa-fetch, or python3 exa_tools.py exa-search <query>",
+        file=sys.stderr,
+    )
     return 2
 
 
