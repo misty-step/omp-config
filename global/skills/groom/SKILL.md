@@ -7,7 +7,7 @@ description: |
   "north star", "what should we build", "prioritize", "rethink this",
   "moonshot", "audit skills". Trigger: /groom, /vision, /backlog, /north-star,
   /rethink, /moonshot.
-argument-hint: "[vision|tidy|audit|--emphasis explore|rethink|moonshot|scaffold] [context]"
+argument-hint: "[vision|tidy|audit|moonshot] [context]"
 ---
 
 # /groom
@@ -29,6 +29,7 @@ Use julius-caveman only for interim synthesis; keep artifacts in normal English.
 | `vision` | only north-star work | create or refresh root `VISION.md` and wire consumers |
 | `tidy` | board hygiene only | Powder tidy; no mega sweep |
 | `audit` | harness-health report | read-only skill/prompt usage and staleness; no board edits |
+| `moonshot` | ambition emphasis | default loop with harder ambition floor and deletion pressure |
 
 ## Vision (always before strategic rank)
 

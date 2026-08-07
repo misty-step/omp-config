@@ -11,9 +11,9 @@ argument-hint: "[repo-path|canary|powder|landmark|mint]"
 
 # /foundation
 
-Bring one repository up to the **every-project floor**. No modes. Every run
-scores **every** dimension, then remediates accepted gaps until the gate holds
-or each residual has a named waiver.
+Bring one repository up to the **every-project floor**, or answer one factory
+surface question. Full runs score every dimension, then remediate accepted gaps
+until the gate holds or each residual has a named waiver.
 
 SSOT for product obligations: `global/references/application-floor.md`.  
 SSOT for score rows and severity: `references/foundation-checklist.md`.
@@ -79,8 +79,10 @@ the dimension requires a gate, live probe, eval, or judgment.
 ## Contract
 
 - One repo per run. Default: current checkout.
-- **Full front every time.** Score every checklist dimension. Do not sample.
-- **Audit before patch.** Write the packet, then remediate.
+- **Factory-only args** (`canary|powder|landmark|mint`): answer from the Factory
+  surfaces table and fleet standard. Do not run the full floor scorecard.
+- **Full foundation run** (default / no factory-only arg): score every checklist
+  dimension. Do not sample. Audit before patch, then remediate.
 - **Remediate in the same run** for accepted gaps. File a Powder card only when
   the gap is blocked on secrets, human policy, or multi-PR scope the operator
   defers.
