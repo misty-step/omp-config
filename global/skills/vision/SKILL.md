@@ -11,6 +11,6 @@ argument-hint: "[create|update|refresh|audit] [context]"
 
 Compatibility entry only.
 
-1. Load `skill://groom`.
+1. Load `/groom`.
 2. Run **vision** mode: create or refresh root `VISION.md` and wire consumers.
 3. Do not keep a separate vision procedure here.

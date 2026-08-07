@@ -12,6 +12,6 @@ argument-hint: "[canary|powder|landmark|mint]"
 
 Compatibility entry only. Surfaces: `misty-canary`, `misty-landmark`, Powder, Mint.
 
-1. Load `skill://foundation`.
+1. Load `/foundation`.
 2. Answer from the **Factory surfaces** section.
 3. For `canary|powder|landmark|mint` args, skip the full floor scorecard.
