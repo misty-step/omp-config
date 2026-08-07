@@ -64,17 +64,9 @@ Source of truth: `review_common.floor_plan` and `review_scope` in
 Submit only the freeze `planned_lanes`, in order. Do not drop a floor lane.
 Do not invent a reviewer outside `REVIEW_SPECS`.
 
-Summary of the live floor (if this disagrees with code, trust the code):
-
-| Range | `planned_lanes` |
-|---|---|
-| Trivial prose/config (not policy) | `[]` → `waive` |
-| Substantive non-code | `autoreview`, `thermo-nuclear-code-quality-review` |
-| Code | `autoreview`, `thermo-nuclear-review`, `ponytail` |
-| Code + high-stakes path | above + `thermo-nuclear-code-quality-review` |
-
-Policy paths and `.gitattributes` stay substantive. Trivial waiver never
-authorizes policy, executable, or evidence-rendering changes.
+Use `classify` or read the freeze file for the lane set. Policy paths and
+`.gitattributes` stay substantive. Trivial waiver never authorizes policy,
+executable, or evidence-rendering changes.
 
 ```bash
 python3 bin/review_gate.py waive --repo . \
@@ -106,8 +98,9 @@ above are the review authority.
 3. Emit `omp.review-result.v1` with status, findings, and counts.
 4. `submit` with real attribution. Distinct `(harness, run_id)` per lane.
 
-`autoreview` run through the helper requires adapter attestation on submit
-(`name`, `executable`, `executable_sha256`, `engine`). Use
+`autoreview` requires adapter attestation on submit. Pass CLI flags
+`--adapter-name`, `--adapter-executable`, `--adapter-executable-sha256`, and
+`--adapter-engine` (or call `submit_result` with the same fields). Use
 `global/skills/autoreview/openclaw_autoreview.py` (or the projected path) as
 the executable. Direct leaf submits for thermos and ponytail need no adapter.
 

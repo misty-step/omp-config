@@ -1,4 +1,4 @@
-"""Public primitives shared by the committed-range review gate and runner."""
+"""Public primitives shared by the committed-range review gate."""
 from __future__ import annotations
 
 import hashlib
@@ -16,7 +16,6 @@ FREEZE_SCHEMA = "omp.review-freeze.v2"
 RESULT_SCHEMA = "omp.review-result.v1"
 PASS_SCHEMA = "omp.review-pass.v3"
 RECEIPT_SCHEMA = "omp.review-receipt.v3"
-SCHEMA = RECEIPT_SCHEMA
 PASS_DIRECTORY = Path(".omp/review-passes")
 RECEIPT_RELATIVE = Path(".omp/review-receipt.json")
 FREEZE_RELATIVE = Path(".omp/review-freeze.json")
@@ -31,7 +30,6 @@ REVIEWERS = (
     "thermo-nuclear-code-quality-review",
     "ponytail",
 )
-SKILL_RELATIVE = Path("SKILL.md")
 
 REVIEW_SPECS: dict[str, dict[str, Any]] = {
     "autoreview": {

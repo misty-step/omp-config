@@ -78,8 +78,6 @@ def repo_root(path: str | Path | None) -> Path:
 
 
 
-def freeze_path(repo: Path, value: str | None = None) -> Path:
-    return confined_path(repo, value, FREEZE_RELATIVE, "freeze")
 
 def receipt_path(repo: Path, value: str | None = None) -> Path:
     return confined_path(repo, value, RECEIPT_RELATIVE, "receipt")

@@ -408,5 +408,61 @@ class ReviewGateProtocolTests(unittest.TestCase):
         self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
         self.assertIn("malformed", result.stderr)
 
+
+    def test_cli_submit_autoreview_requires_adapter_flags(self) -> None:
+        identity = self.freeze_range()
+        lanes = identity.get("planned_lanes", list(REVIEWERS))
+        if "autoreview" not in lanes:
+            self.skipTest("floor did not plan autoreview")
+        result = self.result_for("autoreview")
+        path = self.repo / "ar.json"
+        path.write_text(json.dumps(result), encoding="utf-8")
+        missing = self.run_gate(
+            "submit",
+            "--repo",
+            str(self.repo),
+            "--reviewer",
+            "autoreview",
+            "--actor",
+            "tester",
+            "--harness",
+            "test",
+            "--model",
+            "test-model",
+            "--run-id",
+            "run-ar-missing",
+            "--result",
+            str(path),
+        )
+        self.assertNotEqual(missing.returncode, 0, missing.stdout + missing.stderr)
+        self.assertIn("adapter", (missing.stderr + missing.stdout).lower())
+        adapter = self.adapter()
+        ok = self.run_gate(
+            "submit",
+            "--repo",
+            str(self.repo),
+            "--reviewer",
+            "autoreview",
+            "--actor",
+            "tester",
+            "--harness",
+            "test",
+            "--model",
+            "test-model",
+            "--run-id",
+            "run-ar-ok",
+            "--result",
+            str(path),
+            "--adapter-name",
+            adapter["name"],
+            "--adapter-executable",
+            adapter["executable"],
+            "--adapter-executable-sha256",
+            adapter["executable_sha256"],
+            "--adapter-engine",
+            adapter["engine"],
+        )
+        self.assertEqual(ok.returncode, 0, ok.stderr)
+
 if __name__ == "__main__":
     unittest.main()

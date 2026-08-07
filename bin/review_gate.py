@@ -96,6 +96,24 @@ def _read_result(args: argparse.Namespace) -> dict[str, Any]:
         raise GateError(f"{label} is not JSON: {error}") from error
 
 
+def _adapter_from_args(args: argparse.Namespace) -> dict[str, str] | None:
+    fields = {
+        "name": getattr(args, "adapter_name", None),
+        "executable": getattr(args, "adapter_executable", None),
+        "executable_sha256": getattr(args, "adapter_executable_sha256", None),
+        "engine": getattr(args, "adapter_engine", None),
+    }
+    present = [value for value in fields.values() if value]
+    if not present:
+        return None
+    if len(present) != 4 or any(not value for value in fields.values()):
+        raise GateError(
+            "adapter attestation requires --adapter-name, --adapter-executable, "
+            "--adapter-executable-sha256, and --adapter-engine"
+        )
+    return {key: str(value) for key, value in fields.items()}
+
+
 def submit(args: argparse.Namespace) -> int:
     repo = repo_root(args.repo)
     reviewer = args.reviewer
@@ -109,7 +127,9 @@ def submit(args: argparse.Namespace) -> int:
         "run_id": args.run_id,
     }
     freeze_file = _freeze_file(repo)
-    output = submit_result(repo, freeze_file, reviewer, attribution, result)
+    output = submit_result(
+        repo, freeze_file, reviewer, attribution, result, adapter=_adapter_from_args(args)
+    )
     status = result.get("status")
     print(f"review pass submitted: {output}")
     if status != "clean":
@@ -350,8 +370,15 @@ def parser() -> argparse.ArgumentParser:
     submit_parser.add_argument("--model", required=True)
     submit_parser.add_argument("--run-id", required=True)
     submit_parser.add_argument("--result", help="JSON result file; use - or omit to read stdin")
+    submit_parser.add_argument("--adapter-name", help="adapter name for autoreview attestation")
+    submit_parser.add_argument("--adapter-executable", help="absolute or repo-relative adapter executable")
+    submit_parser.add_argument(
+        "--adapter-executable-sha256",
+        help="sha256 digest of the adapter executable bytes",
+    )
+    submit_parser.add_argument("--adapter-engine", help="adapter engine id (for example pi or codex)")
 
-    record_parser = sub.add_parser("record", help="record the three gate-owned review passes")
+    record_parser = sub.add_parser("record", help="record the planned gate-owned review passes")
     record_parser.add_argument("--repo", default=".")
 
     verify_parser = sub.add_parser("verify", help="verify the final receipt for a committed range")
