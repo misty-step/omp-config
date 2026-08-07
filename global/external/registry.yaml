@@ -172,6 +172,8 @@ sources:
       - global/skills/wayfinder
       - global/skills/grilling
       - global/skills/writing-for-agents
+      - global/skills/domain-modeling
+      - global/skills/setup-matt-pocock-skills
 
   - repo: openclaw/agent-skills
     ref: main
