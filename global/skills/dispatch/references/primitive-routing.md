@@ -55,7 +55,7 @@ Respect `task.maxConcurrency`.
 | Outcome | Skills to name beyond the kit | Native agent |
 |---|---|---|
 | implementation and delivery | `deliver`, `ci`, `powder`, `sprites`, `refactor`, `compound`, `verification`, `bdd-pipeline` | `builder`; `verifier` proves |
-| product and infrastructure operation | `factory-apps`, `estate-infrastructure`, `document`, `showcase` | `builder`; `verifier` proves |
+| product and infrastructure operation | `factory-apps`, `estate-infrastructure`, `document`, `showcase`, `foundation` | `builder`; `verifier` proves |
 | harness and architecture | `harness-engineering`, `mcp-design`, `project-engineering` | `architect` or `builder` |
 | independent review | `verify`, `verify-live`, `code-review`, `autoreview`, `thermo-nuclear-review`, `thermo-nuclear-code-quality-review`, `review-tests`, `review-security`, `review-vision` | `verifier` |
 | multi-lane audits and quality programs | `quality` | chief dispatches selected domain lanes |
@@ -64,6 +64,7 @@ Respect `task.maxConcurrency`.
 | communication shaping | `comms` | chief or owning agent |
 | product and interface design | `design`, `image-gen`, `improve-ui`, `baseline-ui`, `prototype` | `designer` |
 | product direction | `vision`, `groom`, `roadmap`, `wayfinder` | chief; dispatch designer/researcher/architect as needed |
+| skill authoring | `writing-for-agents` | chief or `architect` |
 | persona browser QA | `qa-users`, `qa-persona` | chief → `qa-master` → `qa-persona` |
 | sharp critique of a plan | `grilling` | chief or `designer` |
 | structure critique | `prune`, `ponytail` | `sculptor` |
