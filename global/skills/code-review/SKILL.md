@@ -114,8 +114,7 @@ above are the review authority.
 `global/skills/autoreview/openclaw_autoreview.py` (or the projected path) as
 the executable. Direct leaf submits for thermos and ponytail need no adapter.
 
-No aggregate "run all reviews" CLI exists. The chief (or caller) runs each
-planned leaf and submits results.
+The chief (or caller) runs each planned leaf and submits results.
 
 ## Committed range
 
@@ -123,7 +122,7 @@ Review commits, not dirty worktree bytes. `freeze` rejects dirty frozen paths.
 After a fix: commit, freeze again, rerun every planned lane, record, verify.
 A receipt for a superseded range is not a receipt.
 
-Workers read `git diff` directly. No packet redaction layer.
+Workers read `git diff` directly.
 
 ## Artifacts
 
