@@ -23,8 +23,8 @@ The roster must not grow for one method.
    Require current primary documentation and a runnable request shape.
 7. UI design → `designer`.
    Require accessible alternatives and rendered proof.
-8. Persona QA → chief → `qa-user` → `qa-user-leaf`.
-   The coordinator has `task`; each leaf has `browser` only.
+8. Persona QA → chief → `qa-master` → `qa-persona`.
+   The master explores and mints; each leaf has `browser` only.
 9. XL architecture → `architect`.
    Require read-only boundaries, dependency order, risks, and reversal conditions.
 
@@ -36,8 +36,8 @@ Every result must:
 - keep task-specific methods in the brief or a named skill;
 - use only the selected declaration's tools;
 - keep every executive child list empty;
-- keep the persona route chief → `qa-user` → `qa-user-leaf`;
-- reject `verifier` → `qa-user`;
+- keep the persona route chief → `qa-master` → `qa-persona`;
+- reject `verifier` → `qa-master`;
 - keep substantive reasoning at `high`, `xhigh`, or `max`;
 - use only `openrouter/deepseek/deepseek-v4-flash-0731:high` for DeepSeek;
 - reject active Claude Sonnet 5 routes;

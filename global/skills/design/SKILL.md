@@ -105,15 +105,18 @@ widths.
 Report gate results as terse `file:line — verdict` lines. Include screenshot
 paths in the completion message.
 
-## Routing
+## Kit branches
+
+This skill is the designer autoload kit. Load branch skills only when the route needs them:
 
 - Net-new product surface, flow, or visual direction → `skill://prototype`.
 - Existing surface systematic audit → `skill://improve-ui`.
 - Whole-product audit → `skill://quality` with the `design` domain.
 - New UI baseline, WCAG, keyboard, or motion-performance pass →
   `skill://baseline-ui`.
+- Informational image or concept raster → `skill://image-gen`.
 - Animation or interaction behavior verification → dispatch `verifier` with
-  `verify-live`.
+  live proof through `skill://verify`.
 
 The prototype skill owns parallel direction dispatch, catalog synthesis, and the
 operator lock. Do not duplicate those lanes in this skill.

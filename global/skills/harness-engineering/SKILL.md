@@ -82,14 +82,14 @@ Run the primitive test before promoting a pattern. Most patterns are prompts.
 
 Discover authored agents in this order: project `.omp/agents`, user
 `~/.omp/agent/agents`, then the current OMP declarations in `global/agents/`:
-`architect`, `builder`, `designer`, `qa-user`, `qa-user-leaf`, `researcher`,
-and `verifier`. The Claude-plugin provider is disabled, and the bundled names
-`task`, `scout`, `librarian`, `sonic`, `reviewer`, and `security-reviewer` are
-disabled by `task.disabledAgents`; do not route work to them. Discover skills
-through analogous native-provider precedence: project and user `.omp` or
-`.agents` first. Auto-learn skills defer to same-named authored skills. No
-resolved bundle or catalog projection exists beyond lookup. Repo-local
-vendoring is exceptional.
+`architect`, `builder`, `designer`, `researcher`, `verifier`, `sculptor`,
+`qa-master`, and `qa-persona`. The Claude-plugin provider is disabled, and the
+bundled names `task`, `scout`, `librarian`, `sonic`, `reviewer`, and
+`security-reviewer` are disabled by `task.disabledAgents`; do not route work to
+them. Discover skills through analogous native-provider precedence: project and
+user `.omp` or `.agents` first. Auto-learn skills defer to same-named authored
+skills. No resolved bundle or catalog projection exists beyond lookup.
+Repo-local vendoring is exceptional.
 
 ## Primitive Test
 

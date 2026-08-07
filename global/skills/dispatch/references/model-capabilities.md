@@ -18,7 +18,7 @@ Two OpenRouter routes are the primary workhorses for dispatched work:
 2. `openrouter/deepseek/deepseek-v4-flash-0731:high` — fast bulk workhorse.
 
 Every agent ladder starts with these two routes.
-`researcher`, `qa-user`, and `qa-user-leaf` lead with DeepSeek; the rest lead
+`researcher`, `qa-master`, and `qa-persona` lead with DeepSeek; the rest lead
 with Luna. `designer` keeps Kimi K3 first because it spends no premium quota.
 Subscription routes follow as escalation and availability fallbacks.
 Every ladder ends with `openrouter/x-ai/grok-4.5:high` →
@@ -31,8 +31,9 @@ Every ladder ends with `openrouter/x-ai/grok-4.5:high` →
 | `verifier` | Luna → DeepSeek | GPT-5.6 Sol → Fable 5 → Opus 5 → GPT-5.6 Luna (codex) → Grok 4.5 → Gemini 3.6 Flash → Kimi K3 | `xhigh` |
 | `researcher` | DeepSeek → Luna | Gemini 3.6 Flash → Grok 4.5 → GPT-5.6 Luna (codex) → GPT-5.6 Sol → Fable 5 → Kimi K3 → Opus 5 | `high` |
 | `designer` | Kimi K3 → Luna → DeepSeek | Fable 5 → GPT-5.6 Luna (codex) → GPT-5.6 Sol → Gemini 3.6 Flash → Grok 4.5 → Opus 5 | `max` |
-| `qa-user` | DeepSeek → Luna | GPT-5.6 Luna (codex) → Gemini 3.6 Flash → Grok 4.5 → Fable 5 → GPT-5.6 Sol → Kimi K3 → Opus 5 | `high` |
-| `qa-user-leaf` | DeepSeek → Luna | Gemini 3.6 Flash → GPT-5.6 Luna (codex) → Grok 4.5 → Fable 5 → GPT-5.6 Sol → Kimi K3 → Opus 5 | `high` |
+| `qa-master` | DeepSeek → Luna | GPT-5.6 Luna (codex) → Gemini 3.6 Flash → Grok 4.5 → Fable 5 → GPT-5.6 Sol → Kimi K3 → Opus 5 | `high` |
+| `qa-persona` | DeepSeek → Luna | Gemini 3.6 Flash → GPT-5.6 Luna (codex) → Grok 4.5 → Fable 5 → GPT-5.6 Sol → Kimi K3 → Opus 5 | `high` |
+| `sculptor` | Luna → DeepSeek | GPT-5.6 Sol → Fable 5 → Opus 5 → GPT-5.6 Luna (codex) → Grok 4.5 → Gemini 3.6 Flash → Kimi K3 | `max` |
 
 ## Fixed policy
 

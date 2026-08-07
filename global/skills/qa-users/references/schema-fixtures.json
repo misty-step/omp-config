@@ -11,12 +11,16 @@
         "mission": "Complete the first-use flow and report what a real user can observe.",
         "strength_focus": "Clear onboarding",
         "friction_focus": "Recoverable validation errors",
-        "entrypoint_ids": ["home"],
+        "entrypoint_ids": [
+          "home"
+        ],
         "source_read": false,
         "tracker_read": false,
         "issue_write": false,
         "fresh_rca": true,
-        "max_actions": 5
+        "max_actions": 5,
+        "knowledge": "Ordinary product user knowledge only. No source or admin tools.",
+        "blind_spots": "Implementation details, source layout, tracker state, and developer diagnostics."
       }
     ],
     "harness": "omp",
@@ -44,16 +48,27 @@
     "tracker": {
       "schema_version": "qa-users.tracker.v1",
       "selected": "powder",
-      "capabilities": { "query": true, "create": true, "read_back": true },
+      "capabilities": {
+        "query": true,
+        "create": true,
+        "read_back": true
+      },
       "query": {
         "operation": "search",
         "pagination": "cursor",
         "truncation_signal": "has_more"
       },
-      "create": { "operation": "create_issue", "idempotency_key": "finding_fingerprint" },
+      "create": {
+        "operation": "create_issue",
+        "idempotency_key": "finding_fingerprint"
+      },
       "read_back": {
         "operation": "get_issue",
-        "required_fields": ["id", "title", "body"]
+        "required_fields": [
+          "id",
+          "title",
+          "body"
+        ]
       }
     },
     "execution_overrides": {
@@ -67,7 +82,14 @@
       "dry_run": true,
       "phase": "planned",
       "personas": [
-        { "persona_id": "persona-a", "status": "planned", "entrypoints": ["home"], "evidence_count": 0 }
+        {
+          "persona_id": "persona-a",
+          "status": "planned",
+          "entrypoints": [
+            "home"
+          ],
+          "evidence_count": 0
+        }
       ],
       "findings": [],
       "strengths": [],
@@ -86,17 +108,29 @@
       "dry_run": false,
       "phase": "executed",
       "personas": [
-        { "persona_id": "persona-a", "status": "completed", "entrypoints": ["home"], "evidence_count": 1 }
+        {
+          "persona_id": "persona-a",
+          "status": "completed",
+          "entrypoints": [
+            "home"
+          ],
+          "evidence_count": 1
+        }
       ],
       "findings": [
         {
           "fingerprint": "417022bbb46cb7a2db2f816bc354019b47950853d398b45da3acb4ec29ca6ce7",
           "persona": "persona-a",
           "affected_entrypoint": "home",
-          "reproduction": ["Open the home page", "Submit the first-use form"],
+          "reproduction": [
+            "Open the home page",
+            "Submit the first-use form"
+          ],
           "expected": "The form reports a recoverable validation error",
           "observed": "The form clears the entered values without an explanation",
-          "evidence": ["session://evidence/persona-a/home-step-2"],
+          "evidence": [
+            "session://evidence/persona-a/home-step-2"
+          ],
           "severity": "high",
           "confidence": 0.9,
           "category": "reliability",
@@ -106,15 +140,21 @@
           "tracker_issue_id": "ISSUE-1"
         }
       ],
-      "strengths": ["The home page renders the first-use form."],
-      "suppressed_friction": ["A low-confidence copy concern was retained without filing."],
+      "strengths": [
+        "The home page renders the first-use form."
+      ],
+      "suppressed_friction": [
+        "A low-confidence copy concern was retained without filing."
+      ],
       "tracker_summary": {
         "selected": "powder",
         "scanned_pages": 1,
         "truncated": false,
         "ambiguous": false,
         "created": 1,
-        "read_back_issue_ids": ["ISSUE-1"]
+        "read_back_issue_ids": [
+          "ISSUE-1"
+        ]
       }
     }
   },

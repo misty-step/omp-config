@@ -29,15 +29,15 @@ Maintain one frozen scenario row per scenario with these fields:
 | `expected` | observable result stated before execution |
 | `evidence` | screenshot, snapshot, status, console line, or transcript to capture |
 
-A fresh, non-mutating `verifier` runs every row through `skill://verify-live`. Return `PASS`, `WARN`, `FAIL`, or `SKIP` with the exact interaction or command and observed result. `SKIP` names its blocker.
+A fresh, non-mutating `verifier` runs every row through `skill://verify` (live branch). Return `PASS`, `WARN`, `FAIL`, or `SKIP` with the exact interaction or command and observed result. `SKIP` names its blocker.
 
 Keep rows deterministic and re-runnable. Do not depend on wall-clock time or row order. Reproduce a failure before recording it. Cover every golden path, invariant, and hostile edge: invalid input, empty state, authentication failure, double submit, refresh mid-flow, back navigation, and concurrent session.
 
 ## Persona track
 
-Use the frozen `input.v1` with the `skill://qa-users` coordinator. It dispatches exactly one browser-only `qa-user-leaf` per configured persona. A persona receives a distinct goal, tolerance, and expertise level, not a script.
+Dispatch `qa-master` with `skill://qa-users`. It explores when needed, freezes `input.v1`, and dispatches exactly one browser-only `qa-persona` per configured persona. A persona receives mission, knowledge, and blind_spots, not a script.
 
-Each persona returns exact steps, expected versus observed behavior, runtime evidence references, strengths, friction, and `failure_reason` when its mission fails. Preserve strengths and all friction, including friction below the finding threshold. A persona or coordinator never reads product source, edits source, files issues, or invents an entrypoint.
+Each persona returns exact steps, expected versus observed behavior, runtime evidence references, strengths, friction, and `failure_reason` when its mission fails. Preserve strengths and all friction, including friction below the finding threshold. A persona never reads product source, edits source, files issues, or invents an entrypoint. The master never runs a full persona mission on its own browser session.
 
 The deterministic and persona tracks are complementary. Neither track replaces the other.
 
@@ -45,9 +45,9 @@ The deterministic and persona tracks are complementary. Neither track replaces t
 
 Record evidence during exploration. Use a video for an interactive reproduction and one annotated screenshot for a static reproduction. Store heavy payloads as artifact paths, not inline report content.
 
-The root confirms each candidate before triage. Each confirmed finding records its affected entrypoint, exact steps, expected behavior, observed behavior, evidence, severity, confidence, and category. Record a root cause only when runtime evidence establishes it.
+`qa-master` confirms each candidate before synthesis. Each confirmed finding records its affected entrypoint, exact steps, expected behavior, observed behavior, evidence, severity, confidence, and category. Record a root cause only when runtime evidence establishes it.
 
-One serialized root tracker writer exhaustively scans every tracker page or cursor. It blocks on ambiguity or truncation. Deduplicate with the canonical SHA-256 finding fingerprint from `skill://qa-users` plus `affected_entrypoint`. File only actionable, evidence-backed findings within the frozen create ceiling, then read every created issue back. Accepted and matched findings retain their tracker issue identifier.
+One serialized chief tracker writer exhaustively scans every tracker page or cursor. It blocks on ambiguity or truncation. Deduplicate with the canonical SHA-256 finding fingerprint from `skill://qa-users` plus `affected_entrypoint`. File only actionable, evidence-backed findings within the frozen create ceiling, then read every created issue back. Accepted and matched findings retain their tracker issue identifier.
 
 Do not mutate a user session. Use `fix-and-pr` only when `skill://qa-users` authorizes it after filing and read-back, with `inside_user_session: false`.
 

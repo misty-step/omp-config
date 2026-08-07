@@ -14,7 +14,8 @@ That duplication increased failure surface and prompt overhead without improving
 ## Decision
 
 Keep five broad native agents: `architect`, `builder`, `verifier`, `researcher`, and `designer`.
-Keep `qa-user` and `qa-user-leaf` only for the required persona QA depth.
+Keep `qa-master` and `qa-persona` only for the required persona QA depth.
+Keep `sculptor` only for the read-only structure critic lane.
 Dispatch all other work directly from the chief through native `task`.
 Keep task-specific methods and hidden skill names in the task brief.
 Keep every broad agent child allowlist empty.

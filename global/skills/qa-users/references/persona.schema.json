@@ -9,6 +9,8 @@
     "id",
     "label",
     "mission",
+    "knowledge",
+    "blind_spots",
     "entrypoint_ids",
     "source_read",
     "tracker_read",
@@ -19,6 +21,8 @@
     "id": { "type": "string", "minLength": 2, "maxLength": 64, "pattern": "^[a-z][a-z0-9._-]{1,63}$" },
     "label": { "type": "string", "minLength": 1, "maxLength": 128 },
     "mission": { "type": "string", "minLength": 1, "maxLength": 2048 },
+    "knowledge": { "type": "string", "minLength": 1, "maxLength": 2048 },
+    "blind_spots": { "type": "string", "minLength": 1, "maxLength": 2048 },
     "strength_focus": { "type": "string", "maxLength": 512 },
     "friction_focus": { "type": "string", "maxLength": 512 },
     "entrypoint_ids": {

@@ -71,7 +71,7 @@ Substantive work MUST pass a named-critic gate before closeout.
 - Verify each finding against the work and record proof before closeout.
 - Include erasure in every gate. Ask, “What can be deleted while preserving behavior?”
 - Measure shrink with token count, AST node count, or a line budget when applicable. Do not accept subjective simplicity as proof.
-- Every substantive critic gate includes one fresh `ponytail` agent. It audits the change and its surrounding shipped system.
+- Every substantive critic gate includes one fresh `sculptor` agent. It audits structure, deletion, and deep-module shape without repairing findings.
 - For review work, assign named angles to existing independent review lanes when they satisfy this critic boundary. Otherwise dispatch a dedicated critic. Do not nest another review workflow.
 - Follow `skill://dispatch`, `skill://code-review`, `skill://autoreview`, and `global/references/failure-modes.md` for routing, review mechanics, and failure-mode prompts.
 

@@ -47,14 +47,13 @@ class DispatchRoutingTests(unittest.TestCase):
 
     def test_direct_chief_persona_route_uses_only_structural_qa_declarations(self) -> None:
         persona = next(item for item in self.fixture["scenarios"] if item["id"] == "persona-qa")
-        self.assertEqual(persona["chain"], ["chief", "qa-user", "qa-user-leaf"])
-        coordinator = self.fields["qa-user"]
-        leaf = self.fields["qa-user-leaf"]
-        self.assertEqual(coordinator["tools"], "task")
-        self.assertEqual(coordinator["spawns"], "qa-user-leaf")
-        self.assertEqual(leaf["tools"], "browser")
-        self.assertEqual(leaf.get("spawns", ""), "")
-        self.assertNotIn("qa-user", self.fields["verifier"].get("spawns", ""))
+        self.assertEqual(persona["chain"], ["chief", "qa-master", "qa-persona"])
+        coordinator = self.fields["qa-master"]
+        leaf = self.fields["qa-persona"]
+        self.assertIn("task", {part.strip() for part in coordinator.get("tools", "").split(",") if part.strip()})
+        self.assertEqual(coordinator["spawns"], "qa-persona")
+        self.assertEqual(leaf.get("tools", ""), "browser")
+        self.assertNotIn("qa-master", self.fields["verifier"].get("spawns", ""))
 
     def test_direct_chief_persona_and_native_agent_routes_are_distinct(self) -> None:
         scenarios = {scenario["id"]: scenario for scenario in self.fixture["scenarios"]}
@@ -106,7 +105,7 @@ class DispatchRoutingTests(unittest.TestCase):
         }
         luna = "openrouter/openai/gpt-5.6-luna"
         deepseek = "openrouter/deepseek/deepseek-v4-flash-0731"
-        deepseek_first = {"researcher", "qa-user", "qa-user-leaf"}
+        deepseek_first = {"researcher", "qa-master", "qa-persona"}
         self.assertEqual(
             [name for name, models in ladders.items() if models[0].startswith("kimi-code/k3")],
             ["designer"],
