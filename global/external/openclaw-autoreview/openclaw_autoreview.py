@@ -30,10 +30,10 @@ from pathlib import Path, PurePosixPath
 from typing import Any, Callable, NamedTuple
 
 
-ENGINES = ("codex", "claude", "droid", "copilot", "pi", "opencode", "cursor")
+ENGINES = ("codex", "claude", "droid", "copilot", "pi", "omp", "opencode", "cursor")
 ENGINE_ALIASES = {"cursor-agent": "cursor"}
 ENGINE_CHOICES = (*ENGINES, *ENGINE_ALIASES)
-ALL_REVIEWERS = ("codex", "claude", "pi")
+ALL_REVIEWERS = ("codex", "claude", "pi", "omp")
 SAFE_GIT_CONFIG_ARGS = (
     "-c",
     "core.fsmonitor=false",
@@ -817,6 +817,7 @@ DEFAULT_MODEL_BY_ENGINE = {
 DEFAULT_CODEX_ACCESS_FALLBACK_MODEL = "gpt-5.6-terra"
 DEFAULT_THINKING_BY_ENGINE = {
     "codex": "high",
+    "omp": "high",
 }
 THINKING_LEVELS_BY_ENGINE = {
     "codex": {"none", "minimal", "low", "medium", "high", "xhigh", "max"},
@@ -824,6 +825,7 @@ THINKING_LEVELS_BY_ENGINE = {
     "droid": {"off", "none", "low", "medium", "high", "xhigh", "max"},
     "copilot": set(),
     "pi": {"off", "minimal", "low", "medium", "high", "xhigh"},
+    "omp": {"off", "minimal", "low", "medium", "high", "xhigh", "max", "auto"},
     "opencode": {"minimal", "low", "medium", "high", "max"},
     "cursor": set(),
 }
@@ -1249,15 +1251,22 @@ def safe_engine_env(
         "PI_SKIP_VERSION_CHECK",
         "PI_TELEMETRY",
     }
+    omp_allowed_exact = pi_allowed_exact | {
+        "OMP_AUTH_BROKER_URL",
+        "OMP_AUTH_BROKER_TOKEN",
+        "OMP_PROFILE",
+        "XAI_API_KEY",
+    }
     engine_allowed_exact = {
         "claude": claude_allowed_exact,
         "codex": codex_allowed_exact,
+        "omp": omp_allowed_exact,
         "opencode": multi_provider_allowed_exact,
         "pi": pi_allowed_exact,
     }.get(engine or "", set())
     allowed_prefixes = ("AUTOREVIEW_FAKE_",)
     custom_provider_env_keys: set[str] = set()
-    if engine in {"opencode", "pi"}:
+    if engine in {"opencode", "pi", "omp"}:
         for raw_key in os.environ.get("AUTOREVIEW_PROVIDER_ENV_ALLOW", "").split(","):
             key = raw_key.strip()
             if not key:
@@ -1276,7 +1285,7 @@ def safe_engine_env(
             or key in engine_allowed_exact
             or any(key.startswith(prefix) for prefix in allowed_prefixes)
             or (
-                engine == "pi"
+                engine in {"pi", "omp"}
                 and (
                     key in MULTI_PROVIDER_CREDENTIAL_ENV_KEYS
                     or key in MULTI_PROVIDER_ENV_KEYS
@@ -1316,6 +1325,7 @@ def safe_engine_env(
     engine_config_paths = {
         "claude": ("CLAUDE_CONFIG_DIR",),
         "codex": ("CODEX_HOME",),
+        "omp": ("PI_CODING_AGENT_DIR", "OMP_PROFILE"),
         "pi": ("PI_CODING_AGENT_DIR",),
     }
     for key in engine_config_paths.get(engine or "", ()):
@@ -1339,7 +1349,7 @@ def safe_engine_env(
             )
             if normalized:
                 env[key] = normalized
-    if engine in {"claude", "opencode", "pi"}:
+    if engine in {"claude", "omp", "opencode", "pi"}:
         for key in PROVIDER_CREDENTIAL_PATH_ENV_KEYS:
             value = os.environ.get(key)
             env.pop(key, None)
@@ -10031,14 +10041,14 @@ def run_claude(args: argparse.Namespace, repo: Path, prompt: str) -> str:
 def run_droid(args: argparse.Namespace, repo: Path, prompt: str) -> str:
     raise SystemExit(
         "droid engine is unavailable: the current Droid CLI cannot disable project instructions and all tools; "
-        "use codex, claude, or pi"
+        "use codex, claude, pi, or omp"
     )
 
 
 def run_copilot(args: argparse.Namespace, repo: Path, prompt: str) -> str:
     raise SystemExit(
         "copilot engine is unavailable: its file tools cannot be confined to the reviewed bundle "
-        "without exposing ignored repository secrets; use codex, claude, or pi"
+        "without exposing ignored repository secrets; use codex, claude, pi, or omp"
     )
 
 
@@ -10063,7 +10073,7 @@ def run_opencode(args: argparse.Namespace, repo: Path, prompt: str) -> str:
     raise SystemExit(
         "opencode engine is unavailable: the current CLI contract does not prove "
         "project-config isolation and its generic fetch tool cannot be restricted "
-        "away from private or metadata endpoints; use codex, claude, or pi"
+        "away from private or metadata endpoints; use codex, claude, pi, or omp"
     )
 
 
@@ -10271,6 +10281,95 @@ def run_pi(args: argparse.Namespace, repo: Path, prompt: str) -> str:
         raise SystemExit(f"pi engine failed ({result.returncode})\n{result.stderr or result.stdout}")
     return result.stdout
 
+
+
+def omp_review_isolation_flags() -> list[str]:
+    """Flags that keep OMP from loading project-controlled trust surfaces."""
+    return [
+        "--no-session",
+        "--no-extensions",
+        "--no-skills",
+        "--no-rules",
+        "--no-lsp",
+        "--no-pty",
+    ]
+
+
+def ensure_omp_isolation_supported(args: argparse.Namespace, repo: Path) -> str:
+    omp_bin = resolve_command(args.omp_bin, repo)
+    engine_env = safe_engine_env(repo, [Path(omp_bin).parent], engine="omp")
+    with tempfile.TemporaryDirectory(
+        prefix="autoreview-omp-probe.",
+        dir=safe_temp_root(repo),
+    ) as tempdir:
+        probe_cwd = Path(tempdir)
+        result = run([omp_bin, "--version"], probe_cwd, check=False, env=engine_env)
+        help_result = run([omp_bin, "--help"], probe_cwd, check=False, env=engine_env)
+    if result.returncode != 0:
+        raise SystemExit("omp engine requires a working `omp --version`")
+    help_text = f"{help_result.stdout}\n{help_result.stderr}"
+    required_flags = [
+        "--print",
+        *omp_review_isolation_flags(),
+        "--no-tools",
+        "--thinking",
+        "--system-prompt",
+    ]
+    missing = [flag for flag in required_flags if flag not in help_text]
+    if help_result.returncode != 0 or missing:
+        detail = ", ".join(missing) if missing else "--help failed"
+        raise SystemExit(f"omp engine requires OMP isolation flags missing from --help: {detail}")
+    return omp_bin
+
+
+def run_omp(args: argparse.Namespace, repo: Path, prompt: str) -> str:
+    omp_bin = ensure_omp_isolation_supported(args, repo)
+    schema_text = json.dumps(SCHEMA, separators=(",", ":"), ensure_ascii=True)
+    system_prompt = (
+        "You are an isolated code-review engine. Review only the supplied bundle. "
+        "Do not invent repository context outside the prompt. "
+        "Return only one JSON object that validates against this exact JSON Schema: "
+        f"{schema_text} "
+        "Every finding must include non-empty title and body strings, priority in "
+        "P0|P1|P2|P3, confidence in [0,1], category, and code_location.file_path plus line. "
+        "If there are no findings, return findings as an empty array. "
+        "No markdown fences, no preamble, no trailing commentary."
+    )
+    cmd = [
+        omp_bin,
+        "--print",
+        *omp_review_isolation_flags(),
+        "--no-tools",
+        "--mode",
+        "text",
+        "--system-prompt",
+        system_prompt,
+    ]
+    if args.model:
+        cmd.extend(["--model", args.model])
+    if args.thinking:
+        cmd.extend(["--thinking", args.thinking])
+    with tempfile.TemporaryDirectory(
+        prefix="autoreview-omp-run.",
+        dir=safe_temp_root(repo),
+    ) as tempdir:
+        # Neutral cwd so project AGENTS.md / skills / rules cannot load.
+        result = run_with_heartbeat(
+            cmd,
+            Path(tempdir),
+            input_text=prompt,
+            label="omp",
+            stream_output=args.stream_engine_output,
+            resolve_root=repo,
+            env=safe_engine_env(
+                repo,
+                [Path(cmd[0]).parent],
+                engine="omp",
+            ),
+        )
+    if result.returncode != 0:
+        raise SystemExit(f"omp engine failed ({result.returncode})\n{result.stderr or result.stdout}")
+    return result.stdout
 
 class CodexStreamDisplay:
     def __init__(self, *, activity_seconds: int = 20) -> None:
@@ -11746,7 +11845,7 @@ def parse_args() -> argparse.Namespace:
         action="append",
         help="Model for all reviewers or engine=model. Repeatable. Defaults: codex=gpt-5.6-sol with an access-only gpt-5.6-terra retry, claude=claude-fable-5.",
     )
-    parser.add_argument("--thinking", action="append", help="Thinking/effort for all reviewers or engine=level. Repeatable. Codex: none, minimal, low, medium, high, xhigh, max. Claude: low, medium, high, xhigh, max. Droid: off, none, low, medium, high. Pi: off, minimal, low, medium, high, xhigh. OpenCode: minimal, low, medium, high, max. Cursor: none.")
+    parser.add_argument("--thinking", action="append", help="Thinking/effort for all reviewers or engine=level. Repeatable. Codex: none, minimal, low, medium, high, xhigh, max. Claude: low, medium, high, xhigh, max. Droid: off, none, low, medium, high. Pi: off, minimal, low, medium, high, xhigh. OMP: off, minimal, low, medium, high, xhigh, max, auto. OpenCode: minimal, low, medium, high, max. Cursor: none.")
     parser.add_argument(
         "--fallback-model",
         action="append",
@@ -11776,7 +11875,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--opencode-bin", default=os.environ.get("OPENCODE_BIN", "opencode"))
     parser.add_argument("--pi-bin", default=os.environ.get("PI_BIN", "pi"))
-    parser.add_argument("--no-tools", dest="tools", action="store_false", default=True, help="Disable tools for engines that support it. Codex, Droid, copilot, opencode, and cursor reject no-tools review.")
+    parser.add_argument("--omp-bin", default=os.environ.get("OMP_BIN", "omp"))
+    parser.add_argument("--no-tools", dest="tools", action="store_false", default=True, help="Disable tools for engines that support it. Codex, Droid, copilot, opencode, and cursor reject no-tools review. OMP and Pi always run with --no-tools.")
     parser.add_argument("--self-test", action="store_true", help="Run deterministic local autoreview self-tests.")
     parser.add_argument("--self-test-opencode-jsonl-parser", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--self-test-opencode-isolation", action="store_true", help=argparse.SUPPRESS)
@@ -11856,6 +11956,8 @@ def run_engine(args: argparse.Namespace, repo: Path, prompt: str) -> str:
         return run_copilot(args, repo, prompt)
     if args.engine == "pi":
         return run_pi(args, repo, prompt)
+    if args.engine == "omp":
+        return run_omp(args, repo, prompt)
     if args.engine == "opencode":
         return run_opencode(args, repo, prompt)
     if args.engine == "cursor":
@@ -12004,7 +12106,7 @@ def reviewer_args(args: argparse.Namespace) -> list[argparse.Namespace]:
         clone.model = model
         clone.thinking = thinking
         clone.fallback_model = fallback_model
-        clone.tools = False if engine in {"droid", "pi"} else args.tools
+        clone.tools = False if engine in {"droid", "omp", "pi"} else args.tools
         result.append(clone)
     return result
 
@@ -12029,7 +12131,7 @@ def run_reviewer(
     input_truncated: bool = False,
 ) -> dict[str, Any]:
     ensure_reviewer_input_complete(args, input_truncated)
-    attempts = 3 if args.engine == "cursor" else 1
+    attempts = 3 if args.engine in {"cursor", "omp"} else 1
     for attempt in range(1, attempts + 1):
         raw = run_engine(args, repo, prompt)
         try:
