@@ -17,7 +17,7 @@ Keep the shared program here. Load only the selected domain reference.
 
 | Need | Use instead |
 |---|---|
-| Every-project floor, faces, onboarding, factory surfaces | `'/home/phaedrus/.omp/agent/skills/foundation'` |
+| Every-project floor, faces, onboarding, factory surfaces | `'skill://foundation'` |
 | Broad architecture reshape toward a goal | `'/home/phaedrus/.omp/agent/skills/refactor'` + `'/home/phaedrus/.omp/agent/skills/prune'` |
 | Single frozen-range review | `'/home/phaedrus/.omp/agent/skills/code-review'` |
 | Persona browser QA | `'/home/phaedrus/.omp/agent/skills/qa-users'` |
