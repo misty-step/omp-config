@@ -4,6 +4,7 @@
 skills:
   ignoredSkills:
     - estate-infrastructure
+    - foundation
     - sprites
     - powder
     - research
