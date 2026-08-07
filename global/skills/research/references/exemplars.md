@@ -57,8 +57,8 @@ Organize entries by technique, not language or domain.
 ### Find best-in-class implementations
 
 ```bash
-curl -s https://api.exa.ai/search \
-  -H "x-api-key: $EXA_API_KEY" \
+curl -s http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.exa.ai/search \
+  -H "x-api-key: __mint.exa.default__" \
   -H "Content-Type: application/json" \
   -d '{
     "query": "fastest [DOMAIN] implementation [TECHNIQUE]",
@@ -80,8 +80,8 @@ Good query patterns:
 ### Expand from a known exemplar
 
 ```bash
-curl -s https://api.exa.ai/findSimilar \
-  -H "x-api-key: $EXA_API_KEY" \
+curl -s http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.exa.ai/findSimilar \
+  -H "x-api-key: __mint.exa.default__" \
   -H "Content-Type: application/json" \
   -d '{
     "url": "https://github.com/KNOWN_EXEMPLAR",

@@ -6,10 +6,14 @@ Exa provides neural search optimized for code and technical content.
 
 **Use the official remote MCP or REST API through local CLI wrappers or curl.**
 
-Auth: `x-api-key: $EXA_API_KEY` header. Set the key in the shell environment.
+Auth: route every Exa REST request through Mint with `x-api-key: __mint.exa.default__`.
+Never set or read a raw `EXA_API_KEY` in an agent environment.
 
-MCP endpoint: `https://mcp.exa.ai/mcp`.
-Use it when the active harness has MCP tool support.
+MCP endpoint: `http://mint.tail5f5eb4.ts.net:4949/proxy/https/mcp.exa.ai/mcp`.
+Use it from clients with native remote MCP support.
+OMP uses the `exa-mint` stdio bridge in
+`omp-config/global/skills/research/scripts/exa_mcp_stdio.py`; the bridge
+preserves the Mint marker and forwards the MCP session over HTTP.
 Use `exa-search` / `exa-fetch` when MCP is unavailable or a
 script needs deterministic JSON.
 Use raw REST only when no wrapper is present.
@@ -24,8 +28,8 @@ exa-fetch --chars 2000 https://example.com/page1 https://example.com/page2
 ## Search
 
 ```bash
-curl -s https://api.exa.ai/search \
-  -H "x-api-key: $EXA_API_KEY" \
+curl -s http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.exa.ai/search \
+  -H "x-api-key: __mint.exa.default__" \
   -H "Content-Type: application/json" \
   -d '{
     "query": "YOUR QUERY HERE",
@@ -42,8 +46,8 @@ Use Exa deep search when the task needs stronger source gathering before synthes
 Use it when a downstream script needs structured output that it can validate.
 
 ```bash
-curl -s https://api.exa.ai/search \
-  -H "x-api-key: $EXA_API_KEY" \
+curl -s http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.exa.ai/search \
+  -H "x-api-key: __mint.exa.default__" \
   -H "Content-Type: application/json" \
   -d '{
     "query": "best practices for browser agent visual regression",
@@ -88,7 +92,7 @@ Runtime controls:
 - `response.agentic.private_context_allowed` records that consent in the
   returned artifact. Keep it false for public-web-only runs.
 
-Current official endpoint family: `https://api.exa.ai/agent/runs`, with
+Current official endpoint family: `http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.exa.ai/agent/runs`, with
 separate run retrieval and event endpoints under Exa's Agent API docs.
 The docs checked for this change show create/poll/list/event/continue flows.
 They show no verified cancel endpoint.
@@ -99,8 +103,8 @@ Treat timeout after run creation as a residual cost risk until a cancel endpoint
 Find reference implementations — highest-leverage research for engineers.
 
 ```bash
-curl -s https://api.exa.ai/search \
-  -H "x-api-key: $EXA_API_KEY" \
+curl -s http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.exa.ai/search \
+  -H "x-api-key: __mint.exa.default__" \
   -H "Content-Type: application/json" \
   -d '{
     "query": "TLA+ PlusCal payment state machine example",
@@ -116,8 +120,8 @@ curl -s https://api.exa.ai/search \
 Use this mode for time-sensitive queries, such as model releases and security advisories.
 
 ```bash
-curl -s https://api.exa.ai/search \
-  -H "x-api-key: $EXA_API_KEY" \
+curl -s http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.exa.ai/search \
+  -H "x-api-key: __mint.exa.default__" \
   -H "Content-Type: application/json" \
   -d '{
     "query": "Claude API latest model versions",
@@ -133,8 +137,8 @@ curl -s https://api.exa.ai/search \
 Find pages similar to a known URL.
 
 ```bash
-curl -s https://api.exa.ai/findSimilar \
-  -H "x-api-key: $EXA_API_KEY" \
+curl -s http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.exa.ai/findSimilar \
+  -H "x-api-key: __mint.exa.default__" \
   -H "Content-Type: application/json" \
   -d '{
     "url": "https://example.com/good-reference",
@@ -148,8 +152,8 @@ curl -s https://api.exa.ai/findSimilar \
 Extract content from known URLs.
 
 ```bash
-curl -s https://api.exa.ai/contents \
-  -H "x-api-key: $EXA_API_KEY" \
+curl -s http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.exa.ai/contents \
+  -H "x-api-key: __mint.exa.default__" \
   -H "Content-Type: application/json" \
   -d '{
     "ids": ["https://example.com/page1", "https://example.com/page2"],
@@ -173,10 +177,7 @@ curl -s https://api.exa.ai/contents \
 When Exa MCP is configured, prefer these capability-shaped tools:
 
 - `web_search_exa` — broad web search.
-- `web_search_advanced_exa` — filtered/deeper search.
 - `web_fetch_exa` — fetch known URLs into context.
-- Company, LinkedIn, GitHub, and competitor tools are specialized retrieval
-  lanes; do not invoke them for generic research.
 
 ## Integration with Research Skill
 

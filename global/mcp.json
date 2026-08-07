@@ -4,6 +4,11 @@
     "parallel-search": {
       "type": "http",
       "url": "https://search.parallel.ai/mcp"
+    },
+    "exa-mint": {
+      "type": "stdio",
+      "command": "${HOME}/.omp/agent/skills/research/scripts/exa_mcp_stdio.py",
+      "timeout": 120000
     }
   },
   "disabledServers": [
