@@ -7,7 +7,7 @@ description: >
   observability, work state, release intelligence, and credentialed outbound
   calls. Mode B has no active workflow plane; do not invent a replacement.
   Trigger: /factory-apps, /factory-stack.
-argument-hint: "[canary|powder|landmark|mint|audit]"
+argument-hint: "[canary|powder|landmark|mint]"
 ---
 
 # /factory-apps
