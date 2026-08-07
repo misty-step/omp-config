@@ -16,7 +16,6 @@ from review_common import (
     DIGEST_PATTERN,
     FREEZE_RELATIVE,
     OBSOLETE_SCHEMA_MESSAGE,
-    PACKET_RELATIVE,
     PASS_DIRECTORY,
     PASS_SCHEMA,
     RECEIPT_SCHEMA,
@@ -261,7 +260,7 @@ def submit_result(
 def clean_passes(passes: list[dict[str, Any]]) -> None:
     for item in passes:
         if item.get("status") != "clean" or item.get("actionable_findings") != 0 or item.get("findings") != []:
-            raise GateError(f"reviewer {item.get('reviewer')} did not produce a clean pass; rerun freeze, prepare, submit, and record")
+            raise GateError(f"reviewer {item.get('reviewer')} did not produce a clean pass; rerun freeze, submit, and record")
 
 
 def load_receipt(repo: Path, output: Path) -> tuple[dict[str, Any], dict[str, Any]]:

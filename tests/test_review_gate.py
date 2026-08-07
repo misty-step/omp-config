@@ -63,7 +63,7 @@ class ReviewGateProtocolTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         return self.git_oid("HEAD")
 
-    def freeze_and_prepare(self) -> dict[str, object]:
+    def freeze_range(self) -> dict[str, object]:
         (self.repo / "app.py").write_text('def result():\n    return "reviewed"\n', encoding="utf-8")
         new_oid = self.commit("reviewed change", "app.py")
         frozen = self.run_gate(
@@ -76,12 +76,7 @@ class ReviewGateProtocolTests(unittest.TestCase):
             new_oid,
         )
         self.assertEqual(frozen.returncode, 0, frozen.stderr)
-        prepared = self.run_gate("prepare", "--repo", str(self.repo))
-        self.assertEqual(prepared.returncode, 0, prepared.stderr)
         return json.loads((self.repo / ".omp" / "review-freeze.json").read_text(encoding="utf-8"))
-
-    def packet(self) -> dict[str, object]:
-        return {}
 
     def identity(self) -> dict[str, object]:
         return json.loads((self.repo / ".omp" / "review-freeze.json").read_text(encoding="utf-8"))
@@ -177,8 +172,8 @@ class ReviewGateProtocolTests(unittest.TestCase):
         )
         review_receipt.verify_receipt(self.repo, receipt, identity, review_common.review_scope)
 
-    def test_cli_freeze_prepare_record_verify_with_direct_submissions(self) -> None:
-        identity = self.freeze_and_prepare()
+    def test_cli_freeze_record_verify_with_direct_submissions(self) -> None:
+        identity = self.freeze_range()
         lanes = identity.get("planned_lanes", list(REVIEWERS))
         self.submit_all(reviewers=lanes)
 
@@ -203,13 +198,13 @@ class ReviewGateProtocolTests(unittest.TestCase):
             self.assertEqual(item["schema"], review_common.PASS_SCHEMA)
             self.assertEqual(set(item["worker"]), {"actor", "harness", "model", "run_id"})
     def test_forged_v2_result_is_rejected(self) -> None:
-        self.freeze_and_prepare()
+        self.freeze_range()
         result = self.result_for("thermo-nuclear-review", schema="omp.review-result.v2")
         with self.assertRaises(review_common.GateError):
             self.submit("thermo-nuclear-review", result=result)
 
     def test_malformed_finding_locations_are_rejected(self) -> None:
-        self.freeze_and_prepare()
+        self.freeze_range()
         malformed = (
             {"path": "/absolute.py"},
             {"path": "../outside.py"},
@@ -230,7 +225,7 @@ class ReviewGateProtocolTests(unittest.TestCase):
                 )
 
     def test_worker_attribution_is_explicit_and_actor_syntax_is_checked(self) -> None:
-        self.freeze_and_prepare()
+        self.freeze_range()
         with self.assertRaises(review_common.GateError):
             self.submit(
                 "thermo-nuclear-review",
@@ -248,7 +243,7 @@ class ReviewGateProtocolTests(unittest.TestCase):
         self.assertNotIn("provider", document["worker"])
 
     def test_identical_resubmission_is_idempotent_but_drift_rejected(self) -> None:
-        self.freeze_and_prepare()
+        self.freeze_range()
         result = self.result_for("thermo-nuclear-review")
         attribution = self.attribution("thermo-nuclear-review")
         with mock.patch.object(
@@ -274,7 +269,7 @@ class ReviewGateProtocolTests(unittest.TestCase):
             self.submit("thermo-nuclear-review", result=result, attribution=changed_attribution)
 
     def test_status_and_findings_must_agree(self) -> None:
-        self.freeze_and_prepare()
+        self.freeze_range()
         finding = {
             "severity": "low",
             "title": "finding",
@@ -293,7 +288,7 @@ class ReviewGateProtocolTests(unittest.TestCase):
             )
 
     def test_forged_pass_schema_is_rejected_at_record(self) -> None:
-        self.freeze_and_prepare()
+        self.freeze_range()
         path = self.submit("thermo-nuclear-review")
         document = json.loads(path.read_text(encoding="utf-8"))
         document["schema"] = "omp.review-pass.v2"
@@ -310,13 +305,13 @@ class ReviewGateProtocolTests(unittest.TestCase):
             self.submit(reviewer, adapter=self.adapter() if reviewer == "autoreview" else None)
 
     def test_duplicate_harness_run_identity_is_rejected(self) -> None:
-        self.freeze_and_prepare()
+        self.freeze_range()
         self.submit_all(duplicate_identity=True)
         with self.assertRaises(review_common.GateError):
             self.record()
 
     def test_pass_status_drift_is_rejected_at_record(self) -> None:
-        self.freeze_and_prepare()
+        self.freeze_range()
         path = self.submit("thermo-nuclear-review")
         document = json.loads(path.read_text(encoding="utf-8"))
         document["status"] = "findings"
@@ -326,7 +321,7 @@ class ReviewGateProtocolTests(unittest.TestCase):
             self.record()
 
     def test_post_record_pass_drift_is_rejected_at_verify(self) -> None:
-        self.freeze_and_prepare()
+        self.freeze_range()
         self.submit_all()
         self.record()
         path = self.repo / ".omp" / "review-passes" / "autoreview.json"
@@ -335,7 +330,7 @@ class ReviewGateProtocolTests(unittest.TestCase):
             self.verify()
 
     def test_post_record_skill_drift_is_rejected_at_verify(self) -> None:
-        self.freeze_and_prepare()
+        self.freeze_range()
         self.submit_all()
         self.record()
         receipt_path = self.repo / ".omp" / "review-receipt.json"
@@ -387,7 +382,7 @@ class ReviewGateProtocolTests(unittest.TestCase):
         )
 
     def test_hook_advisory_clean_receipt_still_verifies(self) -> None:
-        identity = self.freeze_and_prepare()
+        identity = self.freeze_range()
         self.submit_all(reviewers=identity.get("planned_lanes", list(REVIEWERS)))
         self.record()
         result = self.run_command(

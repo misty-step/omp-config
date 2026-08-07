@@ -77,10 +77,6 @@ def freeze(args: argparse.Namespace) -> int:
     return EXIT_CLEAN
 
 
-def prepare(args: argparse.Namespace) -> int:
-    repo = repo_root(args.repo)
-    _freeze_file(repo)
-    return EXIT_CLEAN
 
 def _read_result(args: argparse.Namespace) -> dict[str, Any]:
     source = args.result
@@ -317,7 +313,7 @@ def hook(args: argparse.Namespace) -> int:
     print(f"review-gate (advisory): {guidance}", file=sys.stderr)
     print(
         "review-gate (advisory): push allowed without review evidence; "
-        "run the sequence (freeze, prepare, submit, record, verify) to record it",
+        "run the sequence (freeze, submit, record, verify) to record it",
         file=sys.stderr,
     )
     return EXIT_CLEAN
@@ -345,8 +341,6 @@ def parser() -> argparse.ArgumentParser:
     freeze_parser.add_argument("--new-oid")
     freeze_parser.add_argument("--remote")
     freeze_parser.add_argument("--no-worktree-check", action="store_true")
-    prepare_parser = sub.add_parser("prepare", help="prepare the gate-owned review packet")
-    prepare_parser.add_argument("--repo", default=".")
 
     submit_parser = sub.add_parser("submit", help="submit one direct leaf review result")
     submit_parser.add_argument("--repo", default=".")
@@ -389,8 +383,6 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.command == "freeze":
             return freeze(args)
-        if args.command == "prepare":
-            return prepare(args)
         if args.command == "submit":
             return submit(args)
         if args.command == "record":

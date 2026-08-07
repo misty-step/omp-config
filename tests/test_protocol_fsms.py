@@ -13,27 +13,23 @@ import unittest
 REVIEW_TRANSITIONS: frozenset[tuple[str, str, str]] = frozenset(
     {
         ("idle", "freeze", "frozen"),
-        ("frozen", "prepare", "prepared"),
-        ("prepared", "submit_pass", "passes_partial"),
-        ("prepared", "submit_pass", "passes_complete"),
+        ("frozen", "submit_pass", "passes_partial"),
+        ("frozen", "submit_pass", "passes_complete"),
         ("passes_partial", "submit_pass", "passes_partial"),
         ("passes_partial", "submit_pass", "passes_complete"),
         ("passes_complete", "record", "receipted"),
         ("receipted", "verify", "verified"),
         ("idle", "verify", "failed"),
         ("frozen", "verify", "failed"),
-        ("prepared", "verify", "failed"),
         ("passes_partial", "verify", "failed"),
-        ("prepared", "record", "failed"),
         ("passes_partial", "record", "failed"),
-        ("prepared", "submit_forged", "failed"),
+        ("frozen", "submit_forged", "failed"),
         ("receipted", "range_drift", "failed"),
         ("failed", "freeze", "frozen"),
         ("verified", "range_superseded", "idle"),
         ("idle", "record", "failed"),
         ("idle", "submit_pass", "failed"),
         ("frozen", "record", "failed"),
-        ("frozen", "submit_pass", "failed"),
         ("passes_complete", "verify", "failed"),
         ("receipted", "submit_pass", "failed"),
     }
@@ -46,9 +42,6 @@ REVIEW_ILLEGAL: frozenset[tuple[str, str]] = frozenset(
         ("idle", "submit_pass"),
         ("frozen", "verify"),
         ("frozen", "record"),
-        ("frozen", "submit_pass"),
-        ("prepared", "verify"),
-        ("prepared", "record"),
         ("passes_partial", "verify"),
         ("passes_partial", "record"),
         ("passes_complete", "verify"),
@@ -130,7 +123,6 @@ class ReviewGateFsmTests(unittest.TestCase):
         state = "idle"
         for event, expected in (
             ("freeze", "frozen"),
-            ("prepare", "prepared"),
             ("submit_pass", "passes_partial"),
         ):
             nxt = review_move(state, event)
@@ -141,11 +133,11 @@ class ReviewGateFsmTests(unittest.TestCase):
         self.assertEqual(review_move("receipted", "verify"), "verified")
 
     def test_illegal_ship_without_receipt(self) -> None:
-        for state in ("idle", "frozen", "prepared", "passes_partial"):
+        for state in ("idle", "frozen", "passes_partial"):
             self.assertEqual(review_move(state, "verify"), "failed", state)
 
     def test_illegal_record_before_complete(self) -> None:
-        self.assertEqual(review_move("prepared", "record"), "failed")
+        self.assertEqual(review_move("frozen", "record"), "failed")
         self.assertEqual(review_move("passes_partial", "record"), "failed")
 
     def test_every_illegal_pair_fails_closed(self) -> None:

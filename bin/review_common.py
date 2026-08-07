@@ -13,13 +13,11 @@ from typing import Any
 GATE_ROOT = Path(__file__).resolve().parents[1]
 BUNDLE_SCHEMA = "omp.review-bundle.v2"
 FREEZE_SCHEMA = "omp.review-freeze.v2"
-PACKET_SCHEMA = "omp.review-packet.v1"
 RESULT_SCHEMA = "omp.review-result.v1"
 PASS_SCHEMA = "omp.review-pass.v3"
 RECEIPT_SCHEMA = "omp.review-receipt.v3"
 SCHEMA = RECEIPT_SCHEMA
 PASS_DIRECTORY = Path(".omp/review-passes")
-PACKET_RELATIVE = Path(".omp/review-packet")
 RECEIPT_RELATIVE = Path(".omp/review-receipt.json")
 FREEZE_RELATIVE = Path(".omp/review-freeze.json")
 PROTECTED_BRANCHES = {"main", "master"}
@@ -59,7 +57,7 @@ REVIEW_SPECS: dict[str, dict[str, Any]] = {
 }
 
 OBSOLETE_SCHEMA_MESSAGE = (
-    "obsolete review receipt/pass schema; run freeze, prepare, submit all three passes, record, then verify"
+    "obsolete review receipt/pass schema; run freeze, submit planned lanes, record, then verify"
 )
 
 

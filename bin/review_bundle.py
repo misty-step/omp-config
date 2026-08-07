@@ -12,7 +12,6 @@ from review_common import (
     DIGEST_PATTERN,
     FREEZE_RELATIVE,
     FREEZE_SCHEMA,
-    PACKET_RELATIVE,
     PASS_DIRECTORY,
     PROTECTED_BRANCHES,
     RECEIPT_RELATIVE,
@@ -77,8 +76,6 @@ def repo_root(path: str | Path | None) -> Path:
     return resolved
 
 
-def packet_path(repo: Path, value: str | None = None) -> Path:
-    return confined_path(repo, value, PACKET_RELATIVE, "packet")
 
 
 def freeze_path(repo: Path, value: str | None = None) -> Path:
