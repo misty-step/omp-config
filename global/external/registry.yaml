@@ -172,7 +172,7 @@ sources:
     license: MIT
     license_path: LICENSE
     consumers:
-      - global/skills/project-engineering/SKILL.md
+      - global/skills/foundation/SKILL.md
       - global/references/skill-authoring-standard.md
       - global/skills/wayfinder
       - global/skills/grilling

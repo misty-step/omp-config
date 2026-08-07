@@ -31,9 +31,9 @@ SSOT for score rows and severity: `references/foundation-checklist.md`.
 | Live proof design | `global/references/verification-system-first.md` |
 | Factory method (Canary, Powder, Landmark) | `/factory-apps` |
 
-Compose with `/document`, `/showcase`, `/vision`, `/ci`, and codebase-design
-when a gap needs that owner. Stay on this skill for the run; do not switch to a
-second “profile-only” skill.
+Compose with `/document`, `/showcase`, `/vision`, `/ci`, and
+`mattpocock-codebase-design` (`global/external/mattpocock-skills/codebase-design/SKILL.md`)
+when a gap needs that owner. Stay on this skill for the run.
 
 ## Contract
 
