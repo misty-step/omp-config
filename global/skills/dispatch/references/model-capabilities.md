@@ -2,7 +2,7 @@
 
 This reference owns agent-model fit.
 It does not own model facts.
-Read `/home/phaedrus/.omp/agent/skills/harness-engineering/references/model-provider-harness-index.md` for
+Read `skill://harness-engineering/references/model-provider-harness-index.md` for
 dated availability, price, context, and harness evidence.
 
 ## Agent ladders

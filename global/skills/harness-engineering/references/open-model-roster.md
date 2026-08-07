@@ -6,7 +6,7 @@ roster_review_due: 2026-08-08
 
 Choose open-model defaults for OMP peer lanes here.
 **Live model facts, prices, CLI forms, and provider routes live in**
-`/home/phaedrus/.omp/agent/skills/harness-engineering/references/model-provider-harness-index.md`.
+`skill://harness-engineering/references/model-provider-harness-index.md`.
 Do not duplicate that catalog in this file.
 Re-check the index and run a local smoke before any default change.
 
