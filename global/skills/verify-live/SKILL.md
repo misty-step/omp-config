@@ -69,6 +69,7 @@ not re-enable it.
 | Accessibility | 1 (quick tree) / 3 (scored audit) | 1: `tab.ariaSnapshot()`. 3: `chrome-devtools lighthouse_audit --outputDirPath <path>` (covers accessibility, SEO, best practices, agentic browsing — not performance) |
 | What network calls fired | 2 | `agent-browser network requests [--filter <pattern>]`, or `agent-browser network har start <path>` / `har stop` for a full HAR |
 | Console error appeared | 2 | `agent-browser console` for all messages, `agent-browser errors` to isolate uncaught JS exceptions |
+| Desktop window video or stills (this machine) | local `evcap` | follow `references/evidence-capture-tooling.md`; use `evcap rec/shot -w <id>` |
 
 ## Repro-first evidence discipline
 
@@ -118,9 +119,9 @@ tabs opened through the builtin tool. If you used tier 3, run
 
 ## Reference material (read on demand, not autoloaded)
 
-These files live under `global/external/`, which is not projected into the live
-skills directory. Read them directly by absolute path when the job needs more
-depth than this file carries:
+Read `references/evidence-capture-tooling.md` for local desktop window capture
+with `evcap` on this machine. Read the external files below by absolute path
+when the job needs more depth than this file carries:
 
 - `/Users/phaedrus/Development/omp-config/global/external/vercel-agent-browser/SKILL.md` — agent-browser discovery stub; the authoritative grammar is `agent-browser skills get core`, not this file.
 - `/Users/phaedrus/Development/omp-config/global/external/vercel-dogfood/SKILL.md` — full exploratory-QA workflow this ladder condenses.

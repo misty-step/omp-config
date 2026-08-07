@@ -77,6 +77,29 @@ The grader and numbers both affect the system. Inspect both honestly; a 3.8-to-4
 - **Separate families:** judge model must differ from generator family; self-enhancement raises win rate 10–25%; use reference-guide objective items, one judge per dimension, and an “insufficient info” result (Zheng et al., MT-Bench, arXiv 2306.05685; Anthropic, Demystifying Evals).
 - **Challenge easy scores:** ~100% pass means the eval is too weak; aim for ~70%.
 - **Anti-Goodhart:** keep a hidden held-out split (~60/40), diversify and rotate sources, n-gram-screen new fixtures, and turn every shipped defect into a permanent fixture-backed case.
+## Evidence Capture
+
+Every claim needs a durable evidence packet. A reviewer must judge the claim
+without chat context. Capture the evidence with the cheapest honest method
+for the surface.
+
+- Rendered behavior: capture a screenshot or a short video. A still proves a
+  state. It never proves motion.
+- Behavior over time: record a video. For an interactive issue, record the
+  steps and one frame per step.
+- API and CLI: capture the request, the response, and the exit code.
+- Logs and sinks: capture the exact lines that show the result.
+- Packets: list every artifact with its size and hash. A reviewer can then
+  confirm that nothing changed after capture.
+
+State the surface you captured. Name the gap when you could not capture
+something. Delete captured operator content after you verify it. Prefer
+numeric checks, such as hashes and frame differences, over viewing personal
+content.
+
+The machine-specific capture tooling lives in
+`global/skills/verify-live/references/evidence-capture-tooling.md`.
+
 ## Minimum Artifact
 Every substantial plan or closeout includes: `Claim`, `Standards`, `Falsifier`, `Driver`, `Grader`, `Evidence packet`, `Cadence`, `Critic topology`, `Stop rules`, and `Gaps / waiver`.
 For tiny mechanical changes, use a focused structural gate or exact inspection and name why the closeout needed no live loop.
