@@ -163,18 +163,11 @@ export default function (pi: ExtensionAPI) {
 				left.push(cols >= 100 ? `${theme.fg("statusLineSep", model.provider)} ${cluster}` : cluster);
 				const level = pi.getThinkingLevel();
 				if (level && level !== "off") {
-					// Full per-level color ladder; every theme defines these keys.
-					// Unknown levels (e.g. auto) fall back to the muted context tone.
-					const ladder: Record<string, string> = {
-						minimal: "thinkingMinimal",
-						low: "thinkingLow",
-						medium: "thinkingMedium",
-						high: "thinkingHigh",
-						xhigh: "thinkingXhigh",
-						max: "thinkingMax",
-					};
-					// Thinking symbols carry their own label ("󰪣 high").
-					left.push(theme.fg((ladder[level] ?? "statusLineContext") as never, sym(`thinking.${level}`) || level));
+					// Color via the runtime's thinking-tier helper: `max` resolves to
+					// thinkingMax only when a theme defines it, else falls back to
+					// thinkingXhigh (matching core omp). Unknown levels get a muted tone.
+					const label = sym(`thinking.${level}`) || level;
+					left.push(theme.getThinkingBorderColor(level)(label));
 				}
 			}
 			if (cols >= 80) left.push(theme.fg("statusLinePath", iconed(sym("icon.folder"), currentFolder(ctx.cwd, home))));
