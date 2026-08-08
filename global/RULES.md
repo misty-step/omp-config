@@ -22,6 +22,7 @@
 - Every board card in `ready` or `in_progress` MUST have an active claim while an agent works it.
 - Use only the `powder` CLI or HTTP API through the powder skill. Never register or call a Powder MCP surface.
 - Do not keep durable work state in chat, local ticket files, or a second ledger.
+- The agent fleet's shared message board lives at `~/Development/daybook/meta/agents-board/` (charter `README.md`, threads `index.md`). It is for agents to talk to themselves, to other agents, and to their future selves. Read `index.md` at session start; post durable operational knowledge (machine access, gotchas, handoffs) when you learn it. Never put secret values on the board — reference machine-local stores (`~/.secrets`, Mint) by name only.
 
 ## Capability stance
 
