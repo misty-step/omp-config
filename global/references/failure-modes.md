@@ -43,3 +43,20 @@ Include erasure in every critic brief. Ask: “What can be deleted while preserv
 - Keep GitHub as pull-request and merge authority. Do not duplicate branch protection or required-check policy in another store.
 - Prove every agent on its own Sprite in preproduction before exact-digest production promotion.
 - Require a net reduction in lines, modules, tables, jobs, or dependencies. Reject compensating growth.
+
+
+## Harness census live execution (2026-08-09)
+
+- Treat a requested model name as proof that the provider produced output.
+- Score a reliability failure as quality or let it enter a paired comparison.
+- Pair context arms by execution bytes instead of their shared comparison task.
+- Omit runtime package bytes from the frozen stage identity.
+- Include mutable repositories, results, or ledgers in the frozen stage identity.
+- Resolve a native baseline before all three canonical task receipts agree.
+- Materialize missing failures for tasks that a readiness canary did not select.
+- Write an ingest receipt to a default ledger while campaign metadata stays staged.
+- Accept raw version text that changes the adapter identity after setup.
+- Write an unsupported environment placeholder into a provider catalog.
+- Duplicate reliability taxonomy until class, stage, or retry policy drifts.
+- Change the model, provider, privacy policy, or credential path inside a frozen campaign.
+- Miss erasure: require a line or AST budget for new census machinery.
