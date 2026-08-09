@@ -33,30 +33,14 @@ Include erasure in every critic brief. Ask: “What can be deleted while preserv
 - The primary agent inspects for compensating additions after each deletion and removes them when behavior remains preserved.
 - Use `global/references/delete-first.md` for the broader deletion and simplification sequence.
 
-## Olympus simple operational cutover (2026-08-04)
-
-- Do not replace a deleted subsystem with another queue, ledger, receipt, wrapper, or configuration path.
-- Do not remove preproduction, combine agent hosts, or weaken exact-revision, authority, credential, budget, drain, or durability gates.
-- Keep Habitat auto-selection, owner assignment, cooldown, and daily-cap behavior while removing runtime policy editing.
-- Never await Asclepius from the Argus execution path. Route persisted review results through independent reconciliation.
-- Dispatch CI repair only for the current open `auto/*` head with a current failed check and trusted repository authority.
-- Keep GitHub as pull-request and merge authority. Do not duplicate branch protection or required-check policy in another store.
-- Prove every agent on its own Sprite in preproduction before exact-digest production promotion.
-- Require a net reduction in lines, modules, tables, jobs, or dependencies. Reject compensating growth.
-
-
 ## Harness census live execution (2026-08-09)
 
-- Treat a requested model name as proof that the provider produced output.
-- Score a reliability failure as quality or let it enter a paired comparison.
-- Pair context arms by execution bytes instead of their shared comparison task.
-- Omit runtime package bytes from the frozen stage identity.
-- Include mutable repositories, results, or ledgers in the frozen stage identity.
-- Resolve a native baseline before all three canonical task receipts agree.
-- Materialize missing failures for tasks that a readiness canary did not select.
-- Write an ingest receipt to a default ledger while campaign metadata stays staged.
-- Accept raw version text that changes the adapter identity after setup.
-- Write an unsupported environment placeholder into a provider catalog.
-- Duplicate reliability taxonomy until class, stage, or retry policy drifts.
-- Change the model, provider, privacy policy, or credential path inside a frozen campaign.
-- Miss erasure: require a line or AST budget for new census machinery.
+- **Requested identity as outcome:** Do not treat a requested model as observed output. Require a parsed adapter attestation before quality scoring.
+- **Reliability leakage:** Do not score reliability failures or retry policy refusals. Require an unresolved capability result and a non-retryable refusal.
+- **Comparison identity corruption:** Do not pair arms by row bytes, task count, or shifted database columns. Compare the shared task digest in both tables.
+- **Wrong freeze boundary:** Freeze runtime packages, images, adapters, and task inputs. Exclude mutable workspaces, results, and ledgers from stage identity.
+- **Unsafe resume:** Do not rerun a pending task from a modified workspace. Verify its frozen source identity before provider work.
+- **Claimed authority:** Do not record network or credential controls that the live worker did not use. Probe the launched container and stored configuration.
+- **Premature baseline:** Do not resolve a native baseline before all selected task receipts agree. Do not create receipts for unselected tasks.
+- **Split ledger:** Do not let an implicit run database compete with the campaign ledger. Require one canonical receipt store.
+- **Runtime identity drift:** Do not accept loose version text, unsupported provider entries, or mid-campaign model changes. Keep one reliability taxonomy and refuse drift.
