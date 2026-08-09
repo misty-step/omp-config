@@ -41,7 +41,7 @@ model_requested: string
 effort_requested: string|null
 provider_route_resolved: string|null
 provider_effort_resolved: string|null
-harness: prime|omp|third
+harness: prime|omp|pi
 composition: controlled_raw|controlled_enriched
 status: confirmed|blocked_route|blocked_effort|clamped_effort|blocked_harness|blocked_composition
 reason_code: string|null
@@ -68,12 +68,12 @@ Each model-effort target requests these six rows:
 2. Prime Agent controlled-enriched;
 3. OMP controlled-raw;
 4. OMP controlled-enriched;
-5. confirmed third harness controlled-raw;
-6. confirmed third harness controlled-enriched.
+5. Pi controlled-raw;
+6. Pi controlled-enriched.
 
 Run each confirmed row on all three tasks even when a sibling is blocked. Treat an incomplete cohort as product-local evidence only. Make a paired six-arm claim only when all six rows are confirmed.
 
-The third harness is provisionally Pi. The operator must confirm it because local PipeWire is a multimedia service.
+The third harness is confirmed as Pi 0.83.0.
 
 Cross-harness comparisons are whole-product `config_delta` comparisons. Native tools and orchestration differ.
 
@@ -368,7 +368,6 @@ Do not store credentials, environment values, customer data, raw private corpora
 
 This design becomes runnable only when:
 
-- the operator confirms the third harness;
 - the unavailable Gemini route is resolved or remains blocked;
 - every harness has a content-addressed route-effort availability receipt;
 - adapter-level turn, time, fallback, and identity enforcement passes;

@@ -60,9 +60,9 @@ Prime's inspected DeepSeek mapping does not preserve every OMP label. Pi's curre
 
 ## Third harness
 
-The user named PipeWire. Local `/usr/bin/pipewire` is the Linux multimedia service. No PipeWire coding harness command or repository was found.
+The operator confirmed that the third coding harness is Pi. Local `/usr/bin/pipewire` is an unrelated Linux multimedia service.
 
-The installed Pi 0.83.0 CLI has the expected model, effort, context, skill, MCP, and JSON controls. Treat Pi as a provisional locator only. Do not launch the third-harness cells until the operator confirms Pi or supplies a different command.
+The installed Pi 0.83.0 CLI has the expected model, effort, context, skill, MCP, and JSON controls.
 
 Observed versions:
 
@@ -113,11 +113,10 @@ run(
 ) -> crucible.runner_exchange_result.v1
 ```
 
-The runner converts those inputs into `crucible.runner_exchange_request.v1`. It rejects identity mismatches before successful-result persistence and writes a typed failure receipt. One Crucible agent runner owns this interface. Three private adapters translate Prime, OMP, and the confirmed third harness into normalized results. Add no service, scheduler, statistics package, or dashboard.
+The runner converts those inputs into `crucible.runner_exchange_request.v1`. It rejects identity mismatches before successful-result persistence and writes a typed failure receipt. One Crucible agent runner owns this interface. Three private adapters translate Prime, OMP, and Pi into normalized results. Add no service, scheduler, statistics package, or dashboard.
 
 ## Open facts
 
-- Confirm whether “PipeWire” means Pi, or provide its command or repository.
 - Resolve `google-antigravity/gemini-3.5-flash-lite` without changing provider.
 
 The canonical census specification owns every other blocker and the runnable proof gate.
