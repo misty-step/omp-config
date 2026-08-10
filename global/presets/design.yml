@@ -4,6 +4,7 @@
 skills:
   ignoredSkills:
     - estate-infrastructure
+    - using-exe-dev
     - foundation
     - factory-apps
     - sprites

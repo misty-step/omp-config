@@ -32,3 +32,16 @@ Include erasure in every critic brief. Ask: “What can be deleted while preserv
 - Treat the metric as evidence, not as a substitute for behavior proof.
 - The primary agent inspects for compensating additions after each deletion and removes them when behavior remains preserved.
 - Use `global/references/delete-first.md` for the broader deletion and simplification sequence.
+
+## exe.dev agent skill (2026-08-10)
+
+- Add an MCP server or wrapper CLI even though exe.dev defines SSH as its API.
+- Put exe.dev guidance in always-loaded `AGENTS.md` instead of one model-invoked skill.
+- Trigger on quoted or comparative mentions, or leave the skill enabled in no-operations presets.
+- Vendor the upstream skill without a declared license and immutable registry receipt.
+- Treat account authentication as mutation authority or bypass Estate's typed artifact when it owns the action.
+- Copy credentials to a VM or allow direct control-plane HTTPS proof outside Mint.
+- Accept an unknown host key, forward an SSH agent by default, or select an unintended local identity.
+- Invent flags, parse terminal prose, or select a VM without one exact `.vms[].vm_name` match.
+- Change a VM, account, integration, support grant, sharing rule, or attachment scope without exact authority.
+- Erasure failure: duplicate the remote docs catalog or add configuration, agents, tools, and process beyond the routed skill.
