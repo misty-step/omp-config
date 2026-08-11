@@ -51,8 +51,7 @@ CREATE TABLE IF NOT EXISTS responses (
     cost_cache_write REAL,
     cost_total REAL,
     duration REAL,
-    ttft REAL,
-    UNIQUE(response_id)
+    ttft REAL
 );
 CREATE INDEX IF NOT EXISTS responses_timestamp ON responses(timestamp);
 CREATE INDEX IF NOT EXISTS responses_provider ON responses(provider);
