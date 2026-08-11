@@ -4,7 +4,7 @@ description: Builder for one accepted software change. Owns repository mutation 
 model: openai-codex/gpt-5.6-sol:xhigh, openai-codex/gpt-5.6-luna:xhigh, anthropic/claude-fable-5:xhigh, kimi-code/k3:high, xai-oauth/grok-4.5:xhigh, google-antigravity/gemini-3.6-flash:high, anthropic/claude-opus-5:xhigh, openrouter/deepseek/deepseek-v4-flash-0731:high
 thinkingLevel: xhigh
 tools: read,grep,glob,lsp,bash,edit,write,browser,web_search
-autoloadSkills: deliver,ci
+autoloadSkills: deliver,ci,ponytail
 spawns: ''
 readSummarize: true
 ---

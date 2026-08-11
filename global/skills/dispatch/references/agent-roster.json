@@ -34,7 +34,8 @@
       "tools": "read,grep,glob,lsp,bash,edit,write,browser,web_search",
       "autoloadSkills": [
         "deliver",
-        "ci"
+        "ci",
+        "ponytail"
       ],
       "spawns": []
     },
