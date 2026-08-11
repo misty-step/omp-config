@@ -124,7 +124,7 @@ def _parent_file(path: Path) -> Path | None:
     if path.parent.name == path.stem:
         return None
     candidate = path.parent.parent / f"{path.parent.name}.jsonl"
-    if candidate.is_file() and candidate != path:
+    if candidate.is_file():
         return candidate
     return None
 
@@ -136,10 +136,8 @@ def _root_file(path: Path) -> Path:
     dispatches again as `<session>/<lane>/<lane>.<leaf>.jsonl`. Only the top
     file carries session identity, so every lookup resolves to it.
     """
-    seen = {path}
     current = path
-    while (parent := _parent_file(current)) is not None and parent not in seen:
-        seen.add(parent)
+    while (parent := _parent_file(current)) is not None:
         current = parent
     return current
 
