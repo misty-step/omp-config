@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS responses (
     response_id TEXT,
     session_id TEXT,
     session_file TEXT NOT NULL,
+    root_file TEXT NOT NULL,
     lane TEXT,
     agent_type TEXT,
     workspace TEXT,
@@ -129,6 +130,25 @@ def _parent_file(path: Path) -> Path | None:
     return None
 
 
+def _root_file(path: Path) -> Path:
+    """Walk lane files up to the session transcript that owns them.
+
+    OMP nests a dispatched lane as `<session>/<lane>.jsonl` and a lane that
+    dispatches again as `<session>/<lane>/<lane>.<leaf>.jsonl`. Only the top
+    file carries session identity, so every lookup resolves to it.
+    """
+    seen = {path}
+    current = path
+    while (parent := _parent_file(current)) is not None and parent not in seen:
+        seen.add(parent)
+        current = parent
+    return current
+
+
+def _lane_name(path: Path) -> str:
+    return path.stem.rsplit(".", 1)[-1]
+
+
 def _session_context(connection: sqlite3.Connection, parent: Path) -> dict[str, str | None]:
     key = str(parent)
     row = connection.execute(
@@ -188,9 +208,9 @@ def _task_mappings(obj: dict[str, Any]) -> list[tuple[str, str | None]]:
 
 
 def _upsert_mappings(
-    connection: sqlite3.Connection, parent: Path, mappings: list[tuple[str, str | None]]
+    connection: sqlite3.Connection, root: Path, mappings: list[tuple[str, str | None]]
 ) -> None:
-    parent_key = str(parent)
+    root_key = str(root)
     for lane, agent_type in mappings:
         connection.execute(
             """
@@ -198,17 +218,17 @@ def _upsert_mappings(
             VALUES (?, ?, ?)
             ON CONFLICT(parent_file, lane) DO UPDATE SET agent_type = excluded.agent_type
             """,
-            (parent_key, lane, agent_type),
+            (root_key, lane, agent_type),
         )
         connection.execute(
-            "UPDATE responses SET agent_type = ? WHERE session_file = ? AND lane = ?",
-            (agent_type, str(parent.with_suffix("") / f"{lane}.jsonl"), lane),
+            "UPDATE responses SET agent_type = ? WHERE root_file = ? AND lane = ? AND agent_type IS NULL",
+            (agent_type, root_key, lane),
         )
 
 
-def _agent_map(connection: sqlite3.Connection, parent: Path) -> dict[str, str | None]:
+def _agent_map(connection: sqlite3.Connection, root: Path) -> dict[str, str | None]:
     rows = connection.execute(
-        "SELECT lane, agent_type FROM lane_agents WHERE parent_file = ?", (str(parent),)
+        "SELECT lane, agent_type FROM lane_agents WHERE parent_file = ?", (str(root),)
     )
     return {row["lane"]: row["agent_type"] for row in rows}
 
@@ -217,6 +237,7 @@ def _response_row(
     obj: dict[str, Any],
     *,
     session_file: Path,
+    root_file: Path,
     context: dict[str, str | None],
     lane: str | None,
     agent_type: str | None,
@@ -245,6 +266,7 @@ def _response_row(
         "response_id": _text(message.get("responseId")) or _text(obj.get("responseId")),
         "session_id": context.get("session_id"),
         "session_file": str(session_file),
+        "root_file": str(root_file),
         "lane": lane,
         "agent_type": agent_type,
         "workspace": context.get("workspace"),
@@ -318,24 +340,16 @@ def _ingest_file(
     offset = 0
     if state and int(state["inode"]) == int(initial_stat.st_ino) and int(initial_stat.st_size) >= int(state["offset"]):
         offset = int(state["offset"])
-    parent = None if is_parent else _parent_file(path)
-    parent_key = str(parent.absolute()) if parent else None
+    root = path if is_parent else _root_file(path)
+    root_key = str(root)
     if is_parent:
-        context = contexts.get(str(path)) or _session_context(connection, path)
-        mappings = _agent_map(connection, path)
-    else:
-        if parent:
-            context = contexts.get(parent_key) or _session_context(connection, parent)
-        else:
-            context = {"session_id": None, "workspace": None, "repo": None}
-        mappings = _agent_map(connection, parent) if parent else {}
-    lane = None if is_parent else path.stem
-    if is_parent:
+        context = contexts.get(root_key) or _session_context(connection, root)
+        lane = None
         agent_type = "chief"
-    elif lane.startswith("__"):
-        agent_type = lane.lstrip("_")
     else:
-        agent_type = mappings.get(lane)
+        context = contexts.get(root_key) or _session_context(connection, root)
+        lane = _lane_name(path)
+        agent_type = lane.lstrip("_") if lane.startswith("__") else _agent_map(connection, root).get(lane)
     processed_offset = offset
     try:
         with path.open("rb") as stream:
@@ -371,13 +385,14 @@ def _ingest_file(
                     workspace = _text(obj.get("cwd"))
                     context = _store_session(connection, path, session_id, workspace)
                     contexts[str(path)] = context
-                if candidate_task and (mapping_root := path if is_parent else parent):
-                    _upsert_mappings(connection, mapping_root, _task_mappings(obj))
+                if candidate_task:
+                    _upsert_mappings(connection, root, _task_mappings(obj))
                     if lane and not agent_type:
-                        agent_type = _agent_map(connection, mapping_root).get(lane)
+                        agent_type = _agent_map(connection, root).get(lane)
                 values = _response_row(
                     obj,
                     session_file=path,
+                    root_file=root,
                     context=context,
                     lane=lane,
                     agent_type=agent_type,

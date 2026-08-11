@@ -93,7 +93,6 @@ they sleep most of the time or can be rewritten to Workers/D1.
   mature external workflow now:
   session/product analytics, client-facing dashboards, or
   integrations Canary does not yet cover.
-- Do not add Sentry. The account is retired and no service depends on it.
 - If an external tool becomes recurring operating leverage, decide explicitly:
   build the missing Canary capability, keep renting it, or remove the workflow.
 

@@ -98,6 +98,44 @@ class UsageLedgerTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.tmp.cleanup()
 
+    def test_nested_dispatch_attributes_a_deep_lane(self) -> None:
+        leaf = self.child.with_suffix("") / f"{self.child.stem}.PersonaLeaf.jsonl"
+        leaf.parent.mkdir()
+        leaf.write_text(
+            self._record(
+                "2026-08-06T03:00:00Z",
+                "leaf-response",
+                provider="openrouter",
+                model="deepseek",
+                input_tokens=8,
+                output_tokens=4,
+                cache_read=2,
+                cost=0.25,
+            )
+            + "\n"
+        )
+        dispatch = json.dumps(
+            {
+                "type": "message",
+                "message": {
+                    "role": "assistant",
+                    "content": [
+                        {
+                            "type": "toolCall",
+                            "name": "task",
+                            "arguments": {"tasks": [{"name": "PersonaLeaf", "agent": "qa-persona"}]},
+                        }
+                    ],
+                },
+            }
+        )
+        self.child.write_text(self.child.read_text() + dispatch + "\n")
+        self.invoke("ingest", "--sessions-root", str(self.sessions), "--db", str(self.db))
+        rows = {row["dimension"]: row for row in self.report("--by", "agent")["rows"]}
+        self.assertEqual(rows["qa-persona"]["requests"], 1)
+        sessions = {row["dimension"] for row in self.report("--by", "session")["rows"]}
+        self.assertNotIn("unknown", sessions)
+
     def test_nested_dispatch_attributes_a_sibling_lane(self) -> None:
         persona = self.child.parent / "PersonaLane.jsonl"
         persona.write_text(
