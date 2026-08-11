@@ -101,7 +101,6 @@ class DispatchRoutingTests(unittest.TestCase):
         ladders = {
             name: [part.strip() for part in fields["model"].split(",")]
             for name, fields in self.fields.items()
-            if "," in fields["model"]
         }
         deepseek = "openrouter/deepseek/deepseek-v4-flash-0731:high"
         deep_reasoning = {"architect", "builder", "verifier", "sculptor"}

@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 import math
+import re
 import sqlite3
 import sys
 from datetime import date, datetime, timedelta
@@ -63,10 +64,10 @@ CREATE TABLE IF NOT EXISTS sessions (
     repo TEXT
 );
 CREATE TABLE IF NOT EXISTS lane_agents (
-    parent_file TEXT NOT NULL,
+    root_file TEXT NOT NULL,
     lane TEXT NOT NULL,
     agent_type TEXT,
-    PRIMARY KEY(parent_file, lane)
+    PRIMARY KEY(root_file, lane)
 );
 CREATE TABLE IF NOT EXISTS file_state (
     path TEXT PRIMARY KEY,
@@ -146,7 +147,17 @@ def _root_file(path: Path) -> Path:
 
 
 def _lane_name(path: Path) -> str:
-    return path.stem.rsplit(".", 1)[-1]
+    """Name a lane by its dispatch path, not by its leaf segment.
+
+    OMP writes `<session>/<lane>.jsonl` and `<session>/<lane>/<lane>.<leaf>.jsonl`,
+    so the file stem already spells the dispatch chain. Two dispatchers can both
+    request the name `Critic`, and only the qualified stem keeps them apart.
+    """
+    return path.stem
+
+
+def _lane_key(dispatcher: Path, root: Path, requested: str) -> str:
+    return requested if dispatcher == root else f"{dispatcher.stem}.{requested}"
 
 
 def _session_context(connection: sqlite3.Connection, parent: Path) -> dict[str, str | None]:
@@ -208,15 +219,19 @@ def _task_mappings(obj: dict[str, Any]) -> list[tuple[str, str | None]]:
 
 
 def _upsert_mappings(
-    connection: sqlite3.Connection, root: Path, mappings: list[tuple[str, str | None]]
+    connection: sqlite3.Connection,
+    root: Path,
+    dispatcher: Path,
+    mappings: list[tuple[str, str | None]],
 ) -> None:
     root_key = str(root)
-    for lane, agent_type in mappings:
+    for requested, agent_type in mappings:
+        lane = _lane_key(dispatcher, root, requested)
         connection.execute(
             """
-            INSERT INTO lane_agents(parent_file, lane, agent_type)
+            INSERT INTO lane_agents(root_file, lane, agent_type)
             VALUES (?, ?, ?)
-            ON CONFLICT(parent_file, lane) DO UPDATE SET agent_type = excluded.agent_type
+            ON CONFLICT(root_file, lane) DO UPDATE SET agent_type = excluded.agent_type
             """,
             (root_key, lane, agent_type),
         )
@@ -228,9 +243,17 @@ def _upsert_mappings(
 
 def _agent_map(connection: sqlite3.Connection, root: Path) -> dict[str, str | None]:
     rows = connection.execute(
-        "SELECT lane, agent_type FROM lane_agents WHERE parent_file = ?", (str(root),)
+        "SELECT lane, agent_type FROM lane_agents WHERE root_file = ?", (str(root),)
     )
     return {row["lane"]: row["agent_type"] for row in rows}
+
+
+def _lane_agent(mappings: dict[str, str | None], lane: str) -> str | None:
+    """Resolve a lane name, tolerating the retry suffix OMP adds on reuse."""
+    if lane in mappings:
+        return mappings[lane]
+    base = re.sub(r"-\d+$", "", lane)
+    return mappings.get(base) if base != lane else None
 
 
 def _response_row(
@@ -349,7 +372,11 @@ def _ingest_file(
     else:
         context = contexts.get(root_key) or _session_context(connection, root)
         lane = _lane_name(path)
-        agent_type = lane.lstrip("_") if lane.startswith("__") else _agent_map(connection, root).get(lane)
+        agent_type = (
+            lane.lstrip("_")
+            if lane.startswith("__")
+            else _lane_agent(_agent_map(connection, root), lane)
+        )
     processed_offset = offset
     try:
         with path.open("rb") as stream:
@@ -386,9 +413,9 @@ def _ingest_file(
                     context = _store_session(connection, path, session_id, workspace)
                     contexts[str(path)] = context
                 if candidate_task:
-                    _upsert_mappings(connection, root, _task_mappings(obj))
+                    _upsert_mappings(connection, root, path, _task_mappings(obj))
                     if lane and not agent_type:
-                        agent_type = _agent_map(connection, root).get(lane)
+                        agent_type = _lane_agent(_agent_map(connection, root), lane)
                 values = _response_row(
                     obj,
                     session_file=path,
