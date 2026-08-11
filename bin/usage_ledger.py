@@ -15,6 +15,7 @@ from typing import Any
 
 DEFAULT_SESSIONS_ROOT = Path.home() / ".omp" / "agent" / "sessions"
 DEFAULT_DB = Path.home() / ".omp" / "agent" / "usage-ledger.sqlite3"
+SCHEMA_VERSION = 1
 GROUP_FIELDS = {
     "day": "substr(timestamp, 1, 10)",
     "model": "COALESCE(model, 'unknown')",
@@ -87,7 +88,18 @@ def _connect(path: Path) -> sqlite3.Connection:
     connection = sqlite3.connect(path, timeout=30)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA journal_mode = WAL")
+    version = connection.execute("PRAGMA user_version").fetchone()[0]
+    if version and version != SCHEMA_VERSION:
+        # Every row is derived from session transcripts, so a schema change
+        # rebuilds instead of migrating. `ingest` refills the ledger.
+        print(
+            f"usage-ledger: schema {version} differs from {SCHEMA_VERSION}; rebuilding",
+            file=sys.stderr,
+        )
+        for table in ("responses", "sessions", "lane_agents", "file_state"):
+            connection.execute(f"DROP TABLE IF EXISTS {table}")
     connection.executescript(SCHEMA)
+    connection.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
     return connection
 
 
@@ -501,11 +513,11 @@ def _report_rows(connection: sqlite3.Connection, args: argparse.Namespace) -> tu
     parameters: list[Any] = []
     if args.since:
         bound, inclusive = _date_bound(args.since, until=False)
-        clauses.append("datetime(timestamp) >= datetime(?)" if inclusive else "datetime(timestamp) > datetime(?)")
+        clauses.append("julianday(timestamp) >= julianday(?)" if inclusive else "julianday(timestamp) > julianday(?)")
         parameters.append(bound)
     if args.until:
         bound, inclusive = _date_bound(args.until, until=True)
-        clauses.append("datetime(timestamp) <= datetime(?)" if inclusive else "datetime(timestamp) < datetime(?)")
+        clauses.append("julianday(timestamp) <= julianday(?)" if inclusive else "julianday(timestamp) < julianday(?)")
         parameters.append(bound)
     if args.provider:
         clauses.append("provider = ?")

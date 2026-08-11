@@ -97,6 +97,15 @@ class UsageLedgerTests(unittest.TestCase):
             }
         )
 
+    def test_a_stale_schema_rebuilds_instead_of_failing(self) -> None:
+        self.invoke("ingest", "--sessions-root", str(self.sessions), "--db", str(self.db))
+        with sqlite3.connect(self.db) as connection:
+            connection.execute("ALTER TABLE responses DROP COLUMN reasoning_level")
+            connection.execute("PRAGMA user_version = 0")
+            connection.execute("PRAGMA user_version = 99")
+        self.invoke("ingest", "--sessions-root", str(self.sessions), "--db", str(self.db))
+        self.assertEqual(self.report("--by", "provider")["totals"]["total_cost"], 3.75)
+
     def test_reasoning_level_comes_from_the_change_record(self) -> None:
         change = json.dumps({"type": "thinking_level_change", "thinkingLevel": "xhigh"})
         self.child.write_text(change + "\n" + self.child.read_text())
