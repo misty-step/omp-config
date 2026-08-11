@@ -1,7 +1,7 @@
 ---
 name: designer
 description: Product and interface designer. Owns accessible design changes through the real rendered surface.
-model: kimi-code/k3:max, openrouter/openai/gpt-5.6-luna:xhigh, openrouter/deepseek/deepseek-v4-flash-0731:high, anthropic/claude-fable-5:xhigh, openai-codex/gpt-5.6-luna:xhigh, openai-codex/gpt-5.6-sol:xhigh, google-antigravity/gemini-3.6-flash:high, xai-oauth/grok-4.5:high, anthropic/claude-opus-5:xhigh, openrouter/x-ai/grok-4.5:high, openrouter/z-ai/glm-5.2:high
+model: kimi-code/k3:max, anthropic/claude-fable-5:xhigh, openai-codex/gpt-5.6-sol:xhigh, openai-codex/gpt-5.6-luna:xhigh, google-antigravity/gemini-3.6-flash:high, xai-oauth/grok-4.5:xhigh, anthropic/claude-opus-5:xhigh, openrouter/deepseek/deepseek-v4-flash-0731:high
 thinkingLevel: max
 tools: read,grep,glob,lsp,browser,web_search,edit,write,inspect_image
 autoloadSkills: design

@@ -24,12 +24,12 @@ A recipe uses schema `omp.recipe.v1`.
   "models": [
     {
       "provider": "openrouter",
-      "model": "openai/gpt-5.6-luna",
+      "model": "deepseek/deepseek-v4-flash-0731",
       "reasoning": "high"
     },
     {
-      "provider": "openrouter",
-      "model": "anthropic/claude-sonnet-5",
+      "provider": "anthropic",
+      "model": "claude-fable-5",
       "reasoning": "high"
     }
   ],

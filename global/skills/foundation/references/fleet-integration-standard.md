@@ -26,7 +26,7 @@ Give runtime projects Canary evidence:
 - Use Canary check-in monitors for worker, scheduler, CLI, or event-plane
   runtimes.
 - Report application error paths to Canary, or add an explicit gap card in
-  Powder. Sentry-only coverage is not enough for Factory operation.
+  Powder. External error tracking alone is not enough for Factory operation.
 
 Give release-managed projects Landmark evidence:
 

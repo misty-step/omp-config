@@ -12,44 +12,44 @@ The first route is the normal route.
 Later routes provide availability resilience after a provider failure.
 They are not per-task choices or independent opinions.
 
-Two OpenRouter routes are the primary workhorses for dispatched work:
+Agent ladders use subscription capacity first, with one permitted OpenRouter
+model as the terminal or high-volume route. The permitted model is
+`openrouter/deepseek/deepseek-v4-flash-0731`; agent declarations use its `high`
+selector. Deep-reasoning agents (`architect`, `builder`, `verifier`, and
+`sculptor`) lead with subscriptions and end at DeepSeek. High-volume agents
+(`researcher`, `qa-master`, and `qa-persona`) lead with DeepSeek before their
+subscription cascade. `designer` leads with Kimi K3.
 
-1. `openrouter/openai/gpt-5.6-luna:xhigh` — deep-reasoning workhorse.
-2. `openrouter/deepseek/deepseek-v4-flash-0731:high` — fast bulk workhorse.
+`global/skills/dispatch/references/agent-roster.json` holds the exact ordered
+ladders. `bin/check` fails when the roster and the agent frontmatter disagree,
+so read the roster instead of copying ladders into prose.
 
-Every agent ladder starts with these two routes.
-`researcher`, `qa-master`, and `qa-persona` lead with DeepSeek; the rest lead
-with Luna. `designer` keeps Kimi K3 first because it spends no premium quota.
-Subscription routes follow as escalation and availability fallbacks.
-Every ladder ends with `openrouter/x-ai/grok-4.5:high` →
-`openrouter/z-ai/glm-5.2:high`.
-
-| Agent | Workhorse head | Subscription fallbacks after the head | Reasoning |
+| Agent | Head | Terminal | Reasoning |
 |---|---|---|---:|
-| `architect` | Luna → DeepSeek | GPT-5.6 Sol → Fable 5 → Opus 5 → GPT-5.6 Luna (codex) → Kimi K3 → Grok 4.5 → Gemini 3.6 Flash | `xhigh` |
-| `builder` | Luna → DeepSeek | GPT-5.6 Luna (codex) → GPT-5.6 Sol → Fable 5 → Kimi K3 → Grok 4.5 → Gemini 3.6 Flash → Opus 5 | `xhigh` |
-| `verifier` | Luna → DeepSeek | GPT-5.6 Sol → Fable 5 → Opus 5 → GPT-5.6 Luna (codex) → Grok 4.5 → Gemini 3.6 Flash → Kimi K3 | `xhigh` |
-| `researcher` | DeepSeek → Luna | Gemini 3.6 Flash → Grok 4.5 → GPT-5.6 Luna (codex) → GPT-5.6 Sol → Fable 5 → Kimi K3 → Opus 5 | `high` |
-| `designer` | Kimi K3 → Luna → DeepSeek | Fable 5 → GPT-5.6 Luna (codex) → GPT-5.6 Sol → Gemini 3.6 Flash → Grok 4.5 → Opus 5 | `max` |
-| `qa-master` | DeepSeek → Luna | GPT-5.6 Luna (codex) → Gemini 3.6 Flash → Grok 4.5 → Fable 5 → GPT-5.6 Sol → Kimi K3 → Opus 5 | `high` |
-| `qa-persona` | DeepSeek → Luna | Gemini 3.6 Flash → GPT-5.6 Luna (codex) → Grok 4.5 → Fable 5 → GPT-5.6 Sol → Kimi K3 → Opus 5 | `high` |
-| `sculptor` | Luna → DeepSeek | GPT-5.6 Sol → Fable 5 → Opus 5 → GPT-5.6 Luna (codex) → Grok 4.5 → Gemini 3.6 Flash → Kimi K3 | `max` |
+| `architect` | GPT-5.6 Sol | DeepSeek | `max` |
+| `builder` | GPT-5.6 Sol | DeepSeek | `xhigh` |
+| `verifier` | GPT-5.6 Sol | DeepSeek | `max` |
+| `sculptor` | GPT-5.6 Sol | DeepSeek | `max` |
+| `designer` | Kimi K3 | DeepSeek | `max` |
+| `researcher` | DeepSeek | Claude Opus 5 | `high` |
+| `qa-master` | DeepSeek | Claude Opus 5 | `high` |
+| `qa-persona` | DeepSeek | Claude Opus 5 | `high` |
 
 ## Fixed policy
 
 Every listed favorite can perform every role.
 The order records preference and provider resilience, not a capability boundary.
-OpenRouter spend is accepted: the two workhorse routes preserve premium
-subscription tokens (GPT-5.6 Sol, Claude Fable 5, Claude Opus 5, and other
-subscription quotas). Premium routes are escalation and availability
-fallbacks, not the normal route.
-Kimi K3 is primary only for `designer`.
-Use GPT-5.6 Luna `medium` as the cheap route for `commit`, `smol`, and `tiny`.
+Subscription capacity is preferred for deep-reasoning routes.
+The only OpenRouter model permitted in agent ladders is
+`openrouter/deepseek/deepseek-v4-flash-0731`.
+Kimi K3 is the head only for `designer`; other ladders may use it as a
+fallback.
 
-No active route uses Claude Sonnet 5.
-Every DeepSeek route must be exactly
+Agent ladders use exactly
 `openrouter/deepseek/deepseek-v4-flash-0731:high`.
-Do not use unversioned, older, newer, or provider-alias DeepSeek selectors.
+The chief configuration keeps its existing max-strength DeepSeek selectors for
+roles and fallback chains; those selectors use the same permitted model.
+Agent ladders and the chief configuration do not use Claude Sonnet 5.
 
 `high` is the minimum substantive reasoning level.
 Unknown risk never lowers reasoning.

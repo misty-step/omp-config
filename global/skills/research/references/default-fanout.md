@@ -48,7 +48,7 @@ Prefer MCP first, local CLI wrapper second, direct Mint REST third.
 | Local `.docx`/`.pdf`/`.xlsx`/CSV | `anydoc` | Firecrawl Parse only for scanned OCR with operator OK |
 | Broad web discovery | Exa or Parallel Search | Firecrawl search |
 | Dynamic or logged-in page | `browser` / `agent-browser` | operator artifact |
-| Model pricing or availability | dated web sources via Exa + official pages | skill://harness-engineering/references/model-provider-harness-index.md, then verify live |
+| Model pricing or availability | dated web sources via Exa + official pages | `skill://harness-engineering/references/model-provider-harness-index.md`, then verify live |
 
 ## Report shape
 
@@ -85,3 +85,29 @@ Prefer MCP first, local CLI wrapper second, direct Mint REST third.
 - `stale`: may be outdated for the freshness requirement
 
 Test every recommendation without the weakest source. If it fails, label confidence low.
+
+## OpenRouter account audit
+
+- Mistake the Mint-routed key for the complete account key inventory.
+- Expose credential bytes, secret-derived identifiers, or request content in evidence.
+- Mix R90 and Misty Step ownership, keys, budgets, usage, or enforcement.
+- Treat current key metadata as historical account usage without a matching time range.
+- Omit revoked, disabled, unused, or provisioning-only keys because one endpoint excludes them.
+- Claim tracing, guardrails, or enforcement that the documented request path cannot prove.
+- Recommend another proxy, store, or dashboard before testing Mint and OpenRouter controls.
+- Report spend without its retrieval time, currency, filters, and provider limitations.
+- Add concepts and process when fewer named keys, tags, limits, and deletion preserve control.
+- Erasure question: what can be deleted while preserving account governance and audit evidence?
+
+## OpenRouter premium-model attribution
+
+- Attribute Luna spend to a caller from model totals alone.
+- Treat an OpenRouter app label, API key, or user field as an agent identity without proving the mapping.
+- Mix workstation OMP usage with deployed R90 product usage because the active repository belongs to R90.
+- Recommend R90 account changes without authenticated R90 evidence or current operator scope.
+- Infer a spike from a rolling total without daily or finer time buckets and a baseline.
+- Treat one expensive model as waste without separating request count, tokens, cache, reasoning, and task outcome.
+- Add a new telemetry store or proxy before testing native Analytics, Activity, Generation, metadata, and Broadcast.
+- Design one key per ephemeral agent when request metadata provides sufficient traceability.
+- Let a cheaper default silently weaken deep-reasoning routes that require Luna.
+- Erasure question: which credentials, dimensions, sinks, jobs, and controls can be removed while preserving attribution?

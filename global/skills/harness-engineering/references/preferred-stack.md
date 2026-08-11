@@ -89,9 +89,9 @@ they sleep most of the time or can be rewritten to Workers/D1.
   Read it before forming a repo-local hypothesis.
 - New services should include a Canary integration path unless you name a reason
   not to.
-- **Sentry/PostHog/Vercel Analytics by exception** when the product needs a
+- **PostHog/Vercel Analytics by exception** when the product needs a
   mature external workflow now:
-  session/product analytics, issue grouping, client-facing dashboards, or
+  session/product analytics, client-facing dashboards, or
   integrations Canary does not yet cover.
 - If an external tool becomes recurring operating leverage, decide explicitly:
   build the missing Canary capability, keep renting it, or remove the workflow.

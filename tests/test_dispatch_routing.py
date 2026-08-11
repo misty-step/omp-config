@@ -92,33 +92,34 @@ class DispatchRoutingTests(unittest.TestCase):
         self.assertIn("architect", self.catalog)
         self.assertEqual(
             self.fields["architect"]["model"].split(",")[0],
-            "openrouter/openai/gpt-5.6-luna:xhigh",
+            "openai-codex/gpt-5.6-sol:max",
         )
         self.assertNotIn("edit", self.fields["architect"]["tools"])
         self.assertEqual(self.fields["architect"].get("spawns", ""), "")
 
-    def test_role_model_order_and_workhorse_heads(self) -> None:
+    def test_role_model_order_and_openrouter_policy(self) -> None:
         ladders = {
             name: [part.strip() for part in fields["model"].split(",")]
             for name, fields in self.fields.items()
-            if "," in fields["model"]
         }
-        luna = "openrouter/openai/gpt-5.6-luna"
-        deepseek = "openrouter/deepseek/deepseek-v4-flash-0731"
-        deepseek_first = {"researcher", "qa-master", "qa-persona"}
-        self.assertEqual(
-            [name for name, models in ladders.items() if models[0].startswith("kimi-code/k3")],
-            ["designer"],
-        )
+        deepseek = "openrouter/deepseek/deepseek-v4-flash-0731:high"
+        deep_reasoning = {"architect", "builder", "verifier", "sculptor"}
+        high_volume = {"researcher", "qa-master", "qa-persona"}
+
+        self.assertEqual(ladders["architect"][0], "openai-codex/gpt-5.6-sol:max")
+        self.assertEqual(ladders["designer"][0], "kimi-code/k3:max")
         for name, models in ladders.items():
-            head = models[1:3] if name == "designer" else models[:2]
-            expected = [deepseek, luna] if name in deepseek_first else [luna, deepseek]
-            self.assertEqual([model.rsplit(":", 1)[0] for model in head], expected, name)
-            self.assertEqual(
-                [model.rsplit(":", 1)[0] for model in models[-2:]],
-                ["openrouter/x-ai/grok-4.5", "openrouter/z-ai/glm-5.2"],
-                name,
-            )
+            openrouter = [model for model in models if model.startswith("openrouter/")]
+            self.assertEqual(openrouter, [deepseek], name)
+            self.assertEqual(len(models), len(set(models)), name)
+            providers = {model.split("/", 1)[0] for model in models}
+            self.assertGreaterEqual(len(providers), 4, name)
+            if name in deep_reasoning:
+                self.assertEqual(models[-1], deepseek, name)
+                self.assertNotEqual(models[0], deepseek, name)
+            if name in high_volume:
+                self.assertEqual(models[0], deepseek, name)
+                self.assertNotEqual(models[-1], deepseek, name)
 
     def test_every_scenario_names_a_catalog_agent(self) -> None:
         for scenario in self.fixture["scenarios"]:
