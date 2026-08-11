@@ -72,7 +72,8 @@ CREATE TABLE IF NOT EXISTS lane_agents (
 CREATE TABLE IF NOT EXISTS file_state (
     path TEXT PRIMARY KEY,
     inode INTEGER NOT NULL,
-    offset INTEGER NOT NULL
+    offset INTEGER NOT NULL,
+    reasoning TEXT
 );
 """
 
@@ -264,6 +265,7 @@ def _response_row(
     context: dict[str, str | None],
     lane: str | None,
     agent_type: str | None,
+    reasoning_level: str | None,
 ) -> dict[str, Any] | None:
     if obj.get("type") != "message":
         return None
@@ -276,15 +278,6 @@ def _response_row(
     cost = usage.get("cost")
     if not isinstance(cost, dict):
         cost = {}
-    reasoning_level = None
-    for source in (message, obj):
-        for key in ("reasoningLevel", "thinkingLevel", "reasoning"):
-            candidate = _text(source.get(key))
-            if candidate:
-                reasoning_level = candidate
-                break
-        if reasoning_level:
-            break
     row = {
         "response_id": _text(message.get("responseId")) or _text(obj.get("responseId")),
         "session_id": context.get("session_id"),
@@ -358,11 +351,13 @@ def _ingest_file(
     except OSError:
         return 0, 1
     state = connection.execute(
-        "SELECT inode, offset FROM file_state WHERE path = ?", (str(path),)
+        "SELECT inode, offset, reasoning FROM file_state WHERE path = ?", (str(path),)
     ).fetchone()
     offset = 0
+    reasoning_level: str | None = None
     if state and int(state["inode"]) == int(initial_stat.st_ino) and int(initial_stat.st_size) >= int(state["offset"]):
         offset = int(state["offset"])
+        reasoning_level = state["reasoning"]
     root = path if is_parent else _root_file(path)
     root_key = str(root)
     if is_parent:
@@ -393,7 +388,10 @@ def _ingest_file(
                     break
                 candidate_usage = b'"usage"' in raw and b'"assistant"' in raw
                 candidate_task = b'"toolCall"' in raw and b'"task"' in raw
-                candidate_context = candidate_task or (is_parent and b'"session"' in raw)
+                candidate_reasoning = b'"thinking_level_change"' in raw
+                candidate_context = (
+                    candidate_task or candidate_reasoning or (is_parent and b'"session"' in raw)
+                )
                 if not candidate_usage and not candidate_context:
                     processed_offset = stream.tell()
                     continue
@@ -412,6 +410,8 @@ def _ingest_file(
                     workspace = _text(obj.get("cwd"))
                     context = _store_session(connection, path, session_id, workspace)
                     contexts[str(path)] = context
+                if candidate_reasoning and obj.get("type") == "thinking_level_change":
+                    reasoning_level = _text(obj.get("thinkingLevel")) or reasoning_level
                 if candidate_task:
                     _upsert_mappings(connection, root, path, _task_mappings(obj))
                     if lane and not agent_type:
@@ -423,6 +423,7 @@ def _ingest_file(
                     context=context,
                     lane=lane,
                     agent_type=agent_type,
+                    reasoning_level=reasoning_level,
                 )
                 if values is not None:
                     try:
@@ -436,10 +437,13 @@ def _ingest_file(
         skipped += 1
     connection.execute(
         """
-        INSERT INTO file_state(path, inode, offset) VALUES (?, ?, ?)
-        ON CONFLICT(path) DO UPDATE SET inode = excluded.inode, offset = excluded.offset
+        INSERT INTO file_state(path, inode, offset, reasoning) VALUES (?, ?, ?, ?)
+        ON CONFLICT(path) DO UPDATE SET
+            inode = excluded.inode,
+            offset = excluded.offset,
+            reasoning = excluded.reasoning
         """,
-        (str(path), int(initial_stat.st_ino), int(processed_offset)),
+        (str(path), int(initial_stat.st_ino), int(processed_offset), reasoning_level),
     )
     if is_parent:
         contexts[str(path)] = context

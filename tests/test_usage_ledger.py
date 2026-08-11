@@ -62,25 +62,7 @@ class UsageLedgerTests(unittest.TestCase):
                 }
             )
             + "\n"
-            + json.dumps(
-                {
-                    "type": "message",
-                    "message": {
-                        "role": "assistant",
-                        "content": [
-                            {
-                                "type": "toolCall",
-                                "name": "task",
-                                "arguments": {
-                                    "tasks": [
-                                        {"name": "VerifierLane", "agent": "verifier"}
-                                    ]
-                                },
-                            }
-                        ],
-                    },
-                }
-            )
+            + self._dispatch("VerifierLane", "verifier")
             + "\n"
             + self._record(
                 "2026-08-05T12:00:00Z",
@@ -114,6 +96,19 @@ class UsageLedgerTests(unittest.TestCase):
                 },
             }
         )
+
+    def test_reasoning_level_comes_from_the_change_record(self) -> None:
+        change = json.dumps({"type": "thinking_level_change", "thinkingLevel": "xhigh"})
+        self.child.write_text(change + "\n" + self.child.read_text())
+        self.invoke("ingest", "--sessions-root", str(self.sessions), "--db", str(self.db))
+        with sqlite3.connect(self.db) as connection:
+            levels = dict(
+                connection.execute(
+                    "SELECT COALESCE(reasoning_level, 'unset'), COUNT(*) FROM responses GROUP BY 1"
+                )
+            )
+        self.assertEqual(levels["xhigh"], 1)
+        self.assertEqual(levels["unset"], 1)
 
     def test_same_lane_name_under_two_dispatchers_keeps_each_agent(self) -> None:
         second = self.child.parent / "SculptorLane.jsonl"
@@ -158,22 +153,9 @@ class UsageLedgerTests(unittest.TestCase):
             )
             + "\n"
         )
-        dispatch = json.dumps(
-            {
-                "type": "message",
-                "message": {
-                    "role": "assistant",
-                    "content": [
-                        {
-                            "type": "toolCall",
-                            "name": "task",
-                            "arguments": {"tasks": [{"name": "PersonaLeaf", "agent": "qa-persona"}]},
-                        }
-                    ],
-                },
-            }
+        self.child.write_text(
+            self.child.read_text() + self._dispatch("PersonaLeaf", "qa-persona") + "\n"
         )
-        self.child.write_text(self.child.read_text() + dispatch + "\n")
         self.invoke("ingest", "--sessions-root", str(self.sessions), "--db", str(self.db))
         rows = {row["dimension"]: row for row in self.report("--by", "agent")["rows"]}
         self.assertEqual(rows["qa-persona"]["requests"], 1)
