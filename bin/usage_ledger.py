@@ -53,7 +53,6 @@ CREATE TABLE IF NOT EXISTS responses (
     duration REAL,
     ttft REAL
 );
-CREATE INDEX IF NOT EXISTS responses_timestamp ON responses(timestamp);
 CREATE INDEX IF NOT EXISTS responses_provider ON responses(provider);
 CREATE INDEX IF NOT EXISTS responses_model ON responses(model);
 CREATE TABLE IF NOT EXISTS sessions (
