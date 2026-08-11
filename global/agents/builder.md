@@ -1,7 +1,7 @@
 ---
 name: builder
 description: Builder for one accepted software change. Owns repository mutation and integration proof.
-model: openrouter/openai/gpt-5.6-luna:xhigh, openrouter/deepseek/deepseek-v4-flash-0731:high, openai-codex/gpt-5.6-luna:xhigh, openai-codex/gpt-5.6-sol:xhigh, anthropic/claude-fable-5:xhigh, kimi-code/k3:high, xai-oauth/grok-4.5:high, google-antigravity/gemini-3.6-flash:high, anthropic/claude-opus-5:xhigh, openrouter/x-ai/grok-4.5:high, openrouter/z-ai/glm-5.2:high
+model: openai-codex/gpt-5.6-sol:xhigh, openai-codex/gpt-5.6-luna:xhigh, anthropic/claude-fable-5:xhigh, kimi-code/k3:high, xai-oauth/grok-4.5:xhigh, google-antigravity/gemini-3.6-flash:high, anthropic/claude-opus-5:xhigh, openrouter/deepseek/deepseek-v4-flash-0731:high
 thinkingLevel: xhigh
 tools: read,grep,glob,lsp,bash,edit,write,browser,web_search
 autoloadSkills: deliver,ci

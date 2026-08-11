@@ -12,44 +12,47 @@ The first route is the normal route.
 Later routes provide availability resilience after a provider failure.
 They are not per-task choices or independent opinions.
 
-Two OpenRouter routes are the primary workhorses for dispatched work:
+Agent ladders use subscription capacity first, with one permitted OpenRouter
+model as the terminal or high-volume route. The permitted model is
+`openrouter/deepseek/deepseek-v4-flash-0731`; agent declarations use its `high`
+selector. Deep-reasoning agents (`architect`, `builder`, `verifier`, and
+`sculptor`) lead with subscriptions and end at DeepSeek. High-volume agents
+(`researcher`, `qa-master`, and `qa-persona`) lead with DeepSeek before their
+subscription cascade. `designer` leads with Kimi K3.
 
-1. `openrouter/openai/gpt-5.6-luna:xhigh` — deep-reasoning workhorse.
-2. `openrouter/deepseek/deepseek-v4-flash-0731:high` — fast bulk workhorse.
+The chief `default` cascade in `global/config.yml` is the pattern these
+ladders imitate: Claude Fable 5 → Claude Opus 5 → Kimi K3 → xai-oauth Grok
+4.5 → Gemini 3.6 Flash → DeepSeek. Each agent keeps its canonical order while
+preserving that subscription-first and terminal-DeepSeek shape.
 
-Every agent ladder starts with these two routes.
-`researcher`, `qa-master`, and `qa-persona` lead with DeepSeek; the rest lead
-with Luna. `designer` keeps Kimi K3 first because it spends no premium quota.
-Subscription routes follow as escalation and availability fallbacks.
-Every ladder ends with `openrouter/x-ai/grok-4.5:high` →
-`openrouter/z-ai/glm-5.2:high`.
-
-| Agent | Workhorse head | Subscription fallbacks after the head | Reasoning |
-|---|---|---|---:|
-| `architect` | Luna → DeepSeek | GPT-5.6 Sol → Fable 5 → Opus 5 → GPT-5.6 Luna (codex) → Kimi K3 → Grok 4.5 → Gemini 3.6 Flash | `xhigh` |
-| `builder` | Luna → DeepSeek | GPT-5.6 Luna (codex) → GPT-5.6 Sol → Fable 5 → Kimi K3 → Grok 4.5 → Gemini 3.6 Flash → Opus 5 | `xhigh` |
-| `verifier` | Luna → DeepSeek | GPT-5.6 Sol → Fable 5 → Opus 5 → GPT-5.6 Luna (codex) → Grok 4.5 → Gemini 3.6 Flash → Kimi K3 | `xhigh` |
-| `researcher` | DeepSeek → Luna | Gemini 3.6 Flash → Grok 4.5 → GPT-5.6 Luna (codex) → GPT-5.6 Sol → Fable 5 → Kimi K3 → Opus 5 | `high` |
-| `designer` | Kimi K3 → Luna → DeepSeek | Fable 5 → GPT-5.6 Luna (codex) → GPT-5.6 Sol → Gemini 3.6 Flash → Grok 4.5 → Opus 5 | `max` |
-| `qa-master` | DeepSeek → Luna | GPT-5.6 Luna (codex) → Gemini 3.6 Flash → Grok 4.5 → Fable 5 → GPT-5.6 Sol → Kimi K3 → Opus 5 | `high` |
-| `qa-persona` | DeepSeek → Luna | Gemini 3.6 Flash → GPT-5.6 Luna (codex) → Grok 4.5 → Fable 5 → GPT-5.6 Sol → Kimi K3 → Opus 5 | `high` |
-| `sculptor` | Luna → DeepSeek | GPT-5.6 Sol → Fable 5 → Opus 5 → GPT-5.6 Luna (codex) → Grok 4.5 → Gemini 3.6 Flash → Kimi K3 | `max` |
+| Agent | Ordered ladder | Reasoning |
+|---|---|---:|
+| `architect` | `openai-codex/gpt-5.6-sol:max` → `anthropic/claude-fable-5:xhigh` → `anthropic/claude-opus-5:xhigh` → `openai-codex/gpt-5.6-luna:xhigh` → `kimi-code/k3:max` → `xai-oauth/grok-4.5:xhigh` → `google-antigravity/gemini-3.6-flash:high` → `openrouter/deepseek/deepseek-v4-flash-0731:high` | `max` |
+| `builder` | `openai-codex/gpt-5.6-sol:xhigh` → `openai-codex/gpt-5.6-luna:xhigh` → `anthropic/claude-fable-5:xhigh` → `kimi-code/k3:high` → `xai-oauth/grok-4.5:xhigh` → `google-antigravity/gemini-3.6-flash:high` → `anthropic/claude-opus-5:xhigh` → `openrouter/deepseek/deepseek-v4-flash-0731:high` | `xhigh` |
+| `verifier` | `openai-codex/gpt-5.6-sol:max` → `anthropic/claude-fable-5:xhigh` → `anthropic/claude-opus-5:xhigh` → `openai-codex/gpt-5.6-luna:xhigh` → `xai-oauth/grok-4.5:xhigh` → `google-antigravity/gemini-3.6-flash:high` → `kimi-code/k3:high` → `openrouter/deepseek/deepseek-v4-flash-0731:high` | `max` |
+| `sculptor` | `openai-codex/gpt-5.6-sol:max` → `anthropic/claude-fable-5:xhigh` → `anthropic/claude-opus-5:xhigh` → `openai-codex/gpt-5.6-luna:xhigh` → `xai-oauth/grok-4.5:xhigh` → `google-antigravity/gemini-3.6-flash:high` → `kimi-code/k3:high` → `openrouter/deepseek/deepseek-v4-flash-0731:high` | `max` |
+| `designer` | `kimi-code/k3:max` → `anthropic/claude-fable-5:xhigh` → `openai-codex/gpt-5.6-sol:xhigh` → `openai-codex/gpt-5.6-luna:xhigh` → `google-antigravity/gemini-3.6-flash:high` → `xai-oauth/grok-4.5:xhigh` → `anthropic/claude-opus-5:xhigh` → `openrouter/deepseek/deepseek-v4-flash-0731:high` | `max` |
+| `researcher` | `openrouter/deepseek/deepseek-v4-flash-0731:high` → `google-antigravity/gemini-3.6-flash:high` → `xai-oauth/grok-4.5:high` → `openai-codex/gpt-5.6-luna:xhigh` → `openai-codex/gpt-5.6-sol:high` → `anthropic/claude-fable-5:high` → `kimi-code/k3:high` → `anthropic/claude-opus-5:high` | `high` |
+| `qa-master` | `openrouter/deepseek/deepseek-v4-flash-0731:high` → `google-antigravity/gemini-3.6-flash:high` → `openai-codex/gpt-5.6-luna:high` → `xai-oauth/grok-4.5:high` → `openai-codex/gpt-5.6-sol:high` → `anthropic/claude-fable-5:high` → `kimi-code/k3:high` → `anthropic/claude-opus-5:high` | `high` |
+| `qa-persona` | `openrouter/deepseek/deepseek-v4-flash-0731:high` → `google-antigravity/gemini-3.6-flash:high` → `openai-codex/gpt-5.6-luna:high` → `xai-oauth/grok-4.5:high` → `openai-codex/gpt-5.6-sol:high` → `anthropic/claude-fable-5:high` → `kimi-code/k3:high` → `anthropic/claude-opus-5:high` | `high` |
 
 ## Fixed policy
 
 Every listed favorite can perform every role.
 The order records preference and provider resilience, not a capability boundary.
-OpenRouter spend is accepted: the two workhorse routes preserve premium
-subscription tokens (GPT-5.6 Sol, Claude Fable 5, Claude Opus 5, and other
-subscription quotas). Premium routes are escalation and availability
-fallbacks, not the normal route.
-Kimi K3 is primary only for `designer`.
-Use GPT-5.6 Luna `medium` as the cheap route for `commit`, `smol`, and `tiny`.
+Subscription capacity is preferred for deep-reasoning routes.
+The only OpenRouter model permitted in agent ladders is
+`openrouter/deepseek/deepseek-v4-flash-0731`.
+Kimi K3 is the head only for `designer`; other ladders may use it as a
+fallback.
 
-No active route uses Claude Sonnet 5.
-Every DeepSeek route must be exactly
+Agent ladders use exactly
 `openrouter/deepseek/deepseek-v4-flash-0731:high`.
-Do not use unversioned, older, newer, or provider-alias DeepSeek selectors.
+The chief configuration keeps its existing max-strength DeepSeek selectors for
+roles and fallback chains; those selectors use the same permitted model.
+Agent ladders do not use Claude Sonnet 5. The current `vision` fallback in
+`global/config.yml` still names `anthropic/claude-sonnet-5:max` and requires
+chief-owned reconciliation.
 
 `high` is the minimum substantive reasoning level.
 Unknown risk never lowers reasoning.

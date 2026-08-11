@@ -1,7 +1,7 @@
 ---
 name: qa-master
 description: QA master that explores a product, mints persona briefs, dispatches browser personas, and synthesizes runtime evidence.
-model: openrouter/deepseek/deepseek-v4-flash-0731:high, openrouter/openai/gpt-5.6-luna:high, openai-codex/gpt-5.6-luna:high, google-antigravity/gemini-3.6-flash:high, xai-oauth/grok-4.5:high, anthropic/claude-fable-5:high, openai-codex/gpt-5.6-sol:high, kimi-code/k3:high, anthropic/claude-opus-5:high, openrouter/x-ai/grok-4.5:high, openrouter/z-ai/glm-5.2:high
+model: openrouter/deepseek/deepseek-v4-flash-0731:high, google-antigravity/gemini-3.6-flash:high, openai-codex/gpt-5.6-luna:high, xai-oauth/grok-4.5:high, openai-codex/gpt-5.6-sol:high, anthropic/claude-fable-5:high, kimi-code/k3:high, anthropic/claude-opus-5:high
 thinkingLevel: high
 tools: read,grep,glob,lsp,browser,task
 autoloadSkills: qa-users

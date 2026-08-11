@@ -224,7 +224,7 @@ describe("recipe task runner", () => {
 		writeFileSync(join(bundle, "recipe.json"), JSON.stringify({
 			schemaVersion: "omp.recipe.v1",
 			instructions: "instructions.md",
-			models: [{ provider: "openrouter", model: "z-ai/glm-5.2", reasoning: "high" }],
+			models: [{ provider: "openrouter", model: "deepseek/deepseek-v4-flash-0731", reasoning: "high" }],
 			skills: [],
 			taskSkills: [],
 			mcpServers: [],
