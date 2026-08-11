@@ -1,13 +1,13 @@
 modelRoles: 
-  smol: openai-codex/gpt-5.6-luna:xhigh
+  smol: openai-codex/gpt-5.6-luna:max
   vision: google-antigravity/gemini-3.6-flash:high
   commit: openai-codex/gpt-5.6-luna:xhigh
-  task: openai-codex/gpt-5.6-luna:max
-  slow: anthropic/claude-fable-5:high
-  plan: openai-codex/gpt-5.6-sol:high
-  advisor: xai-oauth/grok-4.5:xhigh
-  tiny: openai-codex/gpt-5.6-luna:xhigh
-  default: anthropic/claude-fable-5:high
+  task: openai-codex/gpt-5.6-sol:high
+  slow: openai-codex/gpt-5.6-sol:max
+  plan: openai-codex/gpt-5.6-sol:max
+  advisor: openrouter/deepseek/deepseek-v4-flash-0731:max
+  tiny: openai-codex/gpt-5.6-luna:max
+  default: openai-codex/gpt-5.6-sol:high
   designer: kimi-code/k3:max
 disabledProviders: 
   - ollama
@@ -27,113 +27,64 @@ retry:
   fallbackRevertPolicy: cooldown-expiry
   fallbackChains: 
     default: 
-      - openai-codex/gpt-5.6-sol:high
-      - openai-codex/gpt-5.6-luna:xhigh
-      - anthropic/claude-opus-5:xhigh
-      - google-antigravity/gemini-3.6-flash:high
+      - anthropic/claude-fable-5:high
+      - anthropic/claude-opus-5:max
+      - kimi-code/k3:max
       - xai-oauth/grok-4.5:xhigh
-      - kimi-code/k3:high
-      - openrouter/deepseek/deepseek-v4-flash-0731:xhigh
-      - openrouter/openai/gpt-5.6-luna:xhigh
-      - openrouter/x-ai/grok-4.5:xhigh
-      - openrouter/z-ai/glm-5.2:high
+      - google-antigravity/gemini-3.6-flash:high
+      - openrouter/deepseek/deepseek-v4-flash-0731:max
     plan: 
-      - anthropic/claude-fable-5:high
-      - anthropic/claude-opus-5:xhigh
-      - openai-codex/gpt-5.6-luna:xhigh
+      - anthropic/claude-fable-5:max
+      - anthropic/claude-opus-5:max
       - kimi-code/k3:max
       - xai-oauth/grok-4.5:xhigh
       - google-antigravity/gemini-3.6-flash:high
-      - openrouter/deepseek/deepseek-v4-flash-0731:xhigh
-      - openrouter/openai/gpt-5.6-luna:xhigh
-      - openrouter/x-ai/grok-4.5:xhigh
-      - openrouter/z-ai/glm-5.2:high
+      - openrouter/deepseek/deepseek-v4-flash-0731:max
     slow: 
-      - openai-codex/gpt-5.6-sol:high
-      - anthropic/claude-opus-5:xhigh
-      - openai-codex/gpt-5.6-luna:xhigh
+      - anthropic/claude-fable-5:max
+      - anthropic/claude-opus-5:max
       - kimi-code/k3:max
       - xai-oauth/grok-4.5:xhigh
       - google-antigravity/gemini-3.6-flash:high
-      - openrouter/deepseek/deepseek-v4-flash-0731:xhigh
-      - openrouter/openai/gpt-5.6-luna:xhigh
-      - openrouter/x-ai/grok-4.5:xhigh
-      - openrouter/z-ai/glm-5.2:high
+      - openrouter/deepseek/deepseek-v4-flash-0731:max
     task: 
-      - openai-codex/gpt-5.6-sol:high
       - anthropic/claude-fable-5:high
-      - anthropic/claude-opus-5:xhigh
-      - kimi-code/k3:high
-      - xai-oauth/grok-4.5:xhigh
-      - google-antigravity/gemini-3.6-flash:high
-      - openrouter/deepseek/deepseek-v4-flash-0731:xhigh
-      - openrouter/openai/gpt-5.6-luna:xhigh
-      - openrouter/x-ai/grok-4.5:xhigh
-      - openrouter/z-ai/glm-5.2:high
-    smol: 
-      - openai-codex/gpt-5.6-luna:xhigh
-      - google-antigravity/gemini-3.6-flash:high
-      - xai-oauth/grok-4.5:xhigh
-      - kimi-code/k3:high
-      - anthropic/claude-fable-5:high
-      - openai-codex/gpt-5.6-sol:high
-      - openrouter/deepseek/deepseek-v4-flash-0731:xhigh
-      - openrouter/openai/gpt-5.6-luna:xhigh
-      - openrouter/x-ai/grok-4.5:xhigh
-      - openrouter/z-ai/glm-5.2:high
-    vision: 
+      - anthropic/claude-opus-5:max
       - kimi-code/k3:max
-      - openai-codex/gpt-5.6-luna:xhigh
-      - anthropic/claude-fable-5:high
-      - openai-codex/gpt-5.6-sol:high
       - xai-oauth/grok-4.5:xhigh
-      - anthropic/claude-opus-5:xhigh
-      - openrouter/deepseek/deepseek-v4-flash-0731:xhigh
-      - openrouter/openai/gpt-5.6-luna:xhigh
-      - openrouter/x-ai/grok-4.5:xhigh
-      - openrouter/z-ai/glm-5.2:high
-    commit: 
-      - openai-codex/gpt-5.6-luna:xhigh
-      - xai-oauth/grok-4.5:xhigh
-      - openai-codex/gpt-5.6-sol:high
-      - anthropic/claude-fable-5:high
-      - kimi-code/k3:high
-      - openrouter/deepseek/deepseek-v4-flash-0731:xhigh
-      - openrouter/openai/gpt-5.6-luna:xhigh
-      - openrouter/x-ai/grok-4.5:xhigh
-      - openrouter/z-ai/glm-5.2:high
-    tiny: 
-      - openai-codex/gpt-5.6-luna:xhigh
       - google-antigravity/gemini-3.6-flash:high
+      - openrouter/deepseek/deepseek-v4-flash-0731:max
+    smol: 
+      - google-antigravity/gemini-3.5-flash-lite:high
       - xai-oauth/grok-4.5:xhigh
+      - openrouter/deepseek/deepseek-v4-flash-0731:max
+    vision: 
+      - openai-codex/gpt-5.6-luna:max
+      - xai-oauth/grok-4.5:xhigh
+      - anthropic/claude-opus-5:max
       - kimi-code/k3:high
-      - anthropic/claude-fable-5:high
-      - openai-codex/gpt-5.6-sol:high
-      - openrouter/deepseek/deepseek-v4-flash-0731:xhigh
-      - openrouter/openai/gpt-5.6-luna:xhigh
-      - openrouter/x-ai/grok-4.5:xhigh
-      - openrouter/z-ai/glm-5.2:high
+      - openrouter/deepseek/deepseek-v4-flash-0731:max
+    commit: 
+      - google-antigravity/gemini-3.5-flash-lite:high
+      - xai-oauth/grok-4.5:xhigh
+      - openrouter/deepseek/deepseek-v4-flash-0731:max
+    tiny: 
+      - google-antigravity/gemini-3.5-flash-lite:high
+      - xai-oauth/grok-4.5:xhigh
+      - openrouter/deepseek/deepseek-v4-flash-0731:max
     designer: 
       - anthropic/claude-fable-5:high
-      - openai-codex/gpt-5.6-luna:xhigh
+      - anthropic/claude-opus-5:max
       - openai-codex/gpt-5.6-sol:high
       - google-antigravity/gemini-3.6-flash:high
       - xai-oauth/grok-4.5:xhigh
-      - anthropic/claude-opus-5:xhigh
-      - openrouter/deepseek/deepseek-v4-flash-0731:xhigh
-      - openrouter/openai/gpt-5.6-luna:xhigh
-      - openrouter/x-ai/grok-4.5:xhigh
-      - openrouter/z-ai/glm-5.2:high
+      - openrouter/deepseek/deepseek-v4-flash-0731:max
     advisor: 
-      - google-antigravity/gemini-3.6-flash:high
-      - openai-codex/gpt-5.6-luna:xhigh
-      - kimi-code/k3:high
       - anthropic/claude-fable-5:high
       - openai-codex/gpt-5.6-sol:high
-      - openrouter/deepseek/deepseek-v4-flash-0731:xhigh
-      - openrouter/openai/gpt-5.6-luna:xhigh
-      - openrouter/x-ai/grok-4.5:xhigh
-      - openrouter/z-ai/glm-5.2:high
+      - kimi-code/k3:high
+      - xai-oauth/grok-4.5:xhigh
+      - google-antigravity/gemini-3.6-flash:high
 defaultThinkingLevel: auto
 advisor: 
   enabled: true
@@ -234,3 +185,5 @@ github:
 autoResume: true
 dev: 
   autoqaConsent: granted
+browser: 
+  relay: false
