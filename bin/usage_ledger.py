@@ -86,7 +86,6 @@ def _connect(path: Path) -> sqlite3.Connection:
     path.chmod(0o600)
     connection = sqlite3.connect(path, timeout=30)
     connection.row_factory = sqlite3.Row
-    connection.execute("PRAGMA busy_timeout = 5000")
     connection.execute("PRAGMA journal_mode = WAL")
     connection.executescript(SCHEMA)
     return connection
@@ -305,17 +304,25 @@ def _response_row(
         else _number(obj.get("duration")),
         "ttft": _number(message.get("ttft")) if "ttft" in message else _number(obj.get("ttft")),
     }
-    row["response_key"] = row["response_id"] or _synthetic_key(row)
+    row["response_key"] = row["response_id"] or _record_key(row, obj) or _synthetic_key(row)
     return row
 
 
-def _synthetic_key(row: dict[str, Any]) -> str:
-    """Identify a response with no provider id by its own recorded facts.
+def _record_key(row: dict[str, Any], obj: dict[str, Any]) -> str | None:
+    """Identify a response with no provider id by its own transcript record.
 
-    A transcript can be inherited into another log, so the key must not use the
-    file or byte offset. Two copies of one response then collapse to one row.
+    OMP gives every record an id that is unique inside its session, so pairing
+    the two separates requests that happen to share a timestamp and usage.
     """
+    record_id = _text(obj.get("id"))
+    scope = row["session_id"] or row["root_file"]
+    return f"omp:{scope}:{record_id}" if record_id and scope else None
+
+
+def _synthetic_key(row: dict[str, Any]) -> str:
+    """Identify a response that carries neither a provider id nor a record id."""
     parts = (
+        row["session_file"],
         row["timestamp"],
         row["model"],
         row["provider"],
