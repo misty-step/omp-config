@@ -17,7 +17,7 @@ it. It refuses to treat composition or conversation as authorization.
 
 - Name the Estate revision and every exact standard or exception read.
 - Select no broader action class than the request needs.
-- Never treat an agent-home role, pack, Powder card, or conversation as runtime
+- Never treat an agent-home role, pack, Issue state, or conversation as runtime
   identity or approval.
 - Do not expose or request literal credentials, state, plans, snapshots, raw logs,
   or private topology.

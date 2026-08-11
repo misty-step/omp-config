@@ -17,7 +17,7 @@ Every lane receives bars, not adjectives; builder-never-grades verification; liv
 5. **Loop to the bar.** Build, fresh-check, name the biggest gap, close it, and repeat until the bar passes or the operator stops.
    The model never declares itself finished. Keep a live Bridge feed or status page, viewable from a phone, with screenshots, the current gap, and the next move.
 6. **Use prior work.** Point to prior artifacts as bars: match them, then beat them. Read session traces for what worked and use them as techniques.
-   QMD holds Claude/Codex history; Powder runs, comments, links, and `~/.factory-lanes/wave*/` hold lane receipts. Do not re-explain solved work.
+   QMD holds Claude/Codex history; GitHub Issues and `~/.factory-lanes/wave*/` hold lane receipts. Do not re-explain solved work.
 7. **Remove blockers early.** Set budgets instead of asking permission; document key locations, never values. Tell lanes to make their own calls and return only when truly blocked or facing an operator-only decision. For huge, hard-to-reverse foundations, request the plan and upfront uncertainty questions, then run without stopping.
 
 ## Review before the diff

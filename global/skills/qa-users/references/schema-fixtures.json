@@ -47,7 +47,7 @@
     "maximum_creates": 1,
     "tracker": {
       "schema_version": "qa-users.tracker.v1",
-      "selected": "powder",
+      "selected": "github",
       "capabilities": {
         "query": true,
         "create": true,
@@ -95,7 +95,7 @@
       "strengths": [],
       "suppressed_friction": [],
       "tracker_summary": {
-        "selected": "powder",
+        "selected": "github",
         "scanned_pages": 0,
         "truncated": false,
         "ambiguous": false,
@@ -147,7 +147,7 @@
         "A low-confidence copy concern was retained without filing."
       ],
       "tracker_summary": {
-        "selected": "powder",
+        "selected": "github",
         "scanned_pages": 1,
         "truncated": false,
         "ambiguous": false,

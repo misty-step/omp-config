@@ -1,6 +1,6 @@
 # Tracker protocol
 
-The selected tracker adapter is explicit in `tracker.v1` and in `output.v1`'s `execution_overrides.selected_tracker`. The default Misty Step adapter is Powder; another tracker is valid only when the harness supplies the same query/create/read-back contract.
+The selected tracker adapter is explicit in `tracker.v1` and in `output.v1`'s `execution_overrides.selected_tracker`. The default Misty Step adapter is GitHub Issues; another tracker is valid only when the harness supplies the same query/create/read-back contract.
 
 One serialized OMP-root tracker writer owns this protocol:
 

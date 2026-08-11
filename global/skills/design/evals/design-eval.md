@@ -29,5 +29,5 @@ costs context.
 2026-07-22 rebuild trial: three arms (old skill / new skill / null) on the
 comms-lab review app. Evidence:
 `~/Development/misty-step/crucible/runs/local/design-rebuild/` (screenshots, sealed
-key, arm reports, verdict). Operator judgment recorded on Powder card
+key, arm reports, verdict). Operator judgment recorded on the Issue
 `design-skill-rebuild`.

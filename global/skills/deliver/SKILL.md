@@ -41,6 +41,6 @@ Route only when the named oracle is required. Load `global/references/works-crit
 3. Run the repository gate after live behavior works. Never weaken or bypass a gate, threshold, test, or invariant.
 4. Record the authority, changed paths, live entrypoint, exact commands, observed results, review disposition, gate disposition, deviations, and residual risk. A deviation ledger may say `none` only when it is empty.
 5. If delivery produced one reusable repo-technical lesson, write or update one file under `docs/solutions/` using `global/references/learnings.md`. Skip near-duplicates.
-6. Reconcile the Powder card when one governs the work. Stop at merge-ready unless the operator explicitly requests merge or deploy.
+6. Reconcile the governing GitHub Issue when one exists. Stop at merge-ready unless the operator explicitly requests merge or deploy.
 
 Chat alone is not completion evidence. A green aggregate without the exact command and observed result is not proof. Apply `global/references/verification-system-first.md` when proof design is disputed. Complete when a future reviewer can reproduce the live result from the durable record.

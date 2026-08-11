@@ -12,8 +12,8 @@ Establish and remediate the floor with `/foundation` (full scorecard every run).
 1. **Marketing site.** Branded, deployed publicly. Per-repo `DESIGN.md` brand
    identity, strong pitch, real screenshots/GIF walkthroughs, user-facing
    release notes (Landmark), footer link contract (GitHub repo when public,
-   mistystep.io always, Weave for weave-family products). Program epic: powder
-   `misty-step-910`. Evidence bar per `/showcase`: no public claim without a
+   mistystep.io always, Weave for weave-family products). Program epic: github
+   `misty-step` org marketing epic. Evidence bar per `/showcase`: no public claim without a
    screenshot, command, or demo path behind it.
 2. **The five faces.** Functional core behind one robust API. Required faces
    over that core: **API + CLI + MCP + shipped skill + UI**. Add an SDK only

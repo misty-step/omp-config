@@ -94,7 +94,7 @@ Functional core behind one robust API. Required faces over that core:
 
 | Dimension | Pass rule |
 |---|---|
-| Work ledger | Durable work store bound (Powder here) with queryable project/repo identity, or waiver |
+| Work ledger | Durable work store bound (GitHub Issues here) with queryable project identity, or waiver |
 | Canary | Mode + live identity when the service is monitored; else `n/a` with reason |
 | Backup/restore | Policy + restore evidence when stateful; else `n/a` |
 | Data lifecycle | Classification/retention/deletion when personal/customer data exists; else `n/a` |

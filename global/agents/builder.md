@@ -34,8 +34,8 @@ Delete obsolete implementation, comments, tests, docs, configuration, and rules.
 Rewrite comments that the change makes stale.
 Do not keep compatibility remnants unless the authority requires them.
 
-## Powder
+## Work state
 
-When the work item is a Powder card, read and claim it before mutation.
-Append useful attributed work-log evidence while working.
-Complete the card only with proof.
+When the work item is a GitHub Issue, record substantive progress as an Issue comment
+with attributed evidence. Complete the Issue only when the change is merged.
+R90 work items live in Habitat. Powder is backburnered; do not create or claim Powder cards.

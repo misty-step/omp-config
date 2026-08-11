@@ -7,7 +7,7 @@
 | **Shaped work** | Ready / claimed / running | Goal + oracle + proof plan + sequence | Evidence-backed, ordered, actively maintained |
 | **Raw idea** | Backlog | Preserve a promising outcome before it is shaped | Named owner or reason to keep; no execution claim |
 
-Resolve the board through the routing registry: use Powder for ordinary Misty Step
+Resolve the board through the routing registry: use GitHub Issues for Misty Step
 repositories and Habitat for Adminifi and r90.
 Treat a discovered local backlog tree as a migration source only when the
 profile says so. Never treat it as an active lifecycle.
@@ -29,7 +29,7 @@ omp-config is the agent declaration and primitive source.
 It projects into the live agent home (`~/.omp/agent`).
 Its repo validates patterns before they spread.
 
-When shaping omp-config cards on the Powder board, prefer work that is one of:
+When shaping omp-config issues on the GitHub board, prefer work that is one of:
 - a reusable primitive, scaffold, reference, or policy other repos can adopt
 - a proving-ground validation of a pattern meant to transfer outward
 - debt removal that materially blocks downstream adoption or trust
@@ -57,7 +57,7 @@ downstream payoff is explicit.
 - Order work by user value, risk reduction, learning, and enablement.
 - For omp-config itself, optimize for downstream leverage first and local convenience second.
 - Keep active work narrow. High WIP destroys prioritization.
-- Keep ideas that are not execution-ready as backlog cards with an explicit
+- Keep ideas that are not execution-ready as backlog issues with an explicit
   reason.
 
 ## Closure protocol
@@ -140,7 +140,7 @@ Before an issue is execution-ready, verify:
 - dependencies are visible
 - scope boundaries are present
 - verification is executable
-- downstream leverage or proving-ground rationale is explicit for omp-config cards
+- downstream leverage or proving-ground rationale is explicit for omp-config issues
 - the issue can be completed in one coherent pass or needs a split
 
 ## AI-agent adaptation

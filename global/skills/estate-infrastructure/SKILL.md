@@ -51,7 +51,7 @@ declaration cannot fill the gap.
   authorization bound to the exact artifact and runtime proof.
 
 The matching public pack gives declaration vocabulary for the requested scope.
-Pack inclusion, a role name, Powder state, conversational approval, and a generic
+Pack inclusion, a role name, Issue state, conversational approval, and a generic
 agent-home authority-provider result do not establish approval. None establishes
 runtime identity or Estate approval without the verified Estate artifact and
 runtime proof. An executor acts only on an Estate-approved typed artifact. It

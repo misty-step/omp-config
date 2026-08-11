@@ -20,7 +20,7 @@ The rules below prevent that.
 ## Rule 1: authority first, always
 
 Test every finding against one **written** artifact: root `VISION.md`, the
-Powder card's Goal/acceptance criteria, a stated goal in the brief, or an ADR.
+The governing Issue's acceptance criteria, a stated goal in the brief, or an ADR.
 Look for these sources in that order. Form no opinion about the diff before that
 search.
 

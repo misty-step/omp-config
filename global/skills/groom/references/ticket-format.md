@@ -1,10 +1,10 @@
 # Ticket Format
 
 Create work in the repository's registry-routed board.
-Ordinary Misty Step repositories use Powder. Adminifi and r90 use Habitat.
+Misty Step repositories use GitHub Issues. Adminifi and r90 use Habitat.
 Never create a local ticket file as an unregistered fallback.
 
-## Required card fields
+## Required issue fields
 
 - **Title:** imperative outcome, not implementation trivia.
 - **Goal/body:** one sentence naming the user or system outcome, followed by

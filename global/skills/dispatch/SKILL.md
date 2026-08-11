@@ -37,7 +37,7 @@ Each agent autoloads one primary kit. Branch methods stay hand-only until the ki
 | Agent | Autoloaded kit | Brief-only add-ons |
 |---|---|---|
 | architect | _(none)_ | `mcp-design`, `eval-design` |
-| builder | `deliver`, `ci` | `powder`, domain skills |
+| builder | `deliver`, `ci` | domain skills |
 | designer | `design` | `prototype`, `improve-ui`, `baseline-ui` |
 | researcher | `research` |  |
 | verifier | `verify` | lens names inside verify |

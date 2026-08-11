@@ -48,7 +48,7 @@ Use a different model family for the grader and workers.
 - The cheapest valid eval is live telemetry plus judgment:
   did the skill trigger when it should, and did sessions that loaded it end
   better?
-  Use harness-native invocation logs plus Powder receipts.
+  Use harness-native invocation logs plus Issue comments.
 - HarnessX-style trace evolution is review-only here.
   A Mode B/eval lane may propose typed harness edits from sanitized traces.
   No source edit ships without held-out tasks, the full omp-config gate, fresh

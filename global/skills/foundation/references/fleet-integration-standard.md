@@ -2,19 +2,19 @@
 
 This standard applies to active `misty-step` organization projects.
 This repo owns the routing doctrine.
-Product repos own their actual Canary, Powder, and Landmark integration surfaces.
+Product repos own their actual Canary, GitHub Issues, and Landmark integration surfaces.
 
 ## Required Evidence
 
-Add a Powder representation to every active project:
+Add a GitHub Issues representation to every active project:
 
 - Forbid repository-local ticket and Kanban ledgers.
-  Put Misty Step work in Powder under the full repo label, such as
+  Put Misty Step work in GitHub Issues under the full repo label, such as
   `misty-step/canary`. Put R90 work in Habitat.
-- Give a repo without an existing Powder card a seed card titled
-  `Adopt Canary, Powder, and Landmark factory stack`.
-- Import or mirror open GitHub issues as Powder cards.
-  Then agents can find durable work without searching GitHub alone.
+- Give a repo without open work a seed issue titled
+  `Adopt Canary, GitHub Issues, and Landmark factory stack`.
+- Use GitHub Issues as the durable work store for Misty Step.
+  Agents find durable work directly on the forge.
 
 Give runtime projects Canary evidence:
 
@@ -25,8 +25,8 @@ Give runtime projects Canary evidence:
   Add live Canary target readback.
 - Use Canary check-in monitors for worker, scheduler, CLI, or event-plane
   runtimes.
-- Report application error paths to Canary, or add an explicit gap card in
-  Powder. External error tracking alone is not enough for Factory operation.
+- Report application error paths to Canary, or add an explicit gap issue in
+  GitHub. External error tracking alone is not enough for Factory operation.
 
 Give release-managed projects Landmark evidence:
 
@@ -37,7 +37,7 @@ Give release-managed projects Landmark evidence:
   backfill-first plan. Do not add release mutation before an operator approves
   the initial version/tag policy.
 - When `fleet plan` reports missing secret metadata, do not add a broken
-  workflow. Track the secret gap in Powder.
+  workflow. Track the secret gap in GitHub Issues.
   Use manifest-only adoption until the secret policy is fixed.
 
 ## Service Names
@@ -52,7 +52,6 @@ Do not guess it from the repo path:
 | `misty-step/linejam` | `linejam` |
 | `misty-step/scry` | `memory-engine-api` |
 | `misty-step/misty-step` | `misty-step` |
-| `misty-step/powder` | `powder` |
 | `misty-step/sploot` | `sploot-web` |
 | `misty-step/vibe-machine` | `vibe-machine` |
 
@@ -74,20 +73,21 @@ landmark setup \
   --repo-root /path/to/repo \
   --dry-run --error-format json
 
-curl -fsS -H "Authorization: Bearer __mint.powder.default__" \
-  "http://mint.tail5f5eb4.ts.net:4949/proxy/https/${POWDER_API_HOST}/api/v1/cards?repo=misty-step%2F<repo>&limit=100"
+gh issue list \
+  --repo misty-step/<repo> \
+  --state open \
+  --limit 100
 ```
 
-Set `$POWDER_API_HOST` to the canonical deployed host.
-Public doctrine names the provider host, not one operator's host.
-Use the Mint route for every credentialed request.
+Use `gh` for GitHub Issues reads and writes.
+Habitat work for R90 uses its own CLI and API.
 
 ## Waivers
 
 Allow a waiver only when the project is not an active runtime or release
-surface. Store the waiver in a Powder card or repo file.
+surface. Store the waiver in a GitHub issue or repo file.
 State why Canary uptime, health, or error logging does not apply.
-State where work state lives in Powder.
+State where work state lives in GitHub Issues.
 State how Landmark release intelligence is deferred or not applicable.
 
 Do not call a project integrated because it has one of the three surfaces.

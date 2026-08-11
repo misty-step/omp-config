@@ -90,7 +90,7 @@ Stop and reconsider role-scoped bundles.
 ## Name and place the file
 
 - Path: `<target-repo>/.agents/skills/<repo>-<domain>/SKILL.md` — for example,
-  `canary-qa`, `powder-qa`, `canary-deploy`.
+  `canary-qa`, `landmark-qa`, `canary-deploy`.
   The repo prefix is load-bearing.
   It prevents the generated skill from shadowing a first-party omp-config skill
   name (`qa`, `deploy`).

@@ -98,13 +98,10 @@ they sleep most of the time or can be rewritten to Workers/D1.
 
 ## Backlog And Work State
 
-- Use Powder CLI/API through its root product skill for backlog management,
-  work cards, issue discovery, claims, relations, operator input requests, and
-  durable work status. Never register or call a Powder MCP surface.
-- Do not keep durable backlog state in chat, TODO prose, or ad-hoc markdown
-  when Powder is available.
+- Use GitHub Issues for Misty Step backlog and work state, and Habitat for R90. Work evidence is an Issue comment or Habitat item comment.
+- Do not keep durable backlog state in chat, TODO prose, or ad-hoc markdown when GitHub Issues is available.
   Markdown can brief or summarize.
-  Powder owns the work-state record.
+  GitHub owns the work-state record.
 
 ## Agent Substrate
 

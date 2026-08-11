@@ -20,7 +20,7 @@ Do not edit implementation.
 
 | # | Prompt | Repo @ SHA | Forbidden edits | What it stresses |
 |---|---|---|---|---|
-| 1 | "Audit this Powder work-board MCP: 31 tools, `list(20)` ~14k tokens, `list(50)` ~31.5k, full objects in lists, duplicate criteria text, null fields, unbounded work logs. Redesign the surface." | fixture TBD | any source edit | scan vs read split, byte-field measurement, duplication/null deletion, bounded append-only reads |
+| 1 | "Audit this GitHub Issues MCP surface: tool count, `list(20)` token cost, full objects in lists, duplicate text, null fields, unbounded comment logs. Redesign the surface." | fixture TBD | any source edit | scan vs read split, byte-field measurement, duplication/null deletion, bounded append-only reads |
 | 2 | "Design an MCP server for a bug tracker API with issues, comments, projects, labels, and writes. Agents keep choosing the wrong issue tool." | synthetic API fixture TBD | any source edit | outcome tools vs REST mirror, namespacing, CRUD consolidation vs split |
 | 3 | "Review this proposal: add dynamic server-side tool discovery toggles to reduce default context, plus full JSON list responses for compatibility." | github-mcp-server dynamic-discovery notes TBD | any source edit | rejects server-side dynamic discovery, assigns discovery/offload to harness, preserves stable toolsets |
 
@@ -57,7 +57,7 @@ but omits the byte audit, list subset contract, and dynamic-discovery caveat.
 
 ## Human Anchor
 
-The operator blind-grades fixture 1 because it uses a real Powder CLI/API audit.
+The operator blind-grades fixture 1 because it uses a real GitHub Issues API audit.
 Record the verdict here after the first run.
 PENDING - no run yet.
 

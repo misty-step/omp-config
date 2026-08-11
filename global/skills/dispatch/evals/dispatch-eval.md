@@ -10,7 +10,7 @@ The roster must not grow for one method.
 ## Fixtures
 
 1. Accepted implementation → `builder`.
-   Name `deliver`, `ci`, `powder`, the product skill, and the live oracle.
+   Name `deliver`, `ci`, the product skill, and the live oracle.
 2. Security review → `verifier`.
    Keep the lane read-only and require ranked reproducible findings.
 3. Live QA → `verifier`.

@@ -16,7 +16,7 @@ cd ~/.omp/agent/sessions && find . -name '*.jsonl' -mtime -60 -print0 \
   | sort -u | awk '{print $2}' | sort | uniq -c | sort -rn
 ```
 
-Cross-check durable lane evidence on the relevant Powder cards.
+Cross-check durable lane evidence in the relevant Issues.
 Analyze the JSONL directly or with a bounded one-off query.
 Keep only the resulting judgment.
 

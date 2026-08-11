@@ -186,7 +186,7 @@ name. Keep task-specific methods in the brief instead of creating another
 declaration.
 
 The selected Harness owns execution. omp-config owns declarations and
-ephemeral projection only. Powder owns durable work evidence. omp-config writes
+ephemeral projection only. GitHub Issues owns durable work evidence for Misty Step. omp-config writes
 a bounded local dispatch receipt. A failed provider returns evidence to the
 lead. The lead decides whether to replace the lane.
 

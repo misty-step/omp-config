@@ -2,7 +2,7 @@
 disable-model-invocation: true
 name: groom
 description: |
-  Product direction and backlog in one loop: keep VISION.md true, tidy Powder,
+  Product direction and backlog in one loop: keep VISION.md true, tidy Issues,
   then sweep and shape work. Use when: "groom", "vision", "backlog", "roadmap",
   "north star", "what should we build", "prioritize", "rethink this",
   "moonshot", "audit skills". Trigger: /groom, /vision, /backlog, /north-star,
@@ -13,9 +13,9 @@ argument-hint: "[vision|tidy|audit|moonshot] [context]"
 # /groom
 
 Own product direction and the board together.
-Keep root `VISION.md` true. Keep Powder true. Shape ambitious work from both.
+Keep root `VISION.md` true. Keep the repository's Issue backlog true. Shape ambitious work from both.
 Do not maintain a separate roadmap skill or `ROADMAP.html` app.
-Sequence and proof live on Powder cards under the vision.
+Sequence and proof live on GitHub Issues under the vision.
 
 Use `global/references/interrogate-first.md` for operator judgment.
 Read the codebase for facts. Use `skill://dispatch` for native lanes.
@@ -27,7 +27,7 @@ Use julius-caveman only for interim synthesis; keep artifacts in normal English.
 |---|---|---|
 | default | strategic groom | vision check → tidy → mega sweep → shape board |
 | `vision` | only north-star work | create or refresh root `VISION.md` and wire consumers |
-| `tidy` | board hygiene only | Powder tidy; no mega sweep |
+| `tidy` | board hygiene only | Issue tidy; no mega sweep |
 | `audit` | harness-health report | read-only skill/prompt usage and staleness; no board edits |
 | `moonshot` | ambition emphasis | default loop with harder ambition floor and deletion pressure |
 
@@ -53,13 +53,13 @@ rg -n "VISION\.md" AGENTS.md .agents skills 2>/dev/null || true
 
 ## Tidy (mandatory on default and tidy modes)
 
-Powder is the board of record. Follow durable-state and closeout rules.
+GitHub Issues is the board of record for Misty Step. Follow durable-state and closeout rules.
 
 - Close merged work as done or shipped with shipping evidence.
-- Surface stale `in_progress` cards (merged branch gone or 30+ days idle).
+- Surface stale open issues (merged branch gone or 30+ days idle).
 - Propose duplicate consolidation. Never merge silently.
 - Report backlog telemetry: count, age, orphans, unfocused small items.
-- Use Powder in Misty Step repos and Habitat in R90 repos.
+- Use GitHub Issues in Misty Step repos and Habitat in R90 repos.
   Remove legacy ticket directories only after live ledger readback.
 
 ## Mega Sweep (default mode)
@@ -104,7 +104,7 @@ Do not auto-fix.
 - Never auto-delete or silently merge cards.
 - Never archive a card whose trailer points to an unmerged branch.
 - Never let backlog size alone veto evidenced work.
-- Never invent a second durable direction store beside `VISION.md` and Powder.
+- Never invent a second durable direction store beside `VISION.md` and GitHub Issues.
 
 ## Completion Gate
 

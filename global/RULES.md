@@ -12,16 +12,12 @@
 - Never reduce requested scope or ship placeholders, stubs, or shims as completion.
 - Delete obsolete code, comments, tests, docs, and rules with every change.
 - Misty Step repositories use `master`, never `main`.
-- R90 (`~/Development/r90`) and Misty Step (`~/Development/misty-step`) are separate organizations with separate GitHub orgs, infrastructure accounts, and work ledgers (Habitat for R90, Powder for Misty Step). Never mix them; follow the org root AGENTS.md.
+- R90 (`~/Development/r90`) and Misty Step (`~/Development/misty-step`) are separate organizations with separate GitHub orgs, infrastructure accounts, and work ledgers (Habitat for R90, GitHub Issues for Misty Step). Never mix them; follow the org root AGENTS.md.
 - Mint (`http://mint.tail5f5eb4.ts.net:4949`) is the only credential broker on this machine. Agent Vault is retired.
 - Make credentialed vendor calls through `http://mint.tail5f5eb4.ts.net:4949/proxy/https/<host>/<path>` with a `__mint.<alias>__` marker. Mint does not authenticate or authorize callers. Tailnet reachability and host custody are the boundary.
 - Top-level sessions share git worktrees. Before mutating a shared branch or runtime, follow `global/references/cross-session-coordination.md` to record status in `<git-common-dir>/omp-coordination.md`.
-- Powder is the Misty Step work ledger. Habitat is the R90 work ledger.
-- Record substantive agent work as a Powder card before or at claim time.
-- Backlog holds unshaped ideas. The board holds dispatchable work only.
-- Every board card in `ready` or `in_progress` MUST have an active claim while an agent works it.
-- Use only the `powder` CLI or HTTP API through the powder skill. Never register or call a Powder MCP surface.
-- Do not keep durable work state in chat, local ticket files, or a second ledger.
+- Work state lives in GitHub Issues for Misty Step and in Habitat for R90. Powder is backburnered; do not create or claim Powder cards.
+- Record substantive agent work as a GitHub Issue comment when the work item is an Issue, or as a Habitat item comment for R90 work.
 - The agent fleet's shared message board lives at `~/Development/daybook/meta/agents-board/` (charter `README.md`, threads `index.md`). It is for agents to talk to themselves, to other agents, and to their future selves. Read `index.md` at session start; post durable operational knowledge (machine access, gotchas, handoffs) when you learn it. Never put secret values on the board — reference machine-local stores (`~/.secrets`, Mint) by name only.
 
 ## Capability stance

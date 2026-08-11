@@ -3,11 +3,11 @@ disable-model-invocation: true
 name: foundation
 description: |
   Establish everything every project must have: application floor, access faces,
-  gates, tests, release, onboarding, and factory surfaces (Canary, Powder,
-  Landmark, Mint). Full runs audit then remediate; factory-only args answer
+  gates, tests, release, onboarding, and factory surfaces (Canary, Landmark,
+  Mint, and the work ledger). Full runs audit then remediate; factory-only args answer
   from the factory table. Hand-only.
   Trigger: /foundation, /establish-baseline, /factory-apps, /factory-stack.
-argument-hint: "[repo-path|canary|powder|landmark|mint]"
+argument-hint: "[repo-path|canary|landmark|mint|gh]"
 ---
 
 # /foundation
@@ -30,14 +30,14 @@ SSOT for score rows and severity: `references/foundation-checklist.md`.
 | Audit packet shape | `references/audit-packet.md` |
 | Gate design | `global/references/quality-gates.md`, `/ci` |
 | Live proof design | `global/references/verification-system-first.md` |
-| Factory surfaces (Canary, Powder, Landmark, Mint) | this skill, section Factory surfaces |
+| Factory surfaces (Canary, Landmark, Mint) | this skill, section Factory surfaces |
 
 Compose with `/document`, `/showcase`, `/groom` (vision), `/ci`, and
 `mattpocock-codebase-design` (`global/external/mattpocock-skills/codebase-design/SKILL.md`)
 when a gap needs that owner. Stay on this skill for the run.
 
 
-## Factory surfaces (Canary, Powder, Landmark, Mint)
+## Factory surfaces (Canary, Landmark, Mint)
 
 Use the owned factory app before inventing local state or third-party glue.
 Product repos own concrete skills and CLI/API surfaces.
@@ -45,7 +45,7 @@ Product repos own concrete skills and CLI/API surfaces.
 | Need | App | First surface |
 |---|---|---|
 | uptime, incidents, health, production debugging | Canary | `misty-canary`, `canary` on PATH, or API |
-| backlog, cards, claims, operator input | Powder | `powder` CLI or API (no MCP route) |
+| backlog, cards, operator input | GitHub Issues | `gh issue` CLI or API |
 | release intelligence, versions, changelogs | Landmark | `misty-landmark`, `landmark describe --json` |
 | credentialed outbound HTTP | Mint | `http://mint.tail5f5eb4.ts.net:4949/proxy/https/<host>/<path>` with `__mint.<alias>__` |
 | event-triggered / Mode B workflows | unavailable | keep work in Mode A; do not invent a replacement |
@@ -53,7 +53,7 @@ Product repos own concrete skills and CLI/API surfaces.
 Rules:
 
 - Query Canary before a repo-local production hypothesis.
-- Keep durable work state in Powder, never only in chat.
+- Keep durable work state in GitHub Issues, never only in chat.
 - Ask Landmark to describe the repo; do not invent release notes from memory.
 - Mint does not authenticate callers. Tailnet reachability is the boundary.
 - For fleet integration evidence, load `references/fleet-integration-standard.md`.
@@ -80,11 +80,11 @@ the dimension requires a gate, live probe, eval, or judgment.
 ## Contract
 
 - One repo per run. Default: current checkout.
-- **Factory-only args** (`canary|powder|landmark|mint`): answer from the Factory
+- **Factory-only args** (`canary|landmark|mint|gh`): answer from the Factory
   surfaces table and fleet standard. Do not run the full floor scorecard.
 - **Full foundation run** (default / no factory-only arg): score every checklist
   dimension. Do not sample. Audit before patch, then remediate.
-- **Remediate in the same run** for accepted gaps. File a Powder card only when
+- **Remediate in the same run** for accepted gaps. File a GitHub Issue only when
   the gap is blocked on secrets, human policy, or multi-PR scope the operator
   defers.
 - Prefer the smallest change that closes a dimension.
@@ -109,8 +109,8 @@ the dimension requires a gate, live probe, eval, or judgment.
 3. **Remediate** — Close gaps in severity order from the checklist. Use owning
    methods (`/ci`, `/document`, `/showcase`, Landmark, codebase-design) inside
    this run.
-   Done when each former gap is `pass`, `waived` with metadata, or deferred on
-   a Powder card the operator accepted.
+   Done when each former gap is `pass`, `waived` with metadata, or deferred in
+   a GitHub Issue the operator accepted.
 4. **Recheck** — Re-score the full checklist against the tree.
    Done when the completion gate below is filled with evidence.
 
@@ -141,5 +141,5 @@ Shared Operating Spine (`Prove`; Durable State and Closeout) first. Then:
 - Onboarding: zero-to-running path + doctor (or waiver)
 - Typing: Go/Rust default (TS distant third); weaker stack constraint named
 - Factory: work ledger + Canary applicability declared with proof or n/a
-- Residuals: Powder cards listed with owners; no silent gaps
+- Residuals: GitHub Issues listed with owners; no silent gaps
 ```

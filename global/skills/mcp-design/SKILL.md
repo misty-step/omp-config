@@ -53,7 +53,7 @@ Design for outcomes, not operations.
 - Keep low-level operations only when the agent must compose them and their
   outputs stay small.
 - Use service/resource namespacing that survives neighboring servers:
-  `github_issue_search`, `sentry_event_read`, `powder_card_update`.
+  `github_issue_search`, `sentry_event_read`.
   If the client prefixes by server, keep the tool name resource/action-specific.
 - Consolidate sibling CRUD operations with a typed `method` or `action` parameter
   when the operation family shares arguments and a mental model.
@@ -122,9 +122,9 @@ Response rules:
   or a specific read/search alternative.
   Opaque stack traces teach nothing.
 
-### Powder Case Study
+### Work-board Case Study
 
-A 2026-07 audit of the Powder work-board MCP found this canonical failure pattern:
+A 2026-07 audit of a 31-tool work-board MCP found this canonical failure pattern:
 
 - 31 tools cost about 2.6k schema tokens per session before any work.
 - `list(20)` returned about 14k tokens and `list(50)` about 31.5k.

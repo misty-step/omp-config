@@ -37,8 +37,8 @@ Copy every row from `foundation-checklist.md`. Leave none out.
 |---|---|---|---|---|---|
 | | | | | | |
 
-## Deferred cards
-- Powder ids:
+## Deferred issues
+- GitHub Issue ids:
 
 ## Gate
 Paste the Foundation Gate block with evidence filled.
