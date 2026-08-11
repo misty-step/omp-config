@@ -16,6 +16,12 @@ from typing import Any
 DEFAULT_SESSIONS_ROOT = Path.home() / ".omp" / "agent" / "sessions"
 DEFAULT_DB = Path.home() / ".omp" / "agent" / "usage-ledger.sqlite3"
 SCHEMA_VERSION = 1
+
+
+class SchemaMismatch(RuntimeError):
+    """The ledger on disk was written by a different schema version."""
+
+
 GROUP_FIELDS = {
     "day": "substr(timestamp, 1, 10)",
     "model": "COALESCE(model, 'unknown')",
@@ -77,7 +83,7 @@ CREATE TABLE IF NOT EXISTS file_state (
 """
 
 
-def _connect(path: Path) -> sqlite3.Connection:
+def _connect(path: Path, *, rebuild: bool = False) -> sqlite3.Connection:
     path = path.expanduser()
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     if path.parent.stat().st_mode & 0o077:
@@ -89,9 +95,17 @@ def _connect(path: Path) -> sqlite3.Connection:
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA journal_mode = WAL")
     version = connection.execute("PRAGMA user_version").fetchone()[0]
-    if version and version != SCHEMA_VERSION:
+    populated = connection.execute(
+        "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'responses'"
+    ).fetchone()
+    if populated and version != SCHEMA_VERSION:
+        if not rebuild:
+            connection.close()
+            raise SchemaMismatch(
+                f"ledger schema {version} differs from {SCHEMA_VERSION}; run `usage_ledger.py ingest` to rebuild"
+            )
         # Every row is derived from session transcripts, so a schema change
-        # rebuilds instead of migrating. `ingest` refills the ledger.
+        # rebuilds instead of migrating. This same run refills the ledger.
         print(
             f"usage-ledger: schema {version} differs from {SCHEMA_VERSION}; rebuilding",
             file=sys.stderr,
@@ -480,7 +494,7 @@ def ingest(args: argparse.Namespace) -> int:
             parents.append(path)
         else:
             children.append(path)
-    connection = _connect(database)
+    connection = _connect(database, rebuild=True)
     inserted = 0
     skipped = 0
     contexts: dict[str, dict[str, str | None]] = {}
@@ -551,7 +565,11 @@ def _report_rows(connection: sqlite3.Connection, args: argparse.Namespace) -> tu
 
 
 def report(args: argparse.Namespace) -> int:
-    connection = _connect(Path(args.db).expanduser())
+    try:
+        connection = _connect(Path(args.db).expanduser())
+    except SchemaMismatch as error:
+        print(f"usage-ledger: {error}", file=sys.stderr)
+        return 1
     try:
         rows, totals = _report_rows(connection, args)
     finally:

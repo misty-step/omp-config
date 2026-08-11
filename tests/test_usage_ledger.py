@@ -102,7 +102,25 @@ class UsageLedgerTests(unittest.TestCase):
         with sqlite3.connect(self.db) as connection:
             connection.execute("ALTER TABLE responses DROP COLUMN reasoning_level")
             connection.execute("PRAGMA user_version = 0")
-            connection.execute("PRAGMA user_version = 99")
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+        with redirect_stdout(stdout), redirect_stderr(stderr):
+            status = usage_ledger.main(["report", "--db", str(self.db), "--json"])
+        self.assertEqual(status, 1)
+        self.assertIn("run `usage_ledger.py ingest`", stderr.getvalue())
+        with sqlite3.connect(self.db) as connection:
+            surviving = connection.execute("SELECT COUNT(*) FROM responses").fetchone()[0]
+        self.assertEqual(surviving, 2)
+        self.invoke("ingest", "--sessions-root", str(self.sessions), "--db", str(self.db))
+        self.assertEqual(self.report("--by", "provider")["totals"]["total_cost"], 3.75)
+
+    def test_an_unversioned_legacy_ledger_rebuilds(self) -> None:
+        with sqlite3.connect(self.db) as connection:
+            connection.execute(
+                "CREATE TABLE file_state (path TEXT PRIMARY KEY, inode INTEGER NOT NULL, offset INTEGER NOT NULL)"
+            )
+            connection.execute("CREATE TABLE responses (response_key TEXT PRIMARY KEY)")
+            connection.execute("PRAGMA user_version = 0")
         self.invoke("ingest", "--sessions-root", str(self.sessions), "--db", str(self.db))
         self.assertEqual(self.report("--by", "provider")["totals"]["total_cost"], 3.75)
 
