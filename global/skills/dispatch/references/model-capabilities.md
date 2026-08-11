@@ -49,9 +49,7 @@ Agent ladders use exactly
 `openrouter/deepseek/deepseek-v4-flash-0731:high`.
 The chief configuration keeps its existing max-strength DeepSeek selectors for
 roles and fallback chains; those selectors use the same permitted model.
-Agent ladders do not use Claude Sonnet 5. The current `vision` fallback in
-`global/config.yml` still names `anthropic/claude-sonnet-5:max` and requires
-chief-owned reconciliation.
+Agent ladders and the chief configuration do not use Claude Sonnet 5.
 
 `high` is the minimum substantive reasoning level.
 Unknown risk never lowers reasoning.

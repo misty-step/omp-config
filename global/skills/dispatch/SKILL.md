@@ -73,28 +73,6 @@ Sealed launch compositions must list every root and child autoload skill.
 Today the compiler injects the full composition skill list into the sealed root prompt.
 Keep sealed roots thin, or fix per-agent injection before relying on fat child kits there.
 
-## Model policy
-
-Use `high` as the minimum reasoning level for substantive work.
-Treat every listed favorite as capable of every role.
-Use role order to express preference, not exclusivity.
-
-Subscription capacity carries dispatched work. The only OpenRouter model
-permitted in an agent ladder is
-`openrouter/deepseek/deepseek-v4-flash-0731:high`.
-
-`architect`, `builder`, `verifier`, and `sculptor` lead with subscriptions and
-end at DeepSeek. `researcher`, `qa-master`, and `qa-persona` lead with DeepSeek
-because they run high request volume. `designer` leads with Kimi K3.
-Every ladder keeps several subscription providers so one provider outage
-cannot strand an agent.
-
-Use GPT-5.6 Luna `medium` for `commit`, `smol`, and `tiny`.
-DeepSeek must use `openrouter/deepseek/deepseek-v4-flash-0731:high`.
-Do not use unversioned or provider-alias DeepSeek selectors.
-Do not route active work to Claude Sonnet 5.
-Treat later ladder entries as availability fallbacks, not independent reviews.
-
 ## Verification
 
 For medium-risk work, add one independent verifier.
