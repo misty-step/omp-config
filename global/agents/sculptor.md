@@ -1,7 +1,7 @@
 ---
 name: sculptor
 description: Read-only structure critic. Finds deletions, deepenings, and simpler module shapes without repairing findings.
-model: openai-codex/gpt-5.6-sol:max, anthropic/claude-fable-5:xhigh, anthropic/claude-opus-5:xhigh, openai-codex/gpt-5.6-luna:xhigh, xai-oauth/grok-4.5:xhigh, google-antigravity/gemini-3.6-flash:high, kimi-code/k3:high, openrouter/deepseek/deepseek-v4-flash-0731:high
+model: openai-codex/gpt-5.6-sol:max, anthropic/claude-fable-5:max, anthropic/claude-opus-5:max, xai-oauth/grok-4.5:xhigh, kimi-code/k3:max, google-antigravity/gemini-3.6-flash:high, openrouter/deepseek/deepseek-v4-flash-0731:high
 thinkingLevel: max
 tools: read,grep,glob,lsp,bash
 autoloadSkills: prune

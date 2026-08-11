@@ -12,13 +12,17 @@ The first route is the normal route.
 Later routes provide availability resilience after a provider failure.
 They are not per-task choices or independent opinions.
 
-Agent ladders use subscription capacity first, with one permitted OpenRouter
-model as the terminal or high-volume route. The permitted model is
-`openrouter/deepseek/deepseek-v4-flash-0731`; agent declarations use its `high`
-selector. Deep-reasoning agents (`architect`, `builder`, `verifier`, and
-`sculptor`) lead with subscriptions and end at DeepSeek. High-volume agents
-(`researcher`, `qa-master`, and `qa-persona`) lead with DeepSeek before their
-subscription cascade. `designer` leads with Kimi K3.
+Agent ladders use subscription capacity first, in one canonical order:
+OpenAI subscription flagship first, then the Anthropic Sonnet-class, then the
+Anthropic Opus-class, then XAI OAuth Grok, then Kimi Code K3, then the
+Google flash-class. The one permitted OpenRouter model is the terminal
+catch-all on every ladder:
+`openrouter/deepseek/deepseek-v4-flash-0731`; agent declarations use its
+`high` selector. Every ladder ends at DeepSeek. Reasoning level varies by
+agent: `architect`, `builder`, `verifier`, and `sculptor` lead with the
+OpenAI flagship at `max` or `xhigh`; `researcher`, `qa-master`, and
+`qa-persona` run the same order at `high`; `designer` leads with the OpenAI
+flagship at `max` and may prefer Kimi K3 for design-tuned work.
 
 `global/skills/dispatch/references/agent-roster.json` holds the exact ordered
 ladders. `bin/check` fails when the roster and the agent frontmatter disagree,
@@ -26,24 +30,24 @@ so read the roster instead of copying ladders into prose.
 
 | Agent | Head | Terminal | Reasoning |
 |---|---|---|---:|
-| `architect` | GPT-5.6 Sol | DeepSeek | `max` |
-| `builder` | GPT-5.6 Sol | DeepSeek | `xhigh` |
-| `verifier` | GPT-5.6 Sol | DeepSeek | `max` |
-| `sculptor` | GPT-5.6 Sol | DeepSeek | `max` |
-| `designer` | Kimi K3 | DeepSeek | `max` |
-| `researcher` | DeepSeek | Claude Opus 5 | `high` |
-| `qa-master` | DeepSeek | Claude Opus 5 | `high` |
-| `qa-persona` | DeepSeek | Claude Opus 5 | `high` |
+| `architect` | OpenAI flagship | DeepSeek | `max` |
+| `builder` | OpenAI flagship | DeepSeek | `xhigh` |
+| `verifier` | OpenAI flagship | DeepSeek | `max` |
+| `sculptor` | OpenAI flagship | DeepSeek | `max` |
+| `designer` | OpenAI flagship | DeepSeek | `max` |
+| `researcher` | OpenAI flagship | DeepSeek | `high` |
+| `qa-master` | OpenAI flagship | DeepSeek | `high` |
+| `qa-persona` | OpenAI flagship | DeepSeek | `high` |
 
 ## Fixed policy
 
 Every listed favorite can perform every role.
 The order records preference and provider resilience, not a capability boundary.
-Subscription capacity is preferred for deep-reasoning routes.
+Subscription capacity is preferred for every route.
 The only OpenRouter model permitted in agent ladders is
 `openrouter/deepseek/deepseek-v4-flash-0731`.
-Kimi K3 is the head only for `designer`; other ladders may use it as a
-fallback.
+DeepSeek is the paid catch-all terminal, never the head.
+All other models in the ladder route through their subscription providers.
 
 Agent ladders use exactly
 `openrouter/deepseek/deepseek-v4-flash-0731:high`.

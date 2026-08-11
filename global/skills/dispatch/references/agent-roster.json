@@ -5,11 +5,10 @@
       "when_to_use": "Resolve system boundaries, tradeoffs, and dependency order before implementation.",
       "model": [
         "openai-codex/gpt-5.6-sol:max",
-        "anthropic/claude-fable-5:xhigh",
-        "anthropic/claude-opus-5:xhigh",
-        "openai-codex/gpt-5.6-luna:xhigh",
-        "kimi-code/k3:max",
+        "anthropic/claude-fable-5:max",
+        "anthropic/claude-opus-5:max",
         "xai-oauth/grok-4.5:xhigh",
+        "kimi-code/k3:max",
         "google-antigravity/gemini-3.6-flash:high",
         "openrouter/deepseek/deepseek-v4-flash-0731:high"
       ],
@@ -22,12 +21,11 @@
       "when_to_use": "One accepted implementation change taken to a live, gated, evidence-backed outcome.",
       "model": [
         "openai-codex/gpt-5.6-sol:xhigh",
-        "openai-codex/gpt-5.6-luna:xhigh",
         "anthropic/claude-fable-5:xhigh",
-        "kimi-code/k3:high",
+        "anthropic/claude-opus-5:max",
         "xai-oauth/grok-4.5:xhigh",
+        "kimi-code/k3:max",
         "google-antigravity/gemini-3.6-flash:high",
-        "anthropic/claude-opus-5:xhigh",
         "openrouter/deepseek/deepseek-v4-flash-0731:high"
       ],
       "thinkingLevel": "xhigh",
@@ -42,13 +40,12 @@
     "designer": {
       "when_to_use": "One product or interface change taken through accessible design and rendered proof.",
       "model": [
-        "kimi-code/k3:max",
-        "anthropic/claude-fable-5:xhigh",
-        "openai-codex/gpt-5.6-sol:xhigh",
-        "openai-codex/gpt-5.6-luna:xhigh",
-        "google-antigravity/gemini-3.6-flash:high",
+        "openai-codex/gpt-5.6-sol:max",
+        "anthropic/claude-fable-5:max",
+        "anthropic/claude-opus-5:max",
         "xai-oauth/grok-4.5:xhigh",
-        "anthropic/claude-opus-5:xhigh",
+        "kimi-code/k3:max",
+        "google-antigravity/gemini-3.6-flash:high",
         "openrouter/deepseek/deepseek-v4-flash-0731:high"
       ],
       "thinkingLevel": "max",
@@ -61,14 +58,13 @@
     "qa-master": {
       "when_to_use": "Explore a product, mint persona briefs, dispatch browser personas, and synthesize evidence.",
       "model": [
-        "openrouter/deepseek/deepseek-v4-flash-0731:high",
-        "google-antigravity/gemini-3.6-flash:high",
-        "openai-codex/gpt-5.6-luna:high",
-        "xai-oauth/grok-4.5:high",
         "openai-codex/gpt-5.6-sol:high",
         "anthropic/claude-fable-5:high",
+        "anthropic/claude-opus-5:high",
+        "xai-oauth/grok-4.5:high",
         "kimi-code/k3:high",
-        "anthropic/claude-opus-5:high"
+        "google-antigravity/gemini-3.6-flash:high",
+        "openrouter/deepseek/deepseek-v4-flash-0731:high"
       ],
       "thinkingLevel": "high",
       "tools": "read,grep,glob,lsp,browser,task",
@@ -82,14 +78,13 @@
     "qa-persona": {
       "when_to_use": "Browser-only persona user on one real non-production entrypoint.",
       "model": [
-        "openrouter/deepseek/deepseek-v4-flash-0731:high",
-        "google-antigravity/gemini-3.6-flash:high",
-        "openai-codex/gpt-5.6-luna:high",
-        "xai-oauth/grok-4.5:high",
         "openai-codex/gpt-5.6-sol:high",
         "anthropic/claude-fable-5:high",
+        "anthropic/claude-opus-5:high",
+        "xai-oauth/grok-4.5:high",
         "kimi-code/k3:high",
-        "anthropic/claude-opus-5:high"
+        "google-antigravity/gemini-3.6-flash:high",
+        "openrouter/deepseek/deepseek-v4-flash-0731:high"
       ],
       "thinkingLevel": "high",
       "tools": "browser",
@@ -101,14 +96,13 @@
     "researcher": {
       "when_to_use": "Bounded read-only repository, product, or external evidence synthesis.",
       "model": [
-        "openrouter/deepseek/deepseek-v4-flash-0731:high",
-        "google-antigravity/gemini-3.6-flash:high",
-        "xai-oauth/grok-4.5:high",
-        "openai-codex/gpt-5.6-luna:xhigh",
         "openai-codex/gpt-5.6-sol:high",
         "anthropic/claude-fable-5:high",
+        "anthropic/claude-opus-5:high",
+        "xai-oauth/grok-4.5:high",
         "kimi-code/k3:high",
-        "anthropic/claude-opus-5:high"
+        "google-antigravity/gemini-3.6-flash:high",
+        "openrouter/deepseek/deepseek-v4-flash-0731:high"
       ],
       "thinkingLevel": "high",
       "tools": "read,grep,glob,lsp,browser,web_search",
@@ -121,12 +115,11 @@
       "when_to_use": "Read-only structure critic for deletion, deep modules, and simpler shapes without repairs.",
       "model": [
         "openai-codex/gpt-5.6-sol:max",
-        "anthropic/claude-fable-5:xhigh",
-        "anthropic/claude-opus-5:xhigh",
-        "openai-codex/gpt-5.6-luna:xhigh",
+        "anthropic/claude-fable-5:max",
+        "anthropic/claude-opus-5:max",
         "xai-oauth/grok-4.5:xhigh",
+        "kimi-code/k3:max",
         "google-antigravity/gemini-3.6-flash:high",
-        "kimi-code/k3:high",
         "openrouter/deepseek/deepseek-v4-flash-0731:high"
       ],
       "thinkingLevel": "max",
@@ -140,12 +133,11 @@
       "when_to_use": "Independent live proof or review evidence that never repairs findings.",
       "model": [
         "openai-codex/gpt-5.6-sol:max",
-        "anthropic/claude-fable-5:xhigh",
-        "anthropic/claude-opus-5:xhigh",
-        "openai-codex/gpt-5.6-luna:xhigh",
+        "anthropic/claude-fable-5:max",
+        "anthropic/claude-opus-5:max",
         "xai-oauth/grok-4.5:xhigh",
+        "kimi-code/k3:max",
         "google-antigravity/gemini-3.6-flash:high",
-        "kimi-code/k3:high",
         "openrouter/deepseek/deepseek-v4-flash-0731:high"
       ],
       "thinkingLevel": "max",

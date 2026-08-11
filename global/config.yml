@@ -1,14 +1,14 @@
 modelRoles: 
-  smol: openai-codex/gpt-5.6-luna:max
+  smol: google-antigravity/gemini-3.6-flash:high
   vision: google-antigravity/gemini-3.6-flash:high
   commit: openai-codex/gpt-5.6-luna:xhigh
   task: openai-codex/gpt-5.6-sol:high
   slow: openai-codex/gpt-5.6-sol:max
   plan: openai-codex/gpt-5.6-sol:max
-  advisor: openrouter/deepseek/deepseek-v4-flash-0731:max
-  tiny: openai-codex/gpt-5.6-luna:max
+  advisor: google-antigravity/gemini-3.6-flash:high
+  tiny: google-antigravity/gemini-3.6-flash:high
   default: openai-codex/gpt-5.6-sol:high
-  designer: kimi-code/k3:max
+  designer: openai-codex/gpt-5.6-sol:max
 disabledProviders: 
   - ollama
   - llama.cpp
@@ -29,33 +29,33 @@ retry:
     default: 
       - anthropic/claude-fable-5:high
       - anthropic/claude-opus-5:max
-      - kimi-code/k3:max
       - xai-oauth/grok-4.5:xhigh
+      - kimi-code/k3:max
       - google-antigravity/gemini-3.6-flash:high
-      - openrouter/deepseek/deepseek-v4-flash-0731:max
+      - openrouter/deepseek/deepseek-v4-flash-0731:high
     plan: 
       - anthropic/claude-fable-5:max
       - anthropic/claude-opus-5:max
-      - kimi-code/k3:max
       - xai-oauth/grok-4.5:xhigh
+      - kimi-code/k3:max
       - google-antigravity/gemini-3.6-flash:high
       - openrouter/deepseek/deepseek-v4-flash-0731:max
     slow: 
       - anthropic/claude-fable-5:max
       - anthropic/claude-opus-5:max
-      - kimi-code/k3:max
       - xai-oauth/grok-4.5:xhigh
+      - kimi-code/k3:max
       - google-antigravity/gemini-3.6-flash:high
       - openrouter/deepseek/deepseek-v4-flash-0731:max
     task: 
       - anthropic/claude-fable-5:high
       - anthropic/claude-opus-5:max
-      - kimi-code/k3:max
       - xai-oauth/grok-4.5:xhigh
+      - kimi-code/k3:max
       - google-antigravity/gemini-3.6-flash:high
-      - openrouter/deepseek/deepseek-v4-flash-0731:max
+      - openrouter/deepseek/deepseek-v4-flash-0731:high
     smol: 
-      - google-antigravity/gemini-3.5-flash-lite:high
+      - kimi-code/k3:high
       - xai-oauth/grok-4.5:xhigh
       - openrouter/deepseek/deepseek-v4-flash-0731:max
     vision: 
@@ -65,26 +65,24 @@ retry:
       - kimi-code/k3:high
       - openrouter/deepseek/deepseek-v4-flash-0731:max
     commit: 
-      - google-antigravity/gemini-3.5-flash-lite:high
       - xai-oauth/grok-4.5:xhigh
       - openrouter/deepseek/deepseek-v4-flash-0731:max
     tiny: 
-      - google-antigravity/gemini-3.5-flash-lite:high
+      - kimi-code/k3:high
       - xai-oauth/grok-4.5:xhigh
       - openrouter/deepseek/deepseek-v4-flash-0731:max
     designer: 
       - anthropic/claude-fable-5:high
       - anthropic/claude-opus-5:max
-      - openai-codex/gpt-5.6-sol:high
       - google-antigravity/gemini-3.6-flash:high
       - xai-oauth/grok-4.5:xhigh
+      - kimi-code/k3:max
       - openrouter/deepseek/deepseek-v4-flash-0731:max
     advisor: 
-      - anthropic/claude-fable-5:high
-      - openai-codex/gpt-5.6-sol:high
-      - kimi-code/k3:high
       - xai-oauth/grok-4.5:xhigh
-      - google-antigravity/gemini-3.6-flash:high
+      - anthropic/claude-fable-5:high
+      - kimi-code/k3:high
+      - openrouter/deepseek/deepseek-v4-flash-0731:max
 defaultThinkingLevel: auto
 advisor: 
   enabled: true

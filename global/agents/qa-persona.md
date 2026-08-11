@@ -1,7 +1,7 @@
 ---
 name: qa-persona
 description: Browser-only persona user for one real non-production entrypoint; returns runtime evidence and never reads source.
-model: openrouter/deepseek/deepseek-v4-flash-0731:high, google-antigravity/gemini-3.6-flash:high, openai-codex/gpt-5.6-luna:high, xai-oauth/grok-4.5:high, openai-codex/gpt-5.6-sol:high, anthropic/claude-fable-5:high, kimi-code/k3:high, anthropic/claude-opus-5:high
+model: openai-codex/gpt-5.6-sol:high, anthropic/claude-fable-5:high, anthropic/claude-opus-5:high, xai-oauth/grok-4.5:high, kimi-code/k3:high, google-antigravity/gemini-3.6-flash:high, openrouter/deepseek/deepseek-v4-flash-0731:high
 thinkingLevel: high
 tools: browser
 autoloadSkills: qa-persona
