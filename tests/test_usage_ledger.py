@@ -98,6 +98,42 @@ class UsageLedgerTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.tmp.cleanup()
 
+    def test_nested_dispatch_attributes_a_sibling_lane(self) -> None:
+        persona = self.child.parent / "PersonaLane.jsonl"
+        persona.write_text(
+            self._record(
+                "2026-08-06T02:00:00Z",
+                "persona-response",
+                provider="openrouter",
+                model="deepseek",
+                input_tokens=10,
+                output_tokens=5,
+                cache_read=1,
+                cost=0.5,
+            )
+            + "\n"
+        )
+        dispatch = json.dumps(
+            {
+                "type": "message",
+                "message": {
+                    "role": "assistant",
+                    "content": [
+                        {
+                            "type": "toolCall",
+                            "name": "task",
+                            "arguments": {"tasks": [{"name": "PersonaLane", "agent": "qa-persona"}]},
+                        }
+                    ],
+                },
+            }
+        )
+        self.child.write_text(dispatch + "\n" + self.child.read_text())
+        self.invoke("ingest", "--sessions-root", str(self.sessions), "--db", str(self.db))
+        rows = {row["dimension"]: row for row in self.report("--by", "agent")["rows"]}
+        self.assertIn("qa-persona", rows)
+        self.assertEqual(rows["qa-persona"]["requests"], 1)
+
     @staticmethod
     def _record(
         timestamp: str,

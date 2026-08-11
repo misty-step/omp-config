@@ -20,21 +20,20 @@ selector. Deep-reasoning agents (`architect`, `builder`, `verifier`, and
 (`researcher`, `qa-master`, and `qa-persona`) lead with DeepSeek before their
 subscription cascade. `designer` leads with Kimi K3.
 
-The chief `default` cascade in `global/config.yml` is the pattern these
-ladders imitate: Claude Fable 5 → Claude Opus 5 → Kimi K3 → xai-oauth Grok
-4.5 → Gemini 3.6 Flash → DeepSeek. Each agent keeps its canonical order while
-preserving that subscription-first and terminal-DeepSeek shape.
+`global/skills/dispatch/references/agent-roster.json` holds the exact ordered
+ladders. `bin/check` fails when the roster and the agent frontmatter disagree,
+so read the roster instead of copying ladders into prose.
 
-| Agent | Ordered ladder | Reasoning |
-|---|---|---:|
-| `architect` | `openai-codex/gpt-5.6-sol:max` → `anthropic/claude-fable-5:xhigh` → `anthropic/claude-opus-5:xhigh` → `openai-codex/gpt-5.6-luna:xhigh` → `kimi-code/k3:max` → `xai-oauth/grok-4.5:xhigh` → `google-antigravity/gemini-3.6-flash:high` → `openrouter/deepseek/deepseek-v4-flash-0731:high` | `max` |
-| `builder` | `openai-codex/gpt-5.6-sol:xhigh` → `openai-codex/gpt-5.6-luna:xhigh` → `anthropic/claude-fable-5:xhigh` → `kimi-code/k3:high` → `xai-oauth/grok-4.5:xhigh` → `google-antigravity/gemini-3.6-flash:high` → `anthropic/claude-opus-5:xhigh` → `openrouter/deepseek/deepseek-v4-flash-0731:high` | `xhigh` |
-| `verifier` | `openai-codex/gpt-5.6-sol:max` → `anthropic/claude-fable-5:xhigh` → `anthropic/claude-opus-5:xhigh` → `openai-codex/gpt-5.6-luna:xhigh` → `xai-oauth/grok-4.5:xhigh` → `google-antigravity/gemini-3.6-flash:high` → `kimi-code/k3:high` → `openrouter/deepseek/deepseek-v4-flash-0731:high` | `max` |
-| `sculptor` | `openai-codex/gpt-5.6-sol:max` → `anthropic/claude-fable-5:xhigh` → `anthropic/claude-opus-5:xhigh` → `openai-codex/gpt-5.6-luna:xhigh` → `xai-oauth/grok-4.5:xhigh` → `google-antigravity/gemini-3.6-flash:high` → `kimi-code/k3:high` → `openrouter/deepseek/deepseek-v4-flash-0731:high` | `max` |
-| `designer` | `kimi-code/k3:max` → `anthropic/claude-fable-5:xhigh` → `openai-codex/gpt-5.6-sol:xhigh` → `openai-codex/gpt-5.6-luna:xhigh` → `google-antigravity/gemini-3.6-flash:high` → `xai-oauth/grok-4.5:xhigh` → `anthropic/claude-opus-5:xhigh` → `openrouter/deepseek/deepseek-v4-flash-0731:high` | `max` |
-| `researcher` | `openrouter/deepseek/deepseek-v4-flash-0731:high` → `google-antigravity/gemini-3.6-flash:high` → `xai-oauth/grok-4.5:high` → `openai-codex/gpt-5.6-luna:xhigh` → `openai-codex/gpt-5.6-sol:high` → `anthropic/claude-fable-5:high` → `kimi-code/k3:high` → `anthropic/claude-opus-5:high` | `high` |
-| `qa-master` | `openrouter/deepseek/deepseek-v4-flash-0731:high` → `google-antigravity/gemini-3.6-flash:high` → `openai-codex/gpt-5.6-luna:high` → `xai-oauth/grok-4.5:high` → `openai-codex/gpt-5.6-sol:high` → `anthropic/claude-fable-5:high` → `kimi-code/k3:high` → `anthropic/claude-opus-5:high` | `high` |
-| `qa-persona` | `openrouter/deepseek/deepseek-v4-flash-0731:high` → `google-antigravity/gemini-3.6-flash:high` → `openai-codex/gpt-5.6-luna:high` → `xai-oauth/grok-4.5:high` → `openai-codex/gpt-5.6-sol:high` → `anthropic/claude-fable-5:high` → `kimi-code/k3:high` → `anthropic/claude-opus-5:high` | `high` |
+| Agent | Head | Terminal | Reasoning |
+|---|---|---|---:|
+| `architect` | GPT-5.6 Sol | DeepSeek | `max` |
+| `builder` | GPT-5.6 Sol | DeepSeek | `xhigh` |
+| `verifier` | GPT-5.6 Sol | DeepSeek | `max` |
+| `sculptor` | GPT-5.6 Sol | DeepSeek | `max` |
+| `designer` | Kimi K3 | DeepSeek | `max` |
+| `researcher` | DeepSeek | Claude Opus 5 | `high` |
+| `qa-master` | DeepSeek | Claude Opus 5 | `high` |
+| `qa-persona` | DeepSeek | Claude Opus 5 | `high` |
 
 ## Fixed policy
 

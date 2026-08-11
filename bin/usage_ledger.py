@@ -202,7 +202,7 @@ def _upsert_mappings(
         )
         connection.execute(
             "UPDATE responses SET agent_type = ? WHERE session_file = ? AND lane = ?",
-            (agent_type, str(parent / f"{lane}.jsonl"), lane),
+            (agent_type, str(parent.with_suffix("") / f"{lane}.jsonl"), lane),
         )
 
 
@@ -220,8 +220,7 @@ def _response_row(
     context: dict[str, str | None],
     lane: str | None,
     agent_type: str | None,
-    offset: int,
-) -> tuple[Any, ...] | None:
+) -> dict[str, Any] | None:
     if obj.get("type") != "message":
         return None
     message = obj.get("message")
@@ -230,11 +229,6 @@ def _response_row(
     usage = message.get("usage")
     if not isinstance(usage, dict):
         return None
-    response_id = _text(message.get("responseId")) or _text(obj.get("responseId"))
-    response_key = response_id or hashlib.sha256(
-        f"{context.get('session_id') or ''}\0{session_file}\0{offset}".encode("utf-8")
-    ).hexdigest()
-    timestamp = _text(obj.get("timestamp")) or _text(message.get("timestamp"))
     cost = usage.get("cost")
     if not isinstance(cost, dict):
         cost = {}
@@ -247,51 +241,61 @@ def _response_row(
                 break
         if reasoning_level:
             break
-    return (
-        response_key,
-        response_id,
-        context.get("session_id"),
-        str(session_file),
-        lane,
-        agent_type,
-        context.get("workspace"),
-        context.get("repo"),
-        _text(message.get("provider")),
-        _text(message.get("model")),
-        reasoning_level,
-        timestamp,
-        _integer(usage.get("input")),
-        _integer(usage.get("output")),
-        _integer(usage.get("cacheRead")),
-        _integer(usage.get("cacheWrite")),
-        _integer(usage.get("totalTokens")),
-        _integer(usage.get("reasoningTokens")),
-        _number(cost.get("input")),
-        _number(cost.get("output")),
-        _number(cost.get("cacheRead")),
-        _number(cost.get("cacheWrite")),
-        _number(cost.get("total")),
-        _number(message.get("duration"))
+    row = {
+        "response_id": _text(message.get("responseId")) or _text(obj.get("responseId")),
+        "session_id": context.get("session_id"),
+        "session_file": str(session_file),
+        "lane": lane,
+        "agent_type": agent_type,
+        "workspace": context.get("workspace"),
+        "repo": context.get("repo"),
+        "provider": _text(message.get("provider")),
+        "model": _text(message.get("model")),
+        "reasoning_level": reasoning_level,
+        "timestamp": _text(obj.get("timestamp")) or _text(message.get("timestamp")),
+        "input_tokens": _integer(usage.get("input")),
+        "output_tokens": _integer(usage.get("output")),
+        "cache_read_tokens": _integer(usage.get("cacheRead")),
+        "cache_write_tokens": _integer(usage.get("cacheWrite")),
+        "total_tokens": _integer(usage.get("totalTokens")),
+        "reasoning_tokens": _integer(usage.get("reasoningTokens")),
+        "cost_input": _number(cost.get("input")),
+        "cost_output": _number(cost.get("output")),
+        "cost_cache_read": _number(cost.get("cacheRead")),
+        "cost_cache_write": _number(cost.get("cacheWrite")),
+        "cost_total": _number(cost.get("total")),
+        "duration": _number(message.get("duration"))
         if "duration" in message
         else _number(obj.get("duration")),
-        _number(message.get("ttft")) if "ttft" in message else _number(obj.get("ttft")),
-    )
+        "ttft": _number(message.get("ttft")) if "ttft" in message else _number(obj.get("ttft")),
+    }
+    row["response_key"] = row["response_id"] or _synthetic_key(row)
+    return row
 
 
-def _insert_response(connection: sqlite3.Connection, values: tuple[Any, ...]) -> bool:
-    connection.execute(
-        """
-        INSERT INTO responses(
-            response_key, response_id, session_id, session_file, lane, agent_type,
-            workspace, repo, provider, model, reasoning_level, timestamp,
-            input_tokens, output_tokens, cache_read_tokens, cache_write_tokens,
-            total_tokens, reasoning_tokens, cost_input, cost_output,
-            cost_cache_read, cost_cache_write, cost_total, duration, ttft
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        values,
+def _synthetic_key(row: dict[str, Any]) -> str:
+    """Identify a response with no provider id by its own recorded facts.
+
+    A transcript can be inherited into another log, so the key must not use the
+    file or byte offset. Two copies of one response then collapse to one row.
+    """
+    parts = (
+        row["timestamp"],
+        row["model"],
+        row["provider"],
+        row["input_tokens"],
+        row["output_tokens"],
+        row["total_tokens"],
+        row["cost_total"],
     )
-    return True
+    digest = hashlib.sha256("\0".join("" if part is None else str(part) for part in parts).encode("utf-8"))
+    return f"synthetic:{digest.hexdigest()}"
+
+
+def _insert_response(connection: sqlite3.Connection, row: dict[str, Any]) -> None:
+    columns = ", ".join(row)
+    placeholders = ", ".join(f":{name}" for name in row)
+    connection.execute(f"INSERT INTO responses({columns}) VALUES ({placeholders})", row)
 
 
 def _ingest_file(
@@ -347,9 +351,8 @@ def _ingest_file(
                     processed_offset = line_start
                     break
                 candidate_usage = b'"usage"' in raw and b'"assistant"' in raw
-                candidate_context = is_parent and (
-                    b'"session"' in raw or (b'"toolCall"' in raw and b'"task"' in raw)
-                )
+                candidate_task = b'"toolCall"' in raw and b'"task"' in raw
+                candidate_context = candidate_task or (is_parent and b'"session"' in raw)
                 if not candidate_usage and not candidate_context:
                     processed_offset = stream.tell()
                     continue
@@ -368,15 +371,16 @@ def _ingest_file(
                     workspace = _text(obj.get("cwd"))
                     context = _store_session(connection, path, session_id, workspace)
                     contexts[str(path)] = context
-                if is_parent and candidate_context and b'"toolCall"' in raw:
-                    _upsert_mappings(connection, path, _task_mappings(obj))
+                if candidate_task and (mapping_root := path if is_parent else parent):
+                    _upsert_mappings(connection, mapping_root, _task_mappings(obj))
+                    if lane and not agent_type:
+                        agent_type = _agent_map(connection, mapping_root).get(lane)
                 values = _response_row(
                     obj,
                     session_file=path,
                     context=context,
                     lane=lane,
                     agent_type=agent_type,
-                    offset=line_start,
                 )
                 if values is not None:
                     try:
@@ -473,27 +477,15 @@ def _report_rows(connection: sqlite3.Connection, args: argparse.Namespace) -> tu
         ORDER BY total_cost DESC, dimension ASC
     """
     rows = [dict(row) for row in connection.execute(query, parameters)]
-    total_cost = float(
-        connection.execute(f"SELECT COALESCE(SUM(cost_total), 0) FROM responses{where}", parameters).fetchone()[0]
-    )
-    total_requests = int(
-        connection.execute(f"SELECT COUNT(*) FROM responses{where}", parameters).fetchone()[0]
-    )
-    total_tokens = int(
-        connection.execute(f"SELECT COALESCE(SUM(total_tokens), 0) FROM responses{where}", parameters).fetchone()[0]
-    )
-    cached_tokens = int(
-        connection.execute(f"SELECT COALESCE(SUM(cache_read_tokens), 0) FROM responses{where}", parameters).fetchone()[0]
-    )
+    totals = {
+        "requests": sum(int(row["requests"]) for row in rows),
+        "total_cost": sum(float(row["total_cost"]) for row in rows),
+        "total_tokens": sum(int(row["total_tokens"]) for row in rows),
+        "cached_tokens": sum(int(row["cached_tokens"]) for row in rows),
+    }
     for row in rows:
         row["total_cost"] = float(row["total_cost"])
-        row["cost_share"] = row["total_cost"] / total_cost if total_cost else 0.0
-    totals = {
-        "requests": total_requests,
-        "total_cost": total_cost,
-        "total_tokens": total_tokens,
-        "cached_tokens": cached_tokens,
-    }
+        row["cost_share"] = row["total_cost"] / totals["total_cost"] if totals["total_cost"] else 0.0
     return rows, totals
 
 

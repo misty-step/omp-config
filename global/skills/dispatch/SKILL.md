@@ -79,18 +79,15 @@ Use `high` as the minimum reasoning level for substantive work.
 Treat every listed favorite as capable of every role.
 Use role order to express preference, not exclusivity.
 
-Two OpenRouter routes are the primary workhorses for dispatched work:
+Subscription capacity carries dispatched work. The only OpenRouter model
+permitted in an agent ladder is
+`openrouter/deepseek/deepseek-v4-flash-0731:high`.
 
-1. `openrouter/openai/gpt-5.6-luna:xhigh` — deep-reasoning workhorse.
-2. `openrouter/deepseek/deepseek-v4-flash-0731:high` — fast bulk workhorse.
-
-OpenRouter spend is accepted. It preserves premium subscription tokens
-(GPT-5.6 Sol, Claude Fable 5, Claude Opus 5, and other subscription quotas).
-Premium subscription routes remain in every ladder as escalation and
-availability fallbacks, not as the normal route.
-`researcher`, `qa-master`, and `qa-persona` lead with DeepSeek V4 Flash 0731.
-All other agents lead with GPT-5.6 Luna `xhigh` except `designer`, which leads with Kimi K3.
-Kimi K3 stays primary only for `designer`; it spends no premium quota.
+`architect`, `builder`, `verifier`, and `sculptor` lead with subscriptions and
+end at DeepSeek. `researcher`, `qa-master`, and `qa-persona` lead with DeepSeek
+because they run high request volume. `designer` leads with Kimi K3.
+Every ladder keeps several subscription providers so one provider outage
+cannot strand an agent.
 
 Use GPT-5.6 Luna `medium` for `commit`, `smol`, and `tiny`.
 DeepSeek must use `openrouter/deepseek/deepseek-v4-flash-0731:high`.

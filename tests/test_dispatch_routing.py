@@ -110,14 +110,17 @@ class DispatchRoutingTests(unittest.TestCase):
         self.assertEqual(ladders["architect"][0], "openai-codex/gpt-5.6-sol:max")
         self.assertEqual(ladders["designer"][0], "kimi-code/k3:max")
         for name, models in ladders.items():
-            self.assertTrue(
-                all(not model.startswith("openrouter/") or model == deepseek for model in models),
-                name,
-            )
+            openrouter = [model for model in models if model.startswith("openrouter/")]
+            self.assertEqual(openrouter, [deepseek], name)
+            self.assertEqual(len(models), len(set(models)), name)
+            providers = {model.split("/", 1)[0] for model in models}
+            self.assertGreaterEqual(len(providers), 4, name)
             if name in deep_reasoning:
                 self.assertEqual(models[-1], deepseek, name)
+                self.assertNotEqual(models[0], deepseek, name)
             if name in high_volume:
                 self.assertEqual(models[0], deepseek, name)
+                self.assertNotEqual(models[-1], deepseek, name)
 
     def test_every_scenario_names_a_catalog_agent(self) -> None:
         for scenario in self.fixture["scenarios"]:
