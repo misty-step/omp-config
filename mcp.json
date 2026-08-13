@@ -1,0 +1,25 @@
+{
+  "$schema": "https://raw.githubusercontent.com/can1357/oh-my-pi/main/packages/coding-agent/src/config/mcp-schema.json",
+  "mcpServers": {
+    "parallel-search": {
+      "type": "http",
+      "url": "https://search.parallel.ai/mcp"
+    },
+    "openrouter": {
+      "type": "http",
+      "url": "https://mcp.openrouter.ai/mcp"
+    }
+  },
+  "disabledServers": [
+    "canary",
+    "chrome-devtools",
+    "computer-use",
+    "crucible",
+    "monologue",
+    "node_repl",
+    "openaiDeveloperDocs",
+    "overmind",
+    "pencil",
+    "qmd"
+  ]
+}

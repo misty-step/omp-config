@@ -1,0 +1,12 @@
+/*
+!/.gitignore
+!/install
+!/AGENTS.md
+!/RULES.md
+!/config.yml
+!/mcp.json
+!/models.yml
+!/skills/
+/skills/*
+!/skills/model-research/
+!/skills/model-research/**
