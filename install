@@ -12,9 +12,13 @@ for source in \
   AGENTS.md \
   RULES.md \
   mcp.json \
+  skills/exa-ai/SKILL.md \
+  skills/foundation/SKILL.md \
+  skills/herdr/SKILL.md \
   skills/model-research/SKILL.md \
   skills/model-research/references/evidence.md \
-  skills/model-research/references/roles.md
+  skills/model-research/references/roles.md \
+  skills/thermo-nuclear-code-quality-review/SKILL.md
 do
   [ -s "$repo_dir/$source" ] || {
     printf 'Missing or empty source: %s\n' "$source" >&2
@@ -59,10 +63,20 @@ else
   install -m 600 "$repo_dir/mcp.json" "$mcp_target"
 fi
 
-skill_target="$agent_dir/skills/model-research"
-rm -rf -- "$skill_target"
-install -d -m 700 "$skill_target/references"
-install -m 600 "$repo_dir/skills/model-research/SKILL.md" "$skill_target/SKILL.md"
-install -m 600 "$repo_dir/skills/model-research/references/"*.md "$skill_target/references/"
+for skill in \
+  exa-ai \
+  foundation \
+  herdr \
+  model-research \
+  thermo-nuclear-code-quality-review
+do
+  skill_target="$agent_dir/skills/$skill"
+  rm -rf -- "$skill_target"
+  install -d -m 700 "$skill_target"
+  install -m 600 "$repo_dir/skills/$skill/SKILL.md" "$skill_target/SKILL.md"
+done
+
+install -d -m 700 "$agent_dir/skills/model-research/references"
+install -m 600 "$repo_dir/skills/model-research/references/"*.md "$agent_dir/skills/model-research/references/"
 
 printf 'Installed lean OMP config in %s\n' "$agent_dir"

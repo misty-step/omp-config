@@ -8,5 +8,13 @@
 !/models.yml
 !/skills/
 /skills/*
+!/skills/exa-ai/
+!/skills/exa-ai/**
+!/skills/foundation/
+!/skills/foundation/**
+!/skills/herdr/
+!/skills/herdr/**
 !/skills/model-research/
 !/skills/model-research/**
+!/skills/thermo-nuclear-code-quality-review/
+!/skills/thermo-nuclear-code-quality-review/**
