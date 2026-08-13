@@ -55,12 +55,12 @@ Respect `task.maxConcurrency`.
 | Outcome | Skills to name beyond the kit | Native agent |
 |---|---|---|
 | implementation and delivery | `deliver`, `ci`, `sprites`, `refactor`, `verification` | `builder`; `verifier` proves |
-| product and infrastructure operation | `foundation`, `factory-apps`, `estate-infrastructure`, `using-exe-dev`, `document`, `showcase` | `builder`; `verifier` proves |
+| product and infrastructure operation | `foundation`, `factory-apps`, `estate-infrastructure`, `using-exe-dev`, `herdr`, `document`, `showcase` | `builder`; `verifier` proves |
 | harness and architecture | `harness-engineering`, `mcp-design` | `architect` or `builder` |
 | independent review | `verify`, `verify-live`, `code-review`, `autoreview`, `thermo-nuclear-review`, `thermo-nuclear-code-quality-review`, `review-tests`, `review-security`, `review-vision` | `verifier` |
 | multi-lane audits and quality programs | `quality` | chief dispatches selected domain lanes |
 | skill and decision evaluation | `skill-eval`, `eval-design` | chief dispatches `verifier` or `architect` |
-| evidence synthesis | `research`, `capability-confidence` | `researcher` |
+| evidence synthesis | `research`, `exa-ai`, `firecrawl`, `capability-confidence` | `researcher` |
 | communication shaping | `comms` | chief or owning agent |
 | product and interface design | `design`, `improve-ui`, `baseline-ui`, `prototype` | `designer` |
 | product direction | `groom`, `vision`, `wayfinder` | chief; dispatch designer/researcher/architect as needed |
@@ -73,7 +73,7 @@ Respect `task.maxConcurrency`.
 
 Use LSP for symbol intelligence.
 Use browser or `agent-browser` for rendered behavior.
-Use `exa-mint` and `firecrawl-mint` for research acquisition.
+Use `exa-search` / `exa-fetch` and `firecrawl-mint` for research acquisition.
 Use `parallel-search` as additional web search when useful.
 Follow `mcp-pruning.md` for every other MCP.
 Use Mint for credentialed vendor calls.

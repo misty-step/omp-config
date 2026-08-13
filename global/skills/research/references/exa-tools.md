@@ -4,28 +4,20 @@ Exa finds and ranks technical sources. Use it for discovery. Use Firecrawl to ex
 
 ## Access
 
-OMP server: `exa-mint` in `global/mcp.json`.
+CLI: `exa-search` and `exa-fetch` (symlinked to `global/skills/research/scripts/exa_tools.py`).
 
-Bridge: `global/skills/research/scripts/exa_mcp_stdio.py`  
-Mint MCP proxy: `http://mint.tail5f5eb4.ts.net:4949/proxy/https/mcp.exa.ai/mcp`  
 REST proxy: `http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.exa.ai`  
 Marker: `x-api-key: __mint.exa.default__`
 
 Never set a raw `EXA_API_KEY` in an agent environment.
 
-## MCP tools
-
-- `web_search_exa` — broad web and technical search
-- `web_fetch_exa` — fetch known URLs when Firecrawl is unavailable
-
-## CLI and REST fallback
+## CLI and REST
 
 Script: `global/skills/research/scripts/exa_tools.py`
 
 ```bash
-SCRIPT="${HOME}/.omp/agent/skills/research/scripts/exa_tools.py"
-python3 "$SCRIPT" exa-search --num 5 "YOUR QUERY"
-python3 "$SCRIPT" exa-fetch --chars 2000 https://example.com/page
+exa-search --num 5 "YOUR QUERY"
+exa-fetch --chars 2000 https://example.com/page
 ```
 
 ```bash
@@ -82,4 +74,4 @@ curl -s http://mint.tail5f5eb4.ts.net:4949/proxy/https/api.exa.ai/findSimilar \
 
 - Cite every Exa URL you use.
 - Treat snippets as leads. Extract the page when the claim matters.
-- Provider chain: Exa MCP → script/REST → Parallel Search.
+- Provider chain: Exa CLI/REST → Parallel Search.

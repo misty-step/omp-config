@@ -28,8 +28,8 @@ Complete acquisition when every consequential claim has direct support or an exp
 
 | Need | Prefer | Fallback |
 |---|---|---|
-| Discover technical pages, papers, code | Exa MCP (`exa-mint`) | `exa-search` / Parallel Search |
-| Fetch known URLs into clean text | Firecrawl scrape (`firecrawl-mint`) | Exa fetch |
+| Discover technical pages, papers, code | `exa-search` CLI / REST | Parallel Search |
+| Fetch known URLs into clean text | Firecrawl scrape (`firecrawl-mint`) | `exa-fetch` CLI |
 | Map or crawl a docs site | Firecrawl map / crawl | selective Exa fetch |
 | Broad web search | Exa or Parallel Search | Firecrawl search |
 | Local office/PDF/CSV to markdown | `anydoc` CLI | hosted Firecrawl Parse (OCR only, operator OK) |

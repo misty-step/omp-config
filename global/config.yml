@@ -10,9 +10,6 @@ modelRoles:
   default: openai-codex/gpt-5.6-sol:high
   designer: openai-codex/gpt-5.6-sol:max
 disabledProviders: 
-  - ollama
-  - llama.cpp
-  - lm-studio
   - claude-plugins
   - claude
   - codex

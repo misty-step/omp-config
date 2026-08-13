@@ -168,3 +168,56 @@ Include erasure in every critic brief. Ask: “What can be deleted while preserv
 - Break the reusable workflow JSON-string contract while changing the repository caller workflow.
 - Describe an adapter dimension incorrectly or omit a retained adapter from the README table.
 - Erasure failure: add benchmark infrastructure or compatibility code instead of deleting the redundant adapter and reusing the existing report contract.
+
+## Agent platform tool skills (2026-08-13)
+
+- Duplicate Exa or Firecrawl procedures outside `/research`, then let routes, bounds, or Mint markers drift.
+- Put raw vendor keys in skill text, commands, environments, logs, or child prompts instead of Mint markers.
+- Treat Herdr terminal ownership as an agent-composition or acceptance system that it does not provide.
+- Guess an unidentified vendor name and configure the wrong service.
+- Add a wrapper, MCP route, or helper where a thin skill pointer or native CLI already supplies the capability.
+- Claim a skill is configured without proving OMP discovery and the real command or protocol surface.
+- Erasure failure: retain copied NEN guidance after the OMP-native canonical reference owns the same behavior.
+
+## Nen multipass credential setup (2026-08-13)
+
+- Pass an undefined label or description into pi-tui `SelectList`, causing `visibleWidth` to crash.
+- Rename only the visible command while stale `multikey` registrations, tests, or docs remain.
+- Show pool management without a guided first-run path for an empty or partially configured credential pool.
+- Overwrite existing account credentials while repairing setup or tests.
+- Test helper output without exercising the real command registration and rendered selection data.
+- Add a wizard framework, compatibility alias, or fallback instead of one direct guided setup flow.
+- Erasure failure: retain obsolete `multikey` names, dead menu states, or redundant prompt helpers after the clean cutover.
+
+## Iron Forest declaration-profile simplification (2026-08-13)
+
+- Keep Mint-specific syntax, names, docs, fixtures, or validation instead of treating environment values as opaque strings.
+- Remove Mint wording while retaining a Mint-shaped grammar or rewrite path under a generic name.
+- Delete profile safeguards that protect credentials, path containment, file types, cancellation, or executable modes.
+- Add helpers, modes, flags, aliases, or fallbacks instead of shortening the canonical profile composition path.
+- Change profile precedence, host-profile seeding, reserved-key rejection, evidence output, or cleanup behavior during simplification.
+- Claim shrink from moved code or deleted tests without a measured net line and AST-node reduction.
+- Erasure failure: leave dead Mint examples, tests, ADR claims, regexes, imports, fields, or code paths after cutover.
+
+## OMP configuration repository retirement (2026-08-13)
+
+- Restore three backed-up files while leaving any repository projection symlink active.
+- Delete a parent directory and remove cotenant runtime state beside a projected link.
+- Write through a symlink and modify the archival repository instead of the local OMP surface.
+- Archive GitHub before the final archival commit and issue evidence are published.
+- Lose dirty workspace content while creating the archival tip.
+- Leave an executable installer that can project this archive into a live OMP configuration.
+- Claim factory defaults when the evidence proves only the pre-install local state.
+- Erasure failure: add an archival deployment system, compatibility path, or second configuration source.
+
+## Cantrip post-processing model cutover and label leakage (2026-08-13)
+
+- Change only repository defaults while the live user config keeps the old model.
+- Assume a newly announced OpenRouter model slug without proving catalog availability and a real completion.
+- Strip ordinary dictated text that happens to begin with “clean transcript” rather than only a model-added label boundary.
+- Fix one response path while multi-pass cleanup or tagged output can still leak the same label.
+- Hide unexpected model output with broad parsing that can delete speaker content.
+- Update prompt wording without preserving the output sanitizer as a provider-independent defense.
+- Trust daemon logs alone even though transcript content is intentionally absent there; inspect the linked private archive.
+- Restart a stale installed binary or omit a real dictation smoke check after configuration reload.
+- Erasure failure: add a response-schema abstraction or provider branch when one narrow normalization rule preserves behavior.

@@ -8,7 +8,6 @@ Do not re-enable them from a skill or workflow.
 
 | Server | Role |
 |---|---|
-| `exa-mint` | Exa discovery through Mint |
 | `firecrawl-mint` | Firecrawl scrape, map, crawl, search through Mint REST |
 | `parallel-search` | Parallel web search MCP |
 

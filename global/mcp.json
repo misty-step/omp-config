@@ -5,28 +5,10 @@
       "type": "http",
       "url": "https://search.parallel.ai/mcp"
     },
-    "exa-mint": {
-      "type": "stdio",
-      "command": "${HOME}/.omp/agent/skills/research/scripts/exa_mcp_stdio.py",
-      "timeout": 120000
-    },
     "firecrawl-mint": {
       "type": "stdio",
       "command": "${HOME}/.omp/agent/skills/research/scripts/firecrawl_mcp_stdio.py",
       "timeout": 180000
-    },
-    "amos": {
-      "type": "stdio",
-      "command": "${HOME}/Development/amos-mcp/amos_mcp_stdio.py",
-      "env": {
-        "HERMES_BIN": "${HOME}/.local/bin/hermes",
-        "HERMES_HOME": "${HOME}/.hermes/profiles/amos",
-        "AMOS_REPLY_DIR": "${HOME}/.hermes/profiles/amos/amos-replies",
-        "AMOS_OPERATOR_IDS": "406257347883827201",
-        "AMOS_ASK_CHANNEL": "discord",
-        "AMOS_NOTIFY_CHANNEL": "discord:#operations"
-      },
-      "timeout": 4200000
     }
   },
   "disabledServers": [

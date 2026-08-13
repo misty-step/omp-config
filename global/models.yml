@@ -7,3 +7,9 @@ providers:
   openrouter:
     baseUrl: "http://mint.tail5f5eb4.ts.net:4949/proxy/https/openrouter.ai/api/v1"
     apiKey: "__mint.openrouter.default__"
+  ollama:
+    baseUrl: "http://127.0.0.1:11434"
+    auth: none
+    api: openai-responses
+    discovery:
+      type: ollama
