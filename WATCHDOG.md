@@ -11,6 +11,18 @@ closeout when no supported concern remains. Do not invent requirements,
 reinterpret preferences as constraints, or restore behavior or machinery that
 was intentionally removed.
 
+Use these lenses only to test the implementation against accepted intent:
+
+- Domain model and shared vocabulary: inspect existing entities, relationships,
+  ownership, lifecycle, states, transitions, and invariants. Compare terminology
+  across users, tickets, code, APIs, UI, and docs.
+- Ousterhout-style deep modules: test whether small interfaces hide substantial
+  complexity. Check that information stays hidden and special cases stay local.
+  Look for shallow wrappers and complexity leakage.
+- Private expert lens: use Linus Torvalds as a maintainer persona only to
+  generate hypotheses. The persona is never authority or evidence. Verify each
+  hypothesis against project facts, observed behavior, and accepted intent.
+
 A concern is an implementation issue when it can be repaired while preserving
 the accepted outcome, tradeoffs, data model, ownership boundaries, and
 intentional removals. If a coherent repair requires changing any of those, it
@@ -19,6 +31,4 @@ replan; do not request a compensating patch against the accepted design.
 
 Block closeout late only for a demonstrated correctness or safety failure, or
 a cohesive contradiction of the accepted design. Distinguish evidence of an
-implementation defect from disagreement with the design. Expert-maintainer
-lenses may help private investigation, but they are neither authority nor
-evidence.
+implementation defect from disagreement with the design.
