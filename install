@@ -14,11 +14,21 @@ for source in \
   mcp.json \
   skills/exa-ai/SKILL.md \
   skills/foundation/SKILL.md \
+  skills/frontend-design/SKILL.md \
+  skills/frontend-design/LICENSE.txt \
+  skills/grill-me/SKILL.md \
+  skills/grill-me/LICENSE.txt \
   skills/herdr/SKILL.md \
+  skills/improve-codebase-architecture/SKILL.md \
+  skills/improve-codebase-architecture/HTML-REPORT.md \
+  skills/improve-codebase-architecture/LICENSE.txt \
   skills/model-research/SKILL.md \
-  skills/model-research/references/evidence.md \
-  skills/model-research/references/roles.md \
-  skills/thermo-nuclear-code-quality-review/SKILL.md
+  skills/prototype/SKILL.md \
+  skills/prototype/LOGIC.md \
+  skills/prototype/UI.md \
+  skills/prototype/LICENSE.txt \
+  skills/thermo-nuclear-code-quality-review/SKILL.md \
+  skills/tidy/SKILL.md
 do
   [ -s "$repo_dir/$source" ] || {
     printf 'Missing or empty source: %s\n' "$source" >&2
@@ -66,9 +76,14 @@ fi
 for skill in \
   exa-ai \
   foundation \
+  frontend-design \
+  grill-me \
   herdr \
+  improve-codebase-architecture \
   model-research \
-  thermo-nuclear-code-quality-review
+  prototype \
+  thermo-nuclear-code-quality-review \
+  tidy
 do
   skill_target="$agent_dir/skills/$skill"
   rm -rf -- "$skill_target"
@@ -76,7 +91,12 @@ do
   install -m 600 "$repo_dir/skills/$skill/SKILL.md" "$skill_target/SKILL.md"
 done
 
-install -d -m 700 "$agent_dir/skills/model-research/references"
-install -m 600 "$repo_dir/skills/model-research/references/"*.md "$agent_dir/skills/model-research/references/"
+install -m 600 "$repo_dir/skills/frontend-design/LICENSE.txt" "$agent_dir/skills/frontend-design/LICENSE.txt"
+install -m 600 "$repo_dir/skills/grill-me/LICENSE.txt" "$agent_dir/skills/grill-me/LICENSE.txt"
+install -m 600 "$repo_dir/skills/improve-codebase-architecture/LICENSE.txt" "$agent_dir/skills/improve-codebase-architecture/LICENSE.txt"
+install -m 600 "$repo_dir/skills/improve-codebase-architecture/HTML-REPORT.md" "$agent_dir/skills/improve-codebase-architecture/HTML-REPORT.md"
+install -m 600 "$repo_dir/skills/prototype/LICENSE.txt" "$agent_dir/skills/prototype/LICENSE.txt"
+install -m 600 "$repo_dir/skills/prototype/LOGIC.md" "$agent_dir/skills/prototype/LOGIC.md"
+install -m 600 "$repo_dir/skills/prototype/UI.md" "$agent_dir/skills/prototype/UI.md"
 
 printf 'Installed lean OMP config in %s\n' "$agent_dir"
