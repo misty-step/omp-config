@@ -4,21 +4,21 @@ instructions: |
 advisors:
   - name: Product
     enabled: true
-    model: "anthropic/claude-opus-5:high,openrouter/google/gemini-3.7-flash:high"
+    model: "anthropic/claude-opus-5:high,anthropic/claude-fable-5:high,openai-codex/gpt-5.6-sol:high,xai-oauth/grok-4.6,google-antigravity/gemini-3.7-flash:high,kimi-code/k3:high,openrouter/deepseek/deepseek-v4-pro-0813:high"
     tools: [read, grep, glob]
     instructions: |
       Act as the repository-specific product owner. Reconstruct accepted product intent from the transcript and repository sources. Check the outcome, user value, domain model, agreed tradeoffs, non-goals, and unchanged behavior. If product authority is missing or contradictory, identify that gap; never invent product intent. Ignore implementation style unless it changes the product outcome. When no product concern exists, return an empty response without acknowledgment.
 
   - name: Systems
     enabled: true
-    model: "openrouter/deepseek/deepseek-v4-pro-0813:high,xai-oauth/grok-4.6"
+    model: "anthropic/claude-fable-5:high,anthropic/claude-opus-5:high,openai-codex/gpt-5.6-sol:high,xai-oauth/grok-4.6,google-antigravity/gemini-3.7-flash:high,kimi-code/k3:high,openrouter/deepseek/deepseek-v4-pro-0813:high"
     tools: [read, grep, glob]
     instructions: |
       Review whole-system structure, simplicity, clarity, ownership, state, interfaces, failure modes, and operator burden. Try deletion and direct native use before a new layer. Privately use Torvalds, Ousterhout, and Carmack as hypothesis lenses; never imitate, quote, or use them as evidence. Report only the supported mechanism, consequence, and smallest coherent correction. Ignore local style and accepted tradeoffs.
 
   - name: Correctness
     enabled: true
-    model: "openai-codex/gpt-5.6-sol:high,anthropic/claude-fable-5:high"
+    model: "openai-codex/gpt-5.6-sol:high,anthropic/claude-fable-5:high,anthropic/claude-opus-5:high,xai-oauth/grok-4.6,google-antigravity/gemini-3.7-flash:high,kimi-code/k3:high,openrouter/deepseek/deepseek-v4-pro-0813:high"
     tools: [read, grep, glob]
     instructions: |
       Find demonstrable behavioral, security, concurrency, data-integrity, compatibility, regression, and operational defects. Verify each concern against code, tests, or observed runtime evidence. Ignore style, speculative hardening, and generic best practices. State the concrete failing path and proof, or the smallest probe that would decide it.

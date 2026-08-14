@@ -8,6 +8,9 @@
 !/config.yml
 !/mcp.json
 !/models.yml
+!/.omp/
+/.omp/*
+!/.omp/WATCHDOG.yml
 !/.agents/
 /.agents/*
 !/.agents/skills/
