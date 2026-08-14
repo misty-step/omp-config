@@ -1,14 +1,22 @@
 modelRoles: 
   default: openai-codex/gpt-5.6-sol:high
   slow: openai-codex/gpt-5.6-sol:max
-  plan: openai-codex/gpt-5.6-sol:max
-  advisor: openai-codex/gpt-5.6-sol:high
+  plan: "@slow"
+  advisor: "@default"
   task: google-antigravity/gemini-3.7-flash:high
-  designer: openai-codex/gpt-5.6-sol:max
+  designer: "@slow"
   vision: openrouter/google/gemini-3.7-flash:high
-  smol: openai-codex/gpt-5.6-luna:max
-  tiny: openai-codex/gpt-5.6-luna:max
-  commit: openai-codex/gpt-5.6-luna:max
+  smol: openai-codex/gpt-5.6-luna:high
+  tiny: "@smol"
+  commit: "@smol"
+enabledModels:
+  - openai-codex/gpt-5.6-sol
+  - openai-codex/gpt-5.6-luna
+  - google-antigravity/gemini-3.7-flash
+  - anthropic/claude-fable-5
+  - openrouter/deepseek/deepseek-v4-pro-0813
+  - openrouter/~deepseek/deepseek-v4-flash-latest
+  - openrouter/google/gemini-3.7-flash
 symbolPreset: nerd
 theme: 
   dark: titanium
@@ -16,83 +24,28 @@ theme:
 setupVersion: 1
 skills: 
   enableAgentsUser: true
+github:
+  enabled: true
+secrets:
+  enabled: true
 advisor: 
   enabled: true
-dev: 
-  autoqaConsent: granted
 providers:
+  tinyModel: lfm2-350m
   webSearchOrder:
     - exa
-retry: 
-  fallbackChains: 
-    default: 
+retry:
+  fallbackChains:
+    openai-codex/gpt-5.6-sol:
       - anthropic/claude-fable-5:max
-      - xai-oauth/grok-4.6
-      - kimi-code/k3:max
       - openrouter/deepseek/deepseek-v4-pro-0813:max
-      - openrouter/~deepseek/deepseek-v4-flash-latest:max
-    slow: 
-      - anthropic/claude-fable-5:max
-      - xai-oauth/grok-4.6
-      - kimi-code/k3:max
-      - openrouter/deepseek/deepseek-v4-pro-0813:max
-      - openrouter/~deepseek/deepseek-v4-flash-latest:max
-    plan: 
-      - anthropic/claude-fable-5:max
-      - xai-oauth/grok-4.6
-      - kimi-code/k3:max
-      - openrouter/deepseek/deepseek-v4-pro-0813:max
-      - openrouter/~deepseek/deepseek-v4-flash-latest:max
-    advisor: 
-      - anthropic/claude-fable-5:max
-      - xai-oauth/grok-4.6
-      - kimi-code/k3:max
-      - openrouter/deepseek/deepseek-v4-pro-0813:max
-      - openrouter/~deepseek/deepseek-v4-flash-latest:max
-    task: 
-      - openai-codex/gpt-5.6-sol:max
-      - anthropic/claude-fable-5:max
-      - xai-oauth/grok-4.6
-      - kimi-code/k3:max
-      - openrouter/deepseek/deepseek-v4-pro-0813:max
-      - openrouter/~deepseek/deepseek-v4-flash-latest:max
-    designer: 
-      - anthropic/claude-fable-5:max
-      - xai-oauth/grok-4.6
-      - kimi-code/k3:max
-      - openrouter/google/gemini-3.7-flash:high
-    vision: 
-      - kimi-code/k3:high
-      - anthropic/claude-fable-5:high
-      - xai-oauth/grok-4.6
+    google-antigravity/gemini-3.7-flash:
       - openai-codex/gpt-5.6-sol:high
-      - openrouter/moonshotai/kimi-k3:high
-    smol: 
-      - anthropic/claude-fable-5:max
-      - xai-oauth/grok-4.6
-      - kimi-code/k3:max
       - openrouter/deepseek/deepseek-v4-pro-0813:max
+    openai-codex/gpt-5.6-luna:
+      - google-antigravity/gemini-3.7-flash:high
       - openrouter/~deepseek/deepseek-v4-flash-latest:max
-    tiny: 
-      - anthropic/claude-fable-5:max
-      - xai-oauth/grok-4.6
-      - kimi-code/k3:max
-      - openrouter/google/gemini-3.5-flash-lite:high
-      - openrouter/deepseek/deepseek-v4-pro-0813:max
-      - openrouter/~deepseek/deepseek-v4-flash-latest:max
-    commit: 
-      - anthropic/claude-fable-5:max
-      - xai-oauth/grok-4.6
-      - kimi-code/k3:max
-      - openrouter/deepseek/deepseek-v4-pro-0813:max
-      - openrouter/~deepseek/deepseek-v4-flash-latest:max
-task: 
-  agentModelOverrides: 
-    scout: "@smol,anthropic/claude-fable-5:max,xai-oauth/grok-4.6,kimi-code/k3:max,openrouter/deepseek/deepseek-v4-pro-0813:max,openrouter/~deepseek/deepseek-v4-flash-latest:max"
-    librarian: "@smol,anthropic/claude-fable-5:max,xai-oauth/grok-4.6,kimi-code/k3:max,openrouter/deepseek/deepseek-v4-pro-0813:max,openrouter/~deepseek/deepseek-v4-flash-latest:max"
-    sonic: "@smol,anthropic/claude-fable-5:max,xai-oauth/grok-4.6,kimi-code/k3:max,openrouter/deepseek/deepseek-v4-pro-0813:max,openrouter/~deepseek/deepseek-v4-flash-latest:max"
-    reviewer: "@slow,anthropic/claude-fable-5:max,xai-oauth/grok-4.6,kimi-code/k3:max,openrouter/deepseek/deepseek-v4-pro-0813:max,openrouter/~deepseek/deepseek-v4-flash-latest:max"
-    task: "@task,openai-codex/gpt-5.6-sol:max,anthropic/claude-fable-5:max,xai-oauth/grok-4.6,kimi-code/k3:max,openrouter/deepseek/deepseek-v4-pro-0813:max,openrouter/~deepseek/deepseek-v4-flash-latest:max"
-    init: "@task,openai-codex/gpt-5.6-sol:max,anthropic/claude-fable-5:max,xai-oauth/grok-4.6,kimi-code/k3:max,openrouter/deepseek/deepseek-v4-pro-0813:max,openrouter/~deepseek/deepseek-v4-flash-latest:max"
-    designer: "@designer,anthropic/claude-fable-5:max,xai-oauth/grok-4.6,kimi-code/k3:max,openrouter/google/gemini-3.7-flash:high"
-    security-reviewer: "openai-codex/gpt-5.6-sol:max,anthropic/claude-fable-5:max,xai-oauth/grok-4.6,kimi-code/k3:max,openrouter/deepseek/deepseek-v4-pro-0813:max,openrouter/~deepseek/deepseek-v4-flash-latest:max"
+task:
+  enableLsp: true
+  agentModelOverrides:
+    security-reviewer: "@slow"
