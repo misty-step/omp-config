@@ -3,7 +3,7 @@ modelRoles:
   slow: openai-codex/gpt-5.6-sol:max
   plan: openai-codex/gpt-5.6-sol:max
   advisor: openai-codex/gpt-5.6-sol:max
-  task: openai-codex/gpt-5.6-sol:max
+  task: google-antigravity/gemini-3.7-flash:high
   designer: openai-codex/gpt-5.6-sol:max
   vision: openrouter/google/gemini-3.7-flash:high
   smol: openai-codex/gpt-5.6-luna:max
@@ -20,6 +20,9 @@ advisor:
   enabled: true
 dev: 
   autoqaConsent: granted
+providers:
+  webSearchOrder:
+    - exa
 retry: 
   fallbackChains: 
     default: 
@@ -47,6 +50,7 @@ retry:
       - openrouter/deepseek/deepseek-v4-pro-0813:high
       - openrouter/~deepseek/deepseek-v4-flash-latest:max
     task: 
+      - openai-codex/gpt-5.6-sol:max
       - anthropic/claude-fable-5:max
       - xai-oauth/grok-4.6
       - kimi-code/k3:max
@@ -88,7 +92,7 @@ task:
     librarian: "@smol,anthropic/claude-fable-5:max,xai-oauth/grok-4.6,kimi-code/k3:max,openrouter/deepseek/deepseek-v4-pro-0813:high,openrouter/~deepseek/deepseek-v4-flash-latest:max"
     sonic: "@smol,anthropic/claude-fable-5:max,xai-oauth/grok-4.6,kimi-code/k3:max,openrouter/deepseek/deepseek-v4-pro-0813:high,openrouter/~deepseek/deepseek-v4-flash-latest:max"
     reviewer: "@slow,anthropic/claude-fable-5:max,xai-oauth/grok-4.6,kimi-code/k3:max,openrouter/deepseek/deepseek-v4-pro-0813:high,openrouter/~deepseek/deepseek-v4-flash-latest:max"
-    task: "@task,anthropic/claude-fable-5:max,xai-oauth/grok-4.6,kimi-code/k3:max,openrouter/deepseek/deepseek-v4-pro-0813:high,openrouter/~deepseek/deepseek-v4-flash-latest:max"
-    init: "@task,anthropic/claude-fable-5:max,xai-oauth/grok-4.6,kimi-code/k3:max,openrouter/deepseek/deepseek-v4-pro-0813:high,openrouter/~deepseek/deepseek-v4-flash-latest:max"
+    task: "@task,openai-codex/gpt-5.6-sol:max,anthropic/claude-fable-5:max,xai-oauth/grok-4.6,kimi-code/k3:max,openrouter/deepseek/deepseek-v4-pro-0813:high,openrouter/~deepseek/deepseek-v4-flash-latest:max"
+    init: "@task,openai-codex/gpt-5.6-sol:max,anthropic/claude-fable-5:max,xai-oauth/grok-4.6,kimi-code/k3:max,openrouter/deepseek/deepseek-v4-pro-0813:high,openrouter/~deepseek/deepseek-v4-flash-latest:max"
     designer: "@designer,anthropic/claude-fable-5:max,xai-oauth/grok-4.6,kimi-code/k3:max,openrouter/google/gemini-3.7-flash:high"
     security-reviewer: "openai-codex/gpt-5.6-sol:max,anthropic/claude-fable-5:max,xai-oauth/grok-4.6,kimi-code/k3:max,openrouter/deepseek/deepseek-v4-pro-0813:high,openrouter/~deepseek/deepseek-v4-flash-latest:max"
