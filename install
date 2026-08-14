@@ -50,6 +50,10 @@ for file in config.yml models.yml AGENTS.md RULES.md WATCHDOG.md WATCHDOG.yml; d
   install -m 600 "$repo_dir/$file" "$agent_dir/$file"
 done
 
+if [ -d "$repo_dir/../omp-config" ] && [ ! -e "$repo_dir/../AGENTS.md" ]; then
+  ln -sf omp-config/AGENTS.md "$repo_dir/../AGENTS.md"
+fi
+
 mcp_target="$agent_dir/mcp.json"
 if [ -f "$mcp_target" ]; then
   temp=$(mktemp "$agent_dir/.mcp.json.XXXXXX")
