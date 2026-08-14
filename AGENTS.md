@@ -29,13 +29,17 @@ Before you implement a subsystem, sketch a direct design and a deletion design. 
 
 ## Premise gate
 
-Before production implementation, record:
+Before non-trivial production implementation, record:
 
 - The required outcome and the accountable person or binding evidence source.
 - The observed problem and baseline measurement.
 - The part, process, or requirement that can be deleted.
 - The cheapest experiment that can falsify the proposed mechanism.
-- The whole-system success measure, stop criterion, unchanged behavior, and unchanged invariants.
+- The whole-system success measure and stop criterion.
+- When the ticket or conversation does not already settle them, a short
+  plain-language working interpretation of the intended design, accepted
+  tradeoffs, intentional behavior changes or removals, non-goals, and the
+  behavior and invariants that must remain unchanged.
 
 Return the work to refinement when evidence invalidates the mechanism. Do not use implementation momentum as a reason to continue.
 

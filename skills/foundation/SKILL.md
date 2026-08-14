@@ -47,7 +47,7 @@ Default to the current repository unless the invocation names another target.
 Keep one repository or coherent project boundary per run.
 
 Inspect before interviewing. Establish observed facts and unresolved questions
-across all four domains:
+across these areas:
 
 ### Product and users
 
@@ -57,10 +57,25 @@ across all four domains:
 - Current product truth: README, vision, screenshots, demos, documentation,
   user feedback, and deployed surfaces where applicable.
 
+### Domain and language
+
+- Reconstruct the project's philosophy and domain model before recommending
+  code structure: core concepts, data structures and relationships, authority,
+  lifetimes, transitions, and invariants.
+- Audit names across user and operator language, tickets, code, APIs, UI, and
+  docs. Treat each name as a model claim about the thing, its role, or its
+  owner.
+- Find overloaded terms, synonyms, misleading ownership, implementation
+  language that obscures the domain, and names left by retired architecture.
+  Distinguish current domain truth from historical residue and unresolved
+  ambiguity.
+- Use DDD to investigate the existing model, not as permission to invent
+  aggregates, repositories, factories, or taxonomy.
+
 ### Architecture and interfaces
 
-- Domain core, ownership boundaries, data model, dependencies, and technology
-  constraints.
+- Existing code structure, ownership boundaries, dependencies, and technology
+  constraints; where these support or contradict the observed domain model.
 - Existing API, CLI, UI, library, skill, MCP, SDK, event, or automation faces.
 - Which faces serve real users or integrations. Do not presume every project
   needs every face.

@@ -2,6 +2,7 @@
 !/.gitignore
 !/install
 !/AGENTS.md
+!/WATCHDOG.md
 !/RULES.md
 !/config.yml
 !/mcp.json
