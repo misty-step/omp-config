@@ -51,6 +51,12 @@ Present:
   ambiguity.
 - Use DDD to investigate the existing model, not as permission to invent
   aggregates, repositories, factories, or taxonomy.
+- Audit project-owned agent context. Ensure the Product advisor can locate the
+  product authority and accepted invariants. Prefer pointers from `AGENTS.md`
+  to existing sources over copied guidance. Add project `WATCHDOG.md`
+  priorities or a project skill only when a project-specific review risk or
+  repeated workflow requires one. Do not mirror global configuration or create
+  a project advisor roster by default.
 
 ```markdown
 ## Project profile

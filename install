@@ -12,6 +12,7 @@ for source in \
   AGENTS.md \
   RULES.md \
   WATCHDOG.md \
+  WATCHDOG.yml \
   mcp.json \
   skills/create-task/LICENSE \
   skills/create-task/SKILL.md \
@@ -45,7 +46,7 @@ if [ -f "$agent_dir/mcp.json" ]; then
 fi
 
 install -d -m 700 "$agent_dir"
-for file in config.yml models.yml AGENTS.md RULES.md WATCHDOG.md; do
+for file in config.yml models.yml AGENTS.md RULES.md WATCHDOG.md WATCHDOG.yml; do
   install -m 600 "$repo_dir/$file" "$agent_dir/$file"
 done
 

@@ -1,8 +1,8 @@
 modelRoles: 
-  default: openai-codex/gpt-5.6-sol:max
+  default: openai-codex/gpt-5.6-sol:high
   slow: openai-codex/gpt-5.6-sol:max
   plan: openai-codex/gpt-5.6-sol:max
-  advisor: openai-codex/gpt-5.6-sol:max
+  advisor: openai-codex/gpt-5.6-sol:high
   task: google-antigravity/gemini-3.7-flash:high
   designer: openai-codex/gpt-5.6-sol:max
   vision: openrouter/google/gemini-3.7-flash:high
