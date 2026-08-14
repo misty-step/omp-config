@@ -13,6 +13,8 @@ for source in \
   RULES.md \
   WATCHDOG.md \
   mcp.json \
+  skills/create-task/LICENSE \
+  skills/create-task/SKILL.md \
   skills/exa-ai/SKILL.md \
   skills/foundation/SKILL.md \
   skills/herdr/SKILL.md \
@@ -65,6 +67,7 @@ else
 fi
 
 for skill in \
+  create-task \
   exa-ai \
   foundation \
   herdr \
@@ -76,6 +79,8 @@ do
   install -d -m 700 "$skill_target"
   install -m 600 "$repo_dir/skills/$skill/SKILL.md" "$skill_target/SKILL.md"
 done
+
+install -m 600 "$repo_dir/skills/create-task/LICENSE" "$agent_dir/skills/create-task/LICENSE"
 
 install -d -m 700 "$agent_dir/skills/model-research/references"
 install -m 600 "$repo_dir/skills/model-research/references/"*.md "$agent_dir/skills/model-research/references/"

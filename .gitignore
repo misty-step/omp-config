@@ -9,6 +9,8 @@
 !/models.yml
 !/skills/
 /skills/*
+!/skills/create-task/
+!/skills/create-task/**
 !/skills/exa-ai/
 !/skills/exa-ai/**
 !/skills/foundation/
