@@ -6,6 +6,12 @@
 !/config.yml
 !/mcp.json
 !/models.yml
+!/.agents/
+/.agents/*
+!/.agents/skills/
+/.agents/skills/*
+!/.agents/skills/writing-for-agents/
+!/.agents/skills/writing-for-agents/**
 !/skills/
 /skills/*
 !/skills/exa-ai/
