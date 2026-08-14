@@ -26,12 +26,31 @@ Keep one project boundary. Establish:
 Absence is not a gap without a product need. Treat old documents and installed
 tools as evidence, not authority. Verify consequential runtime claims.
 
-Settle facts with tools. Use `grill-me` only for material operator judgments
-about ambition, users, compatibility, burden, or tradeoffs.
+Inspect before interviewing. Establish observed facts and unresolved questions
+across these areas. Settle facts with tools. Use `grill-me` only for material
+operator judgments about ambition, users, compatibility, burden, or tradeoffs.
 
 ## Profile
 
 Present:
+
+- Purpose, users, primary jobs, project stage, and success criteria.
+- Public, private, internal, experimental, library, service, CLI, web, or mixed
+  distribution.
+- Current product truth: README, vision, screenshots, demos, documentation,
+  user feedback, and deployed surfaces where applicable.
+- Reconstruct the project's philosophy and domain model before recommending
+  code structure: core concepts, data structures and relationships, authority,
+  lifetimes, transitions, and invariants.
+- Audit names across user and operator language, tickets, code, APIs, UI, and
+  docs. Treat each name as a model claim about the thing, its role, or its
+  owner.
+- Find overloaded terms, synonyms, misleading ownership, implementation
+  language that obscures the domain, and names left by retired architecture.
+  Distinguish current domain truth from historical residue and unresolved
+  ambiguity.
+- Use DDD to investigate the existing model, not as permission to invent
+  aggregates, repositories, factories, or taxonomy.
 
 ```markdown
 ## Project profile

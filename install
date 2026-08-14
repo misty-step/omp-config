@@ -11,7 +11,10 @@ for source in \
   models.yml \
   AGENTS.md \
   RULES.md \
+  WATCHDOG.md \
   mcp.json \
+  skills/create-task/LICENSE \
+  skills/create-task/SKILL.md \
   skills/exa-ai/SKILL.md \
   skills/foundation/SKILL.md \
   skills/frontend-design/SKILL.md \
@@ -42,7 +45,7 @@ if [ -f "$agent_dir/mcp.json" ]; then
 fi
 
 install -d -m 700 "$agent_dir"
-for file in config.yml models.yml AGENTS.md RULES.md; do
+for file in config.yml models.yml AGENTS.md RULES.md WATCHDOG.md; do
   install -m 600 "$repo_dir/$file" "$agent_dir/$file"
 done
 
@@ -74,6 +77,7 @@ else
 fi
 
 for skill in \
+  create-task \
   exa-ai \
   foundation \
   frontend-design \
@@ -98,5 +102,6 @@ install -m 600 "$repo_dir/skills/improve-codebase-architecture/HTML-REPORT.md" "
 install -m 600 "$repo_dir/skills/prototype/LICENSE.txt" "$agent_dir/skills/prototype/LICENSE.txt"
 install -m 600 "$repo_dir/skills/prototype/LOGIC.md" "$agent_dir/skills/prototype/LOGIC.md"
 install -m 600 "$repo_dir/skills/prototype/UI.md" "$agent_dir/skills/prototype/UI.md"
+install -m 600 "$repo_dir/skills/create-task/LICENSE" "$agent_dir/skills/create-task/LICENSE"
 
 printf 'Installed lean OMP config in %s\n' "$agent_dir"

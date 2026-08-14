@@ -27,3 +27,14 @@
 - Review the premise and the implementation.
 - Prove changed behavior on its real interface.
 - Do not claim completion while a supported finding or failed check remains.
+
+## Premise gate
+
+Before non-trivial production implementation, record:
+
+- The intended design, accepted tradeoffs, intentional behavior changes or
+  removals, non-goals, and unchanged invariants, but only when settled by
+  binding evidence or explicit operator decisions.
+
+Route every material unsettled human-owned choice through `grill-me`. Do not
+implement while any such choice remains unresolved.
