@@ -36,10 +36,12 @@ Before non-trivial production implementation, record:
 - The part, process, or requirement that can be deleted.
 - The cheapest experiment that can falsify the proposed mechanism.
 - The whole-system success measure and stop criterion.
-- When the ticket or conversation does not already settle them, a short
-  plain-language working interpretation of the intended design, accepted
-  tradeoffs, intentional behavior changes or removals, non-goals, and the
-  behavior and invariants that must remain unchanged.
+- The intended design, accepted tradeoffs, intentional behavior changes or
+  removals, non-goals, and unchanged invariants, but only when settled by
+  binding evidence or explicit operator decisions.
+
+Route every material unsettled human-owned choice through `grill-me`. Do not
+implement while any such choice remains unresolved.
 
 Return the work to refinement when evidence invalidates the mechanism. Do not use implementation momentum as a reason to continue.
 
