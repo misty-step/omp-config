@@ -1,5 +1,6 @@
 #!/bin/sh
 set -eu
+umask 077
 
 repo_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 agent_dir=${PI_CODING_AGENT_DIR:-$(omp config path)}
@@ -9,33 +10,22 @@ command -v jq >/dev/null 2>&1 || { echo "jq is required" >&2; exit 1; }
 for source in \
   config.yml \
   models.yml \
-  AGENTS.md \
-  RULES.md \
-  WATCHDOG.md \
-  WATCHDOG.yml \
   mcp.json \
-  skills/create-task/LICENSE \
-  skills/create-task/SKILL.md \
-  skills/exa-ai/SKILL.md \
-  skills/foundation/SKILL.md \
-  skills/frontend-design/SKILL.md \
-  skills/frontend-design/LICENSE.txt \
-  skills/grill-me/SKILL.md \
-  skills/grill-me/LICENSE.txt \
-  skills/herdr/SKILL.md \
-  skills/improve-codebase-architecture/SKILL.md \
-  skills/improve-codebase-architecture/HTML-REPORT.md \
-  skills/improve-codebase-architecture/LICENSE.txt \
-  skills/model-research/SKILL.md \
-  skills/prototype/SKILL.md \
-  skills/prototype/LOGIC.md \
-  skills/prototype/UI.md \
-  skills/prototype/LICENSE.txt \
-  skills/thermo-nuclear-code-quality-review/SKILL.md \
-  skills/tidy/SKILL.md
+  global/AGENTS.md \
+  global/RULES.md \
+  global/WATCHDOG.md \
+  global/WATCHDOG.yml
 do
   [ -s "$repo_dir/$source" ] || {
     printf 'Missing or empty source: %s\n' "$source" >&2
+    exit 1
+  }
+done
+
+for skill_dir in "$repo_dir"/skills/*; do
+  [ -d "$skill_dir" ] || continue
+  [ -s "$skill_dir/SKILL.md" ] || {
+    printf 'Missing or empty skill entrypoint: %s/SKILL.md\n' "$skill_dir" >&2
     exit 1
   }
 done
@@ -46,8 +36,11 @@ if [ -f "$agent_dir/mcp.json" ]; then
 fi
 
 install -d -m 700 "$agent_dir"
-for file in config.yml models.yml AGENTS.md RULES.md WATCHDOG.md WATCHDOG.yml; do
+for file in config.yml models.yml; do
   install -m 600 "$repo_dir/$file" "$agent_dir/$file"
+done
+for file in AGENTS.md RULES.md WATCHDOG.md WATCHDOG.yml; do
+  install -m 600 "$repo_dir/global/$file" "$agent_dir/$file"
 done
 
 mcp_target="$agent_dir/mcp.json"
@@ -77,32 +70,18 @@ else
   install -m 600 "$repo_dir/mcp.json" "$mcp_target"
 fi
 
-for skill in \
-  create-task \
-  exa-ai \
-  foundation \
-  frontend-design \
-  grill-me \
-  herdr \
-  improve-codebase-architecture \
-  model-research \
-  prototype \
-  thermo-nuclear-code-quality-review \
-  tidy
-do
-  skill_target="$agent_dir/skills/$skill"
-  rm -rf -- "$skill_target"
+skills_temp=$(mktemp -d "$agent_dir/.skills.XXXXXX")
+trap 'rm -rf "$skills_temp"' 0 1 2 15
+for skill_dir in "$repo_dir"/skills/*; do
+  [ -d "$skill_dir" ] || continue
+  skill=${skill_dir##*/}
+  skill_target="$skills_temp/$skill"
   install -d -m 700 "$skill_target"
-  install -m 600 "$repo_dir/skills/$skill/SKILL.md" "$skill_target/SKILL.md"
+  cp -R "$skill_dir"/. "$skill_target"/
+  chmod -R u=rwX,go= "$skill_target"
 done
-
-install -m 600 "$repo_dir/skills/frontend-design/LICENSE.txt" "$agent_dir/skills/frontend-design/LICENSE.txt"
-install -m 600 "$repo_dir/skills/grill-me/LICENSE.txt" "$agent_dir/skills/grill-me/LICENSE.txt"
-install -m 600 "$repo_dir/skills/improve-codebase-architecture/LICENSE.txt" "$agent_dir/skills/improve-codebase-architecture/LICENSE.txt"
-install -m 600 "$repo_dir/skills/improve-codebase-architecture/HTML-REPORT.md" "$agent_dir/skills/improve-codebase-architecture/HTML-REPORT.md"
-install -m 600 "$repo_dir/skills/prototype/LICENSE.txt" "$agent_dir/skills/prototype/LICENSE.txt"
-install -m 600 "$repo_dir/skills/prototype/LOGIC.md" "$agent_dir/skills/prototype/LOGIC.md"
-install -m 600 "$repo_dir/skills/prototype/UI.md" "$agent_dir/skills/prototype/UI.md"
-install -m 600 "$repo_dir/skills/create-task/LICENSE" "$agent_dir/skills/create-task/LICENSE"
+rm -rf -- "$agent_dir/skills"
+mv "$skills_temp" "$agent_dir/skills"
+trap - 0 1 2 15
 
 printf 'Installed lean OMP config in %s\n' "$agent_dir"
