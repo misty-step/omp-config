@@ -10,13 +10,39 @@ modelRoles:
   tiny: "@smol"
   commit: "@smol"
 enabledModels:
-  - openai-codex/gpt-5.6-sol
-  - openai-codex/gpt-5.6-luna
-  - google-antigravity/gemini-3.7-flash
+  # Anthropic & OpenAI Codex
   - anthropic/claude-fable-5
+  - anthropic/claude-opus-5
+  - openai-codex/gpt-5.6-sol
+  - openai-codex/gpt-5.6-terra
+  - openai-codex/gpt-5.6-luna
+  # xAI & Kimi
+  - xai-oauth/grok-4.6
+  - kimi-code/k3
+  # Google
+  - google-antigravity/gemini-3.5-flash-lite
+  - google-antigravity/gemini-3.7-flash
+  # OpenRouter Frontier & Cloud
+  - openrouter/deepseek/deepseek-v4-flash-0731
   - openrouter/deepseek/deepseek-v4-pro-0813
   - openrouter/~deepseek/deepseek-v4-flash-latest
+  - openrouter/openai/gpt-5.6-luna
+  - openrouter/xai/grok-4.6
+  - openrouter/z-ai/glm-5.2
+  - openrouter/moonshotai/kimi-k3
   - openrouter/google/gemini-3.7-flash
+  # OpenRouter Open Weights & High Performance
+  - openrouter/nvidia/nemotron-3-super-120b-a12b
+  - openrouter/nvidia/nemotron-3-nano-30b-a3b
+  - openrouter/nvidia/nemotron-3-ultra-550b-a55b
+  - openrouter/poolside/laguna-s-2.1
+  - openrouter/poolside/laguna-m.1
+  - openrouter/poolside/laguna-xs-2.1
+  - openrouter/thinkingmachines/inkling
+  - openrouter/thinkingmachines/inkling-small
+  - openrouter/qwen/qwen3-235b-a22b
+  - openrouter/mistralai/mistral-small-3.2-24b-instruct
+  - openrouter/mistralai/devstral-2512
 symbolPreset: nerd
 theme:
   dark: dark-ember
