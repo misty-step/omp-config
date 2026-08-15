@@ -87,5 +87,6 @@ done
 rm -rf -- "$agent_dir/skills"
 mv "$skills_temp" "$agent_dir/skills"
 trap - 0 1 2 15
+rm -f "$agent_dir/extensions/evidence-packet.ts"
 
 printf 'Installed lean OMP config in %s\n' "$agent_dir"
