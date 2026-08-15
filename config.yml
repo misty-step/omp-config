@@ -19,8 +19,8 @@ enabledModels:
   - openrouter/google/gemini-3.7-flash
 symbolPreset: nerd
 theme:
-  dark: ember
-  light: light
+  dark: dark-ember
+  light: dark-ember
 browser:
   relay: false
 setupVersion: 1
