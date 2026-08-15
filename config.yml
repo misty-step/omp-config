@@ -18,9 +18,9 @@ enabledModels:
   - openrouter/~deepseek/deepseek-v4-flash-latest
   - openrouter/google/gemini-3.7-flash
 symbolPreset: nerd
-theme: 
+theme:
   dark: ember
-  light: ember
+  light: light
 setupVersion: 1
 skills: 
   enableAgentsUser: true

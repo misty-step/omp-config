@@ -10,7 +10,7 @@ Use real-surface media for every observable UI change.
 - Accessibility behavior: add keyboard interaction evidence and the applicable
   accessibility-tree or diagnostic result.
 
-A new surface does not require a false baseline. Set `baselineRequired: false`
+A new surface does not require a false baseline. Set `baseline_required: false`
 unless the claim compares the new surface with an earlier state.
 
 ## Prepare
