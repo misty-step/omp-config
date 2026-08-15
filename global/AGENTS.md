@@ -26,6 +26,9 @@
 - Fix the source. Migrate every caller. Remove obsolete paths.
 - Review the premise and the implementation.
 - Prove changed behavior on its real interface.
+- Evidence packet: for every observable behavior or state change, read
+  `skill://evidence-packet`; plan proof before the first production edit,
+  capture the real surface, and deliver inspected artifacts.
 - Do not claim completion while a supported finding or failed check remains.
 
 ## Premise gate

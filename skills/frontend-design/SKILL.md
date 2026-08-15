@@ -53,3 +53,6 @@ Preserve:
 Run the UI in a browser at desktop and mobile sizes. Exercise the primary
 interaction with keyboard and pointer. Compare the result with the thesis and
 brief. Fix the visible defects; source inspection is not proof.
+
+Use `skill://evidence-packet` to capture and deliver the validated real-surface
+proof.
