@@ -127,13 +127,13 @@ When running inside Herdr (`HERDR_ENV=1`), prefer a dedicated review tab. A
 full-width tab keeps diffs and annotations readable and isolates the review
 from the coding conversation.
 
-1. **Create and focus a dedicated review tab**:
+1. **Create a dedicated review tab without changing operator focus**:
    ```bash
    herdr tab create \
      --workspace "$HERDR_WORKSPACE_ID" \
      --cwd "$PWD" \
      --label "hunk: <topic>" \
-     --focus
+     --no-focus
    ```
    Read the tab ID and root pane ID from `.result.tab.tab_id` and
    `.result.root_pane.pane_id`; never predict them.
@@ -152,8 +152,10 @@ from the coding conversation.
    Read `.result.pane.pane_id`, then launch Hunk with `--wrap` in that pane.
 
 4. **Retain the review surface during the walkthrough.** Report the workspace,
-   tab, pane, and Hunk session IDs plus any user-focus change. When the review
-   is finished, close only the tab or pane created for it:
+   tab, pane, and Hunk session IDs. Confirm that operator focus stayed
+   unchanged. When the review is finished, inspect focus: close the created
+   tab or pane only while it remains unfocused; if the operator focused it,
+   leave it open and report it.
    ```bash
    herdr tab close <TAB_ID>
    # or, for the split fallback:
