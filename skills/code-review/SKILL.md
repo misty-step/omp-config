@@ -107,3 +107,8 @@ Finish only when no supported finding remains, the real behavior is proved,
 unchanged invariants hold, and the codebase contains no obsolete path exposed
 by the change. Report repaired findings, deleted complexity, exact proof, and
 any external blocker.
+
+## Interactive walkthrough
+When a review identifies structural choices, accepted trade-offs, or complex
+repairs worth operator discussion, use `skill://hunk` to open an annotated diff
+in Herdr and walk the operator through the changes.
