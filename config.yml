@@ -21,6 +21,8 @@ symbolPreset: nerd
 theme:
   dark: ember
   light: light
+browser:
+  relay: false
 setupVersion: 1
 skills: 
   enableAgentsUser: true
