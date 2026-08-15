@@ -14,7 +14,8 @@ for source in \
   global/AGENTS.md \
   global/RULES.md \
   global/WATCHDOG.md \
-  global/WATCHDOG.yml
+  global/WATCHDOG.yml \
+  themes/ember.json
 do
   [ -s "$repo_dir/$source" ] || {
     printf 'Missing or empty source: %s\n' "$source" >&2
@@ -31,6 +32,7 @@ for skill_dir in "$repo_dir"/skills/*; do
 done
 
 jq empty "$repo_dir/mcp.json" >/dev/null
+jq empty "$repo_dir/themes/ember.json" >/dev/null
 if [ -f "$agent_dir/mcp.json" ]; then
   jq empty "$agent_dir/mcp.json" >/dev/null
 fi
@@ -39,6 +41,8 @@ install -d -m 700 "$agent_dir"
 for file in config.yml models.yml; do
   install -m 600 "$repo_dir/$file" "$agent_dir/$file"
 done
+install -d -m 700 "$agent_dir/themes"
+install -m 600 "$repo_dir/themes/ember.json" "$agent_dir/themes/ember.json"
 for file in AGENTS.md RULES.md WATCHDOG.md WATCHDOG.yml; do
   install -m 600 "$repo_dir/global/$file" "$agent_dir/$file"
 done
@@ -83,5 +87,6 @@ done
 rm -rf -- "$agent_dir/skills"
 mv "$skills_temp" "$agent_dir/skills"
 trap - 0 1 2 15
+rm -f "$agent_dir/extensions/evidence-packet.ts"
 
 printf 'Installed lean OMP config in %s\n' "$agent_dir"

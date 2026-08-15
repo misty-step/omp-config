@@ -8,15 +8,7 @@
     }
   },
   "disabledServers": [
-    "canary",
     "chrome-devtools",
-    "computer-use",
-    "crucible",
-    "monologue",
-    "node_repl",
-    "openaiDeveloperDocs",
-    "overmind",
-    "pencil",
-    "qmd"
+    "node_repl"
   ]
 }

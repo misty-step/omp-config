@@ -18,8 +18,8 @@ enabledModels:
   - openrouter/~deepseek/deepseek-v4-flash-latest
   - openrouter/google/gemini-3.7-flash
 symbolPreset: nerd
-theme: 
-  dark: titanium
+theme:
+  dark: ember
   light: light
 setupVersion: 1
 skills: 
