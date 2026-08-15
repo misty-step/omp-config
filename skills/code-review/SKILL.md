@@ -81,6 +81,19 @@ Tests must defend intent and behavior:
   proved more directly;
 - require each test to fail on a plausible defect.
 
+## Verifier delegation
+
+Delegate independent review to a read-only specialist subagent:
+
+1. **Launch verifier**: Spawn a `reviewer` subagent (and `security-reviewer` for
+   security or authorization boundaries) with `task`.
+2. **Context & Target**: Pass the exact target files, the changed diff, the
+   reconstructed intent, and the acceptance criteria.
+3. **Verifier contract**: The verifier operates read-only. It audits data
+   structures, strategic simplicity, error paths, and behavioral proof.
+4. **Return findings**: The verifier returns structured findings containing
+   the exact file, symbol, failing mechanism, evidence, and smallest repair.
+
 ## Findings and repair
 
 A finding requires:
@@ -100,14 +113,13 @@ Migrate every caller and remove obsolete paths; do not leave compatibility
 shims unless accepted intent requires them.
 
 Run the narrowest real scenario for each repair, then applicable behavioral
-contract tests. A failed check is a new finding. Restart the review over the
-same boundary, including the repairs.
+contract tests. A failed check is a new finding. If repairs were non-trivial,
+re-run verification over the repaired boundary.
 
 Finish only when no supported finding remains, the real behavior is proved,
 unchanged invariants hold, and the codebase contains no obsolete path exposed
 by the change. Report repaired findings, deleted complexity, exact proof, and
 any external blocker.
-
 ## Interactive walkthrough
 When a review identifies structural choices, accepted trade-offs, or complex
 repairs worth operator discussion, use `skill://hunk` to open an annotated diff
