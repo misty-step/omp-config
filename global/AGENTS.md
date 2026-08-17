@@ -31,6 +31,8 @@
   capture the real surface, and deliver inspected artifacts.
 - Interactive diff review: use `skill://hunk` to open changesets, attach
   curated review annotations, and drive interactive diffs in Herdr panes.
+- Herdr focus: preserve the operator's active workspace, tab, and pane. Read
+  `skill://herdr` before every Herdr control action.
 - Do not claim completion while a supported finding or failed check remains.
 
 ## Premise gate

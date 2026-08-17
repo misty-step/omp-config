@@ -1,6 +1,6 @@
 ---
 name: hunk
-description: Terminal diff viewer and live review session controller. Use to view diffs, navigate changesets, attach inline review annotations, and drive interactive reviews in Herdr panes.
+description: Terminal diff viewer and live review session controller. Use to view diffs, navigate changesets, attach inline review annotations, and drive interactive reviews in dedicated Herdr tabs or panes.
 ---
 
 # Hunk
@@ -21,13 +21,26 @@ hunk show [commit-sha]                  # Commit diff
 hunk patch [file | -]                   # Unified diff from file or stdin
 ```
 
+### Readable long lines
+
+Use wrapping by default for walkthroughs and full-file reviews:
+
+```bash
+hunk diff [target] --wrap
+hunk show HEAD --wrap
+```
+
+`--wrap` renders long diff lines on continuation rows without changing their
+logical old/new line targets. `--no-wrap` truncates each diff line to one
+terminal row. Prefer `--no-wrap` only when horizontal density is intentional.
+
 ### Sidecar annotations
 
 Launch Hunk with pre-loaded agent review notes:
 
 ```bash
-hunk diff --agent-context /tmp/notes.json
-hunk show HEAD --agent-context /tmp/notes.json
+hunk diff --wrap --agent-context /tmp/notes.json --agent-notes
+hunk show HEAD --wrap --agent-context /tmp/notes.json --agent-notes
 ```
 
 Sidecar JSON schema:
@@ -45,7 +58,8 @@ Sidecar JSON schema:
 }
 ```
 
-Target line accepts either `newLine` or `oldLine`.
+Target line accepts either `newLine` or `oldLine` and must be a changed line
+covered by a diff hunk; unchanged context lines are rejected.
 
 ## Live Session Control (`hunk session`)
 
@@ -100,29 +114,50 @@ hunk session comment clear --repo . --all --yes
 ### 5. Reload session contents
 
 ```bash
-hunk session reload --repo . -- diff
-hunk session reload --repo . -- show HEAD~1
+hunk session reload --repo . -- diff --wrap
+hunk session reload --repo . -- show HEAD~1 --wrap
 ```
+
+Reloading retains live comments. Include `--wrap` when an existing session was
+launched without it.
 
 ## Herdr Integration
 
-When running inside Herdr (`HERDR_ENV=1`):
+When running inside Herdr (`HERDR_ENV=1`), prefer a dedicated review tab. A
+full-width tab keeps diffs and annotations readable and isolates the review
+from the coding conversation.
 
-1. **Split a pane beside the active session**:
+1. **Create a dedicated review tab without changing operator focus**:
    ```bash
-   herdr pane split --current --direction right --no-focus
+   herdr tab create \
+     --workspace "$HERDR_WORKSPACE_ID" \
+     --cwd "$PWD" \
+     --label "hunk: <topic>" \
+     --no-focus
    ```
-   Or create a dedicated review tab:
+   Read the tab ID and root pane ID from `.result.tab.tab_id` and
+   `.result.root_pane.pane_id`; never predict them.
+
+2. **Launch wrapped Hunk in the tab's root pane**:
    ```bash
-   herdr tab create --label "hunk: <topic>"
+   herdr pane run <ROOT_PANE_ID> \
+     "hunk diff [target] --wrap [--agent-context /tmp/notes.json --agent-notes]"
    ```
 
-2. **Launch Hunk inside the pane**:
+3. **Use a same-tab split only when side-by-side context is the point**, the
+   diff is small, or the operator explicitly requests it:
    ```bash
-   herdr pane run <PANE_ID> hunk diff [target] [--agent-context /tmp/notes.json]
+   herdr pane split --current --direction right --cwd "$PWD" --no-focus
    ```
+   Read `.result.pane.pane_id`, then launch Hunk with `--wrap` in that pane.
 
-3. **Close the pane when finished**:
+4. **Retain the review surface during the walkthrough.** Report the workspace,
+   tab, pane, and Hunk session IDs. Confirm that operator focus stayed
+   unchanged. When the review is finished, inspect focus: close the created
+   tab or pane only while it remains unfocused; if the operator focused it,
+   leave it open and report it.
    ```bash
+   herdr tab close <TAB_ID>
+   # or, for the split fallback:
    herdr pane close <PANE_ID>
    ```
