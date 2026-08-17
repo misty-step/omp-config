@@ -1,70 +1,105 @@
 ---
 name: foundation
-description: Inspect a project's current reality, agree on its next foundation, then execute the locked scope.
+description: Inspect a project, install its agentic engineering baseline, and execute the locked next foundation.
 disable-model-invocation: true
 argument-hint: "[repo-path]"
 ---
 
 # Foundation
 
+Build a tight engineering environment, then the next credible stage.
+
 ```text
-inspect -> profile -> recommend -> lock -> execute -> prove
+inspect -> assess baseline -> profile -> recommend -> lock -> execute -> prove
 ```
 
-Before the lock, use only repository reads, safe probes, and reversible runtime
-observation. Do not mutate the project.
+## Stance
 
-## Inspect
+A control is a gate that fails fast on an invalid change and names the
+repair. A tight control is fast, deterministic, and actionable. The baseline
+is the set of applicable controls. Equivalent existing machinery satisfies a
+control.
 
-Keep one project boundary. Establish:
+Product requirements decide what the system must do. The baseline decides how
+narrowly, quickly, and reliably agents may change it. Absence of a product
+feature is not a gap. A missing applicable control is, unless an equivalent
+exists or a documented constraint prevents it.
 
-- purpose, users, stage, distribution, and success criteria;
-- domain ownership, state, interfaces, dependencies, and constraints;
+Judge data structures and relationships first (Torvalds). Keep complexity
+behind deep modules (Ousterhout). Use one ubiquitous language across code, API,
+UI, and operations (Evans). Keep important paths direct and inspectable
+(Carmack).
+
+## 1. Inspect
+
+Default to the current repository unless the invocation names another target.
+Keep one project boundary.
+
+Before the lock, only repository reads, safe probes, and reversible runtime
+observation.
+
+Establish observed facts and unresolved questions:
+
+- purpose, users, jobs, stage, distribution, success criteria, and current
+  product truth;
+- philosophy and domain model: concepts, data structures, relationships,
+  authority, lifetimes, transitions, invariants, and names;
+- architecture, interfaces, dependencies, and which faces serve real users;
 - verification gates and undefended risks;
-- onboarding, delivery, release, rollback, and operational needs.
+- onboarding, delivery, release, rollback, and operational needs;
+- project-owned agent context.
 
-Absence is not a gap without a product need. Treat old documents and installed
-tools as evidence, not authority. Verify consequential runtime claims.
-
-Inspect before interviewing. Establish observed facts and unresolved questions
-across these areas. Settle facts with tools. Use `grill-me` only for material
+Treat old documents and installed tools as evidence. Verify consequential
+runtime claims. Settle facts with tools. Use `grill-me` only for material
 operator judgments about ambition, users, compatibility, burden, or tradeoffs.
 
-## Profile
+Audit names as model claims. Separate current domain truth from historical
+residue, synonyms, and overloaded terms. Recover the existing model with DDD
+questions. Recommend only structures the model already requires.
+
+Completion criterion: Every area above is evidenced, labeled as a hypothesis,
+or recorded as an operator judgment. Consequential runtime claims are verified.
+
+## 2. Assess baseline
+
+Classify each applicable control as present, equivalent, missing, or a required
+deviation:
+
+- statically checked language and configuration;
+- formatter and linter as errors;
+- domain types and data constraints;
+- deterministic tests through real contracts;
+- one tight local check command;
+- committed hooks: tight pre-commit, broader pre-push;
+- CI as clean-room authority over the same owned commands;
+- secret and dependency scanning;
+- structured errors with release identity, for operated software;
+- one documented clone-to-green path;
+- project authority discoverable from `AGENTS.md`;
+- merge protection on required checks.
+
+Read [CONTROLS.md](CONTROLS.md) when a classification is uncertain, when
+language, diagnosis, telemetry, or CI latency is in scope, or when a control
+will be installed or proved.
+
+Completion criterion: Every applicable control is classified. Each missing
+control has a place in the recommendation. Each deviation has a reason.
+
+## 3. Profile
 
 Present:
-
-- Purpose, users, primary jobs, project stage, and success criteria.
-- Public, private, internal, experimental, library, service, CLI, web, or mixed
-  distribution.
-- Current product truth: README, vision, screenshots, demos, documentation,
-  user feedback, and deployed surfaces where applicable.
-- Reconstruct the project's philosophy and domain model before recommending
-  code structure: core concepts, data structures and relationships, authority,
-  lifetimes, transitions, and invariants.
-- Audit names across user and operator language, tickets, code, APIs, UI, and
-  docs. Treat each name as a model claim about the thing, its role, or its
-  owner.
-- Find overloaded terms, synonyms, misleading ownership, implementation
-  language that obscures the domain, and names left by retired architecture.
-  Distinguish current domain truth from historical residue and unresolved
-  ambiguity.
-- Use DDD to investigate the existing model, not as permission to invent
-  aggregates, repositories, factories, or taxonomy.
-- Audit project-owned agent context. Ensure the Product advisor can locate the
-  product authority and accepted invariants. Prefer pointers from `AGENTS.md`
-  to existing sources over copied guidance. Add project `WATCHDOG.md`
-  priorities or a project skill only when a project-specific review risk or
-  repeated workflow requires one. Do not mirror global configuration or create
-  a project advisor roster by default.
 
 ```markdown
 ## Project profile
 - Purpose and users:
-- Stage and distribution:
+- Stage, distribution, and next credible outcome:
+- Philosophy and domain model:
+- Current stack, architecture, and interfaces:
+- Baseline posture:
+- Verification, delivery, and operations:
 - Strengths:
-- Next pressure:
-- Constraints:
+- Next pressure and measured bottlenecks:
+- Constraints and invariants:
 - Risks:
 - Operator decisions:
 ```
@@ -72,33 +107,51 @@ Present:
 Label hypotheses. Cite the paths, commands, URLs, or observations behind
 consequential claims.
 
-## Recommend
+Completion criterion: Every profile field is filled. Claims that change the
+recommendation are cited. Operator decisions are only the unresolved judgments.
+
+## 4. Recommend
 
 Recommend one coherent package:
 
 ```markdown
 ## Foundation recommendation
+
+### Agentic engineering baseline
+- Controls to install:
+- Equivalents to keep:
+- Required deviations:
+- Proof:
+
+### Product-shaped foundation
 - Outcome:
 - Build:
 - Preserve:
 - Omit, with reconsideration trigger:
+- Maintenance, operating cost, and exit:
 - Implementation slices:
 - Proof:
 - Non-goals:
 ```
 
-Connect each item to evidence and a project outcome. State maintenance and
-operating cost. Exclude interfaces, infrastructure, process, and documentation
-that have no current job.
+Connect each baseline control to the failure it makes expensive or impossible.
+Connect each product item to a project outcome. State maintenance and operating
+cost. Product-shaped interfaces, infrastructure, process, and documentation
+need a current job.
 
-## Lock
+Completion criterion: Every missing baseline control is in the package or a
+recorded deviation. Every product item has a job, cost, and proof. Every
+omission has a reconsideration trigger.
 
-Execution requires explicit operator agreement on:
+## 5. Lock
+
+Execution starts only after explicit operator agreement on:
 
 ```markdown
 ## Foundation lock
 - Outcome:
-- Scope:
+- Baseline scope:
+- Product scope:
 - Non-goals:
 - Slices:
 - Acceptance and proof:
@@ -107,7 +160,9 @@ Execution requires explicit operator agreement on:
 Audit, exploration, recommendation, silence, and partial approval are not a
 lock. If the outcome changes, revise and lock again.
 
-## Execute
+Completion criterion: The operator explicitly agreed to the lock template.
+
+## 6. Execute
 
 1. Track the accepted slices.
 2. Implement the simplest coherent design.
@@ -115,20 +170,33 @@ lock. If the outcome changes, revise and lock again.
 4. Verify each changed contract on its real boundary.
 5. Keep work inside the lock.
 
-New product, architecture, compatibility, operating-cost, or destructive scope
-requires a revised lock. Mechanical work implied by the accepted outcome does
-not.
+Install accepted controls with [CONTROLS.md](CONTROLS.md). Mechanical baseline
+work implied by the lock proceeds. A new vendor, language, paid service,
+compatibility promise, or destructive change needs a revised lock.
 
-## Prove
+Completion criterion: Accepted slices are implemented. Affected callers are
+migrated. Each changed contract is verified on its real boundary.
 
-Run the gates and real interfaces named by the lock. Close with:
+## 7. Prove
+
+Run the gates and real interfaces named by the lock. Each control in the lock
+goes red on a synthetic defect, then the clean path passes. Use the
+[CONTROLS.md](CONTROLS.md) probes. Distinguish declarations, deterministic
+gates, live observations, and fresh judgment.
+
+Close with:
 
 ```markdown
 ## Foundation result
 - Outcome:
+- Baseline installed:
 - Implemented:
 - Proof:
+- Control-plane probes:
 - Preserved:
 - Residual risk:
 - Reconsider when:
 ```
+
+Completion criterion: Named gates and interfaces ran. Controls in the lock went
+red on probes, then the clean path passed. The result template is complete.
