@@ -3,10 +3,10 @@ modelRoles:
   slow: openai-codex/gpt-5.6-sol:max
   plan: "@slow"
   advisor: "@default"
-  task: google-antigravity/gemini-3.7-flash:high
+  task: cursor/composer-2.5
   designer: "@slow"
   vision: openrouter/google/gemini-3.7-flash:high
-  smol: openai-codex/gpt-5.6-luna:high
+  smol: cursor/composer-2.5
   tiny: "@smol"
   commit: "@smol"
 symbolPreset: nerd
@@ -31,16 +31,34 @@ providers:
 retry:
   fallbackChains:
     openai-codex/gpt-5.6-sol:
+      - cursor/gpt-5.6-sol-high
       - anthropic/claude-fable-5:high
+      - cursor/claude-fable-5-high
+      - xai-oauth/grok-4.6:xhigh
       - openrouter/deepseek/deepseek-v4-pro-0813:max
     google-antigravity/gemini-3.7-flash:
+      - cursor/composer-2.5
+      - cursor/cursor-grok-4.6-high
       - xai-oauth/grok-4.6:xhigh
-      - openai-codex/gpt-5.6-sol:high
+      - cursor/gemini-3.7-flash-high
       - openrouter/deepseek/deepseek-v4-pro-0813:max
     openai-codex/gpt-5.6-luna:
-      - google-antigravity/gemini-3.7-flash:high
+      - cursor/composer-2.5
+      - cursor/gpt-5.6-luna-high
       - xai-oauth/grok-4.6:xhigh
       - openrouter/~deepseek/deepseek-v4-flash-latest:max
+    cursor/composer-2.5:
+      - cursor/cursor-grok-4.6-high
+      - xai-oauth/grok-4.6:high
+      - openrouter/~deepseek/deepseek-v4-flash-latest:max
+    cursor/gpt-5.6-sol-high:
+      - anthropic/claude-fable-5:high
+      - xai-oauth/grok-4.6:xhigh
+      - openrouter/deepseek/deepseek-v4-pro-0813:max
+    cursor/gpt-5.6-sol-max:
+      - cursor/claude-fable-5-max
+      - xai-oauth/grok-4.6:xhigh
+      - openrouter/deepseek/deepseek-v4-pro-0813:max
 task:
   enableLsp: true
   agentModelOverrides:
