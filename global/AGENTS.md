@@ -45,3 +45,9 @@ Before non-trivial production implementation, record:
 
 Route every material unsettled human-owned choice through `grill-me`. Do not
 implement while any such choice remains unresolved.
+
+## Knowledge vault
+
+If a compiled knowledge vault is available, retrieve relevant notes before
+inferring, then read the source. Write durable decisions back under that
+vault's contract. Compile; leave raw sessions on disk.
