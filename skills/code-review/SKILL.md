@@ -89,14 +89,23 @@ OS temp path (not the repository):
 ## Conflicts with accepted intent
 ```
 
-Also write a Hunk sidecar at a sibling `.json` when findings have line
-targets. Schema: `comments[].filePath`, `newLine` or `oldLine`, `summary`,
-`rationale`.
+Write a Hunk sidecar at a sibling `.json`. This is a walkthrough, not a
+findings dump. Include:
+
+- one note per load-bearing changed decision (owner, interface, callers, proof);
+- every finding that has a changed-line target.
+
+Schema: `comments[].filePath`, `newLine` or `oldLine`, `summary`, `rationale`.
+Number tour notes `1/N`. Apply them to the live Hunk session (`skill://hunk`
+Walkthrough). Do not present a review as complete while the viewer sits on
+an unannotated first file with `liveCommentCount` 0.
 
 Present the report. Stop.
 
-Completion criterion: The report is on disk, shown to the operator, and no
-production edit has been made.
+Completion criterion: The report is on disk, shown to the operator, the
+Hunk session has the walkthrough notes and is focused on note `1/N`, and
+no production edit has been made.
+
 
 ## 5. Repair
 

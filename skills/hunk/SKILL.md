@@ -61,6 +61,38 @@ Sidecar JSON schema:
 Target line accepts either `newLine` or `oldLine` and must be a changed line
 covered by a diff hunk; unchanged context lines are rejected.
 
+## Walkthrough (required)
+
+Opening Hunk is not a walkthrough. A walkthrough is a numbered tour of
+inline notes the operator can step with next/prev comment.
+
+MUST:
+
+- Write the sidecar **before** launching Hunk. Include a tour of the
+  change, not only review findings.
+- One note per load-bearing decision: owner, interface, each migrated
+  caller cluster, proof, then findings. Typical floor: every file with
+  a behavior change, plus tests that define the contract. Two notes on
+  a 20-file diff is a failed walkthrough.
+- Order notes as a tour (`1/N …`). Start on the owner, not an incidental
+  first file in `git` order.
+- Quote the entire Hunk argv for `herdr pane run`. Unquoted `--wrap` and
+  `--agent-context` are parsed by Herdr and never reach Hunk:
+  ```bash
+  herdr pane run <ROOT_PANE_ID> \
+    "hunk show HEAD --wrap --agent-context /tmp/notes.json --agent-notes"
+  ```
+- After launch, `hunk session get --repo .` MUST show `liveCommentCount` > 0.
+  If it is 0, apply the sidecar immediately (`comment apply --stdin`) and
+  do not tell the operator the walkthrough is open.
+- `hunk session navigate --repo . --next-comment` (or `--file` + `--new-line`
+  of note `1/N`) so the viewport is on the first note, not an unannotated
+  file at the top of the changeset.
+
+Do not annotate every test-fixture line. Annotate decisions, migrations,
+and findings the operator should stop on.
+
+
 ## Live Session Control (`hunk session`)
 
 When Hunk runs in a terminal, it connects to a local loopback daemon. Agents
@@ -138,11 +170,16 @@ from the coding conversation.
    Read the tab ID and root pane ID from `.result.tab.tab_id` and
    `.result.root_pane.pane_id`; never predict them.
 
-2. **Launch wrapped Hunk in the tab's root pane**:
+2. **Launch wrapped Hunk in the tab's root pane**. Quote the entire
+   Hunk argv. Unquoted `--wrap` / `--agent-context` are eaten by Herdr:
    ```bash
    herdr pane run <ROOT_PANE_ID> \
-     "hunk diff [target] --wrap [--agent-context /tmp/notes.json --agent-notes]"
+     "hunk show HEAD --wrap --agent-context /tmp/notes.json --agent-notes"
    ```
+   Then `hunk session get --repo .`. If `liveCommentCount` is 0, apply
+   the sidecar and navigate to note `1/N`. Do not stop on the first
+   unannotated file.
+
 
 3. **Use a same-tab split only when side-by-side context is the point**, the
    diff is small, or the operator explicitly requests it:

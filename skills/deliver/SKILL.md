@@ -36,5 +36,10 @@ Open an unmerged pull request that carries the ticket and the
 report. Open the walkthrough with `skill://hunk`. Leave focus where
 it is.
 
-You are done when the operator can review the PR, the walkthrough,
-and the report.
+The walkthrough MUST be annotated. Follow `skill://hunk` Walkthrough:
+sidecar first, quoted `herdr pane run`, live comment count > 0, viewport
+on note `1/N`. Opening an empty Hunk on the first diff file is not done.
+
+You are done when the operator can review the PR, step the annotated
+walkthrough, and read the report.
+
