@@ -1,7 +1,6 @@
-# UI Prototype
+# UI Catalog
 
-Read `frontend-design`. Build competing structures for one unresolved visual or
-interaction question.
+Build competing structures for one unresolved visual or interaction question.
 
 ## Host
 
@@ -13,11 +12,12 @@ Keep prototype controls away from production mutations.
 
 ## Vary
 
-Build three variants, at most five. Each must differ in structure, hierarchy, or
-primary interaction. State its thesis, primary action, hierarchy, and main cost.
+Build at least six options. Each must differ in structure, hierarchy, or
+primary interaction. State its thesis, primary action, hierarchy, and main
+cost.
 
-Use existing components and tokens when they fit. Do not force variants through
-one shared layout.
+Use existing components and tokens when they fit. Do not force options
+through one shared layout.
 
 ## Switch
 
@@ -30,8 +30,9 @@ Use a shareable `?variant=` value and a separate fixed switcher with:
 
 ## Prove and dispose
 
-Run every variant at desktop and mobile sizes. Exercise the primary interaction
-with keyboard and pointer. Capture comparison screenshots.
+Run every option at desktop and mobile sizes. Exercise the primary
+interaction with keyboard and pointer. Capture comparison screenshots.
 
-After selection, remove every variant, switcher, query branch, prototype route,
-and isolated state. Implement and verify the chosen design normally.
+After selection, remove every unused option, the switcher, the query branch,
+the prototype route, and isolated state. Implement and verify the chosen
+design normally only when asked.
