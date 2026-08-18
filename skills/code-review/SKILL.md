@@ -1,13 +1,13 @@
 ---
 name: code-review
-description: Run a gated lens council, synthesize a report, and wait for the operator before repairing.
+description: Run a gated lens council, filter findings through a taste gate, and wait for the operator before repairing.
 disable-model-invocation: true
 ---
 
 # Code Review
 
 Review the completed change. Do not edit production code until the operator
-has accepted or rejected each finding.
+has accepted or rejected each Take finding.
 
 ## 1. Establish intent
 
@@ -71,14 +71,42 @@ Completion criterion: Every selected lens has a harvested result.
 ## 4. Synthesize
 
 Dedupe overlapping findings. Assign one primary lens. Drop nits that do not
-change behavior, ownership, or future change cost. Write one report to an
-OS temp path (not the repository):
+change behavior, ownership, or future change cost.
+
+**Taste gate.** For each remaining finding, judge the repair against the
+running system, not the diff polish. All four must hold, or the finding
+must remove an invalid representable state:
+
+- simpler (less machinery, one owner, no relocated complexity);
+- more robust (failure is visible; bad input cannot become valid state);
+- more elegant (the model matches the domain);
+- Torvalds-tasteful (invalid states unrepresentable; one owner per datum).
+
+Classify:
+
+- **Take** — passes the gate. This is the only class the operator is asked
+  about. At most one follow-up Take that sits outside the ticket. If several
+  pass, pick the one that most improves the running model and defer the rest.
+- **Hygiene** — colocation, test shape, naming, DRY, comment, or a move that
+  does not change runtime state. Do not ask. Record under Deferred.
+- **Refuse** — style, speculative extensibility, or extra scope that fights
+  the ticket. Drop, or put under Conflicts with accepted intent.
+
+Do not present a flat accept/reject list that mixes Take and Hygiene. The
+operator must not have to ask whether the findings improve the design.
+
+Write one report to an OS temp path (not the repository):
 
 ```markdown
 # Code review
 - Scope:
 - Intent:
 - Lenses:
+
+## Taste
+- Take: `<id>` — <one sentence: what invalid state or dual owner it removes>
+- Hygiene (not asking): <ids or none>
+- Follow-up: <one Take outside this ticket, or none>
 
 ## Findings
 1. [block|should|note] lens=`<name>` `<file>:<symbol>`
@@ -89,29 +117,30 @@ OS temp path (not the repository):
 ## Conflicts with accepted intent
 ```
 
+`## Findings` lists Take items only. Hygiene lives in Deferred.
+
 Write a Hunk sidecar at a sibling `.json`. This is a walkthrough, not a
 findings dump. Include:
 
 - one note per load-bearing changed decision (owner, interface, callers, proof);
-- every finding that has a changed-line target.
+- every Take finding that has a changed-line target.
 
 Schema: `comments[].filePath`, `newLine` or `oldLine`, `summary`, `rationale`.
 Number tour notes `1/N`. Apply them to the live Hunk session (`skill://hunk`
 Walkthrough). Do not present a review as complete while the viewer sits on
 an unannotated first file with `liveCommentCount` 0.
 
-Present the report. Stop.
+Present the report. Lead with Taste. Stop.
 
-Completion criterion: The report is on disk, shown to the operator, the
-Hunk session has the walkthrough notes and is focused on note `1/N`, and
-no production edit has been made.
-
+Completion criterion: The report is on disk, shown to the operator with a
+Taste verdict, the Hunk session has the walkthrough notes and is focused on
+note `1/N`, and no production edit has been made.
 
 ## 5. Repair
 
-After the operator accepts, rejects, or defers each finding, repair only
-the accepted set. Delete first. Fix the source. Migrate every caller.
-Remove obsolete paths.
+After the operator accepts, rejects, or defers each Take finding, repair
+only the accepted set. Do not promote Hygiene unless the operator names it.
+Delete first. Fix the source. Migrate every caller. Remove obsolete paths.
 
 Run the narrowest real scenario for each repair, then applicable contract
 tests. A failed check is a new finding. If repairs were non-trivial, re-run
@@ -119,5 +148,6 @@ the same lens set over the repaired boundary and stop again at a new report.
 
 Use `skill://hunk` when the operator wants an annotated walkthrough.
 
-Completion criterion: Every accepted finding is repaired and proved, or an
-external blocker is named. Rejected and deferred items are untouched.
+Completion criterion: Every accepted Take finding is repaired and proved, or
+an external blocker is named. Rejected, deferred, and Hygiene items are
+untouched.

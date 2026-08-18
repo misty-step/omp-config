@@ -30,10 +30,16 @@ at).
 
 Read `skill://code-review` through the report. Do not repair.
 
+The spoken close and the PR MUST include the Taste verdict. Lead with it.
+Do not ask the operator to accept, reject, or defer Hygiene. If one finding
+passes the taste gate and sits outside this ticket, name it as the follow-up
+and stop. If none pass, say none. Do not end with a mixed findings list
+that forces the operator to ask whether the repairs improve the design.
+
 ## Publish
 
-Open an unmerged pull request that carries the ticket and the
-report. Open the walkthrough with `skill://hunk`. Leave focus where
+Open an unmerged pull request that carries the ticket, the Taste verdict,
+and the report. Open the walkthrough with `skill://hunk`. Leave focus where
 it is.
 
 The walkthrough MUST be annotated. Follow `skill://hunk` Walkthrough:
@@ -41,5 +47,5 @@ sidecar first, quoted `herdr pane run`, live comment count > 0, viewport
 on note `1/N`. Opening an empty Hunk on the first diff file is not done.
 
 You are done when the operator can review the PR, step the annotated
-walkthrough, and read the report.
+walkthrough, read the Taste verdict, and decide only on Take findings.
 
