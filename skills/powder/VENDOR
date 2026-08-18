@@ -2,5 +2,5 @@ source=https://raw.githubusercontent.com/misty-step/powder/master/SKILL.md
 owner=misty-step/powder
 path=SKILL.md
 
-Do not edit skills/powder/SKILL.md.
-Refresh: ./scripts/vendor-powder-skill
+Do not edit SKILL.md.
+Refresh: ./skills/powder/vendor
