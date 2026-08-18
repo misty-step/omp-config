@@ -29,8 +29,11 @@
 - Evidence packet: for every observable behavior or state change, read
   `skill://evidence-packet`; plan proof before the first production edit,
   capture the real surface, and deliver inspected artifacts.
-- Interactive diff review: use `skill://hunk` to open changesets, attach
-  curated review annotations, and drive interactive diffs in Herdr panes.
+- Interactive diff review: use `skill://hunk` to open a numbered,
+  annotated walkthrough (not an empty first-file view), attach curated
+  notes, and drive interactive diffs in Herdr panes.
+
+
 - Herdr focus: preserve the operator's active workspace, tab, and pane. Read
   `skill://herdr` before every Herdr control action.
 - Do not claim completion while a supported finding or failed check remains.
