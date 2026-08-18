@@ -61,6 +61,7 @@ If you already hold `id`, `take` returns it.
 ```
 powder serve
 powder version
+powder skill
 powder list --takeable
 powder show <id>
 powder take <id>
