@@ -1,15 +1,15 @@
 ---
 name: code-review
-description: Review and repair a completed change for whole-system simplicity, correctness, and behavioral fidelity.
+description: Run a gated lens council, synthesize a report, and wait for the operator before repairing.
 disable-model-invocation: true
 ---
 
 # Code Review
 
-Review the completed change, repair every supported defect, prove the repairs,
-and repeat until the boundary is clean.
+Review the completed change. Do not edit production code until the operator
+has accepted or rejected each finding.
 
-## Establish intent
+## 1. Establish intent
 
 Reconstruct from the request, accepted decisions, repository authority, and
 runtime evidence:
@@ -21,106 +21,94 @@ runtime evidence:
 - affected callers, operators, and real interfaces;
 - proof that would distinguish success from a plausible regression.
 
-Review the complete relevant system, not only the diff. A concern that requires
-changing accepted intent is a design conflict, not an implementation defect.
-Route that choice through `grill-me`; do not disguise it as a repair.
+Review the complete relevant system, not only the diff. A concern that
+requires changing accepted intent is a design conflict. Route it through
+`grilling`. Do not disguise it as a repair.
 
-## Start with data
+Completion criterion: Intent, invariants, and proof are written.
 
-Use the Torvalds maxim as a hypothesis lens:
+## 2. Select lenses
 
-> Bad programmers worry about the code. Good programmers worry about data
-> structures and their relationships.
+A change is **trivial** when it is local, touches no public interface, adds
+no state, and does not change an error or concurrency path. Trivial default:
+`thermo` and `torvalds`.
 
-Inspect the data structures and relationships before local control flow. Find
-the owner of each datum, invariant, mutation, and transition. Look for duplicate
-authority, invalid representable states, leaked lifecycle knowledge, conversions
-that erase meaning, and names that misstate the domain.
+Otherwise, or when the operator invoked this skill by name on a non-trivial
+change, run the full council:
 
-Prefer designs that define errors out of existence. Make invalid states
-unrepresentable when the existing language and interface can do so directly.
-Do not add validation, retries, branches, or recovery for states a better model
-can eliminate.
+| Lens | File | Job |
+|---|---|---|
+| thermo | `references/thermo.md` | Ambitious code-judo, file size, spaghetti growth |
+| ousterhout | `references/ousterhout.md` | Deep modules, leaked complexity |
+| torvalds | `references/torvalds.md` | Data, invalid states, ownership |
+| carmack | `references/carmack.md` | Practicality, inspectability, hot-path cost |
+| uncle-bob | `references/uncle-bob.md` | Robustness and error boundaries |
+| kcd | `references/kcd.md` | Behavioral tests and readable contracts |
+| taelin | `references/taelin.md` | Erasure, reduction, a smaller program |
+| ponytail | `references/ponytail.md` | YAGNI; the laziest solution that works |
 
-## Seek strategic simplicity
+The operator may name a subset or force the full council.
 
-Judge the whole codebase after the change, not whether the new code is locally
-small. The shipped system should be simpler, more elegant, and more robust than
-before.
+Completion criterion: The lens set is listed with the trivial/full reason.
 
-Use Ousterhout's strategic-design lens:
+## 3. Council
 
-- make modules deep: small stable interfaces hiding necessary complexity;
-- pull special cases and policy behind the owner instead of leaking them to
-  callers;
-- remove shallow wrappers, pass-through methods, temporal coupling, and
-  configuration that transfers complexity elsewhere;
-- spend complexity only where it removes more complexity from the system over
-  its expected life.
+Launch one read-only scout per selected lens. Give each scout the intent,
+the diff, the target files, and only its reference file.
 
-Challenge every new requirement, layer, branch, state value, fallback,
-compatibility path, abstraction, option, and test fixture. Delete obsolete code,
-aliases, comments, tests, configuration, scaffolding, and dependencies. Look
-beyond the touched lines for nearby machinery the change makes unnecessary.
-Do not preserve residue because deletion was not named in the request.
+Each scout returns at most five findings. A finding has:
 
-## Prove behavior
-
-Review correctness, errors, concurrency, security, compatibility, data
-integrity, performance, and operator failure paths against concrete behavior.
-Trace representative inputs from the real interface through effects and back to
-observable output or state.
-
-Tests must defend intent and behavior:
-
-- assert outcomes, boundaries, invariants, transitions, precedence, and real
-  errors;
-- avoid source-text assertions, call-count choreography, private helpers, mocks
-  of the implementation under test, and incidental defaults;
-- prefer the real boundary; use a test only when the changed contract cannot be
-  proved more directly;
-- require each test to fail on a plausible defect.
-
-## Verifier delegation
-
-Delegate independent review to a read-only specialist subagent:
-
-1. **Launch verifier**: Spawn a `reviewer` subagent (and `security-reviewer` for
-   security or authorization boundaries) with `task`.
-2. **Context & Target**: Pass the exact target files, the changed diff, the
-   reconstructed intent, and the acceptance criteria.
-3. **Verifier contract**: The verifier operates read-only. It audits data
-   structures, strategic simplicity, error paths, and behavioral proof.
-4. **Return findings**: The verifier returns structured findings containing
-   the exact file, symbol, failing mechanism, evidence, and smallest repair.
-
-## Findings and repair
-
-A finding requires:
-
-- exact file, symbol, interface, or behavior;
-- a concrete failing path or maintenance mechanism;
+- exact file, symbol, or behavior;
+- the failing mechanism;
 - evidence;
-- the smallest coherent source repair;
-- observable proof.
+- the smallest coherent repair;
+- severity: `block`, `should`, or `note`.
 
-Exclude taste, generic best practices, speculative hardening, and style nits.
-Zero findings is valid.
+Zero findings from a lens is valid.
 
-Track every finding. Delete first, then simplify the necessary system. Fix the
-source rather than suppressing a symptom or special-casing the observed input.
-Migrate every caller and remove obsolete paths; do not leave compatibility
-shims unless accepted intent requires them.
+Completion criterion: Every selected lens has a harvested result.
 
-Run the narrowest real scenario for each repair, then applicable behavioral
-contract tests. A failed check is a new finding. If repairs were non-trivial,
-re-run verification over the repaired boundary.
+## 4. Synthesize
 
-Finish only when no supported finding remains, the real behavior is proved,
-unchanged invariants hold, and the codebase contains no obsolete path exposed
-by the change. Report repaired findings, deleted complexity, exact proof, and
-any external blocker.
-## Interactive walkthrough
-When a review identifies structural choices, accepted trade-offs, or complex
-repairs worth operator discussion, use `skill://hunk` to open an annotated diff
-in Herdr and walk the operator through the changes.
+Dedupe overlapping findings. Assign one primary lens. Drop nits that do not
+change behavior, ownership, or future change cost. Write one report to an
+OS temp path (not the repository):
+
+```markdown
+# Code review
+- Scope:
+- Intent:
+- Lenses:
+
+## Findings
+1. [block|should|note] lens=`<name>` `<file>:<symbol>`
+   Evidence:
+   Repair:
+
+## Deferred
+## Conflicts with accepted intent
+```
+
+Also write a Hunk sidecar at a sibling `.json` when findings have line
+targets. Schema: `comments[].filePath`, `newLine` or `oldLine`, `summary`,
+`rationale`.
+
+Present the report. Stop.
+
+Completion criterion: The report is on disk, shown to the operator, and no
+production edit has been made.
+
+## 5. Repair
+
+After the operator accepts, rejects, or defers each finding, repair only
+the accepted set. Delete first. Fix the source. Migrate every caller.
+Remove obsolete paths.
+
+Run the narrowest real scenario for each repair, then applicable contract
+tests. A failed check is a new finding. If repairs were non-trivial, re-run
+the same lens set over the repaired boundary and stop again at a new report.
+
+Use `skill://hunk` when the operator wants an annotated walkthrough.
+
+Completion criterion: Every accepted finding is repaired and proved, or an
+external blocker is named. Rejected and deferred items are untouched.
