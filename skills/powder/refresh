@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+url=${POWDER_SKILL_URL:-https://raw.githubusercontent.com/misty-step/powder/master/SKILL.md}
+curl -fsSL "$url" > "$here/SKILL.md"
+printf 'vendored %s\n' "$url"
