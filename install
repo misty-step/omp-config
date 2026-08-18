@@ -87,6 +87,15 @@ done
 rm -rf -- "$agent_dir/skills"
 mv "$skills_temp" "$agent_dir/skills"
 trap - 0 1 2 15
+
+hook_src="$repo_dir/.githooks/pre-push"
+if [ -s "$hook_src" ]; then
+  git_dir=$(git -C "$repo_dir" rev-parse --absolute-git-dir 2>/dev/null) || git_dir=
+  if [ -n "$git_dir" ]; then
+    install -d "$git_dir/hooks"
+    install -m 700 "$hook_src" "$git_dir/hooks/pre-push"
+  fi
+fi
 rm -f "$agent_dir/extensions/evidence-packet.ts"
 
 printf 'Installed lean OMP config in %s\n' "$agent_dir"
