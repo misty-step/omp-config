@@ -50,7 +50,7 @@ Establish observed facts and unresolved questions:
 - project-owned agent context.
 
 Treat old documents and installed tools as evidence. Verify consequential
-runtime claims. Settle facts with tools. Use `grill-me` only for material
+runtime claims. Settle facts with tools. Use `grilling` only for material
 operator judgments about ambition, users, compatibility, burden, or tradeoffs.
 
 Audit names as model claims. Separate current domain truth from historical

@@ -43,7 +43,7 @@ Before non-trivial production implementation, record:
   removals, non-goals, and unchanged invariants, but only when settled by
   binding evidence or explicit operator decisions.
 
-Route every material unsettled human-owned choice through `grill-me`. Do not
+Route every material unsettled human-owned choice through `grilling`. Do not
 implement while any such choice remains unresolved.
 
 ## Knowledge vault
