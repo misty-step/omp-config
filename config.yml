@@ -11,8 +11,48 @@ modelRoles:
   commit: "@smol"
 symbolPreset: nerd
 theme:
-  dark: dark-ember
-  light: dark-ember
+  dark: tokyonight
+  light: tokyonight
+statusLine:
+  preset: custom
+  separator: none
+  transparent: true
+  sessionAccent: true
+  compactThinkingLevel: true
+  showHookStatus: true
+  leftSegments:
+    - model
+    - mode
+    - path
+    - git
+    - pr
+    - subagents
+  rightSegments:
+    - session_name
+    - cache_hit
+    - context_pct
+    - cost
+  segmentOptions:
+    path:
+      abbreviate: true
+      maxLength: 36
+      stripWorkPrefix: true
+    git:
+      showBranch: true
+      showStaged: true
+      showUnstaged: true
+      showUntracked: true
+tui:
+  tight: false
+  hyperlinks: auto
+  renderMermaid: true
+  scrollbackRebuild: true
+  titleState: true
+display:
+  shimmer: classic
+  smoothStreaming: true
+  showTokenUsage: true
+  cacheMissMarker: true
 browser:
   relay: false
 setupVersion: 1

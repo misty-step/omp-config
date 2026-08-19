@@ -13,11 +13,28 @@ Keep prototype controls away from production mutations.
 ## Vary
 
 Build at least six options. Each must differ in structure, hierarchy, or
-primary interaction. State its thesis, primary action, hierarchy, and main
-cost.
+primary interaction, and each must carry its own visual system. State its
+thesis, primary action, hierarchy, visual system, and main cost.
 
-Use existing components and tokens when they fit. Do not force options
-through one shared layout.
+Spread the catalog across these axes. Do not leave one axis constant:
+
+- **Structure:** hero, split, timeline, board, tape, command-driven.
+- **Type:** grotesque, serif editorial, monospace, condensed.
+- **Palette:** light, dark, paper, single accent, high-contrast.
+- **Density:** cockpit, comfortable, poster.
+- **Shape and edge:** hairline, boxed, rounded, hard-shadow.
+- **Motion budget:** none, one anchored transition, gesture-led.
+
+Distinct aesthetic families are required, not decoration. Two options that
+differ only in accent color are one option.
+
+Every option still obeys the direction's invariants: real values stay visible,
+data uses tabular figures, the primary action works by keyboard with visible
+focus, contrast holds, reduced motion is honored, and no option invents product
+scope the brief refuses.
+
+Reuse existing components and tokens only where an option's own system wants
+them. Never force every option through one shared layout or one theme.
 
 ## Switch
 
