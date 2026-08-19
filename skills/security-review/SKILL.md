@@ -6,10 +6,12 @@ disable-model-invocation: true
 
 # Security Review
 
-Execute an adversarial security audit across three frontier models via OpenRouter:
-- **DeepSeek V4 Pro 0813** (`deepseek/deepseek-v4-pro-0813`): Code & Sink Specialist (Injection, Memory, Deserialization, Parsers).
-- **Kimi K3** (`moonshotai/kimi-k3`): Taint & Logic Specialist (Data Flow, State Machines, Auth/Authz, TOCTOU).
-- **GLM 5.3** (`z-ai/glm-5.3`): Threat Model & Architecture Specialist (Trust Domains, Secrets, Blast Radius, Supply Chain).
+Execute a deep, exhaustive, and rigorous adversarial security audit across three frontier reasoning models via OpenRouter:
+- **GLM 5.3** (`z-ai/glm-5.3`)
+- **Kimi K3** (`moonshotai/kimi-k3`)
+- **DeepSeek V4 Pro 0813** (`deepseek/deepseek-v4-pro-0813`)
+
+All three models are concurrently tasked with full-spectrum vulnerability research across injections, taint flow, broken access control, logic defects, concurrency races, cryptography, and systemic architecture.
 
 ---
 
@@ -30,28 +32,28 @@ Completion criterion: Target scope, untrusted inputs, and trust boundaries ident
 Run the multi-model audit engine across the target scope.
 
 ### Execution via Bundled Script
-Run `scripts/audit.mjs` directly from the skill directory:
+Run `scripts/audit.mjs` from the installed skill directory against the target repository:
 
 ```bash
 # Audit working tree changes
-node skills/security-review/scripts/audit.mjs
+node <skill-directory>/scripts/audit.mjs
 
 # Audit staged changes
-node skills/security-review/scripts/audit.mjs --staged
+node <skill-directory>/scripts/audit.mjs --staged
 
 # Audit specific commit
-node skills/security-review/scripts/audit.mjs --commit HEAD
+node <skill-directory>/scripts/audit.mjs --commit HEAD
 
 # Audit specific files or directories
-node skills/security-review/scripts/audit.mjs --file src/auth.ts --file src/server.ts
+node <skill-directory>/scripts/audit.mjs --file src/auth.ts --file src/server.ts
 ```
 
-The script queries all three models in parallel, extracts structured JSON findings, correlates matching issues, and generates:
+The script queries GLM 5.3, Kimi K3, and DeepSeek V4 Pro in parallel, extracts structured JSON findings, correlates matching issues, and generates:
 - Markdown audit report: `/tmp/security-review-<id>.md`
 - Hunk walkthrough annotations: `/tmp/security-walkthrough-<id>.json`
 - Raw findings data: `/tmp/security-findings-<id>.json`
 
-For model domain details and lens reference, see `references/lenses.md`.
+For exhaustive vulnerability checklist and attack domain details, see `references/audit-domains.md`.
 
 Completion criterion: Tri-model council responses collected from all three models with zero unhandled timeouts.
 
@@ -76,8 +78,8 @@ Group and classify surviving findings:
 
 - **Consensus Rating**:
   - **Tri-Model Consensus (3/3)**: Unanimous agreement across all three models. High confidence.
-  - **Dual-Model Consensus (2/3)**: Agreement between two models (e.g. Code Sink + Logic Boundary). High confidence.
-  - **Solo Lens Finding (1/3)**: Specialized finding identified by one model. Requires verified call chain.
+  - **Dual-Model Consensus (2/3)**: Agreement between two models. High confidence.
+  - **Solo Model Finding (1/3)**: Finding identified by a single model. Requires strict call chain verification.
 - **Severity Rating**:
   - `Critical`: Remote code execution, unauthenticated auth bypass, major data exfiltration.
   - `High`: Authenticated privilege escalation, IDOR, sensitive state leak, low-complexity DoS.

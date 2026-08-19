@@ -8,8 +8,9 @@ license: MIT; modified from Matt Pocock's prototype skill. Emil and Leon texts k
 # Prototype
 
 For a visual or interaction task: synthesize Emil and Leon, then ship a
-catalog of at least six structurally different options. For a logic, state,
-or data-shape question: read `LOGIC.md` and stop there.
+catalog of at least six options that differ in structure **and** in visual
+system. For a logic, state, or data-shape question: read `LOGIC.md` and stop
+there.
 
 ## 1. Choose
 
@@ -51,8 +52,14 @@ Merge the scout output into one direction:
 - thesis (one sentence);
 - audience and job;
 - VARIANCE / MOTION / DENSITY dials, or why they do not apply;
+- AESTHETIC RANGE: the styles the catalog will span, and the invariants every
+  style must still obey;
 - keep / drop / never lists;
 - constraints from the existing system.
+
+The direction fixes the product truth and the non-negotiable principles. It
+does not fix one look. Leon and Emil are the floor for every option, never an
+argument for shipping six versions of one theme.
 
 Read `frontend-design` only for product thesis and browser critique rules.
 Do not let it replace the synthesized direction.
@@ -62,7 +69,17 @@ Completion criterion: One written direction a catalog can implement.
 ## 4. Catalog
 
 Read `UI.md`. Build at least six options. Each option must differ in
-structure, hierarchy, or primary interaction. Theme-only swaps do not count.
+structure, hierarchy, or primary interaction, **and** carry its own visual
+system: type, palette, density, shape, and motion budget.
+
+Go wide on purpose. Span distinct aesthetic families so the operator sees
+genuinely different ways to express the product, not one house style repeated.
+A theme-only swap is not a structural option; identical styling across options
+is not a catalog. Both failures are rejected.
+
+Every option still obeys the synthesized principles: real data never hidden,
+tabular figures for data, keyboard operation with visible focus, sufficient
+contrast, honored reduced motion, and no invented product scope.
 
 Mark the surface `PROTOTYPE`. Isolate it from production mutations.
 

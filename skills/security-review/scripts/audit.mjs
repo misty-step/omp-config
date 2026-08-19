@@ -1,28 +1,22 @@
 #!/usr/bin/env node
 import { execSync } from "node:child_process";
-import { writeFileSync, readFileSync, existsSync, mkdirSync } from "node:fs";
-import { resolve, dirname, basename } from "node:path";
+import { writeFileSync, readFileSync, existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { tmpdir } from "node:os";
 
-// Target Models on OpenRouter
+// Frontier Reasoning Models on OpenRouter
 const MODELS = {
-  deepseek: {
-    id: "deepseek/deepseek-v4-pro-0813",
-    name: "DeepSeek V4 Pro 0813",
-    lens: "Code & Sink Specialist",
-    focus: "Low-level implementation defects, dangerous sinks, memory safety, injection vectors (SQL, command, template, regex), deserialization, parser flaws, and boundary overflow errors."
+  glm: {
+    id: "z-ai/glm-5.3",
+    name: "GLM 5.3"
   },
   kimi: {
     id: "moonshotai/kimi-k3",
-    name: "Kimi K3",
-    lens: "Taint & Logic Specialist",
-    focus: "Untrusted taint flow across function/module boundaries, broken access control (IDOR, auth bypass), state machine corruption, race conditions (TOCTOU), and business logic defects."
+    name: "Kimi K3"
   },
-  glm: {
-    id: "z-ai/glm-5.3",
-    name: "GLM 5.3",
-    lens: "Threat Model & Architecture Specialist",
-    focus: "Systemic architecture, trust domain boundaries, privilege escalation, secret leakage, cryptographic misuse, unauthenticated surfaces, denial of service, and failure blast radius."
+  deepseek: {
+    id: "deepseek/deepseek-v4-pro-0813",
+    name: "DeepSeek V4 Pro 0813"
   }
 };
 
@@ -76,19 +70,27 @@ function collectTargetContent(args) {
   return diff;
 }
 
-const SYSTEM_PROMPT = (modelConfig) => `You are a Principal Security Engineer and adversarial security auditor.
-Your assigned lens: ${modelConfig.lens}
-Assigned focus: ${modelConfig.focus}
+const SYSTEM_PROMPT = `You are a Principal Security Engineer and elite adversarial vulnerability researcher.
 
-Review the provided target code or patch.
-Report ONLY real, provable vulnerabilities with credible execution/attack paths.
-Strictly ignore cosmetic issues, style, formatting, and unverified speculative concerns.
+Perform a deep, exhaustive, and rigorous security audit across the entire provided codebase / diff.
+Investigate the full spectrum of vulnerabilities with extreme depth:
+1. Sinks & Injections: OS command injection, SQLi, NoSQLi, Template Injection (SSTI), ReDoS, prototype pollution, dangerous deserialization, memory/arithmetic corruption.
+2. Taint Flow & Boundary Violations: Untrusted data propagation across interfaces, lack of input sanitization/validation, escaping errors.
+3. Access Control & Authentication: IDOR, privilege escalation (horizontal & vertical), broken authentication, token handling, session fixation, timing attacks.
+4. Business Logic & State Machines: Step-skipping, balance/quantity manipulation, race conditions (TOCTOU), invalid state transitions.
+5. Threat Modeling & Architecture: Trust boundary breaches, hardcoded credentials/secrets, cryptographic misuse, Denial of Service (DoS) amplification, blast radius.
 
-Output valid JSON matching this schema:
+For every issue found:
+- Trace the complete source-to-sink exploit path step-by-step.
+- Detail the exact blast radius and security impact.
+- Provide a concrete, robust, production-grade remediation.
+
+Report ONLY real, provable vulnerabilities with credible execution paths. Ignore cosmetic issues, styling, or unverified speculative theories.
+
+Output your audit strictly as a valid JSON object matching this schema:
 {
-  "lens": "${modelConfig.name}",
   "verdict": "clean" | "vulnerable",
-  "summary": "<1-2 sentence executive assessment of security posture>",
+  "summary": "<2-3 sentence executive assessment of security posture>",
   "findings": [
     {
       "id": "SEC-01",
@@ -105,13 +107,13 @@ Output valid JSON matching this schema:
     }
   ]
 }
+
 If no vulnerabilities exist, return "verdict": "clean" and "findings": [].
 Output JSON only.`;
 
 async function queryModel(token, modelKey, modelConfig, targetContent, timeoutMs = 120000) {
   const t0 = Date.now();
-  const systemPrompt = SYSTEM_PROMPT(modelConfig);
-  const userPrompt = `Target Scope to Audit:\n\n\`\`\`\n${targetContent.slice(0, 120000)}\n\`\`\``;
+  const userPrompt = `Target Scope for Deep Security Audit:\n\n\`\`\`\n${targetContent.slice(0, 120000)}\n\`\`\``;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -128,10 +130,10 @@ async function queryModel(token, modelKey, modelConfig, targetContent, timeoutMs
       body: JSON.stringify({
         model: modelConfig.id,
         messages: [
-          { role: "system", content: systemPrompt },
+          { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: userPrompt }
         ],
-        max_tokens: 4000,
+        max_tokens: 6000,
         temperature: 0.1
       }),
       signal: controller.signal
@@ -244,10 +246,7 @@ function synthesizeFindings(results) {
       const candWords = (cand.title || "").toLowerCase().split(/\W+/).filter(w => w.length > 3);
       const sharedKeywords = baseWords.filter(w => candWords.includes(w)).length >= 2;
 
-      // Group if:
-      // 1. Same file AND same CWE
-      // 2. Same file AND overlapping lines AND shared keywords
-      // 3. Same CWE AND shared keywords
+      // Group if matching vulnerability across models
       const shouldGroup = (sameFile && sameCwe) ||
         (sameFile && lineOverlap && sharedKeywords) ||
         (sameCwe && sharedKeywords);
@@ -259,9 +258,9 @@ function synthesizeFindings(results) {
     }
 
     const reportingModels = Array.from(new Set(group.map(g => g.modelName)));
-    const consensus = reportingModels.length >= 3 ? "Tri-Model Consensus"
-      : reportingModels.length === 2 ? "Dual-Model Consensus"
-      : "Solo Lens Finding";
+    const consensus = reportingModels.length >= 3 ? "Tri-Model Consensus (3/3)"
+      : reportingModels.length === 2 ? "Dual-Model Consensus (2/3)"
+      : "Solo Model Finding (1/3)";
 
     const rankMap = { critical: 4, high: 3, medium: 2, low: 1 };
     let topSeverity = "low";
@@ -308,16 +307,16 @@ function generateMarkdownReport(targetLabel, results, synthesis) {
 
 ## 1. Council Summaries
 
-| Model | Assigned Lens | Verdict | Findings | Latency |
-|---|---|---|---|---|
+| Model | Verdict | Findings Identified | Latency |
+|---|---|---|---|
 `;
 
   for (const res of results) {
     const sum = modelSummaries[res.key];
-    md += `| **${res.name}** | ${MODELS[res.key].lens} | \`${sum?.verdict || "unknown"}\` | ${sum?.count || 0} | ${(res.elapsedMs / 1000).toFixed(1)}s |\n`;
+    md += `| **${res.name}** | \`${sum?.verdict || "unknown"}\` | ${sum?.count || 0} | ${(res.elapsedMs / 1000).toFixed(1)}s |\n`;
   }
 
-  md += `\n### Lens Assessments\n`;
+  md += `\n### Model Assessments\n`;
   for (const res of results) {
     const sum = modelSummaries[res.key];
     md += `- **${res.name}**: ${sum?.summary || "No summary provided."}\n`;
@@ -415,15 +414,15 @@ async function main() {
     : "Working tree diff";
 
   if (!args.jsonOutput) {
-    console.log(`[security-reviewer] Initiating Tri-Model Council for: ${targetLabel}`);
+    console.log(`[security-reviewer] Initiating Full-Spectrum Security Audit for: ${targetLabel}`);
     console.log(`[security-reviewer] Payload size: ${targetContent.length} bytes`);
-    console.log(`[security-reviewer] Launching parallel audits (GLM 5.3, Kimi K3, DeepSeek V4 Pro 0813 via OpenRouter)...\n`);
+    console.log(`[security-reviewer] Launching concurrent audits (GLM 5.3, Kimi K3, DeepSeek V4 Pro 0813 via OpenRouter)...\n`);
   }
 
   const promises = [
-    queryModel(token, "deepseek", MODELS.deepseek, targetContent),
+    queryModel(token, "glm", MODELS.glm, targetContent),
     queryModel(token, "kimi", MODELS.kimi, targetContent),
-    queryModel(token, "glm", MODELS.glm, targetContent)
+    queryModel(token, "deepseek", MODELS.deepseek, targetContent)
   ];
 
   const results = await Promise.all(promises);
