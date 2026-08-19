@@ -77,6 +77,12 @@ genuinely different ways to express the product, not one house style repeated.
 A theme-only swap is not a structural option; identical styling across options
 is not a catalog. Both failures are rejected.
 
+Six is a floor, not a target, and it applies to every pass. Never present
+fewer than six live options. When the operator rejects some options and
+favours others, that is direction, not a pick: replace the rejected options
+with new ones descended from the survivors and explore that territory
+further. Never answer feedback by shrinking the catalog.
+
 Every option still obeys the synthesized principles: real data never hidden,
 tabular figures for data, keyboard operation with visible focus, sufficient
 contrast, honored reduced motion, and no invented product scope.
@@ -90,9 +96,12 @@ Completion criterion: Six or more switchable options are on a real surface.
 Exercise every option at desktop and mobile sizes. Use keyboard and pointer
 on the primary interaction. Capture comparison screenshots.
 
-Record the operator's pick, or stop and wait if none is chosen. After a pick,
-remove the other options, the switcher, and prototype-only routes. Implement
-the winner to production standards only when the operator asks.
+Record the operator's pick, or stop and wait if none is chosen. Remove the
+other options only once a single option is chosen. Several named favourites
+are direction for the next pass, not a pick: re-widen the catalog inside that
+territory back to at least six. After a pick, remove the losers, the
+switcher, and prototype-only routes. Implement the winner to production
+standards only when the operator asks.
 
-Completion criterion: A pick is recorded, or the catalog is waiting. Losers
-are gone after a pick.
+Completion criterion: A pick is recorded with the losers gone, or at least six
+live options are waiting.
