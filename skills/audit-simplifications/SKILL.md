@@ -80,6 +80,8 @@ Workers look for:
   collection or index would materially simplify behavior;
 - lifecycle, concurrency, or async states whose representation permits stale
   or contradictory state.
+- dependencies whose use is thin enough that stdlib, an existing dependency,
+  or a small local function would remove them;
 
 Do not force an abstraction. Prefer boring local code when it is already
 clear. Do not recommend a change solely for stylistic consistency,
@@ -128,6 +130,8 @@ Run fresh independent passes for:
 - duplication and ownership overlap;
 - materiality and over-abstraction;
 - schema completeness;
+- dependency ladder: unused, under-used, or duplicated dependencies that
+  stdlib or an existing dependency would replace;
 - dependency-aware priority ranking.
 
 Rank accepted recommendations by concrete impact, confidence, implementation
