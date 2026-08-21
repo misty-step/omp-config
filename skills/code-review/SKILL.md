@@ -45,7 +45,7 @@ change, run the full council:
 | uncle-bob | `references/uncle-bob.md` | Robustness and error boundaries |
 | kcd | `references/kcd.md` | Behavioral tests and readable contracts |
 | taelin | `references/taelin.md` | Erasure, reduction, a smaller program |
-| ponytail | `references/ponytail.md` | YAGNI; the laziest solution that works |
+| hickey | `references/hickey.md` | Simple vs easy; decomplecting; necessary complexity |
 
 The operator may name a subset or force the full council.
 

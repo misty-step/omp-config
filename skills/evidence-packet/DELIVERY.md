@@ -19,13 +19,14 @@ revision.
 
 ## Deliver to a PR
 
-Use the repository-approved attachment interface. Images and videos normally
-use the repository's private or public attachment store. Do not copy private
-evidence to another host.
+Upload images, videos, and transcripts directly to the pull request.
+GitHub-hosted media stays access-controlled with the repository. Do not copy
+private evidence to another host. When CI produces artifacts for the same
+commit, prefer linking those over re-uploading equivalents.
 
-If no approved upload interface is available, report the local artifact path and
-an evidence delivery gap. Do not invent a durable URL. Do not place a local path
-in a PR as if a reviewer can open it.
+If upload is impossible, report the local artifact path and an evidence
+delivery gap. Do not invent a durable URL. Do not place a local path in a PR
+as if a reviewer can open it.
 
 Add one PR section:
 
