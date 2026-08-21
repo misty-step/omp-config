@@ -46,6 +46,7 @@ change, run the full council:
 | kcd | `references/kcd.md` | Behavioral tests and readable contracts |
 | taelin | `references/taelin.md` | Erasure, reduction, a smaller program |
 | hickey | `references/hickey.md` | Simple vs easy; decomplecting; necessary complexity |
+| ponytail | `references/ponytail.md` | YAGNI; the laziest solution that works |
 
 The operator may name a subset or force the full council.
 
