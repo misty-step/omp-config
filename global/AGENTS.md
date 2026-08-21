@@ -9,6 +9,10 @@
 - Judge whole-system code, state, configuration, failure paths, and operator
   work. Local simplicity that moves complexity elsewhere is not progress.
 - Prototype the riskiest unresolved assumption before a broad migration.
+- Render an operator policy statement before acting on it: name the files,
+  roles, surfaces, or knobs it touches and what changes. Proceed on
+  confirmation or explicit go-ahead — a misread caught before the edit costs
+  one message; after, it costs the work.
 
 ## Communication
 
