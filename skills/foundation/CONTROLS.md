@@ -24,6 +24,10 @@ ubiquitous language across code, API, UI, telemetry, and operations.
 
 Assert outcomes, boundaries, invariants, transitions, precedence, and real
 errors through the real contract. Each test goes red on a plausible defect.
+Weight the portfolio toward integration through real contracts; add property
+or fuzz coverage where parsers or core logic demand it. Quarantine flaky
+tests with an owner immediately; fix or delete them fast. Keep the full gate
+inside the repository's CI latency budget.
 
 ## Hooks
 

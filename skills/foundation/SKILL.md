@@ -69,6 +69,10 @@ deviation:
 - formatter and linter as errors;
 - domain types and data constraints;
 - deterministic tests through real contracts;
+- a behavioral test portfolio weighted toward integration, with property or
+  fuzz coverage where parsers or core logic demand it;
+- a flaky-test policy: quarantine with an owner, fix or delete fast;
+- a CI latency budget the full gate respects;
 - one tight local check command;
 - committed hooks: tight pre-commit, broader pre-push;
 - CI as clean-room authority over the same owned commands;
