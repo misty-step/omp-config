@@ -38,9 +38,10 @@ fail on plausible defects.
 
 ## Run
 
-Start every affected application locally and exercise the changed behavior
-through its real entry point. A repository-owned start or seed command wins
-over improvisation.
+Start every affected application locally and QA the product surface: exercise
+the changed behavior end to end as a user would, and probe the paths around
+it. A repository-owned start or seed command wins over improvisation.
+Automated tests, lint, and CI do not substitute for this.
 
 ## Review and repair
 
