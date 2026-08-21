@@ -48,7 +48,7 @@ Read `HTML-REPORT.md`. Write one self-contained HTML report to the OS temporary
 directory and open it in a browser. Recommend one candidate, or state that none
 survived.
 
-Do not edit production code yet. After the user selects a candidate, use
-`explore-unknowns` to settle ownership, interface, state, migration, failure
-behavior, and proof. Implement only when the request authorizes it and the map
-does not expand scope.
+Do not edit production code yet. After the operator selects a candidate, ask
+them to run `/explore-unknowns` to settle ownership, interface, state,
+migration, failure behavior, and proof. Implement only when the request
+authorizes it and the map does not expand scope.

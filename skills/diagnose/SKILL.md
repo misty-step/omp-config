@@ -47,9 +47,10 @@ hypothesis remains live without a reason.
 If three attempted fixes have failed, stop patching. The representation is
 the bug.
 
-Name the data, state, or ownership that permits the failure. Route the
-redesign through `explore-unknowns`. Use `audit-simplifications` when the
-question is whole-repo representation, not this incident.
+Name the data, state, or ownership that permits the failure. Stop and put
+the redesign in front of the operator to run `/explore-unknowns`. Use
+`audit-simplifications` when the question is whole-repo representation, not
+this incident.
 
 Completion criterion: Either a fix from step 3 holds, or patching has
 stopped and the architecture question is in front of the operator.

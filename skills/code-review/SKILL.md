@@ -22,8 +22,9 @@ runtime evidence:
 - proof that would distinguish success from a plausible regression.
 
 Review the complete relevant system, not only the diff. A concern that
-requires changing accepted intent is a design conflict. Route it through
-`explore-unknowns`. Do not disguise it as a repair.
+requires changing accepted intent is a design conflict. Stop and hand it to
+the operator to route through `/explore-unknowns`; do not disguise it as a
+repair.
 
 Completion criterion: Intent, invariants, and proof are written.
 

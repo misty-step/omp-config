@@ -50,9 +50,9 @@ Establish observed facts and unresolved questions:
 - project-owned agent context.
 
 Treat old documents and installed tools as evidence. Verify consequential
-runtime claims. Settle facts with tools. Use `explore-unknowns` only for
-material operator judgments about ambition, users, compatibility, burden, or
-tradeoffs.
+runtime claims. Settle facts with tools. Leave material operator judgments
+about ambition, users, compatibility, burden, or tradeoffs to
+`/explore-unknowns`.
 
 Audit names as model claims. Separate current domain truth from historical
 residue, synonyms, and overloaded terms. Recover the existing model with DDD
