@@ -30,6 +30,14 @@ behind deep modules (Ousterhout). Use one ubiquitous language across code, API,
 UI, and operations (Evans). Keep important paths direct and inspectable
 (Carmack).
 
+Test discipline: tests defend behavior at the outermost surface that still
+gives a fast, deterministic signal — CLI over top-level function over
+internals; drive the entry points users drive, and wire harnesses the way
+production wires them. Assert on stored values, returned payloads, and
+rendered output — never only on counts or collection sizes; a length check
+passes while normalization silently drops input. A passing test must mean a
+real user gets the right result.
+
 ## 1. Inspect
 
 Default to the current repository unless the invocation names another target.
