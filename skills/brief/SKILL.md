@@ -1,6 +1,6 @@
 ---
 name: brief
-description: One-screen executive brief — verdict, open calls, ranked moves, risks.
+description: Decision-grade executive brief grounded in evidence — why things stand, what needs a call.
 disable-model-invocation: true
 ---
 
@@ -33,20 +33,31 @@ board item is accounted for from observed evidence.
 
 ## 2. Deliver
 
-Cut to what changes an operator decision; process narration drops. Return
-only the brief, under 200 words:
+Cut to what changes an operator decision; process narration drops. Weight
+the brief mostly why, some what, a smidge of how:
 
-- **Verdict** — one or two sentences: where the work stands and whether
-  it is on track.
-- **Decisions** — at most three open calls, highest stakes first. Each:
-  the question, the options, your recommendation, the cost of waiting.
-  When more wait, one clause gives the count. Omit when none.
-- **Moves** — at most five, highest first. Each: identifier, what it is,
-  why next, and the move (`do`, `wait`, `drop`).
-- **Watch** — at most three risks, stale claims, or surprises. Omit when
-  none.
+- **Why first** — the causes and stakes behind the state. Why the work
+  stands where it stands, why a call matters now, why the obvious next
+  step is or isn't right. This is the body of the brief.
+- **What second** — the facts that carry those judgments: state,
+  numbers, findings. Include only what supports a why or forces a call.
+- **How last** — mechanics appear only when they change a decision (the
+  command that ships it, the path it lands in), never as narration.
+
+Form follows the material; there is no mandated shape:
+
+- Open with the bottom line in plain sentences: where things stand and
+  why. A quiet session is three sentences and done.
+- Surface every open call — question, live options, your recommendation,
+  the cost of waiting — highest stakes first. When more than a few wait,
+  name the top ones and count the rest. No calls means say so and stop.
+- Beyond that, include only what a decision depends on: risks, surprises,
+  stale claims worth flagging. Everything else drops.
+- As long as the material earns, as short as it allows. Headings appear
+  when the brief outgrows prose, never by default.
 
 Do not implement; do not groom the board.
 
 Completion criterion: every open call is decidable from the brief or
-counted by it — no follow-up question from them, no essay from you.
+counted by it, and every claim traces to observed evidence or is marked
+inferred — no follow-up question from them, no essay from you.
