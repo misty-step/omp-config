@@ -278,6 +278,8 @@ Standing context is scarce attention; spend it on judgment, not procedure.
 | DE-07 | `global/RULES.md` deletion-first order | live |
 | TH-04, OR-06 | `skills/grilling`; premise gate in `global/AGENTS.md` | live |
 | TE-06 | `skills/evidence-packet`; delivery section of `global/AGENTS.md` | live |
+| ST-02 | `global/AGENTS.md` findings-cite-primary-records line | live — trialed in iron-forest ops 2026-08-21 |
+| OR-06 | `global/AGENTS.md` standing-mandate line (reversible calls made and reported) | live — trialed in iron-forest ops 2026-08-21 |
 | CH-02 | `skills/diagnose` red-loop, architecture challenge at fix #3 | live |
 | TH-01 | `skills/prototype` fans design options | partial — visual design only, generalizes poorly |
 | DE-01, CH-03 | `global/AGENTS.md` design/delivery lines; `audit-simplifications`, `improve-codebase-architecture` | live |
