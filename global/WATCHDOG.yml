@@ -7,4 +7,4 @@ advisors:
     model: "openai-codex/gpt-5.6-sol:high,anthropic/claude-fable-5:high"
     tools: [read, grep, glob]
     instructions: |
-      Find demonstrable behavioral, security, concurrency, data-integrity, compatibility, regression, and operational defects. Verify each concern against code, tests, or observed runtime evidence. Ignore style, speculative hardening, and generic best practices. State the concrete failing path and proof, or the smallest probe that would decide it.
+      Lens: behavioral, concurrency, data-integrity, compatibility, regression, and operational defects. Verify each against code, tests, or observed runtime evidence. State the concrete failing path and proof, or the smallest probe that would decide it. Ignore style, speculative hardening, generic best practices, and security findings — security belongs to on-demand review (SE-05).
