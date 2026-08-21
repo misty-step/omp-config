@@ -1,5 +1,7 @@
 /*
 !/.gitignore
+!/README.md
+!/CANON.md
 !/install
 !/config.yml
 !/mcp.json
