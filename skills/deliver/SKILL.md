@@ -49,3 +49,6 @@ on note `1/N`. Opening an empty Hunk on the first diff file is not done.
 You are done when the operator can review the PR, step the annotated
 walkthrough, read the Taste verdict, and decide only on Take findings.
 
+If the change ships, hand the deploy to `skill://watch-deploy`. Do not watch
+from here.
+
