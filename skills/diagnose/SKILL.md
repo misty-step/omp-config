@@ -48,8 +48,8 @@ If three attempted fixes have failed, stop patching. The representation is
 the bug.
 
 Name the data, state, or ownership that permits the failure. Route the
-redesign through `grilling`. Use `audit-simplifications` when the question
-is whole-repo representation, not this incident.
+redesign through `explore-unknowns`. Use `audit-simplifications` when the
+question is whole-repo representation, not this incident.
 
 Completion criterion: Either a fix from step 3 holds, or patching has
 stopped and the architecture question is in front of the operator.

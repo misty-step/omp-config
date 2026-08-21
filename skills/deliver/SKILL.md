@@ -12,7 +12,7 @@ One ready ticket. A reviewable change. Then stop.
 
 Take the highest-priority ready piece of work this checkout should do. Use whatever
 ledger the project already trusts. Skip anything already moving. If
-the work is still a design argument, read `skill://grilling` first.
+the work is still a design argument, read `skill://explore-unknowns` first.
 
 ## Isolate
 

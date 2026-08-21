@@ -69,7 +69,7 @@ Standing context is scarce attention; spend it on judgment, not procedure.
   operator sign-off. Two-way doors get decided fast by whoever is closest.
 - **TH-04** Review the premise before the implementation. A wrong answer to
   the right question beats a right answer to the wrong one. Route material
-  unsettled human-owned choices through `grilling`.
+  unsettled human-owned choices through `explore-unknowns`.
 
 ## DE — Design & architecture
 
@@ -276,7 +276,7 @@ Standing context is scarce attention; spend it on judgment, not procedure.
 | Canon | Harness artifact | Status |
 | --- | --- | --- |
 | DE-07 | `global/RULES.md` deletion-first order | live |
-| TH-04, OR-06 | `skills/grilling`; premise gate in `global/AGENTS.md` | live |
+| TH-04, OR-06 | `skills/explore-unknowns`; premise gate in `global/AGENTS.md` | live |
 | TE-06 | `skills/evidence-packet`; delivery section of `global/AGENTS.md` | live |
 | ST-02, RS-02 | `global/AGENTS.md` findings-cite-primary-records line | live — trialed in iron-forest ops 2026-08-21 |
 | OR-06 | `global/AGENTS.md` standing-mandate line (reversible calls made and reported) | live — trialed in iron-forest ops 2026-08-21 |

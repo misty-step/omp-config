@@ -49,6 +49,6 @@ directory and open it in a browser. Recommend one candidate, or state that none
 survived.
 
 Do not edit production code yet. After the user selects a candidate, use
-`grilling` to settle ownership, interface, state, migration, failure behavior,
-and proof. Implement only when the request authorizes it and the lock does not
-expand scope.
+`explore-unknowns` to settle ownership, interface, state, migration, failure
+behavior, and proof. Implement only when the request authorizes it and the map
+does not expand scope.

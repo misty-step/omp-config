@@ -23,7 +23,7 @@ runtime evidence:
 
 Review the complete relevant system, not only the diff. A concern that
 requires changing accepted intent is a design conflict. Route it through
-`grilling`. Do not disguise it as a repair.
+`explore-unknowns`. Do not disguise it as a repair.
 
 Completion criterion: Intent, invariants, and proof are written.
 
