@@ -222,6 +222,11 @@ Standing context is scarce attention; spend it on judgment, not procedure.
   rather than silently incurring per-token cost. Known necessary exception:
   the `vision` role routes image reads through per-token OpenRouter until a
   flat-rate multimodal model replaces it; activation shows in session cost.
+- **OR-08** Autonomous work leaves a decision trail. Choices made where the
+  brief was silent surface post-hoc in a confidence-ranked, non-blocking
+  ledger (`audit-choices`); the audit changes no code, and a needs-user
+  verdict stops the run (premise gate). Only non-human-owned two-way-door
+  choices proceed provisionally (TH-03).
 
 ## TL — Tooling surface
 
@@ -287,6 +292,7 @@ Standing context is scarce attention; spend it on judgment, not procedure.
 | TL-01, TL-02 | `skills/herdr`, `skills/hunk` | live |
 | OR-05 | `skills/powder`, `skills/checkpoint` | live |
 | TE-01–TE-05 | `skills/foundation` agentic baseline | unverified coverage |
+| OR-08 | `skills/audit-choices` decision ledger | live — deployed; deliver/Iron-Forest wiring blocked on PR #57 |
 | OP-01 | Landmark adopted in at least `canary` (full, `@35d002b`), `linejam` (full, `@35d002b` = v0.28.1), `crucible` (synthesis-only, `@v0`) — examples, inventory not audited | partial — fleet rollout incomplete |
 | OP-03–OP-05 | `skills/watch-deploy` soak gate; `deliver` hands off at ship | drafted — first real deploy pending |
 | SE-03, SE-05 | Council script; `security-reviewer` agent routed to DeepSeek; security on-demand, closeouts correctness-only | live for judgment; remediation blocked (candidate 4) |
