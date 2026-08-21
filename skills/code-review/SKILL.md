@@ -44,10 +44,14 @@ findings is valid.
 
 ## 3. Taste gate
 
-Dedupe overlapping findings, then judge each repair against the running
-system, not diff polish. A finding is a **Take** only when its repair is
-simpler, more robust, more elegant, and removes an invalid representable
-state or a dual owner — otherwise drop it.
+Dedupe overlapping findings. A supported `block` finding — a demonstrated
+correctness, safety, data-integrity, or security defect — is a Take
+unconditionally; taste never suppresses it.
+
+For every other finding, judge the repair against the running system, not
+diff polish. It is a **Take** only when its repair is simpler, more robust,
+more elegant, and removes an invalid representable state or a dual owner;
+otherwise drop it.
 
 - **Take** — the only class the operator is asked about. At most one
   follow-up Take outside the ticket.
