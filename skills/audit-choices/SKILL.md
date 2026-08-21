@@ -59,8 +59,11 @@ Two ways in, same audit:
    is that the operator would have made this same call. Confidence ranks the
    report. Reserve needs-user for genuinely operator-only calls (taste,
    product direction, external cost); every needs-user entry records a
-   recommended provisional call that is reversible, so an unsupervised caller
-   can proceed without waiting. The audit never stalls a run.
+   recommended call and its reversal path, and the caller stops on it — a run
+   does not proceed past a needs-user verdict without the operator. Reversible
+   two-way-door choices that are not human-owned may proceed provisionally
+   under TH-03, logged in the ledger. The audit itself never stalls: it
+   reports and hands back.
 3. **State the corrected decision, don't sketch a patch.** For each unsound
    choice, name the decision the work should be redone from — the property
    that must hold in general — not an edit to layer on top.
