@@ -26,9 +26,14 @@ feature is not a gap. A missing applicable control is, unless an equivalent
 exists or a documented constraint prevents it.
 
 Judge data structures and relationships first (Torvalds). Keep complexity
-behind deep modules (Ousterhout). Use one ubiquitous language across code, API,
-UI, and operations (Evans). Keep important paths direct and inspectable
-(Carmack).
+behind deep modules with errors defined out of existence (Ousterhout). Prefer
+simple over easy; decomplect concerns and drop incidental complexity
+(Hickey). Use one ubiquitous language across code, API, UI, and operations
+(Evans). Keep important paths direct and inspectable (Carmack).
+
+If a stable quality requirement can be encoded in architecture, types, tests,
+tooling, CI, or release infrastructure, a prompt-only reminder is a missing
+control.
 
 ## 1. Inspect
 
@@ -70,13 +75,18 @@ deviation:
 - domain types and data constraints;
 - deterministic tests through real contracts;
 - one tight local check command;
+- a deterministic local start path with sanitized fixtures or seed data for
+  every runnable application;
+- an executable smoke or acceptance path through the public interface;
 - committed hooks: tight pre-commit, broader pre-push;
 - CI as clean-room authority over the same owned commands;
 - secret and dependency scanning;
 - structured errors with release identity, for operated software;
 - one documented clone-to-green path;
 - project authority discoverable from `AGENTS.md`;
-- merge protection on required checks.
+- protected default branch with merge protection on required checks;
+- deployment from the merged immutable revision, with a health check and a
+  rollback path.
 
 Read [CONTROLS.md](CONTROLS.md) when a classification is uncertain, when
 language, diagnosis, telemetry, or CI latency is in scope, or when a control

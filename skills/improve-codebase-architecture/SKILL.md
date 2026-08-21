@@ -8,7 +8,10 @@ license: MIT; modified from Matt Pocock's improve-codebase-architecture skill
 # Improve Codebase Architecture
 
 A deep module hides substantial necessary behavior behind a small interface.
-Find changes that reduce caller knowledge and whole-system complexity.
+Find changes that reduce caller knowledge and whole-system complexity. Judge
+every candidate by its data structures and relationships (Torvalds), module
+depth with errors defined out of existence (Ousterhout), and
+necessary-versus-incidental complexity (Hickey).
 
 ## Scope
 

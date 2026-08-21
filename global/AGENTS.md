@@ -23,17 +23,20 @@
 
 ## Delivery
 
-- Fix the source. Migrate every caller. Remove obsolete paths.
-- Review the premise and the implementation.
-- Prove changed behavior on its real interface.
-- Evidence packet: for every observable behavior or state change, read
-  `skill://evidence-packet`; plan proof before the first production edit,
-  capture the real surface, and deliver inspected artifacts.
-- Interactive diff review: use `skill://hunk` to open a numbered,
-  annotated walkthrough (not an empty first-file view), attach curated
-  notes, and drive interactive diffs in Herdr panes.
-
-
+- Build quality into the codebase. Prefer sound state and module design,
+  types, behavioral tests, local run paths, hooks, CI, and release controls
+  over agent reminders.
+- Keep changes cohesive and reviewable. No huge fucking PRs; split
+  independent outcomes and leave unrelated cleanup out.
+- Use the repository's own path to green. Run every affected application
+  locally and prove changed behavior through its real interface.
+- Attach inspected evidence for observable changes (`skill://evidence-packet`;
+  plan proof and capture baselines before the first production edit). Review
+  the complete result; fix supported in-scope defects at the source,
+  migrating every caller; rerun affected proof; open an annotated Hunk
+  walkthrough for non-trivial changes (`skill://hunk`).
+- Delivery agents leave pull requests unmerged. Merge and deployment require
+  a separate, explicitly requested release gate.
 - Herdr focus: preserve the operator's active workspace, tab, and pane. Read
   `skill://herdr` before every Herdr control action.
 - Do not claim completion while a supported finding or failed check remains.

@@ -1,51 +1,63 @@
 ---
 name: deliver
-description: Take the highest-priority ready ticket to an unmerged pull request with a Hunk walkthrough and a code-review report.
+description: Take the highest-priority ready ticket to an unmerged pull request with real-interface proof, reviewed repairs, and a Hunk walkthrough.
 disable-model-invocation: true
 ---
 
 # Deliver
 
-One ready ticket. A reviewable change. Then stop.
+One ready slice. Proved on its real interface. Then stop.
 
 ## Claim
 
-Take the highest-priority ready piece of work this checkout should do. Use whatever
-ledger the project already trusts. Skip anything already moving. If
+Take the highest-priority ready piece of work this checkout should do, using
+whatever ledger the project already trusts. Skip anything already moving. If
 the work is still a design argument, read `skill://grilling` first.
 
-## Isolate
+## Slice
 
-Leave the operator's branch alone. Do this in a worktree from the
-default branch.
+Work in a worktree off the default branch; leave the operator's branch alone.
+Take the smallest independently useful outcome. Split broad tickets before
+writing code; move unrelated cleanup out.
+
+## Plan proof
+
+Before the first production edit, decide how the changed behavior will be
+proved through its real interface. Capture required baselines now: bugs,
+regressions, comparisons, and state changes cannot be baselined after the
+edit. Read `skill://evidence-packet` when the claim is observable.
 
 ## Implement
 
-The smallest change that is actually true. See a new contract fail
-before you make it pass. Show that acceptance holds
-(`skill://evidence-packet` when the proof is something you can point
-at).
+Choose the design by its data structures and relationships (Torvalds), module
+depth with errors defined out of existence (Ousterhout), and
+necessary-versus-incidental complexity (Hickey). Implement against accepted
+intent using the repository's own checks. Fix the source, migrate every
+caller, remove obsolete paths. Defend newly exposed contracts with tests that
+fail on plausible defects.
 
-## Report
+## Run
 
-Read `skill://code-review` through the report. Do not repair.
+Start every affected application locally and QA the product surface: exercise
+the changed behavior end to end as a user would, and probe the paths around
+it. A repository-owned start or seed command wins over improvisation.
+Automated tests, lint, and CI do not substitute for this.
 
-The spoken close and the PR MUST include the Taste verdict. Lead with it.
-Do not ask the operator to accept, reject, or defer Hygiene. If one finding
-passes the taste gate and sits outside this ticket, name it as the follow-up
-and stop. If none pass, say none. Do not end with a mixed findings list
-that forces the operator to ask whether the repairs improve the design.
+## Review and repair
+
+Review the complete result against accepted intent, repository behavior, and
+runtime evidence — not only the diff. Judge findings by data structures
+(Torvalds), deep modules (Ousterhout), and necessary complexity (Hickey).
+Repair supported in-scope defects; route intent conflicts to the operator;
+leave speculative improvements and unrelated cleanup out. Rerun the proof any
+repair touched.
 
 ## Publish
 
-Open an unmerged pull request that carries the ticket, the Taste verdict,
-and the report. Open the walkthrough with `skill://hunk`. Leave focus where
-it is.
+Attach the inspected evidence to the pull request; GitHub PR uploads are the
+standard path (`skill://evidence-packet`, DELIVERY). Open the annotated Hunk
+walkthrough per `skill://hunk`. Leave the PR unmerged; merge and deployment
+belong to a separate release gate (`skill://release`).
 
-The walkthrough MUST be annotated. Follow `skill://hunk` Walkthrough:
-sidecar first, quoted `herdr pane run`, live comment count > 0, viewport
-on note `1/N`. Opening an empty Hunk on the first diff file is not done.
-
-You are done when the operator can review the PR, step the annotated
-walkthrough, read the Taste verdict, and decide only on Take findings.
-
+You are done when the operator can review the PR, step the walkthrough, read
+the evidence, and decide merge through the release gate.
