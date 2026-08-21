@@ -15,9 +15,19 @@ All three models are concurrently tasked with full-spectrum vulnerability resear
 
 ---
 
+## Model Policy
+
+Security judgment never runs on the session's primary model. Frontier-lab models refuse or soften offensive reasoning. Every phase that weighs exploitability, severity, or repair design belongs to the approved trio:
+
+- **Council queries** (section 2): the bundled script pins GLM 5.3, Kimi K3, and DeepSeek V4 Pro 0813 directly via OpenRouter.
+- **Validation, adjudication, recon** (sections 1, 3–4): delegate to the `security-reviewer` agent — read-only, DeepSeek-routed via `task.agentModelOverrides`; the primary forwards evidence and records verdicts verbatim.
+- **Remediation** (section 6): blocked. The council emits prose guidance, not diffs, and no approved writable agent exists yet. Record the triage decision and guidance verbatim; re-audit any externally landed repair. Never let the primary design the fix inside this audit.
+
 ## 1. Scope & Recon
 
-Establish the security audit boundary from the repository state, request, or target files:
+Establish the security audit boundary from the repository state, request, or target files.
+
+Delegate this section to the `security-reviewer` agent; it is read-only and routed to DeepSeek V4 Pro. The primary supplies the invocation target and receives the boundary summary.
 
 - **Target scope**: Unstaged working tree diff, staged changes (`--staged`), commit (`--commit <hash>`), or explicit files/directories (`--file <path>`).
 - **Trust boundaries**: Identify untrusted inputs (HTTP requests, CLI args, environment variables, webhooks, IPC, file system) and external dependencies.
@@ -61,6 +71,8 @@ Completion criterion: Tri-model council responses collected from all three model
 
 ## 3. Adversarial Taint & Exploit Validation
 
+Route each candidate through the `security-reviewer` agent (Model Policy). The primary supplies paths and evidence; it does not judge.
+
 For each candidate finding reported by the council:
 
 1. **Source-to-Sink Trace**: Trace the attacker-controlled input through every intermediate transformation down to the dangerous operation or broken control.
@@ -74,7 +86,9 @@ Completion criterion: Every candidate finding verified against the codebase or r
 
 ## 4. Adjudication & Consensus Synthesis
 
-Group and classify surviving findings:
+Group and classify surviving findings.
+
+Consensus and severity labels come from council output and `security-reviewer` adjudication — never from the primary's own judgment.
 
 - **Consensus Rating**:
   - **Tri-Model Consensus (3/3)**: Unanimous agreement across all three models. High confidence.
@@ -102,13 +116,12 @@ Completion criterion: Report presented to the operator, Hunk walkthrough loaded,
 
 ---
 
-## 6. Minimal Verified Remediation
+## 6. Remediation Handoff (blocked)
 
-For each accepted finding:
+No mechanism can author repairs yet: the council emits prose guidance, not diffs, and no approved writable agent exists. For each accepted finding:
 
-1. **Root Cause Fix**: Eliminate the vulnerability at the source or sink boundary (e.g., parameterize query, enforce strict whitelist, sanitize input, eliminate TOCTOU).
-2. **Defense-in-Depth**: Add secondary boundary validation where appropriate without adding unnecessary abstraction layers.
-3. **Verification**: Execute a narrow regression scenario or test demonstrating the exploit payload is safely rejected.
-4. **Re-Audit**: On non-trivial repairs, re-run the Tri-Model Council to ensure zero new vulnerabilities were introduced.
+1. Record the operator's triage decision with the council's attack path, severity, and remediation guidance verbatim.
+2. Open remediation as tracked work for an approved-model agent or patch producer once one exists; until then the fix waits — do not design or apply it in this audit.
+3. When an external repair lands, re-run the Tri-Model Council (section 2) over the repaired range.
 
-Completion criterion: Every accepted finding repaired and verified with zero regressions.
+Completion criterion: every accepted finding carries triage, verbatim council guidance, and a tracked remediation reference; no repair authored here.
