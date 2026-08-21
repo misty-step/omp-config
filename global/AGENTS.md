@@ -29,7 +29,7 @@
 - Evidence packet: for every observable behavior or state change, read
   `skill://evidence-packet`; plan proof before the first production edit,
   capture the real surface, and deliver inspected artifacts.
-- Findings cite primary records read now (ST-02); titles, timestamps, and
+- Findings cite primary records read now (ST-02, RS-02); titles, timestamps, and
   recollection are leads.
 - Standing mandate (OR-06): reversible calls get made and reported; ask
   only scope, spend, or risk changes.
