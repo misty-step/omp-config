@@ -62,7 +62,7 @@ remains unresolved.
 ## Research and memory (exocortex)
 
 Ground aggressively. When exploring, brainstorming, or gathering context,
-use web research (`'/home/phaedrus/.omp/agent/skills/research'`) AND fleet memory together: external
+use web research (`skill://research`) AND fleet memory together: external
 sources for what the world says, exocortex for what this fleet already
 knows and decided. Route technical questions through the vault first.
 
