@@ -28,7 +28,7 @@ daybook` and direct git per the daybook AGENTS.md.
 ```sh
 exocortex search "who owns powder credentials" --json   # qmd-backed; deterministic BM25 default
 exocortex get areas/work-philosophy.md                  # read one note
-exocortex note "qmd hybrid needs LLM access; CI=true forces bm25 fallback"  # one-line journal memory
+exocortex note "qmd hybrid needs LLM access; CI=true forces bm25 fallback"  # lands on the daybook agent board
 exocortex put misty-step/new-decision.md --from draft.md              # create-only: fails if it exists
 exocortex put misty-step/decision.md --from draft.md --expects <sha>  # update: stored-revision hash REQUIRED
 exocortex log misty-step/new-decision.md                # lineage
