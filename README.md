@@ -14,6 +14,7 @@ agents run on this machine: model roles, global policy, skills, themes.
 | `mcp.json` | Declared MCP servers; `install` merges per-server auth/oauth from the live copy |
 | `global/AGENTS.md` | Standing policy loaded into every session: design, communication, delivery, premise gate, knowledge vault |
 | `global/RULES.md` | Strict ordering rules; currently the deletion-first ladder |
+| `agents/` | Read-only specialist agents; installed globally and routed by each agent's model role |
 | `global/WATCHDOG.md`, `WATCHDOG.yml` | Closeout reviewer: a second model audits finished work against accepted intent; advisor roster configured in YAML |
 | `themes/` | TUI themes (`tokyonight`, `ember`) |
 | `skills/` | Skill packages, copied wholesale on install — see below |
@@ -42,7 +43,7 @@ attention-consuming flows that fire only on explicit request:
 `audit-choices`, `audit-simplifications`, `brief`, `code-review`, `deliver`,
 `diagnose`, `explore-unknowns`, `foundation`,
 `improve-codebase-architecture`, `install-anti-slop`, `prototype`,
-`security-review`, `tidy`.
+`security-review`, `tidy`, `torvalds-design-review`.
 
 Model-invocable — unambiguous triggers, bounded cost, cheap wrong-fire:
 `ast-grep`, `create-task`, `evidence-packet`, `frontend-design`, `herdr`,

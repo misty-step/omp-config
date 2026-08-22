@@ -31,6 +31,13 @@ for skill_dir in "$repo_dir"/skills/*; do
   }
 done
 
+for agent_file in "$repo_dir"/agents/*.md; do
+  [ -s "$agent_file" ] || {
+    printf 'Missing or empty agent definition: %s\n' "$agent_file" >&2
+    exit 1
+  }
+done
+
 jq empty "$repo_dir/mcp.json" >/dev/null
 for theme_file in "$repo_dir"/themes/*.json; do
   [ -s "$theme_file" ] || continue
@@ -52,6 +59,16 @@ done
 for file in AGENTS.md RULES.md WATCHDOG.md WATCHDOG.yml; do
   install -m 600 "$repo_dir/global/$file" "$agent_dir/$file"
 done
+
+agents_temp=$(mktemp -d "$agent_dir/.agents.XXXXXX")
+trap 'rm -rf "$agents_temp"' 0 1 2 15
+for agent_file in "$repo_dir"/agents/*.md; do
+  [ -s "$agent_file" ] || continue
+  install -m 600 "$agent_file" "$agents_temp/${agent_file##*/}"
+done
+rm -rf -- "$agent_dir/agents"
+mv "$agents_temp" "$agent_dir/agents"
+trap - 0 1 2 15
 
 mcp_target="$agent_dir/mcp.json"
 if [ -f "$mcp_target" ]; then

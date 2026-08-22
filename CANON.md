@@ -311,6 +311,7 @@ Standing context is scarce attention; spend it on judgment, not procedure.
 | SE-03, SE-05 | Council script; `security-reviewer` agent routed to DeepSeek; security on-demand, closeouts correctness-only | live for judgment; remediation blocked (candidate 4) |
 | RS-03 | `skills/audit-simplifications` dependency-ladder lenses | live |
 | OR-07 | Flat-rate watchdog; OpenRouter removed from automatic chains; spend confined to on-demand work plus the documented vision exception | live |
+| TH-04, DE-01–DE-02, DE-07, OR-03, OR-07 | `skills/torvalds-design-review`; high-effort read-only `torvalds-reviewer` agent | live — explicit CLI trial 2026-08-22 |
 
 ### Candidate syntheses — canon not yet embodied
 
