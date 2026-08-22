@@ -59,8 +59,28 @@ Route every material unsettled human-owned choice through `/explore-unknowns`:
 stop and ask the operator to run it. Do not implement while any such choice
 remains unresolved.
 
-## Knowledge vault
+## Research and memory (exocortex)
 
-If a compiled knowledge vault is available, retrieve relevant notes before
-inferring, then read the source. Write durable decisions back under that
-vault's contract. Compile; leave raw sessions on disk.
+Ground aggressively. When exploring, brainstorming, or gathering context,
+use web research (`'/home/phaedrus/.omp/agent/skills/research'`) AND fleet memory together: external
+sources for what the world says, exocortex for what this fleet already
+knows and decided. Route technical questions through the vault first.
+
+If the exocortex binary is available (`command -v exocortex`), retrieve
+before inferring, then read the source:
+
+- `exocortex search "<query>" --json` to find prior decisions and context.
+- `exocortex get <path>` for the note behind a hit.
+
+Write back often, under the vault's contract:
+
+- Status updates when work lands or direction changes.
+- Non-obvious failures: what bit you, why, and the fix —
+  `exocortex note "<one line>"` for capture, full notes for durable
+  decisions.
+- Bar: a future agent would thank you for it. Compile; leave raw session
+  logs on disk.
+
+Keep it organized: link related notes with `[[wiki-links]]`, supersede
+rather than delete, and treat reflection-loop merge proposals as
+first-class work. Full contract: `skill://exocortex`.
