@@ -20,3 +20,7 @@
 !/themes/**
 !/.githooks/
 !/.githooks/**
+
+# Telemetry tooling (repo-local, not deployed)
+!references/
+!references/**
