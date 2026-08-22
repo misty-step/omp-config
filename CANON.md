@@ -37,6 +37,10 @@ Standing context is scarce attention; spend it on judgment, not procedure.
   enforcing what a gate already enforces.
 - A skill is model-invocable iff its trigger is unambiguous, its cost is
   bounded, and firing at the wrong time is cheap. Otherwise operator-invoked.
+- One skill name exposes one program; domain branches live in references
+  loaded by that program, never as sibling skills. A domain splits out only
+  when it gains a distinct invocation contract — proven by a shaped eval, not
+  by reference length.
 - An AGENTS.md candidate that breaks the budget is not universal — it becomes
   a skill or a project template.
 
@@ -172,6 +176,11 @@ Standing context is scarce attention; spend it on judgment, not procedure.
   topology, config lives in code, drift is a bug with an owner. Manual QA on
   the running app is part of done — no test suite substitutes hands-on the
   real thing.
+- **TE-08** Review depth scales with change class. Prose-only changes do not
+  run code reviewers; executable changes get the code council; high-stakes
+  paths — auth, secrets, migrations, harness — get the full council plus the
+  structure critic. The planned lane set is frozen before review and verified
+  against the diff after; lanes are never dropped mid-review.
 
 ## OP — Delivery & operations
 
@@ -284,6 +293,10 @@ Standing context is scarce attention; spend it on judgment, not procedure.
 | TH-04, OR-06 | `skills/explore-unknowns`; premise gate in `global/AGENTS.md` | live |
 | TE-06 | `skills/evidence-packet`; delivery section of `global/AGENTS.md` | live |
 | ST-02, RS-02 | `global/AGENTS.md` findings-cite-primary-records line | live — trialed in iron-forest ops 2026-08-21 |
+| TE-08 | Review-lane floors by change class, frozen plan, verified lanes | extracted from census ADR-0007 — untrialed |
+| Synthesis policy (one program per name) | Router skill + domain references rule | extracted from census ADR-0006 — governs new skills |
+| ADR-0008 (census) | Testing doctrine one shared home | already embodied — foundation + CONTROLS; no new artifact |
+| ADR-0009 (census) | Chief-stays-thin kits; 0001/0002/0003/0005 architecture-specific; 0004 mint broker decommissioned with mint | skipped by operator selection 2026-08-21 |
 | OR-06 | `global/AGENTS.md` standing-mandate line (reversible calls made and reported) | live — trialed in iron-forest ops 2026-08-21 |
 | CH-02 | `skills/diagnose` red-loop, architecture challenge at fix #3 | live |
 | TH-01 | `skills/prototype` fans design options | partial — visual design only, generalizes poorly |
