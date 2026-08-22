@@ -45,9 +45,8 @@ attention-consuming flows that fire only on explicit request:
 `security-review`, `tidy`.
 
 Model-invocable — unambiguous triggers, bounded cost, cheap wrong-fire:
-`ast-grep`, `checkpoint`, `create-task`, `evidence-packet`,
-`frontend-design`, `herdr`, `hunk`, `model-research`, `powder`, `research`,
-`watch-deploy`.
+`ast-grep`, `create-task`, `evidence-packet`, `frontend-design`, `herdr`,
+`hunk`, `model-research`, `powder`, `research`, `watch-deploy`.
 
 The split criterion lives in `CANON.md`, Synthesis policy.
 

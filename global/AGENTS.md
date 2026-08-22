@@ -40,8 +40,9 @@
 - Interactive diff review: use `skill://hunk` to open a numbered,
   annotated walkthrough (not an empty first-file view), attach curated
   notes, and drive interactive diffs in Herdr panes.
-
-
+- Sharpest instrument (CR-03): LSP over text search for symbols; `ast-grep`
+  (`sg`) over sed for structural search and codemods. Grep is the fallback,
+  not the default.
 - Herdr focus: preserve the operator's active workspace, tab, and pane. Read
   `skill://herdr` before every Herdr control action.
 - Do not claim completion while a supported finding or failed check remains.

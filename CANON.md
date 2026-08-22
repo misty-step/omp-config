@@ -303,7 +303,7 @@ Standing context is scarce attention; spend it on judgment, not procedure.
 | DE-01, CH-03 | `global/AGENTS.md` design/delivery lines; `audit-simplifications`, `improve-codebase-architecture` | live |
 | RS-01 | exa routing in `config.yml`; `skills/research` decision protocol | drafted — skill written, untrialed |
 | TL-01, TL-02 | `skills/herdr`, `skills/hunk` | live |
-| OR-05 | `skills/powder`, `skills/checkpoint` | live |
+| OR-05 | `skills/powder` work ledger | live — checkpoint skill deleted 2026-08-21: zero invocations across 190 fleet transcripts, CLI absent from PATH |
 | TE-01–TE-05 | `skills/foundation` agentic baseline | unverified coverage |
 | OR-08 | `skills/audit-choices` decision ledger | live — deployed; deliver/Iron-Forest wiring blocked on PR #57 |
 | OP-01 | Landmark adopted in at least `canary` (full, `@35d002b`), `linejam` (full, `@35d002b` = v0.28.1), `crucible` (synthesis-only, `@v0`) — examples, inventory not audited | partial — fleet rollout incomplete |
