@@ -87,6 +87,9 @@ deviation:
   fuzz coverage where parsers or core logic demand it;
 - a flaky-test policy: quarantine with an owner, fix or delete fast;
 - a CI latency budget the full gate respects;
+- a context budget: every irreducibly atomic module packs inside a declared
+  token budget (default 100k), measured and gated in CI; larger systems split
+  into isolated modules behind enforced boundaries;
 - one tight local check command;
 - a deterministic local start path with sanitized fixtures for each runnable
   application;
@@ -102,8 +105,8 @@ deviation:
   rollback path.
 
 Read [CONTROLS.md](CONTROLS.md) when a classification is uncertain, when
-language, diagnosis, telemetry, or CI latency is in scope, or when a control
-will be installed or proved.
+language, diagnosis, telemetry, CI latency, or the context budget is in scope,
+or when a control will be installed or proved.
 
 Completion criterion: Every applicable control is classified. Each missing
 control has a place in the recommendation. Each deviation has a reason.

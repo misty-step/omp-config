@@ -20,6 +20,28 @@ One owner and one authoritative representation for each datum. Enforce
 invariants in types and in the store. Names are model claims. Keep one
 ubiquitous language across code, API, UI, telemetry, and operations.
 
+## Context budget
+
+An agent works reliably on code it can hold whole. The budget applies to the
+**irreducibly atomic module**: the largest unit that must be understood
+together because its parts share invariants (a proof kernel, a compiler core,
+a schema plus its owner). A repository may be any size; each atomic module
+packs inside a declared token budget. Default 100k tokens — roughly half a
+frontier context window, leaving the other half for the task.
+
+Measure with `repomix --include "<module>/**" --token-count-tree` for the
+coverage-style view, and gate with `repomix --include "<module>/**" --quiet
+--token-budget <N> -o /dev/null` in CI — non-zero exit on overflow. Declare
+each module root and budget in one committed file the gate reads.
+
+A module over budget is a design finding, not a formatting problem. Respond in
+order: delete dead weight; split along an existing seam into isolated modules
+behind a small stable interface; only then raise the budget, with a recorded
+reason. Enforce the resulting boundaries with the stack's own tool:
+dependency-cruiser or Nx boundaries (JS/TS), import-linter (Python), ArchUnit
+(JVM), `internal/` packages (Go), crates (Rust). A "module" whose boundary is
+not enforced is one refactor away from re-merging.
+
 ## Tests
 
 Assert outcomes, boundaries, invariants, transitions, precedence, and real
@@ -131,5 +153,8 @@ defect, then the clean path passes.
     check → the disposable change becomes mergeable.
 11. Safe-environment bad release → health or smoke goes red; repository
     rollback → prior identity and every restoration check pass.
+12. Budget lowered below the module's measured tokens → gate exits non-zero;
+    restored budget → gate passes. A synthetic cross-boundary import → the
+    boundary tool fails; removed → it passes.
 
 Remove the probes. Run the complete clean path.
