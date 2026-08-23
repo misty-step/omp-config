@@ -314,6 +314,7 @@ Standing context is scarce attention; spend it on judgment, not procedure.
 | TH-04, DE-01–DE-02, DE-07, OR-03, OR-07 | `skills/torvalds-design-review`; high-effort read-only `torvalds-reviewer` agent | live — explicit CLI trial 2026-08-22 |
 | TH-01, TH-04, DE-01–DE-08, TE-01–TE-06, CH-01–CH-06, OP-03–OP-06, OR-01–OR-03 | `shape` → `deliver` → `release` → `watch-deploy`; autonomous review-repair loop; evidence-only `brief` | live for entry gates — brief, shape, deliver, and release CLI trials 2026-08-22; first real delivery and deploy pending |
 | RS-01–RS-02, OR-01–OR-03, OR-07 | `skills/dispatch` current-access, benchmark, cost, role, and fallback routing program | live — explicit CLI trial 2026-08-22; no config mutation |
+| DE-07, TE-06, CH-01 | `skills/polish` one-interaction simpler/faster loop with real-surface proof | drafted — CLI gate trial 2026-08-23 |
 
 ### Candidate syntheses — canon not yet embodied
 

@@ -43,8 +43,8 @@ Operator-invoked (`disable-model-invocation: true`) — heavyweight or
 attention-consuming flows that fire only on explicit request:
 `audit-choices`, `audit-simplifications`, `brief`, `code-review`, `deliver`,
 `diagnose`, `explore-unknowns`, `foundation`,
-`improve-codebase-architecture`, `install-anti-slop`, `prototype`, `release`,
-`security-review`, `shape`, `tidy`, `torvalds-design-review`.
+`improve-codebase-architecture`, `install-anti-slop`, `polish`, `prototype`,
+`release`, `security-review`, `shape`, `tidy`, `torvalds-design-review`.
 
 Model-invocable — unambiguous triggers, bounded cost, cheap wrong-fire:
 `ast-grep`, `create-task`, `dispatch`, `evidence-packet`, `exocortex`,
