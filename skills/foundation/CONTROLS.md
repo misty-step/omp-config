@@ -30,9 +30,17 @@ packs inside a declared token budget. Default 100k tokens — roughly half a
 frontier context window, leaving the other half for the task.
 
 Measure with `repomix --include "<module>/**" --token-count-tree` for the
-coverage-style view, and gate with `repomix --include "<module>/**" --quiet
---token-budget <N> -o /dev/null` in CI — non-zero exit on overflow. Declare
-each module root and budget in one committed file the gate reads.
+coverage-style view, and gate in CI with:
+
+```sh
+repomix --include "<module>/**" --no-file-summary --no-directory-structure \
+  --quiet --token-budget <N> -o /dev/null
+```
+
+Non-zero exit on overflow. The gate counts the packed output, not raw source;
+the two flags drop ~400 tokens of pack boilerplate so the count tracks the
+module. Declare each module root and budget in one committed file the gate
+reads.
 
 A module over budget is a design finding, not a formatting problem. Respond in
 order: delete dead weight; split along an existing seam into isolated modules
