@@ -38,6 +38,13 @@ for agent_file in "$repo_dir"/agents/*.md; do
   }
 done
 
+for review_file in "$repo_dir"/references/review/*.md; do
+  [ -s "$review_file" ] || {
+    printf 'Missing or empty review reference: %s\n' "$review_file" >&2
+    exit 1
+  }
+done
+
 jq empty "$repo_dir/mcp.json" >/dev/null
 for theme_file in "$repo_dir"/themes/*.json; do
   [ -s "$theme_file" ] || continue
@@ -68,6 +75,15 @@ for agent_file in "$repo_dir"/agents/*.md; do
 done
 rm -rf -- "$agent_dir/agents"
 mv "$agents_temp" "$agent_dir/agents"
+trap - 0 1 2 15
+
+install -d -m 700 "$agent_dir/references"
+review_temp=$(mktemp -d "$agent_dir/references/.review.XXXXXX")
+trap 'rm -rf "$review_temp"' 0 1 2 15
+cp -R "$repo_dir/references/review"/. "$review_temp"/
+chmod -R u=rwX,go= "$review_temp"
+rm -rf -- "$agent_dir/references/review"
+mv "$review_temp" "$agent_dir/references/review"
 trap - 0 1 2 15
 
 mcp_target="$agent_dir/mcp.json"

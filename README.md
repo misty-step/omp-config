@@ -8,7 +8,7 @@ agents run on this machine: model roles, global policy, skills, themes.
 
 | Path | Purpose |
 | --- | --- |
-| `install` | Deployment script. Validates sources, copies the allowlist into `$(omp config path)`, merges live MCP auth, atomically replaces deployed skills, self-installs the pre-push hook |
+| `install` | Deployment script. Validates sources, copies the allowlist into `$(omp config path)`, deploys agents, skills, and shared review references atomically, merges live MCP auth, and self-installs the pre-push hook |
 | `config.yml` | Model roles and fallback chains, theme/statusline/TUI display, providers (web search routed through exa), task/LSP settings |
 | `models.yml` | Local Ollama provider discovery; cloud models come from omp's bundled catalog |
 | `mcp.json` | Declared MCP servers; `install` merges per-server auth/oauth from the live copy |
@@ -18,6 +18,7 @@ agents run on this machine: model roles, global policy, skills, themes.
 | `global/WATCHDOG.md`, `WATCHDOG.yml` | Closeout reviewer: a second model audits finished work against accepted intent; advisor roster configured in YAML |
 | `themes/` | TUI themes (`tokyonight`, `ember`) |
 | `skills/` | Skill packages, copied wholesale on install — see below |
+| `references/review/` | Shared council contract and lens references used by operator-invoked delivery and review skills |
 | `.githooks/pre-push` | Hook source installed into this repo's git dir by `./install` |
 | `.agents/skills/writing-for-agents/` | Agent-writing guidance served via `skill://writing-for-agents`; not deployed by `install` |
 | `extensions/`, `.omp/` | Reserved; currently empty |
@@ -42,12 +43,12 @@ Operator-invoked (`disable-model-invocation: true`) — heavyweight or
 attention-consuming flows that fire only on explicit request:
 `audit-choices`, `audit-simplifications`, `brief`, `code-review`, `deliver`,
 `diagnose`, `explore-unknowns`, `foundation`,
-`improve-codebase-architecture`, `install-anti-slop`, `prototype`,
-`security-review`, `tidy`, `torvalds-design-review`.
+`improve-codebase-architecture`, `install-anti-slop`, `prototype`, `release`,
+`security-review`, `shape`, `tidy`, `torvalds-design-review`.
 
 Model-invocable — unambiguous triggers, bounded cost, cheap wrong-fire:
-`ast-grep`, `create-task`, `evidence-packet`, `frontend-design`, `herdr`,
-`hunk`, `model-research`, `powder`, `research`, `watch-deploy`.
+`ast-grep`, `create-task`, `dispatch`, `evidence-packet`, `exocortex`,
+`frontend-design`, `herdr`, `hunk`, `powder`, `research`, `watch-deploy`.
 
 The split criterion lives in `CANON.md`, Synthesis policy.
 

@@ -41,6 +41,29 @@ From a clean checkout, run the repository-owned check, test, and build
 commands. Required checks block merge. Pin toolchains and actions. Treat
 warnings as failures. Caches are not part of correctness.
 
+## Local run and fixtures
+
+Own one deterministic start command for each runnable application. Keep
+sanitized fixtures or seed data in the repository. The command must create the
+same topology and wiring that production uses, except for documented local
+substitutes. Startup errors name the missing dependency or repair.
+
+## Public smoke
+
+Own one executable smoke path through the public interface. Use representative
+fixtures. Assert the returned payload, rendered output, stored state, or
+operator signal. A process start or open port is not product proof.
+
+## Merge and release
+
+Protect the default branch. Require the repository-owned checks on the exact
+head and post-merge artifact. Deploy only an immutable merged revision. The
+runtime reports that revision or artifact identity.
+
+Own a health check and rollback command. Rehearse rollback in a safe
+environment before production release. The rehearsal verifies restored
+identity, health, smoke behavior, migration readback, and changed surfaces.
+
 ## Secrets and supply chain
 
 Scan staged changes and CI. Scan history during the first Foundation pass when
@@ -100,5 +123,13 @@ defect, then the clean path passes.
 5. Schema or generated-code drift → consistency gate.
 6. Fresh checkout → documented clone-to-green path.
 7. Controlled runtime error → release-aware capture and redaction.
+8. Missing or malformed local fixture → start command fails with the repair;
+   restored fixture → application starts with expected state.
+9. Broken public behavior → smoke path fails on the result; restored behavior
+   → smoke passes.
+10. Disposable failing required check → protected merge is blocked; restored
+    check → the disposable change becomes mergeable.
+11. Safe-environment bad release → health or smoke goes red; repository
+    rollback → prior identity and every restoration check pass.
 
 Remove the probes. Run the complete clean path.

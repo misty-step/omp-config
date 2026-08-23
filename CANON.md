@@ -307,11 +307,13 @@ Standing context is scarce attention; spend it on judgment, not procedure.
 | TE-01–TE-05 | `skills/foundation` agentic baseline | unverified coverage |
 | OR-08 | `skills/audit-choices` decision ledger | live — deployed; deliver/Iron-Forest wiring blocked on PR #57 |
 | OP-01 | Landmark adopted in at least `canary` (full, `@35d002b`), `linejam` (full, `@35d002b` = v0.28.1), `crucible` (synthesis-only, `@v0`) — examples, inventory not audited | partial — fleet rollout incomplete |
-| OP-03–OP-05 | `skills/watch-deploy` soak gate; `deliver` hands off at ship | drafted — first real deploy pending |
+| OP-03–OP-05 | `release` merge/deploy/rollback gate; `watch-deploy` soak and incident gate | live for entry gates — first real deploy pending |
 | SE-03, SE-05 | Council script; `security-reviewer` agent routed to DeepSeek; security on-demand, closeouts correctness-only | live for judgment; remediation blocked (candidate 4) |
 | RS-03 | `skills/audit-simplifications` dependency-ladder lenses | live |
 | OR-07 | Flat-rate watchdog; OpenRouter removed from automatic chains; spend confined to on-demand work plus the documented vision exception | live |
 | TH-04, DE-01–DE-02, DE-07, OR-03, OR-07 | `skills/torvalds-design-review`; high-effort read-only `torvalds-reviewer` agent | live — explicit CLI trial 2026-08-22 |
+| TH-01, TH-04, DE-01–DE-08, TE-01–TE-06, CH-01–CH-06, OP-03–OP-06, OR-01–OR-03 | `shape` → `deliver` → `release` → `watch-deploy`; autonomous review-repair loop; evidence-only `brief` | live for entry gates — brief, shape, deliver, and release CLI trials 2026-08-22; first real delivery and deploy pending |
+| RS-01–RS-02, OR-01–OR-03, OR-07 | `skills/dispatch` current-access, benchmark, cost, role, and fallback routing program | live — explicit CLI trial 2026-08-22; no config mutation |
 
 ### Candidate syntheses — canon not yet embodied
 
