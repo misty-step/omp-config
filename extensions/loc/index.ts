@@ -7,7 +7,6 @@ import {
 	getTrendPoints,
 	readLocCache,
 	topLanguages,
-	type CommitDelta,
 	type LocStats,
 } from "./analyze.ts";
 
@@ -17,41 +16,34 @@ function formatNumber(value: number): string {
 	return value.toLocaleString("en-US");
 }
 
+function formatCompactLoc(value: number): string {
+	if (value < 1000) return formatNumber(value);
+	const compact = (value / 1000).toFixed(1);
+	return `${compact.endsWith(".0") ? compact.slice(0, -2) : compact}k`;
+}
+
 function formatNativeStatusLine(
 	stats: LocStats,
-	lastDelta: CommitDelta | undefined,
 	theme: ExtensionContext["ui"]["theme"],
 ): string {
 	// setStatus trims ordinary leading whitespace; U+2800 retains one blank terminal cell.
 	const statusIndent = "\u2800";
 	const separator = theme.fg("dim", ` ${theme.sep.dot} `);
+	const [top] = topLanguages(stats, 1);
+	const share = stats.code > 0 && top ? Math.round((top[1].code / stats.code) * 100) : 0;
+	const icon = top ? theme.getLangIconStyled(top[0]) : "";
 	const parts = [
 		statusIndent,
-		theme.fg("accent", theme.cmd.stats),
-		` ${theme.bold(formatNumber(stats.code))}`,
-		theme.fg("dim", " lines"),
+		icon ? `${icon} ` : "",
+		top?.[0] ?? "",
+		` ${share}%`,
+		separator,
+		theme.bold(formatCompactLoc(stats.code)),
+		theme.fg("dim", " LOC"),
 		separator,
 		formatNumber(stats.files),
 		theme.fg("dim", " files"),
 	];
-	const [top] = topLanguages(stats, 1);
-	if (top) {
-		const icon = theme.getLangIconStyled(top[0]);
-		parts.push(
-			separator,
-			icon ? `${icon} ` : "",
-			top[0],
-			theme.fg("muted", ` ${formatNumber(top[1].code)}`),
-		);
-	}
-	if (lastDelta) {
-		const delta = `${lastDelta.net >= 0 ? "+" : ""}${formatNumber(lastDelta.net)}`;
-		parts.push(
-			separator,
-			theme.fg("dim", "Δ "),
-			theme.fg(lastDelta.net === 0 ? "muted" : "accent", delta),
-		);
-	}
 	return parts.join("");
 }
 
@@ -69,8 +61,11 @@ async function refreshStatus(ctx: ExtensionContext, stats?: LocStats): Promise<v
 	if (!ctx.hasUI) return;
 	const resolved = stats ?? readLocCache(ctx.cwd) ?? (await analyzeRepo(ctx.cwd));
 	if (!resolved) return;
-	const [lastDelta] = getCommitDeltas(ctx.cwd, 1);
-	ctx.ui.setStatus("loc", formatNativeStatusLine(resolved, lastDelta, ctx.ui.theme));
+	if (resolved.files === 0) {
+		ctx.ui.setStatus("loc", undefined);
+		return;
+	}
+	ctx.ui.setStatus("loc", formatNativeStatusLine(resolved, ctx.ui.theme));
 }
 
 export default function registerLocExtension(pi: ExtensionAPI): void {

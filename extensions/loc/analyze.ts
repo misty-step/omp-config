@@ -18,7 +18,8 @@ export interface LocStats {
 	comment: number;
 	blank: number;
 	byLanguage: Record<string, LanguageStats>;
-	source: "scc" | "tokei" | "builtin";
+	source: "builtin";
+	headHash: string;
 }
 
 export interface CommitDelta {
@@ -55,17 +56,25 @@ const EXT_TO_LANG: Record<string, string> = {
 	".tf": "Terraform", ".hcl": "HCL", ".dockerfile": "Dockerfile",
 };
 
-const BINARY_EXTENSIONS = new Set([
-	".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".bmp", ".svg",
-	".woff", ".woff2", ".ttf", ".eot", ".otf", ".pdf", ".zip", ".gz", ".bz2", ".xz", ".7z",
-	".tar", ".rar", ".exe", ".dll", ".so", ".dylib", ".a", ".o", ".class", ".jar", ".wasm",
-	".mp3", ".mp4", ".avi", ".mov", ".webm", ".lock", ".min.js", ".min.css", ".map",
-]);
+const BINARY_EXTENSIONS: Record<string, true> = {
+	".png": true, ".jpg": true, ".jpeg": true, ".gif": true, ".webp": true, ".ico": true, ".bmp": true, ".svg": true,
+	".woff": true, ".woff2": true, ".ttf": true, ".eot": true, ".otf": true, ".pdf": true, ".zip": true, ".gz": true,
+	".bz2": true, ".xz": true, ".7z": true, ".tar": true, ".rar": true, ".exe": true, ".dll": true, ".so": true,
+	".dylib": true, ".a": true, ".o": true, ".class": true, ".jar": true, ".wasm": true, ".mp3": true, ".mp4": true,
+	".avi": true, ".mov": true, ".webm": true, ".lock": true, ".map": true,
+};
+const BINARY_SUFFIXES = [".min.js", ".min.css"];
 
-const SKIP_DIR_PARTS = new Set([
-	"node_modules", ".git", "dist", "build", "coverage", ".next", ".nuxt", "vendor",
-	"__pycache__", ".venv", "venv", ".tox", "target",
-]);
+const SKIP_DIR_PARTS: Record<string, true> = {
+	node_modules: true, ".git": true, dist: true, build: true, coverage: true, ".next": true, ".nuxt": true,
+	vendor: true, __pycache__: true, ".venv": true, venv: true, ".tox": true, target: true,
+};
+const BLOCK_COMMENT_LANGUAGES: Record<string, true> = {
+	C: true, "C++": true, Java: true, JavaScript: true, TypeScript: true, Go: true, Rust: true, CSS: true, SQL: true,
+};
+const HASH_COMMENT_LANGUAGES: Record<string, true> = {
+	Python: true, Shell: true, Ruby: true, YAML: true, TOML: true, Dockerfile: true, R: true, Terraform: true, HCL: true,
+};
 
 function run(cmd: string, args: string[], cwd: string) {
 	const result = spawnSync(cmd, args, { cwd, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
@@ -84,8 +93,9 @@ function trackedFiles(cwd: string, ref = "HEAD"): string[] {
 }
 
 function shouldSkipPath(file: string): boolean {
-	for (const part of file.split(/[/\\]/)) if (SKIP_DIR_PARTS.has(part)) return true;
-	return BINARY_EXTENSIONS.has(extname(file).toLowerCase());
+	for (const part of file.split(/[/\\]/)) if (SKIP_DIR_PARTS[part]) return true;
+	const lower = file.toLowerCase();
+	return BINARY_EXTENSIONS[extname(lower)] || BINARY_SUFFIXES.some((suffix) => lower.endsWith(suffix));
 }
 
 function languageForFile(file: string): string {
@@ -94,10 +104,6 @@ function languageForFile(file: string): string {
 	if (base === "makefile") return "Makefile";
 	const ext = extname(file).toLowerCase();
 	return EXT_TO_LANG[ext] ?? (ext ? ext.slice(1).toUpperCase() : "Other");
-}
-
-function emptyStats(): LocStats {
-	return { files: 0, total: 0, code: 0, comment: 0, blank: 0, byLanguage: {}, source: "builtin" };
 }
 
 function addLanguage(stats: LocStats, language: string, fileStats: Omit<LanguageStats, "files"> & { files?: number }) {
@@ -115,60 +121,19 @@ function addLanguage(stats: LocStats, language: string, fileStats: Omit<Language
 	stats.blank += fileStats.blank;
 }
 
-function parseScc(stdout: string): LocStats | null {
-	try {
-		const rows = JSON.parse(stdout) as Array<{ Name?: string; Count?: number; Blanks?: number; Code?: number; Comment?: number }>;
-		if (!Array.isArray(rows)) return null;
-		const stats = emptyStats();
-		stats.source = "scc";
-		for (const row of rows) {
-			const language = row.Name?.trim();
-			if (!language || language === "Total") continue;
-			const files = Number(row.Count ?? 0);
-			const blank = Number(row.Blanks ?? 0);
-			const code = Number(row.Code ?? 0);
-			const comment = Number(row.Comment ?? 0);
-			addLanguage(stats, language, { files, total: code + comment + blank, code, comment, blank });
-		}
-		return stats.files > 0 ? stats : null;
-	} catch { return null; }
-}
-
-function parseTokei(stdout: string): LocStats | null {
-	try {
-		const parsed = JSON.parse(stdout) as Record<string, Record<string, { blanks?: number; code?: number; comments?: number }>>;
-		if (!parsed || typeof parsed !== "object") return null;
-		const stats = emptyStats();
-		stats.source = "tokei";
-		for (const [language, reports] of Object.entries(parsed)) {
-			if (language === "Total") continue;
-			let files = 0, blank = 0, code = 0, comment = 0;
-			for (const report of Object.values(reports)) {
-				files += 1;
-				blank += Number(report.blanks ?? 0);
-				code += Number(report.code ?? 0);
-				comment += Number(report.comments ?? 0);
-			}
-			if (!files) continue;
-			addLanguage(stats, language, { files, total: code + comment + blank, code, comment, blank });
-		}
-		return stats.files > 0 ? stats : null;
-	} catch { return null; }
-}
-
 function countFileLines(content: string, language: string): Omit<LanguageStats, "files"> {
 	const lines = content.split(/\r?\n/);
 	let code = 0, comment = 0, blank = 0;
-	const block = new Set(["C", "C++", "Java", "JavaScript", "TypeScript", "Go", "Rust", "CSS", "SQL"]);
-	const hash = new Set(["Python", "Shell", "Ruby", "YAML", "TOML", "Dockerfile", "R", "Terraform", "HCL"]);
+	const blockComments = BLOCK_COMMENT_LANGUAGES[language];
+	const hashComments = HASH_COMMENT_LANGUAGES[language];
 	let inBlock = false;
 	for (const raw of lines) {
 		const line = raw.trim();
 		if (!line) { blank += 1; continue; }
-		if (block.has(language) && inBlock) { comment += 1; if (line.includes("*/")) inBlock = false; continue; }
-		if (block.has(language) && line.startsWith("/*")) { comment += 1; if (!line.endsWith("*/")) inBlock = true; continue; }
-		if (block.has(language) && (line.startsWith("//") || line.startsWith("///"))) { comment += 1; continue; }
-		if (hash.has(language) && line.startsWith("#")) { comment += 1; continue; }
+		if (blockComments && inBlock) { comment += 1; if (line.includes("*/")) inBlock = false; continue; }
+		if (blockComments && line.startsWith("/*")) { comment += 1; if (!line.endsWith("*/")) inBlock = true; continue; }
+		if (blockComments && (line.startsWith("//") || line.startsWith("///"))) { comment += 1; continue; }
+		if (hashComments && line.startsWith("#")) { comment += 1; continue; }
 		if (language === "HTML" && line.startsWith("<!--")) { comment += 1; continue; }
 		if (language === "SQL" && line.startsWith("--")) { comment += 1; continue; }
 		code += 1;
@@ -183,31 +148,29 @@ function readFileAtRef(root: string, ref: string, file: string): string | null {
 
 export function analyzeBuiltin(cwd: string, ref = "HEAD"): LocStats {
 	const root = gitRoot(cwd) ?? cwd;
-	const stats = emptyStats();
-	for (const file of trackedFiles(root, ref)) {
-		const content = readFileAtRef(root, ref, file);
+	const resolved = run("git", ["rev-parse", `${ref}^{commit}`], root);
+	const headHash = resolved.ok ? resolved.stdout.trim() : "";
+	const stats: LocStats = {
+		files: 0,
+		total: 0,
+		code: 0,
+		comment: 0,
+		blank: 0,
+		byLanguage: {},
+		source: "builtin",
+		headHash,
+	};
+	if (!headHash) return stats;
+	for (const file of trackedFiles(root, headHash)) {
+		const content = readFileAtRef(root, headHash, file);
 		if (content == null) continue;
 		addLanguage(stats, languageForFile(file), countFileLines(content, languageForFile(file)));
 	}
 	return stats;
 }
 
-export function analyzeWithExternalTools(cwd: string): LocStats | null {
-	const root = gitRoot(cwd) ?? cwd;
-	if (run("git", ["rev-parse", "--is-inside-work-tree"], root).stdout.trim() !== "true") return null;
-	const scc = run("scc", ["-f", "json", "--exclude-dir", "node_modules", "--exclude-dir", ".git"], root);
-	if (scc.ok) { const parsed = parseScc(scc.stdout); if (parsed) return parsed; }
-	const tokei = run("tokei", ["-o", "json"], root);
-	if (tokei.ok) { const parsed = parseTokei(tokei.stdout); if (parsed) return parsed; }
-	return null;
-}
-
-export function analyzeRepo(cwd: string, options: { ref?: string; preferExternal?: boolean } = {}): LocStats {
-	if (options.preferExternal !== false) {
-		const external = analyzeWithExternalTools(cwd);
-		if (external) return external;
-	}
-	return analyzeBuiltin(cwd, options.ref ?? "HEAD");
+export function analyzeRepo(cwd: string): LocStats {
+	return analyzeBuiltin(cwd);
 }
 
 export function getCommitDeltas(cwd: string, count = 8): CommitDelta[] {
@@ -263,11 +226,16 @@ export function getTrendPoints(cwd: string, count = 6): TrendPoint[] {
 }
 
 export function readLocCache(cwd: string): (LocStats & { updatedAt?: number }) | null {
-	const cachePath = join(gitRoot(cwd) ?? cwd, ".git", "loc_cache");
+	const root = gitRoot(cwd);
+	if (!root) return null;
+	const resolved = run("git", ["rev-parse", "HEAD^{commit}"], root);
+	const headHash = resolved.ok ? resolved.stdout.trim() : "";
+	if (!headHash) return null;
+	const cachePath = join(root, ".git", "loc_cache");
 	if (!existsSync(cachePath)) return null;
 	try {
 		const parsed = JSON.parse(readFileSync(cachePath, "utf8")) as LocStats & { updatedAt?: number };
-		return typeof parsed.code === "number" ? parsed : null;
+		return typeof parsed.code === "number" && parsed.headHash === headHash ? parsed : null;
 	} catch { return null; }
 }
 
