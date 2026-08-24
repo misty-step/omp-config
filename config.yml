@@ -55,7 +55,9 @@ display:
   cacheMissMarker: true
 browser:
   relay: false
-setupVersion: 1
+setupVersion: 2
+composer:
+  shape: pi
 skills:
   enableAgentsUser: true
 github:
