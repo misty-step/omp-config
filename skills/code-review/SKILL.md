@@ -81,7 +81,7 @@ an accepted security finding has one named external remediation blocker.
 
 ## 6. Report
 
-Write one report and one numbered Hunk sidecar to OS temporary paths:
+Write one report to an OS temporary path:
 
 ```markdown
 # Code review
@@ -93,16 +93,10 @@ Write one report and one numbered Hunk sidecar to OS temporary paths:
 ## Proof and residual risk
 ```
 
-The sidecar covers each load-bearing decision, repaired finding, caller
-migration, and proof. Write it before choosing an interactive or
-non-interactive delivery path.
-
-In an interactive Herdr session, open the annotated walkthrough per
-`skill://hunk` and preserve operator focus. Otherwise return both artifact
-paths without launching Hunk.
+Return the report path and lead with its final verdict. The report cites each
+load-bearing decision, repaired finding, caller migration, proof, and external
+remediation blocker.
 
 Completion criterion: The final verdict is green, or the report names every
-blocking decision and external remediation blocker. Both artifacts exist. An
-interactive walkthrough is loaded with live numbered notes, or a
-non-interactive response returns both paths. No supported finding or failed
-check remains hidden.
+blocking decision and external remediation blocker. The report exists, and no
+supported finding or failed check remains hidden.

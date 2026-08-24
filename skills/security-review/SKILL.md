@@ -60,7 +60,6 @@ node <skill-directory>/scripts/audit.mjs --file src/auth.ts --file src/server.ts
 
 The script queries GLM 5.3, Kimi K3, and DeepSeek V4 Pro in parallel, extracts structured JSON findings, correlates matching issues, and generates:
 - Markdown audit report: `/tmp/security-review-<id>.md`
-- Hunk walkthrough annotations: `/tmp/security-walkthrough-<id>.json`
 - Raw findings data: `/tmp/security-findings-<id>.json`
 
 For exhaustive vulnerability checklist and attack domain details, see `references/audit-domains.md`.
@@ -104,15 +103,15 @@ Completion criterion: Consolidated findings categorized by consensus, severity, 
 
 ---
 
-## 5. Walkthrough & Operator Triage
+## 5. Operator Triage
 
-1. Review the generated Markdown report.
-2. Load the walkthrough notes into the live Hunk session (`skill://hunk`) using the generated sidecar JSON:
-   - Walk the operator through each critical and high finding anchored to source lines.
-   - Present the concrete attack mechanism, blast radius, and minimal repair.
-3. Wait for the operator to accept, defer, or reject each finding before modifying any production code.
+1. Review the generated Markdown report and its source-anchored findings.
+2. Present each critical and high finding with its concrete attack mechanism,
+   blast radius, affected line range, and minimal repair.
+3. Wait for the operator to accept, defer, or reject each finding before
+   modifying any production code.
 
-Completion criterion: Report presented to the operator, Hunk walkthrough loaded, and triage decisions recorded.
+Completion criterion: Report presented to the operator and triage decisions recorded.
 
 ---
 

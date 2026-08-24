@@ -138,9 +138,9 @@ Open an unmerged pull request. Include the work item, accepted spec, decisions,
 tests, QA observations, inspected evidence, review-loop verdict, risks,
 release plan, rollback path, and production signals.
 
-Open the numbered annotated walkthrough with `skill://hunk`. Leave operator
-focus unchanged. Merge and deploy belong to explicit `/release`.
+Return the pull-request URL. Leave operator focus unchanged. Merge and deploy
+belong to explicit `/release`.
 
-Completion criterion: The operator can review one unmerged PR, step every
-load-bearing change, inspect the proof, and make only the release decision.
+Completion criterion: The operator can review one unmerged pull-request diff,
+inspect the proof, and make only the release decision.
 

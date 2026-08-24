@@ -37,9 +37,6 @@
   recollection are leads.
 - Standing mandate (OR-06): reversible calls get made and reported; ask
   only scope, spend, or risk changes.
-- Interactive diff review: use `skill://hunk` to open a numbered,
-  annotated walkthrough (not an empty first-file view), attach curated
-  notes, and drive interactive diffs in Herdr panes.
 - Sharpest instrument (CR-03): LSP over text search for symbols; `ast-grep`
   (`sg`) over sed for structural search and codemods. Grep is the fallback,
   not the default.

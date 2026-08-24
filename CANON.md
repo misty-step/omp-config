@@ -241,8 +241,6 @@ Standing context is scarce attention; spend it on judgment, not procedure.
 
 - **TL-01** Herdr coordinates sessions and panes; operator focus is
   preserved — never steal tab, pane, or workspace (`herdr`).
-- **TL-02** Hunk for review of non-trivial changesets: numbered annotated
-  walkthrough with curated notes, not a bare diff dump (`hunk`).
 - **TL-03** Exe.dev VMs for isolation-sensitive work: untrusted dependencies,
   kernel-level experiments, parallel environments. Never burn the workstation.
 - **TL-04** Iron Forest runs routine issue-to-PR mechanics headlessly
@@ -302,7 +300,7 @@ Standing context is scarce attention; spend it on judgment, not procedure.
 | TH-01 | `skills/prototype` fans design options | partial — visual design only, generalizes poorly |
 | DE-01, CH-03 | `global/AGENTS.md` design/delivery lines; `audit-simplifications`, `improve-codebase-architecture` | live |
 | RS-01 | exa routing in `config.yml`; `skills/research` decision protocol | drafted — skill written, untrialed |
-| TL-01, TL-02 | `skills/herdr`, `skills/hunk` | live |
+| TL-01 | `skills/herdr` | live |
 | OR-05 | `skills/powder` work ledger | live — checkpoint skill deleted 2026-08-21: zero invocations across 190 fleet transcripts, CLI absent from PATH |
 | TE-01–TE-05 | `skills/foundation` agentic baseline | unverified coverage |
 | OR-08 | `skills/audit-choices` decision ledger | live — deployed; deliver/Iron-Forest wiring blocked on PR #57 |

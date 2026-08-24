@@ -48,7 +48,7 @@ attention-consuming flows that fire only on explicit request:
 
 Model-invocable — unambiguous triggers, bounded cost, cheap wrong-fire:
 `ast-grep`, `create-task`, `dispatch`, `evidence-packet`, `exocortex`,
-`frontend-design`, `herdr`, `hunk`, `powder`, `research`, `watch-deploy`.
+`frontend-design`, `herdr`, `powder`, `research`, `watch-deploy`.
 
 The split criterion lives in `CANON.md`, Synthesis policy.
 

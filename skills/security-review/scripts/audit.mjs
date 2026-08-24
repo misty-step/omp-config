@@ -352,33 +352,12 @@ ${v.remediation}
 Before applying repairs:
 1. Verify each exploit mechanism against the real runtime interface.
 2. Filter ungrounded solo findings without concrete source-to-sink proof.
-3. Use \`skill://hunk\` walkthrough to review line annotations with the operator.
+3. Review every source-anchored finding and its line range with the operator.
 `;
 
   return md;
 }
 
-function generateHunkWalkthrough(consolidated) {
-  const comments = [];
-  for (let i = 0; i < consolidated.length; i++) {
-    const v = consolidated[i];
-    if (!v.file_path) continue;
-    comments.push({
-      filePath: v.file_path,
-      newLine: v.line_start || 1,
-      summary: `[${i + 1}/${consolidated.length}] [${v.severity.toUpperCase()}] ${v.title}`,
-      rationale: `**${v.consensus}** (${v.models.join(", ")})\n\n**CWE**: ${v.cwe || "N/A"}\n\n**Attack Path:**\n${v.attack_path}\n\n**Remediation:**\n${v.remediation}`
-    });
-  }
-  return {
-    comments,
-    meta: {
-      generatedBy: "security-reviewer",
-      timestamp: new Date().toISOString(),
-      count: comments.length
-    }
-  };
-}
 
 async function main() {
   const rawArgs = process.argv.slice(2);
@@ -441,21 +420,17 @@ async function main() {
   const synthesis = synthesizeFindings(results);
   const reportId = Date.now().toString(36);
   const mdReport = generateMarkdownReport(targetLabel, results, synthesis);
-  const hunkSidecar = generateHunkWalkthrough(synthesis.consolidated);
 
   const reportPath = resolve(tmpdir(), `security-review-${reportId}.md`);
-  const sidecarPath = resolve(tmpdir(), `security-walkthrough-${reportId}.json`);
   const jsonPath = resolve(tmpdir(), `security-findings-${reportId}.json`);
 
   writeFileSync(reportPath, mdReport, "utf-8");
-  writeFileSync(sidecarPath, JSON.stringify(hunkSidecar, null, 2), "utf-8");
   writeFileSync(jsonPath, JSON.stringify({ results, synthesis }, null, 2), "utf-8");
 
   if (args.jsonOutput) {
     console.log(JSON.stringify({
       reportId,
       reportPath,
-      sidecarPath,
       jsonPath,
       results,
       synthesis
@@ -465,7 +440,6 @@ async function main() {
     console.log(`\n======================================================`);
     console.log(`Security Review Artifacts:`);
     console.log(`- Markdown Report:   ${reportPath}`);
-    console.log(`- Hunk Walkthrough:  ${sidecarPath}`);
     console.log(`- Raw JSON Data:     ${jsonPath}`);
     console.log(`======================================================\n`);
     console.log(mdReport);
