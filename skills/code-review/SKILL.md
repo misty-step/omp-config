@@ -1,31 +1,38 @@
 ---
 name: code-review
-description: Run a multi-angle review, repair supported defects, and repeat until the complete change is tight.
+description: Dispatch an exhaustive multi-model Council of Subagents to review a pull request, branch, or commit, repair supported defects, and verify until green.
 disable-model-invocation: true
-argument-hint: "[change, pull request, or commit]"
+argument-hint: "[pull request, branch, or commit]"
 ---
 
 # Code Review
 
-Review the completed system, not only its diff. Repair supported in-scope
-findings. Repeat until green.
+Exhaustive multi-angle review phase. The top-level agent acts as Master
+Reviewer, dispatching a Council of Subagents across diverse model families
+(Structure, Behavior, Practicality), adjudicating findings, and driving the
+repair loop until tight.
+
+```text
+resolve target -> establish intent -> load council -> dispatch multi-model scouts
+-> adjudicate findings -> repair loop -> emit report
+```
 
 ## 1. Resolve the target
 
-Use the named change, pull request, or commit. For a pull request, create its
-dedicated checkout. For a commit, create an isolated repair branch and
-worktree from that commit. Default to the current change only when the
-invocation names no target.
+Use the named pull request, branch, or commit. For a pull request, create a
+dedicated checkout or worktree. For a commit, create an isolated repair branch
+and worktree from that commit. Default to the current change only when no
+target is supplied.
 
 Record the base, head, diff, and writable checkout before review. Leave the
-operator's branch unchanged.
+operator's active branch unchanged.
 
 Completion criterion: One exact target and isolated repair destination exist.
 
 ## 2. Establish intent
 
-Reconstruct from the request, accepted decisions, repository authority, and
-runtime evidence:
+Reconstruct the accepted intent from the request, accepted decisions,
+repository authority, and runtime evidence:
 
 - outcome and user value;
 - data, owners, lifetimes, states, transitions, and invariants;
@@ -34,69 +41,71 @@ runtime evidence:
 - tests, QA scenarios, production signals, and rollback;
 - proof that separates success from a plausible regression.
 
-A concern that changes accepted intent is a design conflict, not a repair.
+A concern that conflicts with accepted intent is a design question, not a
+repair.
 
 Completion criterion: Intent, invariants, scope, and proof are explicit.
 
-## 3. Load the council
+## 3. Load council and repair protocol
 
-Run `omp config path`. Read `references/review/COUNCIL.md` below that agent
-directory. Read only the sibling lens files selected by its Select section.
+Run `omp config path`. Read `references/review/COUNCIL.md` and
+`references/review/REPAIR-LOOP.md` below that agent directory, along with the
+selected lens files.
 
-Completion criterion: The shared council contract and selected references are
-loaded from the deployed plain-reference source.
+Completion criterion: Council contracts and selected lens references are
+loaded from the deployed reference source.
 
-## 4. Council
+## 4. Dispatch the Council of Subagents
 
-Apply Select, Run, and Classify from the shared council contract. Review the
-complete relevant system, tests, QA observations, and inspected evidence.
+Act as Master Reviewer. Fan out parallel read-only scouts across distinct
+model roles per `references/review/COUNCIL.md`:
 
-Completion criterion: Every selected group returns, and every supported
-finding is Blocker, Take, or Drop.
+1. **Structure Scout (`@slow` / GPT-5.6 Sol Max):** Evaluates data ownership,
+   invalid states, module depth, and decomplection (`torvalds.md`,
+   `ousterhout.md`, `hickey.md`, `taelin.md`).
+2. **Behavior Scout (Claude Fable 5 / Opus):** Evaluates correctness,
+   behavioral contracts, error states, and test defense (`uncle-bob.md`,
+   `kcd.md`).
+3. **Practicality Scout (Grok 4.6 / Gemini Flash):** Evaluates hot path
+   inspectability, mechanical sympathy, YAGNI, and dead seams (`carmack.md`,
+   `thermo.md`, `ponytail.md`).
+4. **Adversarial Security Pass:** When auth, secrets, untrusted inputs, or trust
+   boundaries are modified, stop and ask the operator to invoke
+   `/security-review`, then resume from its triaged findings.
+Adjudicate and deduplicate all scout findings into **Blocker**, **Take**, or
+**Drop**.
+
+Completion criterion: Every dispatched scout returns, and all findings are
+classified with explicit rationale.
 
 ## 5. Repair loop
 
-Security-review findings remain under `/security-review` model policy. Record
-accepted guidance and stop. Do not design or apply that repair until an
-approved writable mechanism or external repair exists. Re-audit an external
-repair before resuming this loop.
+Execute the repair and convergence protocol defined in
+`references/review/REPAIR-LOOP.md`:
 
-Repair all in-scope Blockers and in-scope Takes. Route out-of-scope Blockers
-to the operator with evidence and an owner. Delete first. Fix the source.
-Migrate every caller. Remove obsolete paths. Run the narrowest real scenario
-and applicable contract tests after each repair.
+- repair in-scope Blockers and Takes autonomously;
+- delete first, fix source directly, and migrate all callers;
+- re-verify affected tests and product-surface QA after each repair;
+- repeat until zero in-scope Blockers or Takes remain.
 
-Then rerun the same council over the repaired boundary. Continue until:
-
-- zero in-scope Blockers and in-scope Takes remain;
-- tests and product-surface QA are green;
-- evidence matches the final behavior.
-
-Stop and ask the operator only when a repair changes accepted intent or scope,
-requires a hard-to-reverse choice, or the same supported finding recurs after a
-coherent repair. A failed check is a new finding.
-
-Completion criterion: The loop is green, one explicit decision blocks it, or
-an accepted security finding has one named external remediation blocker.
+Completion criterion: The repair loop terminates green with all checks passing
+and evidence matching the final state.
 
 ## 6. Report
 
-Write one report to an OS temporary path:
+Write the final review report to an OS temporary path:
 
 ```markdown
 # Code review
 ## Target, intent, and scope
-## Council groups
-## Cycles and repairs
+## Council roster and multi-model dispatch
+## Findings (Blockers, Takes, Drops)
+## Cycles and repairs applied
 ## Final verdict
-## Dropped and out-of-scope findings
 ## Proof and residual risk
 ```
 
-Return the report path and lead with its final verdict. The report cites each
-load-bearing decision, repaired finding, caller migration, proof, and external
-remediation blocker.
+Return the report path and lead with its final verdict.
 
-Completion criterion: The final verdict is green, or the report names every
-blocking decision and external remediation blocker. The report exists, and no
-supported finding or failed check remains hidden.
+Completion criterion: The final verdict is green or blocked with an explicit
+reason, and no supported finding remains unaddressed.

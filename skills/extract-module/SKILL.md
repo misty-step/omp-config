@@ -1,6 +1,7 @@
 ---
 name: extract-module
-description: Extract-module investigation — map coupling (fan-in, fan-out, leakages), run the deletion gate, design the boundary, and blueprint phased cutover before splitting a subsystem into an isolated directory, workspace package, or external repo. Use when extracting a module or package, splitting a subsystem, measuring coupling before a split, resolving circular imports for extraction, or moving code to a monorepo workspace or standalone repository.
+description: Multi-stage investigation for extracting a subsystem into an isolated package or repository.
+disable-model-invocation: true
 argument-hint: "[subsystem or module path]"
 ---
 

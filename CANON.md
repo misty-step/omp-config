@@ -217,9 +217,9 @@ Standing context is scarce attention; spend it on judgment, not procedure.
   acceptance; claims are checked against the artifact before integration.
 - **OR-04** Scout-then-edit. Unknown territory gets delegated read-only
   recon; edits stay with one owner who holds the design.
-- **OR-05** Ledger routing: Powder for all Misty Step and other non-R90 work;
-  Habitat only inside R90. Work enters through takeable jobs; proof attaches
-  at completion.
+- **OR-05** Ledger routing: Powder for all Misty Step work (skill scoped to
+  `~/Development/misty-step/`); Habitat only inside R90. Work enters through
+  takeable jobs; proof attaches at completion.
 - **OR-06** Escalation shape: human-owned tradeoffs get asked with concrete
   options and a recommendation; reversible calls get made autonomously and
   reported.
@@ -297,11 +297,11 @@ Standing context is scarce attention; spend it on judgment, not procedure.
 | ADR-0009 (census) | Chief-stays-thin kits; 0001/0002/0003/0005 architecture-specific; 0004 mint broker decommissioned with mint | skipped by operator selection 2026-08-21 |
 | OR-06 | `global/AGENTS.md` standing-mandate line (reversible calls made and reported) | live — trialed in iron-forest ops 2026-08-21 |
 | CH-02 | `skills/diagnose` red-loop, architecture challenge at fix #3 | live |
-| TH-01 | `skills/prototype` fans design options | partial — visual design only, generalizes poorly |
-| DE-01, CH-03 | `global/AGENTS.md` design/delivery lines; `audit-simplifications`, `improve-codebase-architecture` | live |
+| TH-01 | `skills/explore-design` fans ≥6 design options; `skills/shape` fans ≥3 architectures | drafted — skill written, first trial pending |
+| DE-01, CH-03 | `global/AGENTS.md` design/delivery lines; `audit-simplifications`, `skills/refactor` | `audit-simplifications` live; `refactor` drafted — trial pending |
 | RS-01 | exa routing in `config.yml`; `skills/research` decision protocol | drafted — skill written, untrialed |
 | TL-01 | `skills/herdr` | live |
-| OR-05 | `skills/powder` work ledger | live — checkpoint skill deleted 2026-08-21: zero invocations across 190 fleet transcripts, CLI absent from PATH |
+| OR-05 | `skills/capture` conversation-to-ledger extraction; Powder in Misty Step | drafted — capture skill written, trial pending |
 | TE-01–TE-05 | `skills/foundation` agentic baseline | unverified coverage |
 | OR-08 | `skills/audit-choices` decision ledger | live — deployed; deliver/Iron-Forest wiring blocked on PR #57 |
 | OP-01 | Landmark adopted in at least `canary` (full, `@35d002b`), `linejam` (full, `@35d002b` = v0.28.1), `crucible` (synthesis-only, `@v0`) — examples, inventory not audited | partial — fleet rollout incomplete |
@@ -310,7 +310,7 @@ Standing context is scarce attention; spend it on judgment, not procedure.
 | RS-03 | `skills/audit-simplifications` dependency-ladder lenses | live |
 | OR-07 | Flat-rate watchdog; OpenRouter removed from automatic chains; spend confined to on-demand work plus the documented vision exception | live |
 | TH-04, DE-01–DE-02, DE-07, OR-03, OR-07 | `skills/torvalds-design-review`; high-effort read-only `torvalds-reviewer` agent | live — explicit CLI trial 2026-08-22 |
-| TH-01, TH-04, DE-01–DE-08, TE-01–TE-06, CH-01–CH-06, OP-03–OP-06, OR-01–OR-03 | `shape` → `deliver` → `release` → `watch-deploy`; autonomous review-repair loop; evidence-only `brief` | live for entry gates — brief, shape, deliver, and release CLI trials 2026-08-22; first real delivery and deploy pending |
+| TH-01, TH-04, DE-01–DE-08, TE-01–TE-06, CH-01–CH-06, OP-03–OP-06, OR-01–OR-03 | `shape` → `deliver` → `code-review` → `release` → `watch-deploy`; evidence-only `brief` | live for entry gates |
 | RS-01–RS-02, OR-01–OR-03, OR-07 | `skills/dispatch` current-access, benchmark, cost, role, and fallback routing program | live — explicit CLI trial 2026-08-22; no config mutation |
 | DE-07, TE-06, CH-01 | `skills/polish` one-interaction simpler/faster loop with real-surface proof | drafted — CLI gate trial 2026-08-23 |
 | DE-01, DE-03, DE-08 | `foundation` context-budget control: per-atomic-module token budget (default 100k) with repomix gate and enforced boundaries | drafted 2026-08-23 — extracted from Taelin's Bend2 observation; first project install pending |

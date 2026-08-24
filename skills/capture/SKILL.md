@@ -1,22 +1,22 @@
 ---
-name: backlog
-description: Commit this conversation's durable findings to the backlog of record.
+name: capture
+description: Extract and commit this conversation's durable findings, decisions, and debt to the project's backlog of record.
 disable-model-invocation: true
 argument-hint: "[optional project or scope]"
 ---
 
-# Backlog
+# Capture
 
-Commit the durable findings of this conversation to the backlog of record.
-Preserve what was learned, why it matters, and how future work can prove it
-complete.
+Commit the durable findings, decisions, defects, and technical debt of this
+conversation to the authoritative backlog of record. Preserve what was learned,
+why it matters, and how future work can prove it complete.
 
 ## 1. Establish the boundary
 
 Use the active conversation and project. Use the invocation argument only to
 name the project or narrow the subject. Read project policy to identify the
-backlog of record and its interface. When policy names Powder, read
-`skill://powder` before writing.
+backlog of record and its interface. When policy names Powder (such as in
+Misty Step repositories), read `skill://powder` before writing.
 
 If no authoritative backlog is configured, report that missing prerequisite.
 Do not substitute a local file, issue tracker, or memory store.
@@ -29,10 +29,10 @@ backlog of record are explicit.
 Identify each durable finding that warrants future work or changes existing
 work:
 
-- an observed defect, unmet need, or opportunity;
-- an operator decision that constrains delivery;
+- an observed defect, unmet need, or architecture debt;
+- an operator decision that constrains future delivery;
 - a material risk, dependency, or unresolved choice;
-- a concrete follow-up that remains incomplete.
+- a concrete follow-up task that remains incomplete.
 
 For each finding, preserve its evidence, consequence, desired outcome, known
 constraints, and observable proof. Keep an operator-owned choice open unless

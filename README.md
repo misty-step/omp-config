@@ -41,14 +41,15 @@ Two invocation classes:
 
 Operator-invoked (`disable-model-invocation: true`) — heavyweight or
 attention-consuming flows that fire only on explicit request:
-`audit-choices`, `audit-simplifications`, `backlog`, `brief`, `code-review`,
-`deliver`, `diagnose`, `explore-unknowns`, `foundation`,
-`improve-codebase-architecture`, `install-anti-slop`, `polish`, `prototype`,
-`release`, `security-review`, `shape`, `tidy`, `torvalds-design-review`.
+`audit-choices`, `audit-simplifications`, `brief`, `capture`, `code-review`,
+`deliver`, `diagnose`, `explore-design`, `explore-unknowns`, `extract-module`,
+`foundation`, `install-anti-slop`, `polish`, `product-description`, `pulse`,
+`refactor`, `release`, `security-review`, `shape`, `tidy`,
+`torvalds-design-review`.
 
 Model-invocable — unambiguous triggers, bounded cost, cheap wrong-fire:
-`ast-grep`, `create-task`, `dispatch`, `evidence-packet`, `exocortex`,
-`frontend-design`, `herdr`, `powder`, `research`, `watch-deploy`.
+`ast-grep`, `dispatch`, `evidence-packet`, `exocortex`, `frontend-design`,
+`herdr`, `research`, `watch-deploy`.
 
 The split criterion lives in `CANON.md`, Synthesis policy.
 
@@ -62,7 +63,7 @@ context — synthesize one principle at a time, trial it, keep or drop.
 
 ## Ecosystem
 
-- **Powder** — work ledger for all Misty Step work (`skills/powder`).
+- **Powder** — work ledger for all Misty Step work; skill managed in `misty-step/powder` and scoped to `~/Development/misty-step/` via workspace discovery.
 - **Iron Forest** — headless Builder/Verifier/Fixer factory. Mechanical
   enforcement belongs there and in CI, not in prose.
 - **Landmark** — release pipeline: conventional commits become semantic
