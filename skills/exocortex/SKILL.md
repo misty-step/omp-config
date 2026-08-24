@@ -10,14 +10,12 @@ corpora (**cortices**). Daybook is cortex `daybook`. Foreign sources (Notion,
 Drive, harness session logs) enter through **feeds** as provenance-stamped
 notes — never by editing raw sources.
 
-Status: this file is the binding v0 interface contract. The binary is
-NOT fleet-installed: per-harness registration is slice 2. Per-host
-source builds are possible today:
-`go build -o ~/.local/bin/exocortex ./cmd/exocortex`. Until a harness
-registers the MCP server, its agents use the CLI above; if the binary
-is unavailable on a host, fall back to `qmd search "<query>" -c
-daybook` and direct git per the daybook AGENTS.md.
-
+Status: Exocortex is built, tested under race detection, and installed as
+`~/.local/bin/exocortex`. The CLI is the official, universal fleet interface.
+All operations speak structured JSON (`--json` default) and evaluate against
+an isolated, kernel-owned publisher clone. **Never edit or commit to Daybook
+via raw Git directly**; always use `exocortex note` or `exocortex put` to protect
+CAS preconditions and keep working trees clean.
 ## When to use
 
 - **Before work (orient):** search the cortex for prior decisions, project
@@ -26,12 +24,14 @@ daybook` and direct git per the daybook AGENTS.md.
   reusable syntheses go into the cortex; raw session logs stay on disk.
 
 ```sh
-exocortex search "who owns powder credentials" --json   # qmd-backed; deterministic BM25 default
-exocortex get areas/work-philosophy.md                  # read one note
-exocortex note "qmd hybrid needs LLM access; CI=true forces bm25 fallback"  # lands on the daybook agent board
+exocortex brief "powder"                                  # single-call orientation briefing
+exocortex search "who owns powder credentials"            # hybrid semantic search (BM25 + Qwen rerank)
+exocortex search "claim procedure" --type decision        # scoped search: decision | memo | session
+exocortex get areas/work-philosophy.md                    # read note from committed HEAD snapshot
+exocortex note "decision or bug fix"                     # atomic memo to the daily board (~2s)
 exocortex put misty-step/new-decision.md --from draft.md              # create-only: fails if it exists
 exocortex put misty-step/decision.md --from draft.md --expects <sha>  # update: stored-revision hash REQUIRED
-exocortex log misty-step/new-decision.md                # lineage
+exocortex log misty-step/new-decision.md                # git lineage
 exocortex lint misty-step/new-decision.md               # frontmatter floor gate
 ```
 
@@ -66,13 +66,13 @@ Write rules enforced by `put` (do not pre-satisfy by hand):
   On mismatch, re-read with `get`, re-apply your change on top, retry.
   Never overwrite a conflict.
 
-## VCS policy is per-cortex
+## Sole-Publisher Isolation
 
-`put` does not universally commit. The `daybook` cortex runs
-`pull --rebase --autostash`, stages only touched paths, commits, pushes.
-Other cortices may leave commits to the caller. Never run `git add -A`, never
-force-push, never amend another worker's commit.
-
+For Daybook cortices, the kernel manages its own persistent clone under
+`~/.config/exocortex/writers/<cortex>`. Writes land, commit, and push from
+there; `get` reads the committed Git HEAD snapshot. Registered human checkouts
+are never preflighted, stashed, or mutated by the kernel. Failures fail closed
+with structured data conflicts.
 ## Naming and linking
 
 Notes are claims, not topics ("distribution is the moat", not "thoughts on
