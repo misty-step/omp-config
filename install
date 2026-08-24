@@ -137,4 +137,26 @@ if [ -s "$hook_src" ]; then
 fi
 rm -f "$agent_dir/extensions/evidence-packet.ts"
 
+if [ -d "$repo_dir/extensions/loc" ]; then
+  install -d -m 700 "$agent_dir/extensions/loc"
+  for ext_entry in "$repo_dir"/extensions/loc/*; do
+    [ -f "$ext_entry" ] || continue
+    install -m 700 "$ext_entry" "$agent_dir/extensions/loc/${ext_entry##*/}"
+  done
+fi
+
+loc_hook="$repo_dir/extensions/loc/git-hook.sh"
+if [ -x "$loc_hook" ]; then
+  git_dir=$(git -C "$repo_dir" rev-parse --absolute-git-dir 2>/dev/null) || git_dir=
+  if [ -n "$git_dir" ]; then
+    install -d "$git_dir/hooks"
+    for hook_name in post-commit post-merge post-checkout; do
+      target="$git_dir/hooks/$hook_name"
+      if [ ! -e "$target" ]; then
+        ln -sf "../../extensions/loc/git-hook.sh" "$target" 2>/dev/null || install -m 700 "$loc_hook" "$target"
+      fi
+    done
+  fi
+fi
+
 printf 'Installed lean OMP config in %s\n' "$agent_dir"

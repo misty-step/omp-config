@@ -22,6 +22,8 @@
 !/themes/**
 !/.githooks/
 !/.githooks/**
+!/extensions/
+!/extensions/**
 
 # Telemetry tooling (repo-local, not deployed)
 !references/
