@@ -41,8 +41,8 @@ Two invocation classes:
 
 Operator-invoked (`disable-model-invocation: true`) — heavyweight or
 attention-consuming flows that fire only on explicit request:
-`audit-choices`, `audit-simplifications`, `brief`, `code-review`, `deliver`,
-`diagnose`, `explore-unknowns`, `foundation`,
+`audit-choices`, `audit-simplifications`, `backlog`, `brief`, `code-review`,
+`deliver`, `diagnose`, `explore-unknowns`, `foundation`,
 `improve-codebase-architecture`, `install-anti-slop`, `polish`, `prototype`,
 `release`, `security-review`, `shape`, `tidy`, `torvalds-design-review`.
 
