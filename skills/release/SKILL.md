@@ -1,119 +1,99 @@
 ---
 name: release
-description: Merge and deploy one review-ready pull request, verify the exact release, and rollback on red.
+description: Address review, confirm CI is not failing, merge, deploy, verify production, and watch. Revert and investigate if ship or verify fails.
 disable-model-invocation: true
 argument-hint: "[pull request]"
 ---
 
 # Release
 
-One review-ready pull request. Merge, deploy, verify, then hand off the soak.
-Explicit invocation authorizes the declared repository rollback when release
-verification fails. It does not authorize a different production mutation.
+Ship one pull request. Watch it in production. If it fails, revert and find out why.
 
-## 1. Gate
+```text
+review clean -> CI not failing -> merge -> deploy -> verify -> watch
+on red: revert -> investigate -> operator -> fix -> postmortem
+```
 
-Proceed only when all conditions hold:
+Explicit `/release` is the go-ahead to merge and deploy that PR. It authorizes
+the repository's ordinary rollback (revert the merge, reinstall the previous
+binary) if verify fails. It does not authorize a different production change.
 
-- the operator explicitly requested this release;
-- the shaped spec or accepted intent is linked;
-- required CI passes on the exact pull-request head, whose identity is recorded;
-- required human approval exists;
-- no blocker or accepted repair remains;
-- each observable claim has evidence that opens directly from the pull request
-  or its attached packet record; local paths and hashes do not satisfy this gate;
-- the target environment has a repository-owned deploy path and initial
-  checks;
-- the runtime can report the deployed revision or artifact identity;
-- rehearsal evidence proves the declared rollback path can restore health.
-- the protected merge path rejects a changed head;
-- automatic deployment cannot start before required post-merge CI passes.
+## 1. Review clean
 
-A failed condition blocks the release before mutation.
+Open the PR. Record the exact head SHA.
 
-Completion criterion: Every gate is green on the exact head.
+- Every in-scope review finding is addressed or explicitly declined with a
+  reason on the PR.
+- No open Blocker from `/code-review` remains.
+- Human approval is not a gate. Bot comments are not a gate.
 
-## 2. Merge
+If a supported defect is still open, fix it on the branch and start again at
+this step. Do not merge around it.
 
-Confirm the pull-request head still equals the gated head. Merge only that head
-through the protected path. Verify the merge result contains exactly the
-reviewed change. Record the immutable merge revision and built artifact.
+Completion criterion: Head SHA recorded. In-scope review is closed.
 
-Wait for all required CI on that merge revision and artifact. A failed or
-missing check blocks deployment and marks the release blocked. Preserve the
-failure evidence. Route the revert or corrective change through the protected
-path. A corrected revision starts again at Gate.
+## 2. CI not failing
 
-Completion criterion: The merge contains the gated change, its artifact maps to
-the merge revision, and required post-merge CI is green.
+Look at checks on that exact head.
 
-## 3. Deploy
+- Failing required or existing CI blocks the ship.
+- Missing CI is not a failure. Do not invent a suite to satisfy this step.
+- Re-run a failed check once if it looks flaky. A second failure blocks.
 
-Deploy that recorded artifact through the repository-owned release path.
-Observe the deployment event and runtime identity.
+Completion criterion: No failing check on the recorded head.
 
-A matching identity proceeds to Verify. Unknown, stale, or mismatched identity
-is red and enters Roll back on red. That step selects one authorized recovery
-action; this step does not mutate production again.
+## 3. Merge
 
-Completion criterion: Production reports the exact recorded artifact identity.
+Confirm the PR head still equals the recorded SHA. Merge that head through the
+repository's normal path (`gh pr merge`, protected rules if they exist).
 
-## 4. Verify
+Record the merge commit. Wait for post-merge checks if the repo has them. A
+new failure after merge blocks deploy: revert, do not push a second fix onto
+the live merge.
 
-Run every repository-owned initial check against the deployed release:
-health, smoke path, migration readback, and the changed user or operator
-surface. Capture evidence through `skill://evidence-packet`.
+Completion criterion: The merge commit contains the recorded head.
 
-If every check is green, hand `skill://watch-deploy` the repository,
-environment, exact release and artifact identity, rollback path, preauthorized
-rollback boundary, authorization lifetime, health check, smoke path, migration
-readback, changed user or operator surface checks, production signals, and soak
-window. Rollback authorization expires when identity changes or the soak
-window closes.
+## 4. Deploy
 
-Completion criterion: Initial production behavior is green and the soak owner
-has the complete watch contract.
+Deploy through the path this repo already owns (documented install, unit,
+`go install`, workflow). Observe what actually started.
 
-## 5. Roll back on red
+If the runtime can name its revision, record it. If it cannot, say so and
+continue — do not block the ship for a missing version command.
 
-Stop new work. Snapshot or pin volatile logs, traces, requests, metrics, and
-state before recovery, without delaying restoration.
+A deploy that never starts, or starts the wrong artifact, is red. Go to
+Recover.
 
-Immediately:
+Completion criterion: The owned deploy path ran and the new code is what
+production will execute.
 
-1. state the failing signal, first bad release, blast radius, and customer or
-   operator effect;
-2. mark the release blocked and link the incident to the originating work;
-3. preserve the full diagnostic set;
-4. assign the root-cause reproduction and investigation;
-5. record the postmortem obligation when impact, data risk, rollback, or
-   operator intervention was material;
-6. track every corrective action with an owner and proof.
+## 5. Verify
 
-Observe the failing runtime identity. Select exactly one recovery action:
+Exercise the changed surface the way an operator would. Health, smoke, and
+the specific path this PR changed. Capture what you ran and what you saw.
 
-- use the declared rollback when identity matches the recorded artifact and
-  its preauthorization remains valid;
-- otherwise obtain fresh authorization for one repository-owned recovery.
+Green: hand `skill://watch-deploy` the repo, environment, merge SHA, deploy
+identity if known, rollback command, and soak window (repo default, else one
+deploy cycle or 30 minutes).
 
-Invoke the selected action once. Observe the resulting runtime identity.
-Repeat every applicable initial check: health, smoke path, migration readback,
-and the changed user or operator surface. Capture the failed and restored
-states.
+Red: go to Recover. Do not keep poking production.
 
-If the action fails, identity is unknown or wrong, or any restoration check
-stays red, keep incident ownership and the new-work freeze. Select and invoke
-the next authorized repository-owned recovery, then repeat the full checks.
-After three failed recovery actions, stop further mutation. Keep monitoring,
-preserve evidence, and escalate the recovery architecture.
+Completion criterion: Production behaves, or recovery has started.
 
-Continue root-cause work whether restoration succeeds or remains red. Keep the
-smallest real reproduction red while tracing the source. After three failed
-repairs, stop and challenge the architecture.
+## 6. Recover
 
-Do not retry the same release. A corrected revision starts again at Gate.
+Stop new work. Keep the failing evidence.
 
-Completion criterion: Healthy runtime is restored, or mutation stopped after
-three failed recovery actions with an active incident, freeze, and monitoring.
-In both states, the failed release is blocked, evidence is preserved, and
-investigation, postmortem, and corrective actions have owners.
+1. Say what failed, which release, and what the operator or user sees.
+2. Revert the merge or reinstall the previous binary — one action.
+3. Confirm the revert actually restored the surface.
+4. Tell the operator what broke and what you reverted.
+5. Reproduce, fix on a new branch, and start again at Review clean.
+6. Write a short postmortem when the failure shipped, risked data, or needed
+   a revert.
+
+Do not retry the same broken revision. Three failed recoveries: stop mutating
+and escalate.
+
+Completion criterion: Production is healthy again, or mutation has stopped
+and the operator has the incident.
