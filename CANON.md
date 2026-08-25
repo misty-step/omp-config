@@ -226,13 +226,13 @@ Standing context is scarce attention; spend it on judgment, not procedure.
   options and a recommendation; reversible calls get made autonomously and
   reported.
 - **OR-07** Per-token providers are spent deliberately, never ambiently.
-  Standing and automatic surfaces — watchdog advisors, CI summaries,
-  routine subagents — run on flat-rate models. OpenRouter-class spend is
-  reserved for operator-visible, on-demand work. Automatic fallback chains
-  stay within flat-rate providers; an outage that exhausts them fails loud
-  rather than silently incurring per-token cost. Known necessary exception:
-  the `vision` role routes image reads through per-token OpenRouter until a
-  flat-rate multimodal model replaces it; activation shows in session cost.
+  Standing and automatic surfaces — watchdog advisors, CI summaries, and
+  routine subagents — start on flat-rate models. Automatic fallback chains
+  exhaust flat-rate provider routes before one explicit terminal per-token
+  hop: DeepSeek V4 Flash at max effort for routine text roles, or DeepSeek V4
+  Pro at max effort for high-stakes text roles. Activation shows in session
+  cost. Multimodal roles never fall back to text-only models; `vision` starts
+  on flat-rate Gemini and retains image-capable fallbacks.
 - **OR-08** Autonomous work leaves a decision trail. Choices made where the
   brief was silent surface post-hoc in a confidence-ranked, non-blocking
   ledger (`audit-choices`); the audit changes no code, and a needs-user
