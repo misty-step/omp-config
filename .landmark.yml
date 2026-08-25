@@ -1,6 +1,6 @@
 product:
   name: omp-config
-  description: Omp harness configuration for Phaedrus / Misty Step. Source of truth for how
+  description: OMP harness configuration for Phaedrus and Misty Step. Source of truth for model routing, skills, policy, themes, agents, and installed OMP configuration.
 audience: general
 voice: clear, specific, user-facing
 changelog:
