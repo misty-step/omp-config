@@ -41,11 +41,12 @@ Two invocation classes:
 
 Operator-invoked (`disable-model-invocation: true`) — heavyweight or
 attention-consuming flows that fire only on explicit request:
-`audit-choices`, `audit-simplifications`, `brief`, `capture`, `code-review`,
-`deliver`, `diagnose`, `explore-design`, `explore-unknowns`, `extract-module`,
-`foundation`, `install-anti-slop`, `polish`, `product-description`, `pulse`,
-`refactor`, `release`, `security-review`, `shape`, `tidy`,
-`torvalds-design-review`.
+`audit-choices`, `audit-simplifications`, `brief`, `brief-complete`,
+`brief-decision-ready`, `brief-editor`, `brief-editorial`,
+`brief-reader-test`, `capture`, `code-review`, `deliver`, `diagnose`,
+`explore-design`, `explore-unknowns`, `extract-module`, `foundation`,
+`install-anti-slop`, `polish`, `product-description`, `pulse`, `refactor`,
+`release`, `security-review`, `shape`, `tidy`, `torvalds-design-review`.
 
 Model-invocable — unambiguous triggers, bounded cost, cheap wrong-fire:
 `ast-grep`, `dispatch`, `evidence-packet`, `exocortex`, `frontend-design`,
