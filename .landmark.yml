@@ -12,7 +12,7 @@ artifacts:
   json: docs/releases/releases.json
   rss: null
 release:
-  profile: synthesis-only
+  profile: full
 model:
   policy: balanced
   primary: null
