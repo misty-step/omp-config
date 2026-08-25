@@ -20,8 +20,8 @@ Proceed only when all conditions hold:
 - required CI passes on the exact pull-request head, whose identity is recorded;
 - required human approval exists;
 - no blocker or accepted repair remains;
-- each observable claim has openable evidence, or the reviewed change records
-  why no observable evidence applies;
+- each observable claim has evidence that opens directly from the pull request
+  or its attached packet record; local paths and hashes do not satisfy this gate;
 - the target environment has a repository-owned deploy path and initial
   checks;
 - the runtime can report the deployed revision or artifact identity;

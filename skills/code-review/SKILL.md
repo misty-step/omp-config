@@ -40,6 +40,8 @@ repository authority, and runtime evidence:
 - intentional changes, removals, non-goals, and unchanged behavior;
 - tests, QA scenarios, production signals, and rollback;
 - proof that separates success from a plausible regression.
+- for a pull request with observable claims, reviewer-open evidence attachments
+  and an attached packet record, not local paths or hashes alone;
 
 A concern that conflicts with accepted intent is a design question, not a
 repair.
@@ -88,8 +90,9 @@ Execute the repair and convergence protocol defined in
 - re-verify affected tests and product-surface QA after each repair;
 - repeat until zero in-scope Blockers or Takes remain.
 
-Completion criterion: The repair loop terminates green with all checks passing
-and evidence matching the final state.
+Completion criterion: The repair loop terminates green with all checks passing,
+evidence matching the final state, and required PR evidence attachments opening
+from the rendered pull request.
 
 ## 6. Report
 

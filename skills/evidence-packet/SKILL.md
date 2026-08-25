@@ -102,5 +102,9 @@ Finish only when:
 - every claim has the required baseline and result evidence, or an explicit
   evidence gap;
 - every artifact was opened and inspected;
-- the final response links delivered evidence or gives local artifact paths;
+- for a PR, every required artifact and the packet record are attached through
+  the repository-approved interface and open from the rendered PR;
+- without a PR, the final response gives inspected local artifact paths;
 - every runtime-identity limitation and evidence gap is visible.
+
+Local paths and hashes never complete PR evidence delivery.

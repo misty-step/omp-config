@@ -172,6 +172,8 @@ Standing context is scarce attention; spend it on judgment, not procedure.
 - **TE-06** Real interface over mock. Prove changed behavior by running the
   actual surface: drive the browser, launch the TUI, hit the endpoint. An
   evidence packet accompanies every observable change (`evidence-packet`).
+  Pull requests attach reviewer-open artifacts; local paths and hashes are not
+  delivered evidence.
 - **TE-07** Local mirrors production: compose/k8s reproduces production
   topology, config lives in code, drift is a bug with an owner. Manual QA on
   the running app is part of done — no test suite substitutes hands-on the
@@ -289,7 +291,7 @@ Standing context is scarce attention; spend it on judgment, not procedure.
 | --- | --- | --- |
 | DE-07 | `global/RULES.md` deletion-first order | live |
 | TH-04, OR-06 | `skills/explore-unknowns`; premise gate in `global/AGENTS.md` | live |
-| TE-06 | `skills/evidence-packet`; delivery section of `global/AGENTS.md` | live |
+| TE-06 | `skills/evidence-packet`; `deliver`, `code-review`, and `release` gates; delivery section of `global/AGENTS.md` | live — PR attachments required 2026-08-24 |
 | ST-02, RS-02 | `global/AGENTS.md` findings-cite-primary-records line | live — trialed in iron-forest ops 2026-08-21 |
 | TE-08 | Review-lane floors by change class, frozen plan, verified lanes | extracted from census ADR-0007 — untrialed |
 | Synthesis policy (one program per name) | Router skill + domain references rule | extracted from census ADR-0006 — governs new skills |

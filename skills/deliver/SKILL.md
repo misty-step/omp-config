@@ -129,15 +129,26 @@ Completion criterion: Clean, narrative commit history with green tests and QA.
 
 ## 9. Publish PR and audit choices
 
-Open a clean, unmerged pull request. The PR description must carry:
+Open a clean, unmerged pull request. For every observable claim, follow
+`skill://evidence-packet/DELIVERY.md` and upload the inspected packet through
+the repository-approved PR attachment interface before calling the PR ready.
+The PR description must carry:
 
 - the work item and accepted spec;
 - design decisions and elevated data models;
-- test results and inspected evidence artifacts;
+- test results and an Evidence section with openable before/after media;
+- short video or GIF attachments for temporal interaction claims;
+- the attached evidence record or downloadable packet bundle;
 - release notes, production signals, and rollback path.
+
+Render the PR and open every evidence link. Local paths and artifact hashes are
+capture metadata, not reviewer-accessible evidence. A failed or unavailable
+attachment interface blocks delivery unless the operator explicitly waives the
+specific artifact.
 
 Conclude by emitting an `audit-choices` decision ledger summarizing all
 tradeoffs and non-obvious choices made during implementation.
 
-Completion criterion: An unmerged pull request URL is returned with complete
-proof and decision accounting.
+Completion criterion: An unmerged pull request URL is returned; every required
+evidence artifact opens from that PR; proof and decision accounting are
+complete.

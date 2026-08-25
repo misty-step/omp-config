@@ -19,13 +19,18 @@ revision.
 
 ## Deliver to a PR
 
-Use the repository-approved attachment interface. Images and videos normally
-use the repository's private or public attachment store. Do not copy private
-evidence to another host.
+An observable pull request is incomplete until every required artifact is
+reviewer-accessible from the pull request. Upload through the repository-approved
+PR attachment interface:
 
-If no approved upload interface is available, report the local artifact path and
-an evidence delivery gap. Do not invent a durable URL. Do not place a local path
-in a PR as if a reviewer can open it.
+- embed before/after images in the Evidence section;
+- attach a short video or GIF for temporal interaction claims;
+- attach the evidence record or a downloadable packet bundle;
+- keep hashes in the record as identity checks, never as media substitutes.
+
+Local paths are capture locations, not delivery. A hash proves file identity,
+not behavior, and does not let a reviewer inspect the artifact. Never present
+either as completed PR evidence.
 
 Add one PR section:
 
@@ -53,6 +58,16 @@ Add one PR section:
 
 Update the existing Evidence section when the change or proof changes. Do not
 add duplicate sections.
+
+Before PR delivery completes, open every attachment from the rendered pull
+request and confirm that it resolves for a reviewer with repository access,
+shows the declared scenario, and matches the recorded digest. Replace local
+artifact references in the PR with those openable attachments.
+
+An unavailable or failed attachment interface is a delivery blocker. Preserve
+the local packet, record the attempted interface and failure, and stop PR
+readiness until an approved route works or the operator explicitly waives that
+artifact. An evidence-gap paragraph does not make a local-only packet complete.
 
 ## Finish without a PR
 

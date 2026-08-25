@@ -32,7 +32,7 @@
 - Prove changed behavior on its real interface.
 - Evidence packet: for every observable behavior or state change, read
   `skill://evidence-packet`; plan proof before the first production edit,
-  capture the real surface, and deliver inspected artifacts.
+  capture the real surface, and attach inspected artifacts to any pull request.
 - Findings cite primary records read now (ST-02, RS-02); titles, timestamps, and
   recollection are leads.
 - Standing mandate (OR-06): reversible calls get made and reported; ask
