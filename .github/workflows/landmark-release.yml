@@ -26,7 +26,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Run Landmark
-        uses: misty-step/landmark@008ee09b4f3e2c3a63cfe1a3997fb2ea74230cd6
+        uses: misty-step/landmark@d3b07452500e6cdf3ddead1c11ba5584287a80c9
         with:
           mode: full
           healthcheck: "true"
