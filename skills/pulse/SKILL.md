@@ -100,6 +100,44 @@ Use the prior Pulse artifact as the preferred comparison baseline. Use a Git
 snapshot at the start of the window only when the same metric can be reproduced
 with the same scope and method.
 
+### Baseline payload
+
+Embed one versioned machine-readable payload in every report:
+
+```html
+<script type="application/json" id="pulse-baseline">
+{
+  "schema": "pulse.baseline.v1",
+  "capture_id": "...",
+  "target_id": "...",
+  "source_identity": {"commit": "...", "dirty": true, "content_sha256": "..."},
+  "scope": {"included": [], "excluded": [], "digest": "..."},
+  "methods": {"snapshot.product_lines": "loc-category-v1"},
+  "data": {"snapshot.product_lines": {}},
+  "findings": {"torvalds.TV-001": {}}
+}
+</script>
+```
+
+Use stable namespaced datum keys such as `verification.changed_code_coverage`
+and stable persona finding keys such as `torvalds.TV-001`. Record the unit,
+scope digest, and measurement method for each datum.
+
+Compare a prior datum only when:
+
+- the payload schema is supported;
+- `target_id` matches;
+- the datum key and unit match;
+- the scope digest or declared compatible scope matches;
+- the measurement method is compatible.
+
+Compare a prior finding only when the persona, rubric version, and stable finding
+key match. A Git snapshot can supply reproducible source metrics only. It cannot
+supply prior persona scores, runtime values, or finding history.
+
+When no compatible value exists, report the prior value and delta as
+`Baseline only` or `Unavailable`. Do not synthesize a prior value.
+
 A clean source can use its commit as the revision identity. Identify a dirty
 source with the commit, dirty paths, and content digest. `HEAD` identifies the
 commit only.
@@ -294,9 +332,21 @@ representative views, or explicit evidence gaps.
 
 ## 9. Run independent persona assessments
 
-Dispatch two independent read-only reviews against the same source and evidence
-packet. Run them in parallel when the task interface supports it. Do not let one
-review see the other's result before both finish.
+Build one immutable assessment assignment before dispatch. Validate that it
+contains:
+
+- target and target type;
+- actual problem;
+- current or proposed design;
+- binding constraints and intentional non-goals;
+- source commit, dirty state, source content digest, and scope digest;
+- capture ID;
+- exact evidence locations and unavailable evidence.
+
+Serialize the assignment once and record its digest. Pass the same assignment
+and digest to both reviewers. Dispatch two independent read-only reviews in
+parallel when the task interface supports it. Do not let one review see the
+other's result before both finish.
 
 ### Torvalds lens
 
@@ -339,6 +389,26 @@ comparable scores, cited findings, finding history, and actions.
 
 ## 10. Derive the verdict and actions
 
+### Required evidence matrix
+
+Set required evidence before deriving any state. `Inferred` evidence does not
+satisfy a required observed signal.
+
+| Domain | Service | CLI or local tool | Library | Static site |
+| --- | --- | --- | --- | --- |
+| Current snapshot | source identity, content digest, scope | source identity, content digest, scope | source identity, content digest, scope | source identity, content digest, scope |
+| Production health | black-box probe, deployed identity, applicable golden signals, exception source | real command or install probe, installed identity, error output source | Not applicable unless an operated runtime exists | deployed URL, content identity, external probe |
+| Infrastructure and recovery | runtime inventory, drift, durable-state backup and restore evidence | installed projection identity and source-recovery evidence | Not applicable unless distributed as an operated artifact | host/provider identity, deployment identity, rollback or restore evidence |
+| Automated verification | native test result and available coverage dimensions | native test result and available coverage dimensions | native test result and available coverage dimensions | build/link check and applicable functional test |
+| Evolution and complexity | current scoped inventory; compatible prior data may be `Baseline only` | same | same | same |
+| Defects and stability | validated defect source, incident source, deployment history | validated defect or release-regression source | validated defect or release-regression source | validated defect and deployment-error source |
+| System design | applicable context, runtime, deployment, and dependency views | context, command/runtime, installation, and dependency views | context, package/runtime, distribution, and dependency views | context, runtime or Not applicable, deployment, and dependency views |
+| Persona assessment | validated immutable assignment and both completed reviews | same | same | same |
+
+Apply `Not applicable` only when the target boundary makes the signal
+irrelevant and the report states the reason. Apply `Unavailable required
+evidence` when a required signal lacks observed evidence.
+
 Derive each domain state from its supported evidence:
 
 ```text
@@ -362,10 +432,16 @@ labeled inferred evidence, and every action names a proof condition.
 
 ## 11. Render the Indexed Domains report
 
-Create a collision-safe UTC capture ID such as `2026-08-25T160735Z`. Write
-`artifacts/pulse-<capture-id>.html`, unless the target defines another report
-directory. Never overwrite a prior Pulse artifact. If the path exists, append
-the short source-content digest or a monotonic numeric suffix.
+Create a collision-safe capture ID before rendering:
+
+```text
+<UTC timestamp to seconds>-<128-bit random run ID>
+```
+
+Write `artifacts/pulse-<capture-id>.html`, unless the target defines another
+report directory. Write to a temporary file in that directory, then rename it
+atomically to the unique destination. Never use a check-then-write reservation.
+If the destination still exists, generate a new run ID.
 
 Render one standalone HTML file. Inline CSS, JavaScript, and SVG. Load no runtime
 asset from the network.
