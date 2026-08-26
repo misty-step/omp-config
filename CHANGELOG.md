@@ -1,3 +1,15 @@
+## [0.0.2](https://github.com/misty-step/omp-config/compare/v0.0.1...v0.0.2) (2026-08-26)
+
+
+### Bug Fixes
+
+* **pulse:** condition complexity percentile aggregates on numeric analyzers ([7b914a6](https://github.com/misty-step/omp-config/commit/7b914a69046c5d75dff2256403f427bb599788d5))
+
+
+### Features
+
+* **skills:** add cyclomatic and structural complexity controls to foundation, audit, and pulse ([69aecf6](https://github.com/misty-step/omp-config/commit/69aecf695e7603403e5edd4cc06c159b7bc8c8d1))
+
 ## [0.0.1](https://github.com/misty-step/omp-config/compare/v0.0.0...v0.0.1) (2026-08-25)
 
 
