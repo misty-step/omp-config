@@ -92,6 +92,11 @@ Model-invocable — unambiguous triggers, bounded cost, cheap wrong-fire:
 
 The split criterion lives in `CANON.md`, Synthesis policy.
 
+The `exocortex` skill is generated from `misty-step/exocortex`
+`skills/exocortex/SKILL.md`. Do not hand-edit `skills/exocortex/SKILL.md`.
+Regenerate with that repo's `scripts/install-skill.sh` and prove with
+`skills/exocortex/check-source.sh`.
+
 ## Canon relationship
 
 `CANON.md` states the operating philosophy; `global/` and `skills/` are
