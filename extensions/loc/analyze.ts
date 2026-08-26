@@ -1,5 +1,5 @@
 #!/usr/bin/env bun
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { basename, extname, join } from "node:path";
 
@@ -86,10 +86,24 @@ function gitRoot(cwd: string): string | null {
 	return result.ok ? result.stdout.trim() || null : null;
 }
 
-function trackedFiles(cwd: string, ref = "HEAD"): string[] {
-	const result = run("git", ["ls-tree", "-r", "--name-only", ref], cwd);
+interface TrackedObject {
+	oid: string;
+	file: string;
+}
+
+function trackedObjects(cwd: string, ref = "HEAD"): TrackedObject[] {
+	const result = run("git", ["ls-tree", "-r", "-z", "--long", ref], cwd);
 	if (!result.ok) return [];
-	return result.stdout.split("\n").map((line) => line.trim()).filter(Boolean).filter((file) => !shouldSkipPath(file));
+	const objects: TrackedObject[] = [];
+	for (const entry of result.stdout.split("\0")) {
+		if (!entry) continue;
+		const separator = entry.indexOf("\t");
+		if (separator < 0) continue;
+		const [, type, oid] = entry.slice(0, separator).trim().split(/\s+/);
+		const file = entry.slice(separator + 1);
+		if (type === "blob" && oid && !shouldSkipPath(file)) objects.push({ oid, file });
+	}
+	return objects;
 }
 
 function shouldSkipPath(file: string): boolean {
@@ -141,12 +155,87 @@ function countFileLines(content: string, language: string): Omit<LanguageStats, 
 	return { total: code + comment + blank, code, comment, blank };
 }
 
-function readFileAtRef(root: string, ref: string, file: string): string | null {
-	const result = run("git", ["show", `${ref}:${file}`], root);
-	return result.ok ? result.stdout : null;
+async function readTrackedObjects(
+	root: string,
+	objects: TrackedObject[],
+	consume: (file: string, content: string) => void,
+): Promise<void> {
+	if (objects.length === 0) return;
+	const child = spawn("git", ["cat-file", "--batch"], { cwd: root, stdio: ["pipe", "pipe", "pipe"] });
+	const stderr: Buffer[] = [];
+	child.stderr.on("data", (chunk: Buffer) => stderr.push(chunk));
+	const closed = new Promise<number>((resolve, reject) => {
+		child.once("error", reject);
+		child.once("close", (code) => resolve(code ?? 1));
+	});
+	child.stdin.end(`${objects.map(({ oid }) => oid).join("\n")}\n`);
+
+	let phase: "header" | "content" | "separator" = "header";
+	let objectIndex = 0;
+	let remaining = 0;
+	let headerParts: Buffer[] = [];
+	let contentParts: Buffer[] = [];
+
+	const finishContent = () => {
+		const content =
+			contentParts.length === 0
+				? ""
+				: contentParts.length === 1
+					? contentParts[0].toString("utf8")
+					: Buffer.concat(contentParts).toString("utf8");
+		consume(objects[objectIndex].file, content);
+		objectIndex += 1;
+		contentParts = [];
+		phase = "separator";
+	};
+
+	for await (const rawChunk of child.stdout) {
+		const chunk = Buffer.isBuffer(rawChunk)
+			? rawChunk
+			: Buffer.from(rawChunk.buffer, rawChunk.byteOffset, rawChunk.byteLength);
+		let offset = 0;
+		while (offset < chunk.length) {
+			if (phase === "header") {
+				const newline = chunk.indexOf(10, offset);
+				if (newline < 0) {
+					headerParts.push(chunk.subarray(offset));
+					break;
+				}
+				headerParts.push(chunk.subarray(offset, newline));
+				const [oid, type, rawSize] = Buffer.concat(headerParts).toString("utf8").split(" ");
+				headerParts = [];
+				const expected = objects[objectIndex];
+				remaining = Number(rawSize);
+				if (!expected || oid !== expected.oid || type !== "blob" || !Number.isSafeInteger(remaining) || remaining < 0) {
+					throw new Error(`Unexpected git cat-file response for ${expected?.file ?? "end of batch"}`);
+				}
+				offset = newline + 1;
+				phase = "content";
+				if (remaining === 0) finishContent();
+				continue;
+			}
+			if (phase === "content") {
+				const size = Math.min(remaining, chunk.length - offset);
+				contentParts.push(chunk.subarray(offset, offset + size));
+				offset += size;
+				remaining -= size;
+				if (remaining === 0) finishContent();
+				continue;
+			}
+			if (chunk[offset] !== 10) throw new Error("Malformed git cat-file record separator");
+			offset += 1;
+			phase = "header";
+		}
+	}
+
+	const exitCode = await closed;
+	if (exitCode !== 0) throw new Error(Buffer.concat(stderr).toString("utf8").trim() || `git cat-file exited ${exitCode}`);
+	if (objectIndex !== objects.length || phase !== "header" || headerParts.length > 0) {
+		throw new Error(`Incomplete git cat-file batch: read ${objectIndex} of ${objects.length} objects`);
+	}
 }
 
-export function analyzeBuiltin(cwd: string, ref = "HEAD"): LocStats {
+export async function analyzeBuiltin(cwd: string, ref = "HEAD"): Promise<LocStats> {
 	const root = gitRoot(cwd) ?? cwd;
 	const resolved = run("git", ["rev-parse", `${ref}^{commit}`], root);
 	const headHash = resolved.ok ? resolved.stdout.trim() : "";
@@ -161,15 +250,15 @@ export function analyzeBuiltin(cwd: string, ref = "HEAD"): LocStats {
 		headHash,
 	};
 	if (!headHash) return stats;
-	for (const file of trackedFiles(root, headHash)) {
-		const content = readFileAtRef(root, headHash, file);
-		if (content == null) continue;
-		addLanguage(stats, languageForFile(file), countFileLines(content, languageForFile(file)));
-	}
+	const objects = trackedObjects(root, headHash);
+	await readTrackedObjects(root, objects, (file, content) => {
+		const language = languageForFile(file);
+		addLanguage(stats, language, countFileLines(content, language));
+	});
 	return stats;
 }
 
-export function analyzeRepo(cwd: string): LocStats {
+export function analyzeRepo(cwd: string): Promise<LocStats> {
 	return analyzeBuiltin(cwd);
 }
 
@@ -211,12 +300,12 @@ function listTrendRefs(root: string, count: number) {
 	});
 }
 
-export function getTrendPoints(cwd: string, count = 6): TrendPoint[] {
+export async function getTrendPoints(cwd: string, count = 6): Promise<TrendPoint[]> {
 	const root = gitRoot(cwd) ?? cwd;
 	const points: TrendPoint[] = [];
 	let previousCode: number | undefined;
 	for (const entry of listTrendRefs(root, count).reverse()) {
-		const stats = analyzeBuiltin(root, entry.ref);
+		const stats = await analyzeBuiltin(root, entry.ref);
 		const point: TrendPoint = { label: entry.label, ref: entry.ref, code: stats.code, total: stats.total, files: stats.files };
 		if (previousCode !== undefined) point.deltaCode = point.code - previousCode;
 		previousCode = point.code;
@@ -293,11 +382,11 @@ function parseCliArgs(argv: string[]) {
 	return { command, cwd, count };
 }
 
-export function runCli(argv = process.argv.slice(2)): number {
+export async function runCli(argv = process.argv.slice(2)): Promise<number> {
 	const { command, cwd, count } = parseCliArgs(argv);
 	try {
-		if (command === "trend") { console.log(formatTrendReport(getTrendPoints(cwd, count))); return 0; }
-		const stats = analyzeRepo(cwd);
+		if (command === "trend") { console.log(formatTrendReport(await getTrendPoints(cwd, count))); return 0; }
+		const stats = await analyzeRepo(cwd);
 		if (command === "json") { console.log(JSON.stringify({ ...stats, updatedAt: Math.floor(Date.now() / 1000) })); return 0; }
 		console.log(formatLocReport(stats, getCommitDeltas(cwd, count)));
 		return 0;
@@ -307,4 +396,4 @@ export function runCli(argv = process.argv.slice(2)): number {
 	}
 }
 
-if (import.meta.main) process.exit(runCli());
+if (import.meta.main) process.exit(await runCli());

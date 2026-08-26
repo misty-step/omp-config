@@ -36,6 +36,21 @@ mode 600, folds live MCP credentials into declared servers, swaps `skills/`
 atomically, and installs the git hook. Run after every change; sessions pick
 up deployed state on their next start.
 
+## LOC extension
+
+The globally deployed LOC extension provides `/loc`, `/loc-trend`, and a
+committed-`HEAD` status row. Session and turn hooks read `.git/loc_cache` only;
+a missing or stale cache hides the row rather than calculating during
+interactive work. Explicit LOC commands may calculate on demand.
+
+Disable only LOC for a large repository with project-local configuration:
+
+```yaml
+# .omp/config.yml
+disabledExtensions:
+  - extension-module:loc
+```
+
 ## Grievance inbox
 
 `omp-grievances` treats OMP's grievance database as a read-only inbox. Its

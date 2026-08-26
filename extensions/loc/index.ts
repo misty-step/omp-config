@@ -57,11 +57,10 @@ async function resolveStats(ctx: ExtensionContext): Promise<LocStats> {
 	return analyzeRepo(ctx.cwd);
 }
 
-async function refreshStatus(ctx: ExtensionContext, stats?: LocStats): Promise<void> {
+function refreshStatus(ctx: ExtensionContext, stats?: LocStats): void {
 	if (!ctx.hasUI) return;
-	const resolved = stats ?? readLocCache(ctx.cwd) ?? (await analyzeRepo(ctx.cwd));
-	if (!resolved) return;
-	if (resolved.files === 0) {
+	const resolved = stats ?? readLocCache(ctx.cwd);
+	if (!resolved || resolved.files === 0) {
 		ctx.ui.setStatus("loc", undefined);
 		return;
 	}
@@ -77,7 +76,7 @@ export default function registerLocExtension(pi: ExtensionAPI): void {
 				const stats = await resolveStats(ctx);
 				const deltas = getCommitDeltas(ctx.cwd, 8);
 				sendText(pi, formatLocReport(stats, deltas));
-				await refreshStatus(ctx, stats);
+				refreshStatus(ctx, stats);
 			} catch (error) {
 				ctx.ui.notify(error instanceof Error ? error.message : String(error), "error");
 			}
@@ -101,21 +100,21 @@ export default function registerLocExtension(pi: ExtensionAPI): void {
 			const count = Math.min(20, Math.max(3, Number(args.trim()) || 6));
 			if (ctx.hasUI) ctx.ui.setStatus("loc", "Building trend…");
 			try {
-				sendText(pi, formatTrendReport(getTrendPoints(ctx.cwd, count)));
+				sendText(pi, formatTrendReport(await getTrendPoints(ctx.cwd, count)));
 			} catch (error) {
 				ctx.ui.notify(error instanceof Error ? error.message : String(error), "error");
 			} finally {
-				await refreshStatus(ctx);
+				refreshStatus(ctx);
 			}
 		},
 	});
 
-	pi.on("session_start", async (_event, ctx) => {
-		await refreshStatus(ctx);
+	pi.on("session_start", (_event, ctx) => {
+		refreshStatus(ctx);
 	});
 
-	pi.on("turn_end", async (_event, ctx) => {
-		await refreshStatus(ctx);
+	pi.on("turn_end", (_event, ctx) => {
+		refreshStatus(ctx);
 	});
 
 	pi.on("session_shutdown", (_event, ctx) => {
