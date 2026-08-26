@@ -1,3 +1,10 @@
+## [0.0.5](https://github.com/misty-step/omp-config/compare/v0.0.4...v0.0.5) (2026-08-26)
+
+
+### Features
+
+* **skills:** consolidate brief skill on brief-editor specification ([d39088f](https://github.com/misty-step/omp-config/commit/d39088fb047624b260ba8ae257fe6c151f027df7))
+
 ## [0.0.4](https://github.com/misty-step/omp-config/compare/v0.0.3...v0.0.4) (2026-08-26)
 
 
