@@ -13,8 +13,9 @@ test, commit, or push.
 ## Cover
 
 Map every subsystem and cross-cutting owner. Record one row per boundary and mark
-it `review` or `skip` with a reason. Include generated contracts, tooling, and
-operator paths when they own behavior.
+it `review` or `skip` with a reason. Map function-level complexity hotspots
+using the project's configured complexity metric or structural proxies. Include
+generated contracts, tooling, and operator paths when they own behavior.
 
 Done when no subsystem is hidden inside a catch-all row.
 
@@ -25,7 +26,7 @@ For each row, ask in order:
 1. Can the requirement or path be deleted?
 2. Can one representation, state, owner, or data path replace several?
 3. Can a direct interface replace coordination or pass-through layers?
-4. Can invalid states become impossible?
+4. Can invalid states become impossible, or branching be replaced by plain data tables / state machines?
 5. Does the repair reduce whole-system work, including migration and operations?
 
 A finding needs exact symbols, current mechanism, evidence, smallest coherent

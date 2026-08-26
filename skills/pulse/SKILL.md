@@ -31,7 +31,7 @@ Use current primary sources and safe read probes. Cover:
 - public and operator product behavior;
 - deployed identity, health, dependencies, and recovery;
 - repository checks, test defense, CI latency, and failures;
-- complexity, ownership, coupling, and trend;
+- complexity distribution, hotspots (via configured metrics or structural proxies), module token budgets, ownership, coupling, and trend;
 - validated defects, incidents, regressions, and release stability;
 - system design, data paths, states, and trust boundaries;
 - independent persona judgments grounded in the same immutable packet.
