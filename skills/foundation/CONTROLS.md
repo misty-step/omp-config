@@ -50,6 +50,23 @@ dependency-cruiser or Nx boundaries (JS/TS), import-linter (Python), ArchUnit
 (JVM), `internal/` packages (Go), crates (Rust). A "module" whose boundary is
 not enforced is one refactor away from re-merging.
 
+
+## Complexity and control flow
+
+Linear control flow and shallow nesting by default. Model branching as plain
+data or state transitions before adding control-flow branches.
+
+Gate function-level cyclomatic or cognitive complexity in CI and hooks with the
+stack's native toolchain:
+
+- **Go:** `cyclop` or `gocyclo` / `gocognit` via `golangci-lint` (cyclomatic threshold $\le 10\text{--}15$).
+- **Rust:** Run a real complexity analyzer (`rust-code-analysis-cli`, `lizard`) in CI, or gate Clippy's structural nesting proxy (`clippy::excessive_nesting`) alongside function size limits (`clippy::too_many_lines`). Do not treat Clippy's `cognitive_complexity` restriction lint as a complexity measurement tool.
+- **TypeScript / JavaScript:** `complexity` rule in ESLint/Oxlint, or `noExcessiveCognitiveComplexity` in Biome (threshold $\le 10\text{--}15$).
+- **Python:** `mccabe` (`C901`) via Ruff or `flake8-cognitive-complexity` (threshold $\le 10$).
+
+A function over the complexity threshold is a design finding. Respond by
+replacing branching with sum types, state machines, or table-driven dispatch,
+not by arbitrary function slicing.
 ## Tests
 
 Assert outcomes, boundaries, invariants, transitions, precedence, and real
@@ -164,5 +181,7 @@ defect, then the clean path passes.
 12. Budget lowered below the module's measured tokens → gate exits non-zero;
     restored budget → gate passes. A synthetic cross-boundary import → the
     boundary tool fails; removed → it passes.
+13. Deeply branched or excessively nested function → complexity gate fails;
+    flattened or data-modeled implementation → passes.
 
 Remove the probes. Run the complete clean path.
