@@ -55,6 +55,8 @@ display:
   cacheMissMarker: true
 browser:
   relay: false
+  headless: true
+  cmux: false
 setupVersion: 2
 composer:
   shape: pi

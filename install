@@ -6,6 +6,7 @@ repo_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 agent_dir=${PI_CODING_AGENT_DIR:-$(omp config path)}
 
 command -v jq >/dev/null 2>&1 || { echo "jq is required" >&2; exit 1; }
+command -v bun >/dev/null 2>&1 || { echo "bun is required" >&2; exit 1; }
 
 for source in \
   config.yml \
@@ -15,6 +16,7 @@ for source in \
   global/RULES.md \
   global/WATCHDOG.md \
   global/WATCHDOG.yml \
+  bin/omp-grievances.ts \
   themes/tokyonight.json
 do
   [ -s "$repo_dir/$source" ] || {
@@ -158,5 +160,8 @@ if [ -x "$loc_hook" ]; then
     done
   fi
 fi
+
+install -d -m 700 "$HOME/.local/bin"
+install -m 700 "$repo_dir/bin/omp-grievances.ts" "$HOME/.local/bin/omp-grievances"
 
 printf 'Installed lean OMP config in %s\n' "$agent_dir"

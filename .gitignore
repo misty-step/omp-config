@@ -24,6 +24,8 @@
 !/.githooks/**
 !/extensions/
 !/extensions/**
+!/bin/
+!/bin/**
 
 # Telemetry tooling (repo-local, not deployed)
 !references/
