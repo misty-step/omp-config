@@ -30,8 +30,10 @@ inventory -> bounded reviews -> validate -> audit the audit -> deliver
 
 ## 1. Coverage contract
 
-Inspect the repository. Inventory every identifiable subsystem. Include
-frontend, backend, shared infrastructure, platform bridges, generated-contract
+Inspect the repository. Inventory every identifiable subsystem. Run the stack's
+complexity analyzer to map function-level complexity hotspots using the
+project's configured complexity metric or structural proxies. Include frontend,
+backend, shared infrastructure, platform bridges, generated-contract
 ownership, and test or tooling infrastructure when they own material behavior.
 
 Give each subsystem:
@@ -72,8 +74,8 @@ Workers look for:
 - scattered booleans or nullable fields that permit invalid combinations and
   should become a state machine or discriminated union;
 - repeated assumptions about object shape that need a shared typed model;
-- duplicated branching that a small map, registry, reducer, or command model
-  would remove;
+- duplicated branching or high nesting/cyclomatic complexity that a small map,
+  registry, reducer, state machine, or sum-type model would remove;
 - unclear state or behavior ownership that a small module boundary would
   clarify;
 - repeated scans, transformations, or lookups where a more appropriate
