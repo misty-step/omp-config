@@ -258,7 +258,7 @@ Record:
 
 - additions, deletions, renames, and net change by code category;
 - weekly or snapshot movement across the window;
-- cyclomatic/cognitive complexity distribution, p95, maximum, hotspots (via configured metrics or structural proxies), and named outliers;
+- complexity distribution, median, p95, and maximum when a numeric analyzer is configured, or structural proxy findings/hotspots and named outliers;
 - oversized functions, files, packages, and interfaces;
 - dependency and import cycles;
 - direct and transitive dependency movement;
