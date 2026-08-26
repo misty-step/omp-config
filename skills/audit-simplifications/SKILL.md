@@ -1,155 +1,45 @@
 ---
 name: audit-simplifications
-description: Whole-repo read-only audit for material simplifications in data, state, control flow, and ownership.
+description: Find material whole-repository simplifications in data, state, control flow, and ownership.
 disable-model-invocation: true
 argument-hint: "[repo-path]"
 ---
 
-# Audit Simplifications
+# Audit simplifications
 
-Read-only coverage audit of representation. Do not edit files, run tests,
-implement recommendations, commit, or push. Repository reads and other
-read-only inspection are allowed.
+This read-only audit finds complexity the system does not need. It does not edit,
+test, commit, or push.
 
-Not `improve-codebase-architecture` (module deepening, HTML, then grill). Not
-`foundation` (baseline controls). Not `code-review` (repair a completed
-change). This skill inventories every subsystem and hunts invalid or duplicated
-representation. It does not install controls or deepen modules for their own
-sake.
+## Cover
 
-Default to the current repository unless the invocation names another target.
-Keep one project boundary.
+Map every subsystem and cross-cutting owner. Record one row per boundary and mark
+it `review` or `skip` with a reason. Include generated contracts, tooling, and
+operator paths when they own behavior.
 
-Write the canonical report to a scratch path outside the repository
-(`local://audit-simplifications.md` or an OS temp file). Do not write into the
-tree under audit.
+Done when no subsystem is hidden inside a catch-all row.
 
-```text
-inventory -> bounded reviews -> validate -> audit the audit -> deliver
-```
+## Review
 
-## 1. Coverage contract
+For each row, ask in order:
 
-Inspect the repository. Inventory every identifiable subsystem. Include
-frontend, backend, shared infrastructure, platform bridges, generated-contract
-ownership, and test or tooling infrastructure when they own material behavior.
+1. Can the requirement or path be deleted?
+2. Can one representation, state, owner, or data path replace several?
+3. Can a direct interface replace coordination or pass-through layers?
+4. Can invalid states become impossible?
+5. Does the repair reduce whole-system work, including migration and operations?
 
-Give each subsystem:
+A finding needs exact symbols, current mechanism, evidence, smallest coherent
+change, deletions, migration, risk, and proof. Style, naming, speculative
+flexibility, and unsupported rewrites are not findings.
 
-- a stable ID and descriptive name;
-- an exact, non-overlapping ownership boundary;
-- key implementation files;
-- relevant public interfaces, major call sites, and tests;
-- a status: `queued`, `in review`, `recommend`, or `skip`.
+Done when every row has a grounded recommendation or skip.
 
-The inventory is the coverage contract. Broad catch-all rows do not prove
-coverage.
+## Validate and deliver
 
-Seed the report with: subsystem inventory, confirmed opportunities, explicit
-skips, cross-cutting patterns, duplicates and superseded findings, priorities
-and dependencies, and an audit log.
+Recheck each finding against current source and callers. Deduplicate shared root
+causes. Rank by deleted complexity, defect risk, and migration cost. Return the
+coverage map, confirmed findings, rejected candidates, dependencies, and
+ordered implementation slices.
 
-Completion criterion: Every identifiable subsystem has a row with a stable ID,
-exact boundary, files, interfaces, and status `queued`.
-
-## 2. Bounded reviews
-
-Coordinate. Continue until every inventory row is `recommend` or `skip`.
-
-Use fresh read-only `scout` workers. Give each worker one distinct subsystem
-and its exact ownership boundary. Keep concurrency to the lanes you can
-harvest. Use one wait mechanism. Do not interrupt a productive worker because
-it is slow. Harvest, then close.
-
-Each worker reviews its subsystem for at most two materially useful
-simplifications in data structures, state representation, or organizing model.
-It inspects implementation, public interfaces, major call sites, and existing
-tests. It stays inside the assigned boundary. It may name a cross-subsystem
-concern; it must not expand scope to solve it.
-
-Workers look for:
-
-- scattered booleans or nullable fields that permit invalid combinations and
-  should become a state machine or discriminated union;
-- repeated assumptions about object shape that need a shared typed model;
-- duplicated branching that a small map, registry, reducer, or command model
-  would remove;
-- unclear state or behavior ownership that a small module boundary would
-  clarify;
-- repeated scans, transformations, or lookups where a more appropriate
-  collection or index would materially simplify behavior;
-- lifecycle, concurrency, or async states whose representation permits stale
-  or contradictory state.
-- dependencies whose use is thin enough that stdlib, an existing dependency,
-  or a small local function would remove them;
-
-Do not force an abstraction. Prefer boring local code when it is already
-clear. Do not recommend a change solely for stylistic consistency,
-hypothetical extensibility, minor line-count reduction, or moving existing
-branching behind a new type.
-
-A worker returns at most two opportunities. If nothing meets the threshold,
-it returns `skip`.
-
-Each recommendation must include:
-
-1. Verdict: `recommend` or `skip`.
-2. Evidence with exact file and line references.
-3. Current complexity or invalid states.
-4. Proposed representation and why it is simpler.
-5. Smallest credible implementation scope, including affected files and
-   interfaces.
-6. Regression risks and migration concerns.
-7. Existing and additional validation required.
-8. Confidence: `high`, `medium`, or `low`.
-
-Completion criterion: Every inventory row has a harvested worker result.
-
-## 3. Validate
-
-Independently verify every finding against the current repository before
-accepting it.
-
-Reject, narrow, or demote a recommendation that is vague, duplicates another
-finding, misunderstands intentional semantics, or merely relocates complexity.
-
-Record skips as completed coverage. Deduplicate overlapping findings. Assign
-each accepted recommendation to one authoritative subsystem.
-
-If a pass reveals a real omitted subsystem, add an explicit row and audit it.
-Do not hide the omission by broadening a completed boundary.
-
-Completion criterion: Every finding is verified, owned by one subsystem, and
-either accepted with complete fields or recorded as skip, reject, or demote.
-
-## 4. Audit the audit
-
-Run fresh independent passes for:
-
-- repository coverage and missing subsystem boundaries;
-- duplication and ownership overlap;
-- materiality and over-abstraction;
-- schema completeness;
-- dependency ladder: unused, under-used, or duplicated dependencies that
-  stdlib or an existing dependency would replace;
-- dependency-aware priority ranking.
-
-Rank accepted recommendations by concrete impact, confidence, implementation
-effort, blast radius, and prerequisites. Name the best first implementation
-slices.
-
-Completion criterion: Coverage is complete, fields are complete, duplicates
-and weak abstractions are gone, and priorities are internally consistent.
-
-## 5. Deliver
-
-The audit is complete only when:
-
-- every identifiable subsystem has been reviewed;
-- every subsystem is `recommend` or `skip`;
-- every finding has evidence, scope, risk, and validation;
-- duplicates and weak abstractions have been removed;
-- priorities and dependencies are consistent;
-- the repository remains unchanged.
-
-Present the report. Do not implement.
+Done when every recommendation can be implemented without another repository
+survey.

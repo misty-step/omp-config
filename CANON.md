@@ -61,19 +61,17 @@ Standing context is scarce attention; spend it on judgment, not procedure.
 
 ## TH — Thinking
 
-- **TH-01** Fan options before synthesizing. Non-trivial designs get >=3
-  genuinely different approaches — differing in data model, ownership, or
-  interface, not three flavors of one idea — then synthesize the best parts
-  into one.
-- **TH-02** Convergence is mandatory. Brainstorming without a decision
-  artifact is waste. Every fan-out ends with: chosen approach, why, what was
-  rejected and why each lost. Timebox exploration.
+- **TH-01** Fan options only when the decision has material alternatives.
+  Compare deletion, the current interface, and the smallest boring design
+  before adding a new architecture. Cosmetic variants do not count.
+- **TH-02** Exploration ends in a decision artifact: chosen approach, why,
+  rejected alternatives, and the evidence that would change the decision.
 - **TH-03** Reversibility triage. One-way doors (public API breaks, schema
   migrations, infra selection, security posture) get slow treatment and
   operator sign-off. Two-way doors get decided fast by whoever is closest.
-- **TH-04** Review the premise before the implementation. A wrong answer to
-  the right question beats a right answer to the wrong one. Route material
-  unsettled human-owned choices through `explore-unknowns`.
+- **TH-04** Review the premise before the implementation. Resolve material
+  human-owned choices through `shape`; decide reversible implementation facts
+  from source.
 
 ## DE — Design & architecture
 
@@ -178,11 +176,10 @@ Standing context is scarce attention; spend it on judgment, not procedure.
   topology, config lives in code, drift is a bug with an owner. Manual QA on
   the running app is part of done — no test suite substitutes hands-on the
   real thing.
-- **TE-08** Review depth scales with change class. Prose-only changes do not
-  run code reviewers; executable changes get the code council; high-stakes
-  paths — auth, secrets, migrations, harness — get the full council plus the
-  structure critic. The planned lane set is frozen before review and verified
-  against the diff after; lanes are never dropped mid-review.
+- **TE-08** Review depth scales with change class. Prose-only changes get
+  relevant static review. Routine executable changes get one bounded
+  exact-head review. Auth, secrets, persisted-state semantics, migrations,
+  concurrency, harness, and release paths get explicit exhaustive review.
 
 ## OP — Delivery & operations
 
@@ -192,9 +189,10 @@ Standing context is scarce attention; spend it on judgment, not procedure.
   repo via its fleet playbook.
 - **OP-02** Small frequent releases from trunk. Incomplete-but-deployable
   work hides behind flags, never branches.
-- **OP-03** Deploy-watch gate: a deployment is not done until health is
-  verified every way available — metrics, logs, traces, smoke probes — for a
-  defined soak window, by a named owner. No new work begins before stability.
+- **OP-03** Production verification gate: a deployment is done only after the
+  expected artifact passes health, smoke, manual QA on affected production
+  surfaces, and applicable Sentry, log, metric, or trace inspection. A timed
+  soak does not substitute for observed product behavior.
 - **OP-04** Rollback rehearsed or nonexistent. A rollback that has never been
   exercised does not exist. Migrations are forward-compatible or paired with
   a tested reverse plan.
@@ -290,29 +288,29 @@ Standing context is scarce attention; spend it on judgment, not procedure.
 | Canon | Harness artifact | Status |
 | --- | --- | --- |
 | DE-07 | `global/RULES.md` deletion-first order | live |
-| TH-04, OR-06 | `skills/explore-unknowns`; premise gate in `global/AGENTS.md` | live |
+| TH-04, OR-06 | Lean premise gate in `skills/shape` and `global/AGENTS.md` | live |
 | TE-06 | `skills/evidence-packet`; `deliver`, `code-review`, and `release` gates; delivery section of `global/AGENTS.md` | live — PR attachments required 2026-08-24 |
 | ST-02, RS-02 | `global/AGENTS.md` findings-cite-primary-records line | live — trialed in iron-forest ops 2026-08-21 |
-| TE-08 | Review-lane floors by change class, frozen plan, verified lanes | extracted from census ADR-0007 — untrialed |
+| TE-08 | Change-class review depth; exact-head bounded default; exhaustive high-risk council | live |
 | Synthesis policy (one program per name) | Router skill + domain references rule | extracted from census ADR-0006 — governs new skills |
 | ADR-0008 (census) | Testing doctrine one shared home | already embodied — foundation + CONTROLS; no new artifact |
 | ADR-0009 (census) | Chief-stays-thin kits; 0001/0002/0003/0005 architecture-specific; 0004 mint broker decommissioned with mint | skipped by operator selection 2026-08-21 |
 | OR-06 | `global/AGENTS.md` standing-mandate line (reversible calls made and reported) | live — trialed in iron-forest ops 2026-08-21 |
 | CH-02 | `skills/diagnose` red-loop, architecture challenge at fix #3 | live |
-| TH-01 | `skills/explore-design` fans ≥6 design options; `skills/shape` fans ≥3 architectures | drafted — skill written, first trial pending |
+| TH-01 | `skills/explore-design` fans ≥6 visual theses; `skills/shape` compares only material alternatives | live |
 | DE-01, CH-03 | `global/AGENTS.md` design/delivery lines; `audit-simplifications`, `skills/refactor` | `audit-simplifications` live; `refactor` drafted — trial pending |
 | RS-01 | exa routing in `config.yml`; `skills/research` decision protocol | drafted — skill written, untrialed |
 | TL-01 | `skills/herdr` | live |
 | OR-05 | `skills/capture` conversation-to-ledger extraction; Powder in Misty Step | drafted — capture skill written, trial pending |
 | TE-01–TE-05 | `skills/foundation` agentic baseline | unverified coverage |
-| OR-08 | `skills/audit-choices` decision ledger | live — deployed; deliver/Iron-Forest wiring blocked on PR #57 |
+| OR-08 | Operator-invoked `skills/audit-choices` decision ledger | live |
 | OP-01 | Landmark adopted in at least `canary` (full, `@35d002b`), `linejam` (full, `@35d002b` = v0.28.1), `crucible` (synthesis-only, `@v0`) — examples, inventory not audited | partial — fleet rollout incomplete |
-| OP-03–OP-05 | `release` merge/deploy/rollback gate; `watch-deploy` soak and incident gate | live for entry gates — first real deploy pending |
-| SE-03, SE-05 | Council script; `security-reviewer` agent routed to DeepSeek; security on-demand, closeouts correctness-only | live for judgment; remediation blocked (candidate 4) |
+| OP-03–OP-05 | `release` exact-head merge, deploy, production QA, observability, rollback, and incident gate | live — first real deploy pending |
+| SE-03, SE-05 | Council script plus configured `security-reviewer` chain; security on demand; remediation externally owned | live |
 | RS-03 | `skills/audit-simplifications` dependency-ladder lenses | live |
 | OR-07 | Flat-rate watchdog; OpenRouter removed from automatic chains; spend confined to on-demand work plus the documented vision exception | live |
 | TH-04, DE-01–DE-02, DE-07, OR-03, OR-07 | `skills/torvalds-design-review`; high-effort read-only `torvalds-reviewer` agent | live — explicit CLI trial 2026-08-22 |
-| TH-01, TH-04, DE-01–DE-08, TE-01–TE-06, CH-01–CH-06, OP-03–OP-06, OR-01–OR-03 | `shape` → `deliver` → `code-review` → `release` → `watch-deploy`; evidence-only `brief` | live for entry gates |
+| TH-01, TH-04, DE-01–DE-08, TE-01–TE-06, CH-01–CH-06, OP-03–OP-06, OR-01–OR-03 | `shape` → `deliver` → optional `code-review` → `release`; evidence-only `brief` | live for entry gates |
 | RS-01–RS-02, OR-01–OR-03, OR-07 | `skills/dispatch` current-access, benchmark, cost, role, and fallback routing program | live — explicit CLI trial 2026-08-22; no config mutation |
 | DE-07, TE-06, CH-01 | `skills/polish` one-interaction simpler/faster loop with real-surface proof | drafted — CLI gate trial 2026-08-23 |
 | DE-01, DE-03, DE-08 | `foundation` context-budget control: per-atomic-module token budget (default 100k) with repomix gate and enforced boundaries | drafted 2026-08-23 — extracted from Taelin's Bend2 observation; first project install pending |

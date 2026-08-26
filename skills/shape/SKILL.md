@@ -1,120 +1,62 @@
 ---
 name: shape
-description: Turn one rough idea into a groomed, option-tested, locked implementation spec.
+description: Turn one rough idea into an accepted, buildable slice.
 disable-model-invocation: true
 argument-hint: "[idea, ticket, or problem]"
 ---
 
 # Shape
 
-One idea becomes one buildable spec. No production edits.
+Shape prevents builders from inventing product or architecture decisions. It
+turns one evidenced problem into one accepted slice. It makes no production
+edits.
 
-```text
-brainstorm -> brief -> groom -> map unknowns -> fan designs -> choose -> lock spec
-```
+## Ground
 
-## 1. Brainstorm and brief
+Read the request, current system, binding decisions, and trusted work record.
+State the user or operator, observed problem, desired outcome, and reason to act.
+Separate facts from assumptions. Mark missing evidence as unknown.
 
-Collect candidate outcomes before selecting a solution. Include doing nothing,
-deleting the problem, and using the current interface directly. Group duplicate
-ideas by the user problem they solve.
+Done when one evidence-backed problem statement remains.
 
-Name the user, problem, observed evidence, desired outcome, and reason to act
-now. Separate facts, assumptions, and requests. Find the current system and
-ledger state when they exist. Write `Unknown` when evidence is absent.
+## Cut
 
-Completion criterion: One evidence-backed problem statement survives, and no
-invented context remains.
+Challenge every requirement. Prefer deletion or the current interface. Keep the
+smallest independently useful slice with:
 
-## 2. Groom
+- one outcome, one owner, and one data path;
+- explicit invariants and non-goals;
+- affected interfaces and failure behavior;
+- real-interface proof;
+- release and rollback boundaries when applicable.
 
-Challenge each requirement. Delete anything without an owner, protocol,
-production observation, or code invariant. Split the idea until one slice has:
+Any persisted format, schema, meaning, or default change is high risk. It needs
+migration, readback, compatibility, and rollback proof. A required but absent
+migration blocks the slice.
 
-- one user-visible or operator-visible outcome;
-- one owner and one data path;
-- explicit non-goals;
-- a real-interface proof;
-- a release and rollback boundary.
+Done when unrelated cleanup and speculative flexibility are outside the slice.
 
-Defer unrelated cleanup and speculative flexibility. Record dependencies and
-blocked prerequisites in the trusted ledger.
+## Settle
 
-Completion criterion: One independently useful slice is ready for decisions.
+Resolve implementation facts from source. Ask the operator only about material
+human choices: outcome, scope, compatibility, spend, operating burden, or an
+irreversible action. Present concrete options, evidence, tradeoffs, and a
+recommendation in one concise question set.
 
-## 3. Map unknowns
+Compare alternatives only when the choice is real. Include deletion, direct use
+of the current interface, and the smallest boring design. Request
+`/torvalds-design-review` only for a load-bearing or hard-to-reverse design.
 
-If a completed `/explore-unknowns` map does not cover this slice, stop and ask
-the operator to run `/explore-unknowns` with the groomed problem statement.
-Resume only from the completed map.
+Done when no material choice remains open.
 
-Every material choice must be closed by evidence or by the operator. Small
-implementation facts can remain as builder checks. Product intent, scope,
-compatibility, operating burden, spend, and irreversible choices cannot.
+## Lock
 
-Completion criterion: The map has no open material choice.
+Write the accepted spec with: problem and evidence; decision and rejected
+alternatives; data owners and invariants; interfaces and behavior; states and
+failures; compatibility or migration; acceptance scenarios; proof; release and
+rollback; non-goals; ordered slices.
 
-## 4. Fan options
+The operator must accept the spec. Store it in the project's trusted record.
 
-Dispatch at least three read-only design scouts in parallel. Give each the
-problem, map, invariants, proof, and one distinct hypothesis:
-
-1. delete or use the existing interface directly;
-2. the smallest boring design;
-3. a materially different data or ownership model.
-
-Add a domain specialist only when the slice needs one. Each scout returns:
-core data model, owners, state transitions, failure semantics, interface,
-migration, proof, deletions, and the evidence that would falsify its option.
-
-Completion criterion: Three genuinely different options account for every
-invariant and material failure path.
-
-## 5. Choose
-
-Compare whole-system complexity. Prefer one owner per datum, illegal states
-that cannot exist, deep modules, direct paths, and replaceable technology.
-Reject options that move complexity to callers, operators, migration, or
-recovery.
-
-For a load-bearing or hard-to-reverse architecture, stop and ask the operator
-to run `/torvalds-design-review` on the leading option. Resume from its verdict.
-Present the choice, rejected options, and evidence to the operator. Record the
-operator's decision.
-
-Completion criterion: One option is selected with explicit tradeoffs.
-
-## 6. Lock the spec
-
-Produce one spec with this contract:
-
-```markdown
-# <Outcome>
-## Problem and evidence
-## User and job
-## Decision and rejected options
-## Data, ownership, and invariants
-## Interfaces and behavior
-## States, transitions, failures, and recovery
-## Compatibility and migration
-## Security and operational constraints
-## Acceptance scenarios
-## Test portfolio
-## Product-surface QA matrix
-## Release, rollback, and production signals
-## Implementation slices
-## Non-goals and reconsideration triggers
-## Open builder checks
-```
-
-Acceptance scenarios cover happy, risky, boundary, illegal, interrupted, and
-recovery paths. The QA matrix names each affected real surface, adjacent path,
-fixture, action, and observable result. Implementation slices are independently
-provable and ordered by dependency.
-
-The operator must explicitly accept the spec. Silence, partial approval, and a
-prototype preference are not acceptance. Store the accepted spec where the
-project keeps durable decisions or on the trusted work item.
-
-Completion criterion: The accepted spec lets a builder implement without
-making a material product or architecture decision.
+Done when a builder can implement without making a material product or
+architecture decision.

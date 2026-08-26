@@ -1,154 +1,63 @@
 ---
 name: deliver
-description: Take one ready ticket or accepted spec through to an elevated design, proved implementation, adversarial QA, and open pull request with full evidence.
+description: Take one ready slice to a proved, reviewed, unmerged pull request.
 disable-model-invocation: true
-argument-hint: "[ticket or spec]"
+argument-hint: "[ticket or accepted spec]"
 ---
 
 # Deliver
 
-Take one ready ticket or accepted spec through to a proved, reviewed, tight,
-open pull request. Elevate system design, prove behavior with adversarial QA,
-and document choices.
+One ready slice. Prove it on its real interface. Open the pull request. Stop.
+Release is a separate operator decision.
 
-```text
-claim -> isolate -> grok & design -> test first -> implement -> adversarial QA
--> self-review & repair -> tighten -> publish PR -> audit choices
-```
+## Claim
 
-## 1. Claim
+Take one accepted, independently useful slice from the project's trusted work
+record. Use `/shape` when material intent, compatibility, scope, or architecture
+is still open. Isolate the work from the operator's checkout and record the
+base revision.
 
-Resolve and claim the target ticket or spec. Register or link the durable spec
-in the trusted backlog of record before implementation. Use the
-highest-priority ready backlog item when no target is supplied. Skip claimed,
-blocked, superseded, or unshaped work.
+Done when the slice, owner, accepted intent, and proof boundary are explicit.
 
-The work is ready only when accepted intent defines the outcome, data
-ownership, invariants, interfaces, failure behavior, non-goals, and acceptance
-scenarios. If a material architectural choice remains unsettled, stop and ask
-the operator to run `/shape` or `/explore-unknowns`.
+## Build
 
-Completion criterion: One accepted, independently useful slice is claimed.
+Plan proof before production edits. Capture a baseline when the claim is a fix,
+comparison, or state change. Use the current data owners and interfaces unless
+evidence shows they fail. Fix the source, migrate every caller, and delete the
+obsolete path.
 
-## 2. Isolate
+Add a test only for a new observable contract that lacks defense. Keep unrelated
+cleanup and speculative flexibility out.
 
-Create an isolated git worktree from the default branch (using `git worktree`,
-`herdr`, or `exe.dev` as appropriate). Leave the operator's branch and
-unrelated work untouched. Record the exact base revision.
+Done when the slice is complete and no caller or temporary path remains.
 
-Completion criterion: The slice has one isolated checkout and one owner.
+## Prove
 
-## 3. Grok and design elevation
+Run the applicable repository checks. Start the affected system and exercise the
+changed real interface. Cover the changed success, boundary, and failure paths;
+add recovery, concurrency, or hostile-input checks only when the change touches
+those risks. Inspect the evidence.
 
-Do not patch spaghetti on top of existing debt. Channel Torvalds (data
-structures first, single datum ownership, invalid states unrepresentable) and
-Ousterhout (deep modules, small stable interfaces, define errors out of
-existence).
+For an expensive matrix, live eval, or external-provider run, first pass one
+cheap deterministic case through setup, propagation, scoring or aggregation,
+evidence validation, and artifact publication.
 
-Before writing production code:
+Done when the changed behavior and its relevant failure path work on the real
+surface.
 
-- map the core data model and its state transitions;
-- design the deepest possible module interface that hides internal complexity;
-- ensure every datum has exactly one authoritative owner and path;
-- plan required deletions of dead abstractions or obsolete pass-throughs.
+## Review
 
-Completion criterion: A clean, elevated data structure and module design is
-settled before implementation.
+Review the complete result against accepted intent and surrounding behavior.
+Repair supported Blockers. Record useful non-blocking findings as follow-up
+work; they do not expand this slice. Any repair invalidates earlier proof, so
+rerun the affected checks and real scenario on the final head.
 
-## 4. Test first
+Done when no Blocker or failed required check remains.
 
-Before the first production edit, specify behavioral tests defending the
-observable boundary:
+## Publish
 
-- CLI exit codes and output formatting;
-- API response contracts and error payloads;
-- persisted state schemas;
-- real-surface UI/TUI interaction flows.
+Open an unmerged pull request. State the intent, decisions, checks, production
+impact, rollback path, and residual risk. Attach reviewer-open evidence for
+observable claims. Reconcile current PR comments and record the exact final head.
 
-Read `skill://evidence-packet`. Capture required pre-change baselines now.
-
-Completion criterion: Behavioral tests and proof plans are written before
-production edits.
-
-## 5. Implement
-
-Implement in dependency-ordered slices:
-
-- fix the source directly;
-- migrate every caller across the repository;
-- delete obsolete code, configurations, stale tests, and shims;
-- avoid unnecessary allocations, copies, or speculative abstractions.
-
-Continue autonomously for conservative reversible choices. Stop only for
-intent, scope, compatibility, or hard-to-reverse changes.
-
-Completion criterion: The slice is complete with all callers migrated and zero
-dead paths left behind.
-
-## 6. Adversarial QA
-
-Dispatch a fresh-context adversarial QA subagent to exercise the actual running
-system: *"Give me irrefutable evidence that this works on the real surface."*
-
-The QA subagent must start the real application and test:
-
-- happy, boundary, invalid, and malicious inputs;
-- error handling, timeouts, restart, and recovery;
-- viewport, theme, and keyboard navigation variants for UI;
-- concurrency, ordering, and idempotency where applicable.
-
-Inspect every captured artifact. Automated unit tests do not substitute for
-hands-on verification of the running product surface.
-
-Completion criterion: All checks pass, and an inspected evidence packet proves
-the real surface functions correctly.
-
-## 7. Self-review and repair
-
-Conduct a fresh-context review of the complete diff and surrounding system
-against the accepted spec and design invariants. Verify that:
-
-- data structures are clean and invalid states are unrepresentable;
-- module interfaces remain small and internal complexity is hidden;
-- all callers across the repository have been cleanly migrated;
-- no temporary scaffolding, dead code, or placeholder comments remain.
-
-Repair any identified defects autonomously. Rerun affected behavioral tests
-and product-surface QA checks until green.
-
-Completion criterion: The implementation is tight, tests and QA pass, and all
-in-scope defects are resolved.
-
-## 8. Tighten
-
-Apply the deletion-first order: challenge, delete, simplify. Remove incidental
-state, temporary scaffolding, pass-through wrappers, and test-only production
-seams. Tidy the green result into a clean sequence of semantic commits.
-
-Completion criterion: Clean, narrative commit history with green tests and QA.
-
-## 9. Publish PR and audit choices
-
-Open a clean, unmerged pull request. For every observable claim, follow
-`skill://evidence-packet/DELIVERY.md` and upload the inspected packet through
-the repository-approved PR attachment interface before calling the PR ready.
-The PR description must carry:
-
-- the work item and accepted spec;
-- design decisions and elevated data models;
-- test results and an Evidence section with openable before/after media;
-- short video or GIF attachments for temporal interaction claims;
-- the attached evidence record or downloadable packet bundle;
-- release notes, production signals, and rollback path.
-
-Render the PR and open every evidence link. Local paths and artifact hashes are
-capture metadata, not reviewer-accessible evidence. A failed or unavailable
-attachment interface blocks delivery unless the operator explicitly waives the
-specific artifact.
-
-Conclude by emitting an `audit-choices` decision ledger summarizing all
-tradeoffs and non-obvious choices made during implementation.
-
-Completion criterion: An unmerged pull request URL is returned; every required
-evidence artifact opens from that PR; proof and decision accounting are
-complete.
+Done when the operator can review and decide whether to invoke `/release`.

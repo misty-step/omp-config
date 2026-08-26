@@ -1,99 +1,61 @@
 ---
 name: release
-description: Address review, confirm CI is not failing, merge, deploy, verify production, and watch. Revert and investigate if ship or verify fails.
+description: Merge one reviewed change, deploy it, prove production, and recover on failure.
 disable-model-invocation: true
 argument-hint: "[pull request]"
 ---
 
 # Release
 
-Ship one pull request. Watch it in production. If it fails, revert and find out why.
+A release is complete when the exact reviewed change works in production. A
+timer does not prove that. `/release` authorizes merge, deploy, and one ordinary
+rollback for the named pull request.
 
-```text
-review clean -> CI not failing -> merge -> deploy -> verify -> watch
-on red: revert -> investigate -> operator -> fix -> postmortem
-```
+## Ready
 
-Explicit `/release` is the go-ahead to merge and deploy that PR. It authorizes
-the repository's ordinary rollback (revert the merge, reinstall the previous
-binary) if verify fails. It does not authorize a different production change.
+Record the pull request head SHA. Reconcile current review comments. Close every
+supported Blocker; track non-blocking findings separately. Require existing CI
+on that exact head to be green. Open the evidence attached for observable
+claims.
 
-## 1. Review clean
+Before merge, confirm the repository-owned deploy, health, smoke, and rollback
+paths exist and apply to this change. Confirm migration and rollback proof for
+persisted-state changes.
 
-Open the PR. Record the exact head SHA.
+Done when the recorded head is safe to ship.
 
-- Every in-scope review finding is addressed or explicitly declined with a
-  reason on the PR.
-- No open Blocker from `/code-review` remains.
-- Human approval is not a gate. Bot comments are not a gate.
+## Ship
 
-If a supported defect is still open, fix it on the branch and start again at
-this step. Do not merge around it.
+Confirm the head did not change. Merge through the repository's normal path.
+Record the merge revision. Wait for existing post-merge checks. Deploy the
+merged artifact through the owned path. Record the deployed identity when the
+runtime exposes it.
 
-Completion criterion: Head SHA recorded. In-scope review is closed.
+A wrong artifact, failed deploy, or failed post-merge check is red.
 
-## 2. CI not failing
+Done when production runs the intended artifact or recovery has started.
 
-Look at checks on that exact head.
+## Verify production
 
-- Failing required or existing CI blocks the ship.
-- Missing CI is not a failure. Do not invent a suite to satisfy this step.
-- Re-run a failed check once if it looks flaky. A second failure blocks.
+Watch the deploy finish. Then verify production, not a local substitute:
 
-Completion criterion: No failing check on the recorded head.
+- run health and repository-owned smoke checks;
+- manually exercise every affected production product or operator surface;
+- read back changed persisted state or migrations;
+- inspect new relevant Sentry issues, events, and logs when Sentry is present;
+- inspect applicable production logs, metrics, or traces.
 
-## 3. Merge
+Record what ran and what was observed. No fixed soak window is required. Close
+when the deployed product works and no relevant production signal is red.
 
-Confirm the PR head still equals the recorded SHA. Merge that head through the
-repository's normal path (`gh pr merge`, protected rules if they exist).
+## Recover
 
-Record the merge commit. Wait for post-merge checks if the repo has them. A
-new failure after merge blocks deploy: revert, do not push a second fix onto
-the live merge.
+Preserve the failure evidence. Run one authorized repository-owned rollback or
+reinstall the prior artifact. Verify the restored identity, health, smoke,
+state, and affected surfaces. Tell the operator what failed and what changed.
 
-Completion criterion: The merge commit contains the recorded head.
+A fix-forward is a new revision and starts at Ready. If recovery fails or the
+runtime identity is unknown, stop mutation and escalate.
 
-## 4. Deploy
-
-Deploy through the path this repo already owns (documented install, unit,
-`go install`, workflow). Observe what actually started.
-
-If the runtime can name its revision, record it. If it cannot, say so and
-continue — do not block the ship for a missing version command.
-
-A deploy that never starts, or starts the wrong artifact, is red. Go to
-Recover.
-
-Completion criterion: The owned deploy path ran and the new code is what
-production will execute.
-
-## 5. Verify
-
-Exercise the changed surface the way an operator would. Health, smoke, and
-the specific path this PR changed. Capture what you ran and what you saw.
-
-Green: hand `skill://watch-deploy` the repo, environment, merge SHA, deploy
-identity if known, rollback command, and soak window (repo default, else one
-deploy cycle or 30 minutes).
-
-Red: go to Recover. Do not keep poking production.
-
-Completion criterion: Production behaves, or recovery has started.
-
-## 6. Recover
-
-Stop new work. Keep the failing evidence.
-
-1. Say what failed, which release, and what the operator or user sees.
-2. Revert the merge or reinstall the previous binary — one action.
-3. Confirm the revert actually restored the surface.
-4. Tell the operator what broke and what you reverted.
-5. Reproduce, fix on a new branch, and start again at Review clean.
-6. Write a short postmortem when the failure shipped, risked data, or needed
-   a revert.
-
-Do not retry the same broken revision. Three failed recoveries: stop mutating
-and escalate.
-
-Completion criterion: Production is healthy again, or mutation has stopped
-and the operator has the incident.
+Done when production is healthy on a known revision or the incident is safely
+owned.

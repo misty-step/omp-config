@@ -1,29 +1,20 @@
 ---
 name: brief-decision-ready
-description: Give a decision-ready account of the situation and available directions.
+description: Give a sourced account that lets the operator make one decision.
 disable-model-invocation: true
 argument-hint: "[session, project, release, or decision]"
 ---
 
-# Brief Decision Ready
+# Brief decision ready
 
-Help the operator form a decision-ready understanding of what is going on.
+State the decision first. Explain why it exists now, what is settled, and what
+remains uncertain. Use current primary records and mark inference.
 
-Write a self-contained account of the current situation, the forces that
-produced it, why it matters, and the consequences of the available directions.
-Give the operator all context necessary to decide what to do next, including
-material constraints, conflicts, and uncertainty. Assume no knowledge from
-earlier conversation.
+Present only materially different options. For each, name the benefit, cost,
+risk, reversibility, and evidence. Recommend one option and state why the others
+lose. Separate operator choices from reversible next actions.
 
-Favor explanation over inventory: mostly why, some what, almost no how. Facts
-earn their place by clarifying a cause, stake, constraint, tradeoff, or
-consequence. Technical mechanics earn their place only when they change the
-decision.
+Use short active sentences. Include mechanics only when they change a tradeoff.
 
-Lead with the conclusion. Use whatever structure makes the situation easiest
-to understand. If a real decision is open, clarify the choices, what each
-choice buys or risks, and which direction the evidence supports. If no decision
-is open, do not create one.
-
-The brief succeeds when it stands alone and the operator can make a
-high-quality next decision without asking for missing context.
+Done when the operator can choose without opening another source and can see
+what evidence could change the recommendation.

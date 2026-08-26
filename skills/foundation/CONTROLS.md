@@ -71,6 +71,11 @@ From a clean checkout, run the repository-owned check, test, and build
 commands. Required checks block merge. Pin toolchains and actions. Treat
 warnings as failures. Caches are not part of correctness.
 
+Gate expensive matrices, live evals, and external-provider runs with one cheap
+end-to-end smoke. One deterministic fixture or case must cross setup,
+environment and output propagation, scoring or aggregation, schema and evidence
+validation, and artifact publication. Fan-out starts only after this path passes.
+
 ## Local run and fixtures
 
 Own one deterministic start command for each runnable application. Keep

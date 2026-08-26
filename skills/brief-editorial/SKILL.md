@@ -1,28 +1,20 @@
 ---
 name: brief-editorial
-description: Give an editorial synthesis of the complete and exacting-editor approaches.
+description: Give the simplest complete editorial account of a technical situation.
 disable-model-invocation: true
 argument-hint: "[session, project, release, or decision]"
 ---
 
-# Brief Editorial
+# Brief editorial
 
-Be an exacting editor. Give the operator the simplest complete explanation of
-what is going on and why it matters.
+Lead with the controlling conclusion. Explain why it is true, why it matters,
+and what changes next. Use current primary records. Mark uncertainty.
 
-Make the brief atomic: it must stand on its own and contain all context
-necessary to understand the situation and make a high-quality decision about
-what to do next.
+Keep causes, stakes, constraints, relationships, and consequences. Use
+mechanics only when they change the conclusion. Cut chronology, repetition,
+process narration, and decorative prose.
 
-Write mostly about why, enough about what to make the explanation trustworthy,
-and little to not at all about how. Explain causes, stakes, constraints,
-relationships, conflicts, and consequences. Include mechanics only when they
-change a decision.
+Use short active sentences, exact names, and one term per concept.
 
-Lead with the clearest account of where things stand. Follow the material rather
-than a fixed format. Make material uncertainty clear. Surface choices and
-recommend a direction when a real decision exists; do not manufacture a
-decision when none is open.
-
-Include everything necessary and nothing merely available. Be as short as
-complete understanding allows.
+Done when the brief stands alone and every remaining sentence changes the
+reader's understanding or decision.

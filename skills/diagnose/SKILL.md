@@ -1,56 +1,34 @@
 ---
 name: diagnose
-description: Find the root cause with a tight red loop. After three failed fixes, question the architecture.
+description: Find a root cause with a tight red reproduction; challenge the design after three failed fixes.
 disable-model-invocation: true
 ---
 
 # Diagnose
 
-Do not theorize without a red reproduction. Do not patch a third time
-without questioning the design.
+A theory without a red reproduction is a guess. A third patch on the same
+failure is usually a design warning.
 
-## 1. Reproduce
+## Make it red
 
-State the failing claim in one sentence. Produce the tightest command,
-session, or interaction that makes it fail now. Minimize input and surface
-until one behavior is red.
+State the failed claim. Produce the smallest current command or interaction that
+shows it. Preserve exact input, output, state, environment, and revision.
 
-If you catch yourself reading code to build a theory before this
-reproduction exists, stop.
+Done when one repeatable observation separates failure from success.
 
-Completion criterion: A named command or scenario is red on this machine.
+## Isolate the mechanism
 
-## 2. Hypothesize
+List a few falsifiable hypotheses. Test the cheapest discriminating observation
+first. Use logs, traces, a debugger, or bisection only to separate hypotheses.
+Fix the confirmed source mechanism, then run the same reproduction and adjacent
+contract checks.
 
-Write three to five falsifiable hypotheses. Each names a mechanism and the
-observation that would kill it. Instrument or bisect only to distinguish
-them. Do not "look around."
+Done when the reproduction is green for the identified reason.
 
-Completion criterion: Every hypothesis is confirmed or killed by an
-observation, or the next measurement is named.
+## Stop at three
 
-## 3. Fix once
+After three failed fixes, stop patching. Name the data, state, ownership, or
+interface that permits the failure. Put the redesign through `/shape`.
 
-Fix the confirmed mechanism at the source. Watch the reproduction go green.
-Add a regression only when the contract is not already defended on that
-boundary.
-
-Do not keep the first-draft production code as "reference" if it was written
-before the reproduction existed. Delete it and apply the fix that the red
-loop earned.
-
-Completion criterion: The original reproduction is green. No other
-hypothesis remains live without a reason.
-
-## 4. Three-fix stop
-
-If three attempted fixes have failed, stop patching. The representation is
-the bug.
-
-Name the data, state, or ownership that permits the failure. Stop and put
-the redesign in front of the operator to run `/explore-unknowns`. Use
-`audit-simplifications` when the question is whole-repo representation, not
-this incident.
-
-Completion criterion: Either a fix from step 3 holds, or patching has
-stopped and the architecture question is in front of the operator.
+Done when the incident is fixed and defended, or the architectural blocker is
+explicit.

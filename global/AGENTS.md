@@ -1,83 +1,47 @@
 # Agent policy
 
-## Design
+## Work
 
-- Define the outcome, evidence, unchanged invariants, and stop condition before
-  production work.
-- Use an existing interface directly unless evidence proves it insufficient.
-- Give each datum one owner and one explicit data path.
-- Judge whole-system code, state, configuration, failure paths, and operator
-  work. Local simplicity that moves complexity elsewhere is not progress.
-- Prototype the riskiest unresolved assumption before a broad migration.
-- Render an operator policy statement before acting on it: name the files,
-  roles, surfaces, or knobs it touches and what changes. Proceed on
-  confirmation or explicit go-ahead — a misread caught before the edit costs
-  one message; after, it costs the work.
+- Define the outcome, evidence, unchanged invariants, and stop condition before production work.
+- Use an existing interface unless evidence proves it insufficient.
+- Give each datum one owner and one explicit path.
+- Judge code, state, configuration, failure paths, and operator work as one system.
+- Prototype the riskiest assumption before a broad change.
+- State the files, roles, surfaces, and knobs a policy decision changes. Proceed on explicit approval.
 
-## Communication
+## Decisions
 
-- Lead with the conclusion. Use short sentences, active voice, and explicit
-  subjects.
-- Use one term for one concept. Define necessary domain terms.
-- Remove filler, idioms, vague references, and decorative metaphors.
-- Preserve exact API names, code, errors, quotations, and required domain
-  language.
-- Use headings and lists when they reduce ambiguity.
-- Apply ASD-STE100 principles without claiming formal conformance.
+Record accepted intent, tradeoffs, removals, non-goals, and invariants before a
+non-trivial implementation. Use `/shape` only when outcome, scope,
+compatibility, spend, operating burden, or an irreversible choice remains open.
+Resolve implementation facts from source.
+
+Any persisted format, schema, meaning, or default change is high risk. Require
+migration, readback, compatibility, and rollback proof. A required but absent
+migration blocks delivery.
 
 ## Delivery
 
+- Default to one ready slice. Prove its changed real interface. Review it. Open an unmerged pull request. Stop.
 - Fix the source. Migrate every caller. Remove obsolete paths.
-- Review the premise and the implementation.
-- Prove changed behavior on its real interface.
-- Evidence packet: for every observable behavior or state change, read
-  `skill://evidence-packet`; plan proof before the first production edit,
-  capture the real surface, and attach inspected artifacts to any pull request.
-- Findings cite primary records read now (ST-02, RS-02); titles, timestamps, and
-  recollection are leads.
-- Standing mandate (OR-06): reversible calls get made and reported; ask
-  only scope, spend, or risk changes.
-- Sharpest instrument (CR-03): LSP over text search for symbols; `ast-grep`
-  (`sg`) over sed for structural search and codemods. Grep is the fallback,
-  not the default.
-- Herdr focus: preserve the operator's active workspace, tab, and pane. Read
-  `skill://herdr` before every Herdr control action.
-- Do not claim completion while a supported finding or failed check remains.
+- Plan proof before production edits. Read `skill://evidence-packet` for observable behavior or state changes.
+- A Blocker needs a concrete trigger, failing mechanism, violated accepted contract, and causal link to the change. Record other useful findings as follow-up work.
+- Use `/code-review`, `/security-review`, and `/release` only when the operator or change class requires them.
+- Cite primary records read now. Treat titles, timestamps, and recollection as leads.
+- Make conservative reversible calls. Ask only about scope, spend, risk, or irreversible actions.
+- Use LSP for symbols and refactors. Use `ast-grep` for structural search and codemods.
+- Preserve the operator's active Herdr workspace. Read `skill://herdr` before Herdr control.
+- Browser automation: browser relay (`app.relay`) is disabled. Use headless browsers or isolated fixtures.
+- Finish only when no Blocker or failed required check remains.
 
-## Premise gate
+## Communication
 
-Before non-trivial production implementation, record:
+Lead with the conclusion. Use short active sentences, one term per concept, and
+exact API names. Remove filler. Use headings and lists only when they reduce
+ambiguity. Apply ASD-STE100 principles.
 
-- The intended design, accepted tradeoffs, intentional behavior changes or
-  removals, non-goals, and unchanged invariants, but only when settled by
-  binding evidence or explicit operator decisions.
+## Research and memory
 
-Route every material unsettled human-owned choice through `/explore-unknowns`:
-stop and ask the operator to run it. Do not implement while any such choice
-remains unresolved.
-
-## Research and memory (exocortex)
-
-Ground aggressively. When exploring, brainstorming, or gathering context,
-use web research (`skill://research`) AND fleet memory together: external
-sources for what the world says, exocortex for what this fleet already
-knows and decided. Route technical questions through the vault first.
-
-If the exocortex binary is available (`command -v exocortex`), retrieve
-before inferring, then read the source:
-
-- `exocortex search "<query>" --json` to find prior decisions and context.
-- `exocortex get <path>` for the note behind a hit.
-
-Write back often, under the vault's contract:
-
-- Status updates when work lands or direction changes.
-- Non-obvious failures: what bit you, why, and the fix —
-  `exocortex note "<one line>"` for capture, full notes for durable
-  decisions.
-- Bar: a future agent would thank you for it. Compile; leave raw session
-  logs on disk.
-
-Keep it organized: link related notes with `[[wiki-links]]`, supersede
-rather than delete, and treat reflection-loop merge proposals as
-first-class work. Full contract: `skill://exocortex`.
+Use current primary sources. Search exocortex before inferring fleet decisions.
+Use `skill://research` for external technical facts. Write durable decisions and
+non-obvious failures through `skill://exocortex`; keep raw session logs on disk.

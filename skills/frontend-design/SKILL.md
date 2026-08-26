@@ -1,58 +1,36 @@
 ---
 name: frontend-design
-description: Design, materially revise, or polish a UI with a product-specific visual system and browser critique.
+description: Build or refine a UI through one product-specific visual direction and browser critique.
 license: Apache-2.0; modified from Anthropic's frontend-design skill
 ---
 
-# Frontend Design
+# Frontend design
 
-Create one coherent visual direction for the product.
-
-## Ground
-
-Inspect the real surface, content, brief, and existing design system. Identify:
-
-- audience and primary job;
-- brand and platform constraints;
-- current components, tokens, and accessibility requirements.
-
-Use the existing system when it fits. When the brief leaves an axis open, choose
-it and state the reason.
+A strong interface expresses the product's hierarchy and interaction model. It
+is not a collection of fashionable effects.
 
 ## Direct
 
-Before code, define:
+Inspect the real surface, content, users, states, and existing design system.
+State one visual thesis: hierarchy, typography, spacing, color, motion, and the
+one distinctive product idea. Preserve functional contracts.
 
-- **Thesis:** the product-specific visual idea.
-- **Color:** 4–6 functional tokens.
-- **Type:** display, body, and utility roles.
-- **Layout:** hierarchy; add a wireframe only when structure is unresolved.
-- **Signature:** one memorable product-specific element.
-- **Motion:** one justified moment, or none.
-
-Reject a direction that fits an unrelated product unchanged. Use cards,
-numbering, dividers, gradients, and animation only when they carry meaning.
+Done when the direction explains every major visual choice.
 
 ## Build
 
-Reuse current primitives. Add a framework, font, dependency, or abstraction only
-when the direction requires it and current interfaces cannot supply it.
+Reuse current primitives. Add dependencies only when the direction requires
+capability the current system lacks. Implement responsive, accessible states
+with complete content and interactions. Avoid decorative effects that weaken
+hierarchy or performance.
 
-Spend boldness once. Remove decoration that does not clarify hierarchy, state,
-or action. Use direct labels, actions, errors, and empty states.
-
-Preserve:
-
-- responsive narrow and wide layouts;
-- keyboard operation and visible focus;
-- semantic structure, contrast, and reduced motion;
-- visible interactive states without overflow.
+Done when the affected surface works at its real route.
 
 ## Critique
 
-Run the UI in a browser at desktop and mobile sizes. Exercise the primary
-interaction with keyboard and pointer. Compare the result with the thesis and
-brief. Fix the visible defects; source inspection is not proof.
+Run the UI headlessly at desktop and mobile sizes. Exercise primary interaction
+with keyboard and pointer. Inspect screenshots for hierarchy, clipping,
+contrast, rhythm, focus, loading, empty, error, and reduced-motion behavior.
+Repair the source and repeat.
 
-Use `skill://evidence-packet` to capture and deliver the validated real-surface
-proof.
+Done when the real surface supports the thesis and its required states.
