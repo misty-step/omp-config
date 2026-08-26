@@ -60,7 +60,7 @@ Gate function-level cyclomatic or cognitive complexity in CI and hooks with the
 stack's native toolchain:
 
 - **Go:** `cyclop` or `gocyclo` / `gocognit` via `golangci-lint` (cyclomatic threshold $\le 10\text{--}15$).
-- **Rust:** Run a real complexity analyzer (`rust-code-analysis-cli`, `lizard`) in CI, or gate Clippy's supported structural control-flow proxies (`clippy::excessive_nesting`, `clippy::too_many_lines`). Do not treat Clippy's `cognitive_complexity` restriction lint as a complexity measurement tool.
+- **Rust:** Run a real complexity analyzer (`rust-code-analysis-cli`, `lizard`) in CI, or gate Clippy's structural nesting proxy (`clippy::excessive_nesting`) alongside function size limits (`clippy::too_many_lines`). Do not treat Clippy's `cognitive_complexity` restriction lint as a complexity measurement tool.
 - **TypeScript / JavaScript:** `complexity` rule in ESLint/Oxlint, or `noExcessiveCognitiveComplexity` in Biome (threshold $\le 10\text{--}15$).
 - **Python:** `mccabe` (`C901`) via Ruff or `flake8-cognitive-complexity` (threshold $\le 10$).
 
