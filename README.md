@@ -80,8 +80,7 @@ Two invocation classes:
 Operator-invoked (`disable-model-invocation: true`) — human-directed flows
 that run only on explicit request:
 `audit-choices`, `audit-observability`, `audit-simplifications`, `backlog`,
-`brief`, `brief-complete`, `brief-decision-ready`, `brief-editor`,
-`brief-editorial`, `brief-reader-test`, `capture`, `code-review`, `deliver`,
+`brief`, `capture`, `code-review`, `deliver`,
 `diagnose`, `explore-design`, `extract-module`, `foundation`, `groom`,
 `install-anti-slop`, `polish`, `product-description`, `pulse`, `refactor`,
 `release`, `security-review`, `shape`, `tidy`, `torvalds-design-review`.
