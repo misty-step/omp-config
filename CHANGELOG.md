@@ -1,3 +1,10 @@
+## [0.0.4](https://github.com/misty-step/omp-config/compare/v0.0.3...v0.0.4) (2026-08-26)
+
+
+### Features
+
+* **exocortex:** generate skill from misty-step/exocortex ([789ae58](https://github.com/misty-step/omp-config/commit/789ae58ddd0aecad34063f53304665f215a9418a))
+
 ## [0.0.3](https://github.com/misty-step/omp-config/compare/v0.0.2...v0.0.3) (2026-08-26)
 
 
