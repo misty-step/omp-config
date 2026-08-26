@@ -1,3 +1,20 @@
+## [0.0.3](https://github.com/misty-step/omp-config/compare/v0.0.2...v0.0.3) (2026-08-26)
+
+
+### Bug Fixes
+
+* **foundation:** differentiate Rust structural nesting proxy from size limits ([7f3ed0f](https://github.com/misty-step/omp-config/commit/7f3ed0f0889ce665fd54d0006c8790831989b7d6))
+* **foundation:** scope Rust complexity proxies to control flow ([b2ce5e2](https://github.com/misty-step/omp-config/commit/b2ce5e2fa4c2233c567a23a676587f07766050cb))
+* **loc:** batch committed object reads and cache-only passive hooks ([3f2eb56](https://github.com/misty-step/omp-config/commit/3f2eb564f08aee768ef90124aa9d21d21ac36580))
+* **pulse:** condition complexity percentile aggregates on numeric analyzers ([3757c7f](https://github.com/misty-step/omp-config/commit/3757c7f1c474bd813992da172de64f8f6a11b038))
+
+
+### Features
+
+* **skills:** add backlog assessment and grooming flows ([0232cd0](https://github.com/misty-step/omp-config/commit/0232cd064b6b0160345c5b0ec7af04486c937372))
+* **skills:** add cyclomatic and structural complexity controls to foundation, audit, and pulse ([2f5065e](https://github.com/misty-step/omp-config/commit/2f5065e821ef9454032263c225ef51367b3f3ab3))
+* **tooling:** add grievance inbox CLI, install target, and headless config ([e36798b](https://github.com/misty-step/omp-config/commit/e36798b583d61f9ddc7a6227a28365c163ca568f))
+
 ## [0.0.2](https://github.com/misty-step/omp-config/compare/v0.0.1...v0.0.2) (2026-08-26)
 
 
