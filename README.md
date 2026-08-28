@@ -8,7 +8,7 @@ agents run on this machine: model roles, global policy, skills, themes.
 
 | Path | Purpose |
 | --- | --- |
-| `install` | Deployment script. Validates sources, copies the allowlist into `$(omp config path)`, deploys agents, skills, and shared review references atomically, merges live MCP auth, and self-installs the pre-push hook |
+| `install` | Deployment script. Validates sources, copies the allowlist into `$(omp config path)`, deploys agents and skills atomically, merges live MCP auth, and self-installs the pre-push hook |
 | `bin/omp-grievances.ts` | Manual grievance inbox CLI; reads OMP intake without mutation and stores private acknowledgements under XDG state |
 | `config.yml` | Model roles and fallback chains, theme/statusline/TUI display, providers (web search routed through exa), task/LSP settings |
 | `models.yml` | Local Ollama provider discovery; cloud models come from omp's bundled catalog |
@@ -16,14 +16,13 @@ agents run on this machine: model roles, global policy, skills, themes.
 | `global/AGENTS.md` | Standing policy loaded into every session: design, communication, delivery, premise gate, knowledge vault |
 | `global/RULES.md` | Strict ordering rules; currently the deletion-first ladder |
 | `agents/` | Read-only specialist agents; installed globally and routed by each agent's model role |
-| `global/WATCHDOG.md`, `WATCHDOG.yml` | Closeout reviewer: a second model audits finished work against accepted intent; advisor roster configured in YAML |
+| `global/WATCHDOG.md`, `WATCHDOG.yml` | Continuous Steward advisor: a high-reasoning model reviews intent, design, correctness, proof, and operations; roster configured in YAML |
 | `themes/` | TUI themes (`tokyonight`, `ember`) |
 | `skills/` | Skill packages, copied wholesale on install — see below |
-| `references/review/` | Shared council contract and lens references used by operator-invoked delivery and review skills |
 | `.githooks/pre-push` | Hook source installed into this repo's git dir by `./install` |
 | `.agents/skills/writing-for-agents/` | Agent-writing guidance served via `skill://writing-for-agents`; not deployed by `install` |
 | `extensions/loc/` | Session-resident LOC status and commands; deployed by `install` |
-| `CANON.md` | Operating philosophy: principles with stable IDs plus synthesis and deviation ledgers. Reference only — never deployed, never auto-loaded |
+| `CANON.md` | Concise, implementation-independent operating philosophy. Reference only — never deployed or auto-loaded |
 
 ## Install
 
@@ -89,7 +88,6 @@ Model-invocable — unambiguous triggers, bounded cost, cheap wrong-fire:
 `ast-grep`, `dispatch`, `evidence-packet`, `exocortex`, `frontend-design`,
 `herdr`, `research`.
 
-The split criterion lives in `CANON.md`, Synthesis policy.
 
 The `exocortex` skill is generated from `misty-step/exocortex`
 `skills/exocortex/SKILL.md`. Do not hand-edit `skills/exocortex/SKILL.md`.
@@ -98,11 +96,12 @@ Regenerate with that repo's `scripts/install-skill.sh` and prove with
 
 ## Canon relationship
 
-`CANON.md` states the operating philosophy; `global/` and `skills/` are
-deliberate compiled views of it. Harness changes cite canon IDs, the
-synthesis ledger records what is embodied where, and the deviation ledger
-captures reality beating a rule. Never paste canon wholesale into harness
-context — synthesize one principle at a time, trial it, keep or drop.
+`CANON.md` states the implementation-independent operating philosophy.
+Configuration, standing policy, and skills are concrete mechanisms that should
+express it without turning the canon into an inventory of the current harness.
+Implementation details and routing live in this README and the configuration.
+Never paste the canon wholesale into agent context; distill only the judgment a
+surface needs.
 
 ## Ecosystem
 

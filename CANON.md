@@ -1,331 +1,143 @@
-# Canon — Misty Step operating philosophy
+# Misty Step operating philosophy
 
-**Status: reference, not context.** This file states how we build software and
-run agents. It is never auto-loaded into agent context, and `./install` does
-not ship it. Harness artifacts (`global/AGENTS.md`, `global/RULES.md`,
-`skills/*`) are derived views; they change deliberately, citing canon IDs.
+This document describes how we choose, build, and care for software. It is a
+philosophy, not a procedure, checklist, or authority. Reality outranks it.
+When experience contradicts a principle, we examine the evidence and improve
+the principle.
 
-Everything here is suggestion and encouragement, including this sentence
-(ST-01). Reality outranks the document. Deviations get recorded, not hidden.
+## Reality outranks doctrine
 
-## How to use
+Observed behavior is the ground truth. Claims earn confidence through direct
+evidence, primary sources, and reproducible results. We name inference as
+inference and uncertainty as uncertainty.
 
-- Cite IDs (`TE-03`) in ADRs, PR descriptions, review notes, and harness PRs.
-- Consult by section, not whole-file: designing → TH, DE; verifying → TE;
-  shipping → OP, CH; delegating → OR; adopting tools → CR, TL.
-- Synthesis path: canon item → draft rule/skill/AGENTS.md line → trial in one
-  project → promote or drop. Record every step in the synthesis ledger below.
-- Canon changes via PR like code, rationale required. Two similar recorded
-  deviations trigger a principle revision, not a third exception.
+Principles are tools for judgment, not substitutes for it. A justified
+deviation is information. Repeated deviations expose a weak principle or a
+changed world; they do not justify permanent exception machinery.
 
-## Synthesis policy
+Taste matters. We value clear thinking, technical honesty, and the discipline
+to discard a favored idea when the system disproves it.
 
-Standing context is scarce attention; spend it on judgment, not procedure.
+## Purpose before mechanism
 
-| Surface | Carries | Constraint |
-| --- | --- | --- |
-| `global/AGENTS.md` | decision policy needed most turns | stays under ~60 lines |
-| `global/RULES.md` | strict precedence and ordering only | stays tiny |
-| Skills, model-invocable | trigger-shaped procedures with cheap wrong-fire | loaded on demand |
-| Skills, operator-only | heavyweight, attention-consuming, broadly mutating flows | explicit invocation |
-| Project files (via `foundation`) | stack rules, test portfolio, docs surface, run instructions | per repository |
-| `config.yml` | mechanical routing: model roles, search provider, retries | no prose |
-| WATCHDOG | second-model closeout review; behavioral prompt prose by design | event-triggered, bounded, outside session context |
-| Iron Forest and CI | everything checkable mechanically | gates over prose |
+We begin with the outcome: who benefits, what changes for them, what must
+remain true, and what would prove success. A precise solution to the wrong
+problem is still wrong.
 
-- Prose carries judgment; mechanisms carry enforcement. Never write prose
-  enforcing what a gate already enforces.
-- A skill is model-invocable iff its trigger is unambiguous, its cost is
-  bounded, and firing at the wrong time is cheap. Otherwise operator-invoked.
-- One skill name exposes one program; domain branches live in references
-  loaded by that program, never as sibling skills. A domain splits out only
-  when it gains a distinct invocation contract — proven by a shaped eval, not
-  by reference length.
-- An AGENTS.md candidate that breaks the budget is not universal — it becomes
-  a skill or a project template.
+Requirements need an accountable owner or binding evidence. We challenge
+unsupported requirements before optimizing them. We distinguish product intent
+from implementation habit and preserve deliberate non-goals.
 
-## ST — Stance
+Material alternatives deserve comparison. Deletion, the current interface, and
+the smallest boring design are always candidates. Exploration ends with a
+decision, rejected alternatives, and the evidence that would change the choice.
 
-- **ST-01** Nothing is gospel. Rules are suggestions with rationale. Override
-  with judgment, out loud, citing the ID.
-- **ST-02** Evidence first. Claims carry proof: command output, diff,
-  screenshot, transcript. Say "inferred" when it is inferred. Never claim done
-  while a finding or failed check stands.
-- **ST-03** Taste over rule-following. Channel specific dispositions, not
-  name-drops: Torvalds (data structures first, never break userspace, solve
-  real problems), Ousterhout (deep modules, small interfaces, design it
-  twice), Uncle Bob (screaming architecture, behavior-preserving refactor,
-  tests are spec), Kent C. Dodds (test behavior not implementation, mostly
-  integration), Hickey (simple vs easy, it's just data, every complexity buys
-  something or it goes), Carmack (measure, linear code, ruthless focus).
+Reversible choices move quickly. Irreversible choices receive slower treatment,
+clear ownership, and explicit acceptance of their consequences.
 
-## TH — Thinking
+## Simplicity is a system property
 
-- **TH-01** Fan options only when the decision has material alternatives.
-  Compare deletion, the current interface, and the smallest boring design
-  before adding a new architecture. Cosmetic variants do not count.
-- **TH-02** Exploration ends in a decision artifact: chosen approach, why,
-  rejected alternatives, and the evidence that would change the decision.
-- **TH-03** Reversibility triage. One-way doors (public API breaks, schema
-  migrations, infra selection, security posture) get slow treatment and
-  operator sign-off. Two-way doors get decided fast by whoever is closest.
-- **TH-04** Review the premise before the implementation. Resolve material
-  human-owned choices through `shape`; decide reversible implementation facts
-  from source.
+The simplest complete system wins. Complexity must pay rent in capability,
+safety, or enduring reduction of other complexity. Local elegance that moves
+burden into callers, operations, or future maintenance is not simplicity.
 
-## DE — Design & architecture
+We challenge, delete, simplify, accelerate, and only then automate. We prefer a
+small number of deep concepts to a large vocabulary of shallow abstractions.
+We design for replacement and deletion rather than speculative flexibility.
 
-- **DE-01** Simplest, most elegant system wins. Complexity must pay rent:
-  every module, abstraction, and state field earns its keep or goes. Local
-  simplicity that moves complexity elsewhere is not progress.
-- **DE-02** Data first. Get types and schemas right; code follows. Model the
-  domain as plain data. Make illegal states unrepresentable — parse, don't
-  validate.
-- **DE-03** Deep modules, small interfaces. Hide information. Few concepts,
-  deep capability. Shallow wide APIs are debt.
-- **DE-04** Boring technology by default. Innovation tokens spent
-  deliberately, one experiment at a time, in a component chosen for cheap
-  replacement.
-- **DE-05** Walking skeleton first. Thin end-to-end vertical slice — UI to
-  storage to deploy — before depth anywhere. Tracer bullets over layered
-  construction.
-- **DE-06** Strangler over big-bang. Replace incrementally behind stable
-  interfaces. Never freeze traffic for a rewrite.
-- **DE-07** Deletion-first order: challenge, delete, simplify, accelerate,
-  automate. Codified in `global/RULES.md`.
-- **DE-08** Rule of three before abstraction. Prefer replaceable parts over
-  flexible frameworks. Design for deletion.
+Boring technology is the default because familiarity compounds. Innovation is
+a deliberate experiment placed behind a boundary where failure and replacement
+are cheap.
 
-## CH — Change discipline
+## Data, ownership, and boundaries
 
-- **CH-01** Smallest possible change that completes the ask — including
-  caller migration and dead-path removal. Smallest never means incomplete.
-- **CH-02** Root cause only. Fix sources; never suppress symptoms, swallow
-  errors, or special-case inputs to make failures disappear. Three failed
-  fixes in a loop: stop, question the architecture (`diagnose`).
-- **CH-03** Clean cutover internally: migrate every caller, delete obsolete
-  paths, no shims or aliases. Public contracts differ — deprecation windows,
-  because userspace exists (ST-03).
-- **CH-04** No silent scope growth. Anything beyond the stated ask needs
-  explicit justification in the moment; otherwise it becomes a parked ticket,
-  not a drive-by.
-- **CH-05** Done means done: no stubs, placeholders, TODO-implementations;
-  changed surfaces verified on the real interface; affected docs and changelog
-  touched in the same change.
-- **CH-06** One concern per commit; history reads as narrative. Never mix
-  formatting with semantics.
+Data structures, relationships, lifecycles, and invariants come before control
+flow. Every datum has one owner and one explicit path. The model should make
+illegal states unrepresentable where the language permits it.
 
-## RS — Research & knowledge
+Good modules hide necessary complexity behind small, stable interfaces. Policy
+lives with the state it governs. Special cases stay local instead of leaking
+through the system.
 
-- **RS-01** Research before building. Unfamiliar API, library, or error:
-  web-research first (exa is the default provider), never code from memory.
-- **RS-02** Source over memory, primary over secondary. Verify library
-  behavior against its actual source and types when correctness matters.
-  Hallucinated APIs are a standard failure mode, not an edge case.
-- **RS-03** Dependency ladder: stdlib > small maintained dep > own code.
-  Adopting a dependency adopts its maintenance, security, and transitive
-  weight; vet license, activity, and supply chain before adoption.
-- **RS-04** Research ends in an artifact. Timebox it; conclude with a
-  decision — chosen option, rejected options, reasons. ADR if durable,
-  ticket or comment if not.
-- **RS-05** Knowledge vault: retrieve compiled notes before inferring, then
-  read the source anyway. Write durable decisions back; leave raw sessions
-  raw. (Codified in `global/AGENTS.md`.)
+Boundaries define trust, compatibility, and failure. We validate untrusted
+input at the edge and rely on parsed meaning inside. Public contracts respect
+their users; internal contracts change cleanly with every caller migrated.
 
-## CR — Craft
+## Small changes, complete outcomes
 
-- **CR-01** Fast, strict stacks by default: Go or Rust for new services,
-  CLIs, and tools. Strictness converts runtime surprises into compile errors.
-  A project's own stack rules override this; never rewrite a working codebase
-  to match fashion.
-- **CR-02** Agent-friendly tools: structured output (`--json`), deterministic
-  flags, machine-readable errors, scriptable, composable, no TUI-only
-  behavior in pipelines. Choose and build tools to this spec.
-- **CR-03** Sharpest instrument: LSP over text search for symbols; AST
-  rewrite over sed for codemods; dedicated readers over cat. Shell runs one
-  binary or a short fact pipeline, never surgery.
-- **CR-04** Errors are data. Fail loud at boundaries; handle where action is
-  possible; never swallow. Panic or assert only on invariant violation.
-  Messages name operation, input, and expected state.
-- **CR-05** Determinism by default: pinned dependencies, locked toolchains,
-  seeded randomness. Same input produces the same artifact.
-- **CR-06** Measure before optimizing. Algorithmic wins before micro-opt.
-  Still avoid avoidable allocation, copying, and compute early (Carmack).
-  Budgets beat vibes.
+We prefer the smallest change that fully accomplishes the outcome. Small never
+means partial. A coherent change includes affected callers, obsolete-path
+removal, proof, and the documentation needed to preserve current truth.
 
-## TE — Testing & verification
+We fix causes rather than suppress symptoms. Repeated failed fixes are evidence
+that the model or architecture deserves re-examination.
 
-- **TE-01** Tests defend behavior, not plumbing. Spec observable contracts at
-  boundaries: CLI output, API responses, UI flows, persisted state.
-  Implementation-coupled tests get rewritten or deleted.
-- **TE-02** Mixed portfolio weighted toward integration: unit + integration +
-  e2e; property and fuzz for parsers and core logic; torture and chaos for
-  infrastructure; Gherkin where non-programmers read acceptance criteria.
-- **TE-03** Suites are fast: units in seconds, full CI in minutes. Feedback
-  delay changes developer behavior more than coverage numbers do.
-- **TE-04** Flaky is broken. Quarantine with an owner immediately; fix or
-  delete within days. Never normalize retries, sleeps, or wait-and-hope.
-- **TE-05** Red means stop. Failing checks block merge; linters, formatters,
-  and type-checkers run strict in CI with zero tolerated warnings.
-- **TE-06** Real interface over mock. Prove changed behavior by running the
-  actual surface: drive the browser, launch the TUI, hit the endpoint. An
-  evidence packet accompanies every observable change (`evidence-packet`).
-  Pull requests attach reviewer-open artifacts; local paths and hashes are not
-  delivered evidence.
-- **TE-07** Local mirrors production: compose/k8s reproduces production
-  topology, config lives in code, drift is a bug with an owner. Manual QA on
-  the running app is part of done — no test suite substitutes hands-on the
-  real thing.
-- **TE-08** Review depth scales with change class. Prose-only changes get
-  relevant static review. Routine executable changes get one bounded
-  exact-head review. Auth, secrets, persisted-state semantics, migrations,
-  concurrency, harness, and release paths get explicit exhaustive review.
+We leave no scaffolding disguised as delivery: no inert placeholders, fake
+fallbacks, abandoned compatibility paths, or promises that the next change will
+finish this one. History should explain the evolution of the system without
+mixing unrelated concerns.
 
-## OP — Delivery & operations
+## Proof closes the loop
 
-- **OP-01** Every release versioned, changelogged, and annotated through
-  `misty-step/landmark`: conventional commits in; semantic version, technical
-  changelog, synthesized user notes, machine-readable evidence out. Adopt per
-  repo via its fleet playbook.
-- **OP-02** Small frequent releases from trunk. Incomplete-but-deployable
-  work hides behind flags, never branches.
-- **OP-03** Production verification gate: a deployment is done only after the
-  expected artifact passes health, smoke, manual QA on affected production
-  surfaces, and applicable Sentry, log, metric, or trace inspection. A timed
-  soak does not substitute for observed product behavior.
-- **OP-04** Rollback rehearsed or nonexistent. A rollback that has never been
-  exercised does not exist. Migrations are forward-compatible or paired with
-  a tested reverse plan.
-- **OP-05** Health is measured, SLO-shaped. Any service must answer "is it
-  healthy?" from metrics, logs, and traces without SSH archaeology.
-- **OP-06** Incidents stop feature work. Stabilize, then blameless
-  postmortem with tracked actions. An alert paging twice without being
-  actionable gets fixed or deleted; an alert catching real defects gets
-  tuned and kept — never deleted for firing.
-- **OP-07** Operations are idempotent and replayable. Scripts tolerate
-  reruns; manual steps become code; snowflakes get codified or destroyed.
+Source outranks memory. Primary evidence outranks summaries. Research ends in a
+decision or an explicit gap, not a pile of links.
 
-## OR — Agent orchestration
+Changed behavior is proved at the real interface. Tests defend observable
+contracts, boundaries, invariants, and failure paths rather than implementation
+choreography. A failing required check stops the change.
 
-- **OR-01** Subagents for genuine independence. Fan out self-contained
-  slices concurrently; never serialize independent work, never invent padding
-  work to fill a wave.
-- **OR-02** Contracts before fan-out. Interfaces, schemas, and file ownership
-  are decided up front and stated in every brief; siblings coordinate through
-  messaging before touching shared files; one named owner per shared mutation.
-- **OR-03** Orchestrator verifies. A subagent finishing is an exit, not an
-  acceptance; claims are checked against the artifact before integration.
-- **OR-04** Scout-then-edit. Unknown territory gets delegated read-only
-  recon; edits stay with one owner who holds the design.
-- **OR-05** Ledger routing: Powder for all Misty Step work (skill scoped to
-  `~/Development/misty-step/`); Habitat only inside R90. Work enters through
-  takeable jobs; proof attaches at completion.
-- **OR-06** Escalation shape: human-owned tradeoffs get asked with concrete
-  options and a recommendation; reversible calls get made autonomously and
-  reported.
-- **OR-07** Per-token providers are spent deliberately, never ambiently.
-  Standing and automatic surfaces — watchdog advisors, CI summaries, and
-  routine subagents — start on flat-rate models. Automatic fallback chains
-  exhaust flat-rate provider routes before one explicit terminal per-token
-  hop: DeepSeek V4 Flash at max effort for routine text roles, or DeepSeek V4
-  Pro at max effort for high-stakes text roles. Activation shows in session
-  cost. Multimodal roles never fall back to text-only models; `vision` starts
-  on flat-rate Gemini and retains image-capable fallbacks.
-- **OR-08** Autonomous work leaves a decision trail. Choices made where the
-  brief was silent surface post-hoc in a confidence-ranked, non-blocking
-  ledger (`audit-choices`); the audit changes no code, and a needs-user
-  verdict stops the run (premise gate). Only non-human-owned two-way-door
-  choices proceed provisionally (TH-03).
+We measure before optimizing and compare like with like. Fast feedback changes
+behavior; flaky feedback destroys trust. Completion is a claim that carries
+evidence.
 
-## TL — Tooling surface
+## Operations are part of the product
 
-- **TL-01** Herdr coordinates sessions and panes; operator focus is
-  preserved — never steal tab, pane, or workspace (`herdr`).
-- **TL-03** Exe.dev VMs for isolation-sensitive work: untrusted dependencies,
-  kernel-level experiments, parallel environments. Never burn the workstation.
-- **TL-04** Iron Forest runs routine issue-to-PR mechanics headlessly
-  (Builder/Verifier/Fixer). Interactive sessions handle judgment; the factory
-  handles repetition.
+A system includes its deployment, configuration, recovery, observability, and
+operator work. A feature that cannot be shipped, understood, or recovered is
+not complete.
 
-## DC — Documentation
+Production verification observes the product behavior that matters. Health is
+expressed through useful signals and service objectives, not archaeological
+access to machines. Alerts must lead to action.
 
-- **DC-01** Minimal surface: README (what, how to run), VISION (why),
-  ARCHITECTURE when scale demands it, plus ADRs. Nothing else persists.
-  Everything else is generated or deleted.
-- **DC-02** ADRs are immutable once accepted: supersede, never edit.
-  Context, Decision, Consequences.
-- **DC-03** Git holds history; docs hold current truth. Comments explain why,
-  not what. Hand-written changelogs rot; generated ones do not (OP-01).
-- **DC-04** Staleness is a bug. Touching code with stale adjacent docs fixes
-  or deletes the docs in the same change.
+Rollback exists only when it can be executed. Operations are idempotent and
+replayable. Incidents suspend feature work until the system is stable and the
+learning is captured without blame.
 
-## SE — Security
+## Trust and blast radius
 
-- **SE-01** Least privilege everywhere: scoped tokens, short-lived
-  credentials, minimal grants, containers without surprises.
-- **SE-02** Secrets never appear in code, logs, git, or agent context. Assume
-  anything an agent sees can land in transcripts and third-party models.
-  Redact before sharing; gate pipelines with secret scans (Iron Forest does).
-- **SE-03** Validate at trust boundaries; internal code trusts parsed types.
-  Authn/authz, secret handling, and untrusted-input parsing get an
-  adversarial pass (`security-review`).
-- **SE-04** Blast radius stays bounded: destructive commands need explicit
-  approval; production writes are gated; dry-run precedes run.
-- **SE-05** Adversarial security judgment runs on open non-frontier models —
-  GLM 5.3, Kimi K3, DeepSeek V4 Pro via OpenRouter. Frontier-lab models
-  refuse or soften offensive reasoning: exploit chains, attack paths,
-  red-team passes. Embodied: the `security-review` council script plus
-  `security-reviewer`-agent recon, validation, and adjudication, routed
-  via `config.yml` to DeepSeek V4 Pro. Standing closeouts cover correctness
-  only (OR-07); security analysis runs on demand. Council remediation output is prose,
-  not diffs — repairs stay blocked inside the skill until an approved
-  writable agent or patch-producing mechanism exists (candidate 4).
+Least privilege is the default. Secrets stay out of source, logs, transcripts,
+and unnecessary contexts. Destructive power is narrow, visible, and gated by
+the person accountable for its consequences.
 
-## Ledgers
+Dependencies extend the trust boundary. Their license, maintenance, security,
+transitive weight, and exit path are part of the adoption decision.
 
-### Synthesis ledger — canon embodied in harness
+Safety comes from explicit ownership, constrained authority, and recoverable
+actions—not from assuming every participant or component will behave correctly.
 
-| Canon | Harness artifact | Status |
-| --- | --- | --- |
-| DE-07 | `global/RULES.md` deletion-first order | live |
-| TH-04, OR-06 | Lean premise gate in `skills/shape` and `global/AGENTS.md` | live |
-| TE-06 | `skills/evidence-packet`; `deliver`, `code-review`, and `release` gates; delivery section of `global/AGENTS.md` | live — PR attachments required 2026-08-24 |
-| ST-02, RS-02 | `global/AGENTS.md` findings-cite-primary-records line | live — trialed in iron-forest ops 2026-08-21 |
-| TE-08 | Change-class review depth; exact-head bounded default; exhaustive high-risk council | live |
-| Synthesis policy (one program per name) | Router skill + domain references rule | extracted from census ADR-0006 — governs new skills |
-| ADR-0008 (census) | Testing doctrine one shared home | already embodied — foundation + CONTROLS; no new artifact |
-| ADR-0009 (census) | Chief-stays-thin kits; 0001/0002/0003/0005 architecture-specific; 0004 mint broker decommissioned with mint | skipped by operator selection 2026-08-21 |
-| OR-06 | `global/AGENTS.md` standing-mandate line (reversible calls made and reported) | live — trialed in iron-forest ops 2026-08-21 |
-| CH-02 | `skills/diagnose` red-loop, architecture challenge at fix #3 | live |
-| TH-01 | `skills/explore-design` fans ≥6 visual theses; `skills/shape` compares only material alternatives | live |
-| DE-01, CH-03 | `global/AGENTS.md` design/delivery lines; `audit-simplifications`, `skills/refactor` | `audit-simplifications` live; `refactor` drafted — trial pending |
-| RS-01 | exa routing in `config.yml`; `skills/research` decision protocol | drafted — skill written, untrialed |
-| TL-01 | `skills/herdr` | live |
-| OR-05 | `skills/capture` conversation-to-ledger extraction; Powder in Misty Step | drafted — capture skill written, trial pending |
-| TE-01–TE-05 | `skills/foundation` agentic baseline | unverified coverage |
-| OR-08 | Operator-invoked `skills/audit-choices` decision ledger | live |
-| OP-01 | Landmark adopted in at least `canary` (full, `@35d002b`), `linejam` (full, `@35d002b` = v0.28.1), `crucible` (synthesis-only, `@v0`) — examples, inventory not audited | partial — fleet rollout incomplete |
-| OP-03–OP-05 | `release` exact-head merge, deploy, production QA, observability, rollback, and incident gate | live — first real deploy pending |
-| SE-03, SE-05 | Council script plus configured `security-reviewer` chain; security on demand; remediation externally owned | live |
-| RS-03 | `skills/audit-simplifications` dependency-ladder lenses | live |
-| OR-07 | Flat-rate watchdog; OpenRouter removed from automatic chains; spend confined to on-demand work plus the documented vision exception | live |
-| TH-04, DE-01–DE-02, DE-07, OR-03, OR-07 | `skills/torvalds-design-review`; high-effort read-only `torvalds-reviewer` agent | live — explicit CLI trial 2026-08-22 |
-| TH-01, TH-04, DE-01–DE-08, TE-01–TE-06, CH-01–CH-06, OP-03–OP-06, OR-01–OR-03 | `shape` → `deliver` → optional `code-review` → `release`; evidence-only `brief` | live for entry gates |
-| RS-01–RS-02, OR-01–OR-03, OR-07 | `skills/dispatch` current-access, benchmark, cost, role, and fallback routing program | live — explicit CLI trial 2026-08-22; no config mutation |
-| DE-07, TE-06, CH-01 | `skills/polish` one-interaction simpler/faster loop with real-surface proof | drafted — CLI gate trial 2026-08-23 |
-| DE-01, DE-03, DE-08 | `foundation` context-budget control: per-atomic-module token budget (default 100k) with repomix gate and enforced boundaries | drafted 2026-08-23 — extracted from Taelin's Bend2 observation; first project install pending |
-| ST-02, TH-01–TH-04, DE-07, RS-01–RS-05, TE-06, OP-03–OP-06, SE-01–SE-04 | `skills/audit-observability` whole-system signal audit, context contract, and deletion-first remediation plan | drafted 2026-08-25 — first target-system trial pending |
+## Automation serves judgment
 
-### Candidate syntheses — canon not yet embodied
+Automation handles stable, necessary, measured repetition. It does not make an
+unclear process correct or turn an unsettled decision into policy.
 
-| Order | Canon | Proposed vehicle |
-| --- | --- | --- |
-| 1 | TE-01–TE-05 | `foundation` installs project test baseline: portfolio spec, flaky policy, CI budget |
-| 2 | OP-01 | Extend landmark adoption across remaining active repos: `fleet scan` → `plan` → confirmed PRs |
-| 3 | OR-02, OR-03 | Port brief-contract and verify-the-artifact semantics into Iron Forest declarations |
-| 4 | SE-05 | Prototype a writable approved-model remediation agent or an `audit.mjs` patch mode |
+Tools should be deterministic, composable, inspectable, and honest about
+failure. Structured interfaces reduce ambiguity for both people and machines.
 
-### Deviation ledger — reality beating rules
+Delegation begins with a contract: outcome, boundaries, ownership, and proof.
+Independent review supplies evidence and challenge, not authority. Human-owned
+tradeoffs remain human-owned; mechanical and reversible choices belong close
+to the work.
 
-| Date | ID overridden | Case | Outcome |
-| --- | --- | --- | --- |
+## Stewardship over time
+
+We optimize for the system six months from now, not only the patch in front of
+us. The codebase should become easier to understand, operate, and change after
+each completed piece of work.
+
+Documentation holds current truth; history holds history. Durable decisions
+record context, choice, and consequences. Stale explanation is repaired or
+deleted when encountered.
+
+We leave systems with fewer accidental concepts, clearer ownership, stronger
+evidence, and a cheaper path to the next change.
