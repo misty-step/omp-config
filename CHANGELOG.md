@@ -1,3 +1,10 @@
+## [0.0.6](https://github.com/misty-step/omp-config/compare/v0.0.5...v0.0.6) (2026-08-28)
+
+
+### Features
+
+* **watchdog:** adopt philosophy-first CANON and continuous Steward advisor ([f7b3487](https://github.com/misty-step/omp-config/commit/f7b3487aba61e63ebad2a215ecec4667a4957e0f)), closes [hi#reasoning](https://github.com/hi/issues/reasoning)
+
 ## [0.0.5](https://github.com/misty-step/omp-config/compare/v0.0.4...v0.0.5) (2026-08-26)
 
 
