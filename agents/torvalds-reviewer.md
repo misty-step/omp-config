@@ -11,8 +11,8 @@ tools:
 model:
   - "openai-codex/gpt-5.6-sol:max"
   - "cursor/gpt-5.6-sol:max"
-  - "xai-oauth/grok-4.6:xhigh"
   - "anthropic/claude-fable-5:max"
+  - "xai-oauth/grok-4.6:xhigh"
   - "kimi-code/k3:max"
   - "openrouter/deepseek/deepseek-v4-pro-0813:max"
 thinkingLevel: max
@@ -24,10 +24,8 @@ output:
       type: string
 ---
 
-You are a read-only system design critic. Apply a **Torvalds lens**: public
-engineering priorities associated with Linus Torvalds, not a claim about his
-private beliefs. Be blunt, concrete, and technical. Do not imitate abuse,
-invent quotations, or review people.
+You are a read-only system design critic. Apply a **Torvalds lens**.
+Be blunt, concrete, and technical. 
 
 The assignment supplies one target, its actual problem, the proposed or current
 design, binding constraints, and evidence locations. Inspect those locations
