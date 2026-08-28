@@ -1,57 +1,41 @@
 ---
 name: security-review
-description: Run the approved tri-model adversarial audit and validate exploitable security findings.
+description: Validate concrete security risk in one bounded target.
 disable-model-invocation: true
+argument-hint: "[pull request, revision, file, or trust boundary]"
 ---
 
 # Security review
 
-Security review needs offensive reasoning from the approved independent models,
-not the session primary. The bundled script owns council model selection. The
-`security-reviewer` agent owns validation and adjudication. This skill is
-read-only.
+This review is read-only. Review the named target, not a generic vulnerability
+catalog.
 
 ## Bound
 
-Record the exact revision, dirty state, target files, trust boundaries, assets,
-untrusted inputs, privileges, secrets, persistence, and exclusions. Read
-`references/audit-domains.md` and `references/cwe-matrix.md`.
+Record the exact revision and scope. Name the assets, untrusted inputs,
+privileges, trust boundaries, persistence, and exclusions that matter to this
+target.
 
-Done when every changed trust boundary is in scope.
+Done when the reviewer can trace an attacker-controlled path without inventing
+system context.
 
-## Run the council
+## Review
 
-From the target repository, run the installed script:
+Send the packet to `security-reviewer`. Add another independent pass only when a
+named high-risk surface warrants it.
 
-```sh
-node <skill-directory>/scripts/audit.mjs
-node <skill-directory>/scripts/audit.mjs --staged
-node <skill-directory>/scripts/audit.mjs --commit HEAD
-node <skill-directory>/scripts/audit.mjs --file <path>
-```
+A finding needs an attacker-controlled source, a reachable path through current
+controls, a dangerous sink or broken invariant, reproducible preconditions, and
+concrete impact.
 
-Require every configured model to return or report the lane unavailable. Do not
-silently replace a model or accept a partial council as complete.
-
-Done when the report binds every response to the target revision and model.
-
-## Validate
-
-Send each candidate to `security-reviewer`. Require an attacker-controlled
-source, complete path through current controls, dangerous sink or broken
-invariant, reproducible preconditions, impact, and smallest remediation.
-Reject unreachable, controlled, duplicated, speculative, or pre-existing
-findings unrelated to the target.
-
-Consensus supports confidence; it does not replace mechanism evidence.
-
-Done when each finding is confirmed, rejected, or unavailable with a reason.
+Done when each candidate has a complete mechanism or is rejected.
 
 ## Deliver
 
-Return scope, model receipts, confirmed findings by severity, rejected
-candidates, residual risk, and evidence gaps. Record accepted remediation with
-an owner. Do not design or apply a security repair in this audit. Re-audit any
-external repair on its exact revision.
+Validate candidates against current source or a safe reproduction. Reject
+unreachable, controlled, speculative, duplicate, and unrelated findings.
 
-Done when every confirmed finding has operator triage and one durable owner.
+Return confirmed findings, rejected candidates, unavailable checks, residual
+risk, and the owner of each accepted remediation. Do not apply repairs.
+
+Done when every reported finding is actionable without another security survey.

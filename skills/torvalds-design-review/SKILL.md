@@ -1,38 +1,23 @@
 ---
 name: torvalds-design-review
-description: Ask one Torvalds-style critic whether a load-bearing design should exist in its current form.
+description: Ask one first-principles critic whether a load-bearing design has the right owner and boundary.
 disable-model-invocation: true
 argument-hint: "[system, design, or solution]"
 ---
 
 # Torvalds design review
 
-Use this read-only review for a load-bearing or hard-to-reverse design. It asks
-whether the system has the right data and ownership, not whether the diff is
-polished.
+Use this read-only review for a load-bearing or hard-to-reverse design.
 
-## Bind
+State the problem, workload, current design, binding constraints, accepted
+decisions, and primary evidence. Name the target and revision.
 
-State the problem, workload, current design, data owners, invariants,
-constraints, accepted decisions, assumptions, alternatives, and primary
-evidence. Name the exact target and revision.
+Send that packet once to `torvalds-reviewer`. Ask whether the current data
+ownership, state transitions, and boundaries solve the stated problem with less
+complexity than the credible alternatives.
 
-Done when the critic can judge the system without inventing context.
+Check the critic's factual claims against the supplied sources. Return the
+verdict, load-bearing strength or flaw, evidence, migration risk, and first
+reversible move. Unsupported taste is not a finding.
 
-## Dispatch
-
-Send exactly one complete packet to `torvalds-reviewer`. Ask: Would this system
-be designed this way from scratch today? If not, what data structure, owner, or
-boundary is fundamentally wrong? Require direct evidence, deleted complexity,
-migration cost, and the first reversible move.
-
-Done when the specialist returns one explicit verdict.
-
-## Ground
-
-Check the verdict's factual claims against the supplied primary records. Mark
-unsupported claims without softening the central judgment. Return: direct
-answer, load-bearing flaw or strength, evidence, rejected alternative, migration
-risk, and first reversible action.
-
-Done when the operator can accept, reject, or test the verdict.
+Done when the operator can accept, reject, or test one concrete design judgment.

@@ -1,44 +1,24 @@
 ---
 name: audit-choices
-description: Expose consequential choices an implementation made without changing code or blocking delivery.
+description: Expose consequential choices an implementation made without accepted intent.
 disable-model-invocation: true
 license: MIT; from dzhng/skills audit-choices
+argument-hint: "[change or target]"
 ---
 
 # Audit choices
 
-Working code can hide product and architecture decisions the operator never
-made. This audit makes those choices visible. It is read-only and never blocks.
+This audit is read-only and non-blocking.
 
-## Trace
+Read the accepted intent and the named implementation scope. Report only choices
+where the available evidence allowed materially different product, compatibility,
+cost, operating, or irreversible outcomes. Ignore routine implementation,
+style, and hypothetical alternatives.
 
-Read the request, accepted decisions, implementation history, diff, and running
-behavior. Find choices made where the evidence or specification allowed more
-than one material answer. Ignore routine implementation facts.
+For each choice, state the evidence, implemented answer, consequence, and
+whether it follows accepted intent or needs an operator decision.
 
-Done when every material invented choice has an owner and source.
+Return the material choices and the smallest question that settles each open
+one. Suggest `/shape` only when repeated ambiguity points to a missing decision.
 
-## Judge
-
-Classify each choice:
-
-- **Sound:** follows evidence or an accepted invariant.
-- **Unsound:** conflicts with evidence, intent, or system ownership.
-- **Needs operator:** changes outcome, scope, compatibility, spend, burden, or irreversible risk.
-- **Deferred:** reasonable but outside this change.
-
-Do not turn code style or speculative alternatives into choices.
-
-Done when each verdict names its evidence and consequence.
-
-## Record
-
-Append concise entries to the work item's durable decision record. Each entry
-states the choice, why it arose, evidence, verdict, consequence, and next owner.
-Route repeated material ambiguity to `/shape`. Consolidate superseded entries
-when the work ships.
-
-Return the ledger location and a count by verdict. Make no production edit.
-
-Done when a future builder can distinguish accepted design from accidental
-implementation.
+Done when no reported choice is merely taste.

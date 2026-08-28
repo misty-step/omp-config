@@ -1,28 +1,27 @@
 ---
 name: extract-module
-description: Map and design a subsystem extraction without changing production code.
+description: Decide whether and how a named subsystem should cross one boundary.
 disable-model-invocation: true
-argument-hint: "[subsystem or module path]"
+argument-hint: "[subsystem and intended boundary]"
 ---
 
 # Extract module
 
-Extraction adds a boundary, release path, and migration. It is useful only when
-those costs remove more coupling than they create. This skill produces a
-blueprint, not code.
+This work is read-only. Design only the boundary the operator is considering;
+do not blueprint later package or repository phases.
 
-Walk these references in order. Finish one before opening the next:
+Trace the exports, callers, dependencies, shared state, and release paths needed
+to judge that boundary. Use `lsp references` for public symbols. Prefer deletion
+or an internal reorganization when it removes the same coupling without a new
+release path.
 
-1. `references/stage-1-coverage-coupling-map.md`
-2. `references/stage-2-deletion-gate.md`
-3. `references/stage-3-boundary-interface-design.md`
-4. `references/stage-4-extraction-blueprint.md`
+If extraction is justified, return the owner, minimal public contract, affected
+callers, deleted paths, chosen destination, ordered migration, proof, and
+rollback through that destination. Resolve only coupling that crosses the
+chosen boundary.
 
-Use current source, callers, tests, generated contracts, build wiring, runtime
-state, and release paths. Count both sides of every boundary. Reject the
-extraction when a direct internal module removes the same problem with less
-operational weight.
+If it is not justified, state the direct alternative and the evidence that
+makes extraction unnecessary.
 
-Done when the blueprint names the interface, owners, callers, migration,
-deletions, package or repository boundary, validation, rollout, rollback, and
-proof—or concludes that extraction should not happen.
+Done when the operator can accept or reject one bounded extraction without
+paying for unchosen phases.
