@@ -1,3 +1,10 @@
+## [0.0.8](https://github.com/misty-step/omp-config/compare/v0.0.7...v0.0.8) (2026-08-29)
+
+
+### Features
+
+* **skills:** add operator-invoked understanding flow ([1b74783](https://github.com/misty-step/omp-config/commit/1b747830afc89d114f403d4443cfeb8f5130cb5a))
+
 ## [0.0.7](https://github.com/misty-step/omp-config/compare/v0.0.6...v0.0.7) (2026-08-29)
 
 
