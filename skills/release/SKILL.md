@@ -15,7 +15,7 @@ rollback for the named pull request.
 
 Record the pull request head SHA. Reconcile current review comments. Close every
 supported Blocker; track non-blocking findings separately. Require existing CI
-on that exact head to be green. Open the evidence attached for observable
+on that exact head to be green. Open the evidence linked for observable
 claims.
 
 Before merge, confirm the repository-owned deploy, health, smoke, and rollback
