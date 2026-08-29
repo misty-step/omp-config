@@ -57,7 +57,8 @@ Done when no Blocker or failed required check remains.
 ## Publish
 
 Open an unmerged pull request. State the intent, decisions, checks, production
-impact, rollback path, and residual risk. Attach reviewer-open evidence for
-observable claims. Reconcile current PR comments and record the exact final head.
+impact, rollback path, and residual risk. For observable claims that depend on
+media, link reviewer-open here.now evidence. Reconcile current PR comments and
+record the exact final head.
 
 Done when the operator can review and decide whether to invoke `/release`.
