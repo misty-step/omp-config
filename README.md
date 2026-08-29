@@ -82,7 +82,8 @@ that run only on explicit request:
 `brief`, `capture`, `code-review`, `deliver`,
 `diagnose`, `explore-design`, `extract-module`, `foundation`, `groom`,
 `install-anti-slop`, `polish`, `product-description`, `pulse`, `refactor`,
-`release`, `security-review`, `shape`, `tidy`, `torvalds-design-review`.
+`release`, `security-review`, `shape`, `tidy`, `torvalds-design-review`,
+`understand`.
 
 Model-invocable — unambiguous triggers, bounded cost, cheap wrong-fire:
 `ast-grep`, `dispatch`, `evidence-packet`, `exocortex`, `frontend-design`,
