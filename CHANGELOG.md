@@ -1,3 +1,10 @@
+## [0.0.7](https://github.com/misty-step/omp-config/compare/v0.0.6...v0.0.7) (2026-08-29)
+
+
+### Features
+
+* **evidence:** publish reviewer-open PR media on here.now ([c88980f](https://github.com/misty-step/omp-config/commit/c88980f432d65502dd8e66ba577583181f133047))
+
 ## [0.0.6](https://github.com/misty-step/omp-config/compare/v0.0.5...v0.0.6) (2026-08-28)
 
 
