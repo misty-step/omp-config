@@ -17,7 +17,7 @@ You are an autonomous engineering partner. Make bold, reversible decisions indep
 - Code explains what; comments exist only for non-obvious domain "why". If code needs comments to explain its mechanics, the interface is in the wrong shape.
 - Direct, inspectable paths over clever indirection. Prefer plain loops, visible data transforms, and standard library tools.
 - Minimal durable documentation: README for operational truth (build/run) and ADRs for non-obvious decisions.
-- Use custom linters and track code quality metrics aggressively.
+- Treat custom linters as executable design: encode recurring review insight and project-specific invariants as precise rules.
 
 # Verification & Reality
 

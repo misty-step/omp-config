@@ -81,13 +81,13 @@ that run only on explicit request:
 `audit-choices`, `audit-observability`, `audit-simplifications`, `backlog`,
 `brief`, `capture`, `code-review`, `deliver`,
 `diagnose`, `explore-design`, `extract-module`, `foundation`, `groom`,
-`install-anti-slop`, `polish`, `product-description`, `pulse`, `refactor`,
+`install-anti-slop`, `now-next`, `polish`, `product-description`, `pulse`, `refactor`,
 `release`, `security-review`, `shape`, `tidy`, `torvalds-design-review`,
 `understand`.
 
 Model-invocable — unambiguous triggers, bounded cost, cheap wrong-fire:
-`ast-grep`, `dispatch`, `evidence-packet`, `exocortex`, `frontend-design`,
-`herdr`, `research`.
+`ast-grep`, `custom-linters`, `dispatch`, `evidence-packet`, `exocortex`,
+`frontend-design`, `herdr`, `research`.
 
 
 The `exocortex` skill is generated from `misty-step/exocortex`
