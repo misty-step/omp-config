@@ -24,9 +24,9 @@ atomic directory swap. If a source believed pinned changes during generation,
 discard staging and restart from the new state; never retain the inconsistent
 generation as current or draft.
 
-A source known to be unpinned at survey start produces a uniquely named internal
-draft directory, never replaces current output, and must omit `public.html`. On
-failure, preserve current output and remove staging.
+A source known to be unpinned at survey start produces
+`.field-station.draft-<timestamp>`, never replaces current output, and must omit
+`public.html`. On failure, preserve current output and remove staging.
 
 
 ## Model shape

@@ -128,7 +128,7 @@ does not stabilize, preserve current output and return blocked. Promote only a
 successfully rechecked pinned generation with an atomic directory swap.
 
 For a source known to be unpinned at survey start, ensure `public.html` is
-absent, rename staging to a unique internal draft path, and leave current
+absent, rename staging to `.field-station.draft-<timestamp>`, and leave current
 artifacts intact. If draft preservation fails, clean staging and return blocked.
 
 Return the report paths, source identity, requested projection, verified
