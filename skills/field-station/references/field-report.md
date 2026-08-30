@@ -12,16 +12,21 @@ instruction.
 
 ## Transactional refresh
 
-Treat the output directory as generated-only. Exclude it and every staging path
-from source identity, change, freshness, and evidence calculations even when
-Git tracks them. Build the complete next generation in a sibling staging
-directory on the same filesystem. Browser-check the staged HTML and recheck the
-source identity before changing current output.
+Treat current output, staging, and retained draft directories as generated-only.
+Exclude them from source status checks even when Git tracks them. Build the
+complete next generation in a sibling staging directory on the same filesystem
+and browser-check the staged HTML.
 
-Promote `report.json`, `index.html`, and the approved-or-absent `public.html` as
-one directory generation through an atomic directory swap. If the platform
-cannot swap the staged directory safely, return blocked without replacing the
-current generation. On any failure, preserve current output and remove staging.
+Only a Git source pinned to one clean, unchanged HEAD and using only
+HEAD-tracked repository evidence can replace the current generation. Promote
+its `report.json`, `index.html`, and approved-or-absent `public.html` through an
+atomic directory swap. If a source believed pinned changes during generation,
+discard staging and restart from the new state; never retain the inconsistent
+generation as current or draft.
+
+A source known to be unpinned at survey start produces a uniquely named internal
+draft directory, never replaces current output, and must omit `public.html`. On
+failure, preserve current output and remove staging.
 
 
 ## Model shape
@@ -37,10 +42,12 @@ the same.
     "name": "string",
     "root": "string",
     "sourceIdentity": {
-      "revision": "git SHA or explicit non-git identity",
+      "revision": "Git HEAD or non-Git base identity",
       "clean": true,
-      "sourceDigest": "SHA-256",
-      "excludedPaths": [".field-station", ".field-station.next-*"],
+      "complete": true,
+      "dirtyPaths": [],
+      "untrackedEvidencePaths": [],
+      "excludedPaths": [".field-station", ".field-station.next-*", ".field-station.draft-*"],
       "checkedAt": "RFC 3339 timestamp"
     },
     "previousSourceIdentity": null,
@@ -48,9 +55,9 @@ the same.
     "requestedProjection": "internal | contributor | public"
   },
   "artifacts": {
-    "report.json": {"classification": "internal", "state": "current", "sourceIdentity": "current source identity"},
-    "index.html": {"classification": "internal | contributor", "state": "current", "sourceIdentity": "current source identity"},
-    "public.html": {"classification": "public", "state": "current | absent", "sourceIdentity": "current source identity or null"}
+    "report.json": {"classification": "internal", "state": "current | draft", "sourceIdentity": "source identity"},
+    "index.html": {"classification": "internal | contributor", "state": "current | draft", "sourceIdentity": "source identity"},
+    "public.html": {"classification": "public", "state": "current | absent", "sourceIdentity": "complete clean source identity or null"}
   },
   "summary": {
     "oneLiner": "string",
@@ -76,8 +83,8 @@ the same.
   }
 }
 ```
-On a refresh, replace `previousSourceIdentity: null` with an object containing
-the previous `revision` and `sourceDigest`.
+On a refresh, replace `previousSourceIdentity: null` with the previous complete,
+clean source identity. An unpinned draft never becomes the previous identity.
 
 
 ## Claims and evidence
@@ -89,44 +96,43 @@ Views reference central claims instead of copying factual prose.
   "id": "claim-session-storage",
   "statement": "Sessions are stored in PostgreSQL.",
   "status": "observed | evidenced | human | inferred | unknown",
-  "freshness": "current | stale | conflicted",
+  "freshness": "current | stale | conflicted | unpinned",
   "scenarioIds": ["scenario-id"],
   "evidence": [
     {
       "kind": "runtime | code | config | docs | test | git | human",
       "path": "repository/relative/path",
       "lines": "42-91",
-      "revision": "source revision",
-      "sourceDigest": "source content digest",
+      "revision": "Git HEAD or non-git base identity",
+      "dirty": false,
       "note": "what this evidence establishes"
     }
   ]
 }
 ```
 
-`observed` requires one or more valid `scenarioIds`. `evidenced` requires current
-direct artifacts. `human` names the supplied source. `inferred` states the
-reasoning without upgrading it to fact. `unknown` states the exact missing
-evidence.
+`observed` requires one or more valid `scenarioIds`. In a pinned generation,
+`evidenced` requires direct artifacts tracked by HEAD. `human` names the supplied
+source. `inferred` states the reasoning without upgrading it to fact. `unknown`
+states the exact missing evidence.
 
-A claim is `stale` when evidence it depends on changed after the previous source
-identity and it was not re-established. It is `conflicted` when current sources
-disagree. Generation time alone never makes a claim current.
+A claim is `stale` when evidence it depends on changed between two complete,
+clean source identities and it was not re-established. It is `conflicted` when
+current sources disagree. Generation time alone never makes a claim current.
 
-`revision` records repository provenance but is not the complete identity.
-Compute `sourceDigest` from sorted records of relative path, normalized Git
-mode/type, and content: bytes for regular files and link target for symlinks.
-Include every tracked source file plus each untracked or ignored file used as
-evidence.
-Always exclude VCS metadata, generated output, staging paths, dependency trees,
-and build caches. Record clean or dirty state separately and record every
-excluded path. Generated-artifact-only commits therefore do not stale source
-claims.
+For Git, use HEAD as the complete pin only when source paths are clean at both
+the start and end, HEAD is unchanged, and every repository file cited as
+evidence is tracked by that HEAD. Exclude current output, staging, and retained
+draft paths from cleanliness checks. When dirty, record `clean: false`,
+`complete: false`, and the repository-relative dirty path list. When evidence
+uses an untracked or ignored file, record its path and set `complete: false`
+even if Git otherwise reports a clean worktree.
 
-Recompute the digest after rendering. If it changed, do not replace the current
-artifacts: restart and re-survey until the end identity matches, or return
-blocked. For non-Git sources, apply the same path-and-content digest and record
-the method.
+Every incomplete generation is internal, marks every claim `unpinned`, omits
+`public.html`, and does not participate in later change or staleness
+calculations. HEAD is provenance for an incomplete Git generation, not a
+complete pin. Every non-Git source is incomplete and follows the same draft
+rules. Do not synthesize a content digest in the prompt workflow.
 
 ## View records
 
@@ -142,9 +148,11 @@ records only verified or repository-defined prerequisites, run commands,
 configuration boundaries, deployment, observability, recovery, and destructive
 operations.
 
-Changes compare `previousSourceIdentity` with `sourceIdentity` and describe
-meaning, not a commit list. Each item names affected views and claim IDs. When
-no previous source identity exists, say this is the baseline observation.
+Changes compare only complete, clean `previousSourceIdentity` and
+`sourceIdentity` values and describe meaning, not a commit list. When no
+previous complete identity exists, say this is the baseline observation. A
+dirty draft may describe working changes, but they remain unpinned and do not
+advance the baseline.
 
 Scenarios have stable IDs and record command or interaction, surface, expected
 observation, actual observation, runtime identity, status, and established
