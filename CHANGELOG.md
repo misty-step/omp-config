@@ -1,3 +1,10 @@
+## [0.0.9](https://github.com/misty-step/omp-config/compare/v0.0.8...v0.0.9) (2026-08-30)
+
+
+### Features
+
+* **skills:** add executable-design and now-next flows ([c4a4a08](https://github.com/misty-step/omp-config/commit/c4a4a08c2c54a920c7e3e2c9697336e62e03729c))
+
 ## [0.0.8](https://github.com/misty-step/omp-config/compare/v0.0.7...v0.0.8) (2026-08-29)
 
 
