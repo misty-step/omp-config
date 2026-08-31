@@ -80,7 +80,7 @@ Operator-invoked (`disable-model-invocation: true`) — human-directed flows
 that run only on explicit request:
 `audit-choices`, `audit-observability`, `audit-simplifications`, `backlog`,
 `brief`, `capture`, `code-review`, `deliver`,
-`diagnose`, `explore-design`, `extract-module`, `foundation`, `groom`,
+`diagnose`, `explore-design`, `extract-module`, `field-station`, `foundation`, `groom`,
 `install-anti-slop`, `now-next`, `polish`, `product-description`, `pulse`, `refactor`,
 `release`, `security-review`, `shape`, `tidy`, `torvalds-design-review`,
 `understand`.
