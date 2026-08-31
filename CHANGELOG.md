@@ -1,3 +1,10 @@
+## [0.0.10](https://github.com/misty-step/omp-config/compare/v0.0.9...v0.0.10) (2026-08-31)
+
+
+### Features
+
+* **skills:** add Field Station repository reports ([#66](https://github.com/misty-step/omp-config/issues/66)) ([784c6f2](https://github.com/misty-step/omp-config/commit/784c6f2f10211e4fc9c7d9e080ed2ac96bf20280))
+
 ## [0.0.9](https://github.com/misty-step/omp-config/compare/v0.0.8...v0.0.9) (2026-08-30)
 
 
