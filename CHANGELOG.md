@@ -1,3 +1,16 @@
+## [0.0.11](https://github.com/misty-step/omp-config/compare/v0.0.10...v0.0.11) (2026-09-01)
+
+
+### Bug Fixes
+
+* **skills:** preserve backlog read-only contract ([7128c37](https://github.com/misty-step/omp-config/commit/7128c374a0312568597673f630161067c890ee99))
+
+
+### Features
+
+* **skills:** add show-me visual guidance ([914aa47](https://github.com/misty-step/omp-config/commit/914aa47adb59d69c13bcbb734abdd726866f5f6a))
+* **themes:** switch defaults to Everforest ([42cde5c](https://github.com/misty-step/omp-config/commit/42cde5cd0ecf47af5eded6d750feb47aa012aa64))
+
 ## [0.0.10](https://github.com/misty-step/omp-config/compare/v0.0.9...v0.0.10) (2026-08-31)
 
 
