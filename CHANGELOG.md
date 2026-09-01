@@ -1,3 +1,10 @@
+## [0.0.16](https://github.com/misty-step/omp-config/compare/v0.0.15...v0.0.16) (2026-09-01)
+
+
+### Features
+
+* **skills:** add general executive skill ([2f2f38f](https://github.com/misty-step/omp-config/commit/2f2f38ff34bc6ffb2ee2928a3e0fb3f14f6a7155))
+
 ## [0.0.15](https://github.com/misty-step/omp-config/compare/v0.0.14...v0.0.15) (2026-09-01)
 
 
