@@ -18,17 +18,24 @@ difficult. Repeated human or agent comments about the same locally decidable
 violation are evidence of a missing executable control. Treat an existing
 equivalent control as sufficient.
 
+For delivery or resilience work, enforce the dependency order: green
+repository-owned CI, including its deterministic fast gates, before automated
+delivery; repository-owned deploy, artifact identity, health signals, and a
+previously proved recovery action relevant to the named invariant before
+production fault injection. Stop at the earliest missing prerequisite.
+
 Done when one gap, its consequence, supporting evidence, and current owner are
 source-grounded.
 
 ## Agree
 
 Propose the smallest control that closes the gap through the project's current
-tools and interfaces. For a locally decidable invariant, prefer the existing
-lint host and use `/custom-linters` to design the rule. State its cost, operator
-burden, and proof. Include migration or rollback only when the change affects
-persisted state or release behavior. Put material human choices through
-`/shape`.
+tools, deployment substrate, and interfaces. Change orchestration platforms only
+when workload or operating evidence requires it. For a locally decidable
+invariant, prefer the existing lint host and use `/custom-linters` to design the
+rule. State cost, operator burden, and proof. Include migration or rollback only
+when the change affects persisted state or release behavior. Put material human
+choices through `/shape`.
 
 Done when the operator accepts one bounded change.
 
