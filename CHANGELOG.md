@@ -1,3 +1,10 @@
+## [0.0.17](https://github.com/misty-step/omp-config/compare/v0.0.16...v0.0.17) (2026-09-01)
+
+
+### Bug Fixes
+
+* **executive:** separate pre-merge gates from post-merge deploy and harden lease handling ([1ff31d4](https://github.com/misty-step/omp-config/commit/1ff31d4a3fb4e0a97990f9683a71afd2779084b7))
+
 ## [0.0.16](https://github.com/misty-step/omp-config/compare/v0.0.15...v0.0.16) (2026-09-01)
 
 
