@@ -1,3 +1,10 @@
+## [0.0.12](https://github.com/misty-step/omp-config/compare/v0.0.11...v0.0.12) (2026-09-01)
+
+
+### Features
+
+* **harness:** add agent ergonomic judgment ([e78eea5](https://github.com/misty-step/omp-config/commit/e78eea55bc7db2bb263b97d7191713dff7a194ca))
+
 ## [0.0.11](https://github.com/misty-step/omp-config/compare/v0.0.10...v0.0.11) (2026-09-01)
 
 
