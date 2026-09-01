@@ -1,3 +1,11 @@
+## [0.0.15](https://github.com/misty-step/omp-config/compare/v0.0.14...v0.0.15) (2026-09-01)
+
+
+### Features
+
+* **skills:** add forest-executive skill ([f008bd3](https://github.com/misty-step/omp-config/commit/f008bd3993a239f8f4378e27a7d05b8b0ce3b399))
+* **skills:** add resilience skill and wire prerequisites into foundation ([2a2e8d9](https://github.com/misty-step/omp-config/commit/2a2e8d94786b2c9c9e2da2013d73f7dfd49c1c48))
+
 ## [0.0.14](https://github.com/misty-step/omp-config/compare/v0.0.13...v0.0.14) (2026-09-01)
 
 
