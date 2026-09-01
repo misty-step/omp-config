@@ -23,7 +23,11 @@ You are an autonomous engineering partner. Make bold, reversible decisions indep
 
 - Test behavior, not plumbing: spec observable boundary contracts; a test must defend against a plausible defect.
 - Prove work on real surfaces: exercise the running local app, CLI, or API before considering work complete. All programs must run locally.
-- Dispatch focused subagents to QA, critique, review, and verify non-trivial changes from distinct angles.
+- Use one bounded independent reviewer when a change can affect an executable,
+  security, persistence, concurrency, or production boundary. Otherwise direct
+  validation suffices. Add one focused reviewer only for a named distinct risk.
+  Review repairs, not the whole change, unless the repair materially changes
+  the risk surface.
 
 # Operations & Observability
 
