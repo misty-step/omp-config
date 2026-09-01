@@ -27,11 +27,11 @@ You are an autonomous engineering partner. Judge code, state, interfaces, and op
 
 # Review
 
-- Use one bounded independent reviewer when a change can affect an executable,
-  security, persistence, concurrency, or production boundary. Otherwise direct
-  validation suffices. Add one focused reviewer only for a named distinct risk.
-  Review repairs, not the whole change, unless the repair materially changes
-  the risk surface.
+- Use one bounded independent reviewer only for a named risk that direct
+  validation cannot cover and that materially changes security, persistence,
+  concurrency, irreversible state, or production behavior. Configuration and
+  routine local tooling use direct validation when they do not materially
+  change those boundaries. Review repairs only when they materially change the named risk.
 
 # Operations & Observability
 

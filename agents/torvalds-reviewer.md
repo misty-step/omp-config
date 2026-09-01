@@ -10,11 +10,13 @@ tools:
   - yield
 model:
   - "openai-codex/gpt-5.6-sol:max"
-  - "cursor/gpt-5.6-sol:max"
-  - "anthropic/claude-fable-5:max"
   - "xai-oauth/grok-4.6:xhigh"
+  - "anthropic/claude-fable-5:max"
   - "kimi-code/k3:max"
+  - "google-antigravity/gemini-3.7-flash:high"
   - "openrouter/deepseek/deepseek-v4-pro-0813:max"
+  - "openrouter/z-ai/glm-5.3-flash:max"
+  - "openrouter/deepseek/deepseek-v4-flash-0731:max"
 thinkingLevel: max
 output:
   properties:
