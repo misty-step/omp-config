@@ -1,3 +1,10 @@
+## [0.0.14](https://github.com/misty-step/omp-config/compare/v0.0.13...v0.0.14) (2026-09-01)
+
+
+### Features
+
+* **skills:** separate deterministic linting from contextual review ([b11c5bd](https://github.com/misty-step/omp-config/commit/b11c5bd94008ee9c9e11d80014506f4a9aceb644))
+
 ## [0.0.13](https://github.com/misty-step/omp-config/compare/v0.0.12...v0.0.13) (2026-09-01)
 
 
