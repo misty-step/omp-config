@@ -1,3 +1,10 @@
+## [0.0.13](https://github.com/misty-step/omp-config/compare/v0.0.12...v0.0.13) (2026-09-01)
+
+
+### Features
+
+* **harness:** repartition core rules and session context ([21213a1](https://github.com/misty-step/omp-config/commit/21213a1b904f84987e363538de58ef230625f783))
+
 ## [0.0.12](https://github.com/misty-step/omp-config/compare/v0.0.11...v0.0.12) (2026-09-01)
 
 
