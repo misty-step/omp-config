@@ -12,7 +12,7 @@ portfolio audit.
 
 ## Understand
 
-Use [`../backlog/ASSESS.md`](../backlog/ASSESS.md) to read the affected items and
+Use [`../backlog/SKILL.md`](../backlog/SKILL.md) to read the affected items and
 direct relations. State the largest mismatch between the board and current
 evidence. Ask one focused question when product intent remains open.
 
