@@ -33,26 +33,34 @@ Done when the slice is complete and no caller or temporary path remains.
 
 ## Prove
 
-Run the applicable repository checks. Start the affected system and exercise the
-changed real interface. Cover the changed success, boundary, and failure paths;
-add recovery, concurrency, or hostile-input checks only when the change touches
-those risks. Inspect the evidence.
+Run the fastest deterministic repository gates first. Fix changed-caused
+failures before model review, external-provider work, or an expensive matrix.
+Then run the remaining applicable checks, start the affected system, and
+exercise the changed real interface. Cover the changed success, boundary, and
+failure paths; add recovery, concurrency, or hostile-input checks only when the
+change touches those risks. Inspect the evidence.
 
 For an expensive matrix, live eval, or external-provider run, first pass one
 cheap deterministic case through setup, propagation, scoring or aggregation,
 evidence validation, and artifact publication.
 
-Done when the changed behavior and its relevant failure path work on the real
-surface.
+Done when the deterministic gates are green and the changed behavior and its
+relevant failure path work on the real surface.
 
 ## Review
 
-Review the complete result against accepted intent and surrounding behavior.
-Repair supported Blockers. Record useful non-blocking findings as follow-up
-work; they do not expand this slice. Any repair invalidates earlier proof, so
-rerun the affected checks and real scenario on the final head.
+Review only residual risk that the green deterministic gates cannot decide:
+accepted intent, domain behavior, boundaries, non-local effects, and the
+high-risk surfaces this slice touches. Repair supported Blockers.
 
-Done when no Blocker or failed required check remains.
+Classify a recurring, locally decidable finding as a control candidate. Record
+it in the trusted work record for `/custom-linters` (or `/foundation` when the
+repository lacks a lint host); keep its implementation outside this slice.
+Record other useful non-blocking findings as follow-up work. Any repair
+invalidates earlier proof, so rerun the affected gates and real scenario on
+the final head.
+
+Done when no Blocker or failed required gate remains.
 
 ## Publish
 
