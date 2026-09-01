@@ -28,9 +28,9 @@ or returns nothing is a fact too.
 Repository:
 
 - forge slug and primary branch: `git remote get-url origin`, `git symbolic-ref refs/remotes/origin/HEAD`;
-- toolchain and deterministic gates: repository manifests, hooks, and CI
-  (`package.json`, `Makefile`, `.mise.toml`, `Cargo.toml`, `go.mod`, `.githooks/*`,
-  `.github/workflows/*`); keep only commands that exist in those files;
+- pre-merge read-only verification gates: repository test, lint, typecheck, and
+  compilation commands (`bun test`, `cargo test`, `go test ./...`, `oxlint`, `cargo clippy`);
+  keep only commands that exist in manifests and hooks; never include deployment or installation scripts;
 - product lock and architecture contracts: `VISION.md`, `AGENTS.md`, `CANON.md`,
   `README.md`, `docs/adr/*` when present;
 - lint host and custom-rule locations (ast-grep config, oxlint plugins, ESLint,
@@ -40,10 +40,12 @@ Repository:
 CI/CD and deployment infrastructure:
 
 - workflow definitions: `ls .github/workflows/*.yml` or CI configs;
-- deployment targets, platforms, and scripts (e.g. Dockerfiles, Fly, DigitalOcean,
-  systemd units, deployment scripts);
-- release automation (e.g. semantic-release, tag triggers, changelog tooling).
-
+- post-merge deployment & installation commands: commands that deploy to production,
+  mutate local harnesses, or install binaries (e.g. `./install`, `deploy/install-service.sh update`,
+  `fly deploy`, `docker compose up`);
+- release automation: release workflows, semantic-release, tag triggers;
+- agent ergonomics & operational tooling: verify whether all deployment, migration,
+  and recovery paths have automated CLI entrypoints.
 Observability and production health:
 
 - health check endpoints, probes, and status commands;
@@ -53,11 +55,17 @@ Observability and production health:
 
 Tracker:
 
-- Powder: `powder list --repo <slug> --plain`, `--takeable`, `--waiting`; count
-  jobs with and without specs; note live leases;
-- GitHub: `gh issue list -R <slug>`, `gh pr list -R <slug>`, project boards, labels;
-- your executive tracker identity (`POWDER_AGENT=exec-<dir>` or Git forge identity).
-
+- Detect tracker mode:
+  - **Powder mode:** when Powder is configured (`POWDER_AGENT` or `POWDER_URL` set,
+    or `powder list --repo <slug>` succeeds with repository jobs). Record:
+    `POWDER_AGENT=exec-<dir>`, takeable count, spec-less count, live leases;
+    derive: reacquire (`powder list --mine exec-<dir> --plain`), claim (`powder take <id> --agent exec-<dir>`),
+    renew (`powder renew <id> --agent exec-<dir>`), release (`POWDER_AGENT=exec-<dir> powder release <id>`),
+    done (`powder done <id> --proof <sha> --agent exec-<dir>`).
+  - **Forge-only mode:** when Powder is absent or unconfigured. Record:
+    open issues and PRs via `gh issue list -R <slug>`, `gh pr list -R <slug>`;
+    derive: reacquire (`gh issue list -R <slug> --assignee @me`), claim (assign issue `@me` or create topic branch),
+    done (close issue with commit SHA / link in PR body `Fixes #<id>`).
 Credentials and environment:
 
 - `stat -c '%U %a' <env-files>` for owner and mode only. File contents stay
@@ -70,9 +78,10 @@ has an observed value or an explicit "absent".
 ## Compose
 
 Read [`references/prompt-template.md`](references/prompt-template.md). Fill
-each `{{binding}}` from Bind. Keep only commands observed in Bind; a command
-the repository lacks leaves the prompt. Preserve the template's order:
-repository facts first, operating directives last.
+each `{{binding}}` from Bind. Keep the tracker block matching the target mode
+(Powder or Forge-only) and delete the other. Keep only commands observed in
+Bind; a command the repository lacks leaves the prompt. Preserve the template's
+order: repository facts first, operating directives last.
 
 Add a short `<recent-signals>` block from the gathered probes: active PRs,
 open issues / takeable jobs, recent commit cadence, CI/CD health, production
