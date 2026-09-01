@@ -87,7 +87,7 @@ that run only on explicit request:
 
 Model-invocable — unambiguous triggers, bounded cost, cheap wrong-fire:
 `ast-grep`, `custom-linters`, `dispatch`, `evidence-packet`, `exocortex`,
-`frontend-design`, `herdr`, `research`.
+`frontend-design`, `herdr`, `research`, `show-me`.
 
 
 The `exocortex` skill is generated from `misty-step/exocortex`
