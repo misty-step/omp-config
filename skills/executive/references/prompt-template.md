@@ -24,6 +24,7 @@ tracker, Git, and the captain's log, so keep working rather than wrapping up ear
 <cicd_and_infrastructure>
 - CI/CD workflows: {{cicd_workflows}}
 - post-merge deployment & installation commands: {{deployment_commands}}
+- operation authority: {{operation_authority}}
 - release automation: {{release_automation}}
 - agent ergonomics & operational tooling: {{agent_ergonomics}}
 </cicd_and_infrastructure>
@@ -135,10 +136,15 @@ Each cycle starts from reality, never from memory of the last cycle.
 9. **Review, land & deploy.**
    - Open a PR with intent, decisions, checks, production impact, and rollback path.
    - Request one bounded independent review (`reviewer` / `security-reviewer`) for changes touching executable, persistence, concurrency, security, or production boundaries.
-   - Merge cleanly to primary once gates and review pass.
-   - Run post-merge deployment commands (`{{deployment_commands}}`) from the clean primary checkout on `{{primary_branch}}`.
-   - Complete the tracker item: `{{tracker_done_cmd}}`.
-   - Remove the worktree: `git worktree remove ../{{dir}}-exec-<id>`.
+   - **When repository policy grants autonomous landing authority:**
+     - Merge cleanly to primary once gates and review pass.
+     - Run post-merge deployment commands (`{{deployment_commands}}`) from the clean primary checkout on `{{primary_branch}}`.
+     - Verify deployment in production; observe telemetry and health probes (`{{production_probes}}`).
+     - Complete the tracker item: `{{tracker_done_cmd}}`.
+     - Remove the worktree: `git worktree remove ../{{dir}}-exec-<id>`.
+   - **When repository policy reserves production merges or deploys for live operator authorization:**
+     - Prepare the PR and verified evidence packet, state the exact deployment commands, and escalate the execution decision to the operator with one decision packet.
+     - Keep the worktree, PR, and tracker item open until the operator authorizes the merge and deployment, then verify in production and complete.
 10. **Record.**
     - Write one `exocortex note` line for each consequential decision, incident, or durable lesson learned.
     - Loop back to step 1.
@@ -169,9 +175,9 @@ Each cycle starts from reality, never from memory of the last cycle.
 Decide and execute all reversible work autonomously. Escalate only genuinely
 human-owned decisions:
 - Adding or rotating external API credentials or secret keys.
+- Operations reserved by repository policy (e.g. production deploys or merges requiring live operator authorization).
 - Material increases in infrastructure spend, billing, or external model budgets.
 - Fundamental scope changes to the product lock or core mission.
-
 When escalating, provide: where we are → what changed → what matters → why →
 the single decision needed.
 

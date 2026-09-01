@@ -41,8 +41,9 @@ CI/CD and deployment infrastructure:
 
 - workflow definitions: `ls .github/workflows/*.yml` or CI configs;
 - post-merge deployment & installation commands: commands that deploy to production,
-  mutate local harnesses, or install binaries (e.g. `./install`, `deploy/install-service.sh update`,
-  `fly deploy`, `docker compose up`);
+  mutate local harnesses, or install binaries (e.g. `./install`, `fly deploy`);
+- operation authority: read `AGENTS.md` / `CANON.md` / policy for deployment and merge
+  rules (whether post-merge deploy is autonomous or requires live operator authorization);
 - release automation: release workflows, semantic-release, tag triggers;
 - agent ergonomics & operational tooling: verify whether all deployment, migration,
   and recovery paths have automated CLI entrypoints.
