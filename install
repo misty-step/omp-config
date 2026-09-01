@@ -17,7 +17,9 @@ for source in \
   global/WATCHDOG.md \
   global/WATCHDOG.yml \
   bin/omp-grievances.ts \
-  themes/tokyonight.json
+  themes/tokyonight.json \
+  themes/everforest.json \
+  themes/everforest-light.json
 do
   [ -s "$repo_dir/$source" ] || {
     printf 'Missing or empty source: %s\n' "$source" >&2
@@ -55,6 +57,7 @@ for file in config.yml models.yml; do
   install -m 600 "$repo_dir/$file" "$agent_dir/$file"
 done
 install -d -m 700 "$agent_dir/themes"
+rm -f -- "$agent_dir/themes/ember.json" "$agent_dir/themes/ember-dawn.json"
 for theme_file in "$repo_dir"/themes/*.json; do
   [ -s "$theme_file" ] || continue
   install -m 600 "$theme_file" "$agent_dir/themes/${theme_file##*/}"

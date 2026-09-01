@@ -17,7 +17,7 @@ agents run on this machine: model roles, global policy, skills, themes.
 | `global/RULES.md` | Strict ordering rules; currently the deletion-first ladder |
 | `agents/` | Read-only specialist agents; installed globally and routed by each agent's model role |
 | `global/WATCHDOG.md`, `WATCHDOG.yml` | Continuous Steward advisor: a high-reasoning model reviews intent, design, correctness, proof, and operations; roster configured in YAML |
-| `themes/` | TUI themes (`tokyonight`, `ember`) |
+| `themes/` | TUI themes (`tokyonight`, `everforest`, `everforest-light`) |
 | `skills/` | Skill packages, copied wholesale on install — see below |
 | `.githooks/pre-push` | Hook source installed into this repo's git dir by `./install` |
 | `.agents/skills/writing-for-agents/` | Agent-writing guidance served via `skill://writing-for-agents`; not deployed by `install` |
