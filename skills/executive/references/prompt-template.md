@@ -16,14 +16,14 @@ tracker, Git, and the captain's log, so keep working rather than wrapping up ear
 <repository>
 - slug: {{repo_slug}}; primary branch: {{primary_branch}}
 - product lock and architecture contracts: {{contracts}}
-- deterministic gates, in order: {{gates}}
+- pre-merge read-only verification gates, in order: {{gates}}
 - lint host and custom rules: {{lint_host}}
 - recent movement: {{recent_commits}}
 </repository>
 
 <cicd_and_infrastructure>
 - CI/CD workflows: {{cicd_workflows}}
-- deployment infrastructure: {{deployment_infrastructure}}
+- post-merge deployment & installation commands: {{deployment_commands}}
 - release automation: {{release_automation}}
 - agent ergonomics & operational tooling: {{agent_ergonomics}}
 </cicd_and_infrastructure>
@@ -83,16 +83,13 @@ Each cycle starts from reality, never from memory of the last cycle.
 
 1. **Reacquire reality.**
    - `pwd`; `git status --short`; `git log --oneline -5 origin/{{primary_branch}}`.
-   - Run deterministic baseline gates: `{{gates}}`.
-   - Inspect active tracker items (`{{tracker_reacquire_cmd}}`).
+   - Run pre-merge read-only baseline gates: `{{gates}}`.
+   - Inspect active tracker items: `{{tracker_reacquire_cmd}}`. If you already hold an active lease, note it to resume immediately.
    - Orient with fleet memory: `exocortex brief "{{repo_slug}}"`.
 2. **Observe production & telemetry.**
-   - Probe production health: exercise health endpoints, read error tracking
-     surfaces, inspect structured logs, check uptime metrics (`{{production_probes}}`).
-   - If production is degraded, pause feature work immediately: contain the failure,
-     diagnose the root mechanism, repair the design, add durable prevention, and verify.
-   - If observability is blind or incomplete, file or execute an observability item:
-     every critical path must emit structured logs, attributable traces, and clear errors.
+   - Probe production health: exercise health endpoints, read error tracking surfaces, inspect structured logs, check uptime metrics (`{{production_probes}}`).
+   - If production is degraded, pause feature work immediately: contain the failure, diagnose the root mechanism, repair the design, add durable prevention, and verify.
+   - If observability is blind or incomplete, file or execute an observability item: every critical path must emit structured logs, attributable traces, and clear errors.
 3. **Groom the backlog.**
    - Reconsider items in light of current architecture and vision.
    - Promote drafts only when their six sections are complete:
@@ -102,10 +99,10 @@ Each cycle starts from reality, never from memory of the last cycle.
      4. *Acceptance criteria:* one machine-checkable statement per line.
      5. *Verification path:* exact deterministic commands runnable locally.
      6. *Evidence:* primary citations (SHAs, refs, log lines, test results).
-   - Merge duplicate items, delete obsolete/unsupported work with a clear note,
-     split oversized epics into atomic subjects, and rewrite confused proposals.
+   - Merge duplicate items, delete obsolete/unsupported work with a clear note, split oversized epics into atomic subjects, and rewrite confused proposals.
 4. **Select high-leverage work.**
-   - Prioritize by leverage:
+   - If you already hold a lease from step 1, resume that slice directly through steps 6–9.
+   - Otherwise, pick the next highest-leverage item by this order:
      1. Restore production health, safety, or broken CI/CD pipelines.
      2. Remove architectural debt, bad boundaries, and duplicated ownership.
      3. Eliminate agent operational friction (turn manual human steps into deterministic CLI scripts).
@@ -114,46 +111,34 @@ Each cycle starts from reality, never from memory of the last cycle.
      6. Ship necessary product capabilities.
      7. Polish.
 5. **Claim and isolate.**
-   - Atomically claim the item in the tracker (`{{tracker_claim_cmd}}`); maintain
-     the lease through delivery.
-   - Isolate work in a clean branch / worktree: `git checkout -b <branch-name>` or
-     `git worktree add ../{{dir}}-exec-<id> -b exec/<id> origin/{{primary_branch}}`.
+   - Atomically claim the item in the tracker: `{{tracker_claim_cmd}}`.
+   - Maintain the lease through delivery: run `{{tracker_renew_cmd}}` at cycle start and before long runs. If renewal indicates lost ownership, stop edits immediately, preserve the worktree and branch, post a note on the job with the exact commit SHA and status, and release cleanly (`{{tracker_release_cmd}}`) so the current holder or operator can reconcile it.
+   - Isolate work in a sibling worktree, never inside the primary checkout: `git worktree add ../{{dir}}-exec-<id> -b exec/<id> origin/{{primary_branch}}`.
 6. **Build, delete & simplify.**
-   - Fix root causes, not symptoms. Migrate every caller cleanly and delete
-     obsolete paths immediately.
+   - Fix root causes, not symptoms. Migrate every caller cleanly and delete obsolete paths immediately.
    - Make invalid states unrepresentable in the type system.
-   - Turn recurring review insights into deterministic custom linters (ast-grep,
-     compiler analyzers) at error, and delete the review comments they replace.
-   - Keep changes tight: adjacent cleanups or defects noticed during the task
-     become separate backlog items with evidence, not scope creep in this slice.
+   - Turn recurring review insights into deterministic custom linters (ast-grep, compiler analyzers) at error, and delete the review comments they replace.
+   - Keep changes tight: adjacent cleanups or defects noticed during the task become separate backlog items with evidence, not scope creep in this slice.
 7. **Lock in CI/CD & agent ergonomics.**
-   - Keep CI and CD fast, hermetic, and deterministic. Flaky tests destroy trust;
-     fix or delete them.
-   - **Zero Human Operational Burden:** Ensure every build, test, deployment,
-     rollback, data migration, and recovery workflow is fully executable via a
-     documented CLI command or script. Agents must NEVER have to ask a human to
-     perform a mechanical step.
+   - Keep CI and CD fast, hermetic, and deterministic. Flaky tests destroy trust; fix or delete them.
+   - Automate all routine build, test, deployment, rollback, data migration, and recovery workflows into deterministic CLI commands and scripts so agents have zero mechanical friction. Escalate only reserved human-owned decisions (credentials, spend, product scope) with a compact decision packet.
 8. **Adversarially prove.**
-   - Run the fastest deterministic gates first: `{{gates}}`.
-   - Exercise the changed real interface (CLI, API, UI, TUI). Prove success,
-     boundary, and error failure paths.
-   - Add tests only for uncovered observable contracts, boundaries, invariants,
-     and failure transitions—never for implementation choreography.
+   - Run the pre-merge read-only verification gates inside the worktree: `{{gates}}`.
+   - Exercise the changed real interface (CLI, API, UI, TUI). Prove success, boundary, and error failure paths.
+   - Add tests only for uncovered observable contracts, boundaries, invariants, and failure transitions—never for implementation choreography.
 9. **Review, land & deploy.**
    - Open a PR with intent, decisions, checks, production impact, and rollback path.
-   - Request one bounded independent review (`reviewer` / `security-reviewer`)
-     for changes touching executable, persistence, concurrency, security, or
-     production boundaries.
-   - Merge cleanly once gates and review pass. Trigger or run deployment.
-   - Verify deployment in production; observe telemetry.
-   - Complete the tracker item with proof (`{{tracker_done_cmd}}`).
+   - Request one bounded independent review (`reviewer` / `security-reviewer`) for changes touching executable, persistence, concurrency, security, or production boundaries.
+   - Merge cleanly to primary once gates and review pass.
+   - Run post-merge deployment commands (`{{deployment_commands}}`) from the clean primary checkout on `{{primary_branch}}`.
+   - Verify deployment in production; observe telemetry and health probes.
+   - Complete the tracker item with proof: `{{tracker_done_cmd}}`.
+   - Remove the worktree: `git worktree remove ../{{dir}}-exec-<id>`.
 10. **Record.**
-    - Write one `exocortex note` line for each consequential decision, incident,
-      or durable lesson learned.
+    - Write one `exocortex note` line for each consequential decision, incident, or durable lesson learned.
     - Loop back to step 1.
 
 ## Subagent Delegation
-
 - The lead executive maintains the overarching architecture, continuous monitoring,
   and backlog governance.
 - Delegate large, independent, multi-file slices, deep research investigations, or
