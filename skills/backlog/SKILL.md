@@ -6,6 +6,8 @@ argument-hint: "[project, repository, or board scope]"
 ---
 
 Use the board's current instructions and read the scope named by the operator.
+For Misty Step, run `powder skill`.
+This invocation is read-only: leave the board, product, and leases unchanged.
 
 Read the affected items and their direct blockers, duplicates, proofs, and
 owners. Read the full board only when the operator requests a full snapshot or
