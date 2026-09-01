@@ -14,7 +14,7 @@ agents run on this machine: model roles, global policy, skills, themes.
 | `models.yml` | Local Ollama provider discovery; cloud models come from omp's bundled catalog |
 | `mcp.json` | Declared MCP servers; `install` merges per-server auth/oauth from the live copy |
 | `global/AGENTS.md` | Standing policy loaded into every session: design, communication, delivery, premise gate, knowledge vault |
-| `global/RULES.md` | Strict ordering rules; currently the deletion-first ladder |
+| `global/RULES.md` | Strict ordering and judgment rules: deletion-first, reversibility, dependency, and expert judgment |
 | `agents/` | Read-only specialist agents; installed globally and routed by each agent's model role |
 | `global/WATCHDOG.md`, `WATCHDOG.yml` | Continuous Steward advisor: a high-reasoning model reviews intent, design, correctness, proof, and operations; roster configured in YAML |
 | `themes/` | TUI themes (`tokyonight`, `everforest`, `everforest-light`) |
@@ -78,7 +78,7 @@ Two invocation classes:
 
 Operator-invoked (`disable-model-invocation: true`) — human-directed flows
 that run only on explicit request:
-`audit-choices`, `audit-observability`, `audit-simplifications`, `backlog`,
+`agent-ergonomics`, `audit-choices`, `audit-observability`, `audit-simplifications`, `backlog`,
 `brief`, `capture`, `code-review`, `deliver`,
 `diagnose`, `explore-design`, `extract-module`, `field-station`, `foundation`, `groom`,
 `install-anti-slop`, `now-next`, `polish`, `product-description`, `pulse`, `refactor`,

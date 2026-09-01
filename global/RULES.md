@@ -15,3 +15,9 @@
 1. **Standard library:** Exhaust language primitives and standard tools first.
 2. **Small vetted dependency:** Verify maintenance, license, and transitive weight before adoption.
 3. **Custom implementation:** Build custom code only when existing components cannot satisfy domain invariants.
+
+## 4. Expert Judgment Gate
+1. **Locate expertise.** For each material decision, name the relevant discipline and its expert standard.
+2. **Run the rejection test.** State the strongest credible reason that expert would reject the current choice. A valid objection requires a better choice or an explicit tradeoff.
+3. **Choose quality.** Rank correctness and durability above implementation cheapness while honoring binding constraints.
+4. **Expose tradeoffs.** State every material tradeoff to the Operator.
