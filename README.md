@@ -13,8 +13,8 @@ agents run on this machine: model roles, global policy, skills, themes.
 | `config.yml` | Model roles and fallback chains, theme/statusline/TUI display, providers (web search routed through exa), task/LSP settings |
 | `models.yml` | Local Ollama provider discovery; cloud models come from omp's bundled catalog |
 | `mcp.json` | Declared MCP servers; `install` merges per-server auth/oauth from the live copy |
-| `global/AGENTS.md` | Standing policy loaded into every session: design, communication, delivery, premise gate, knowledge vault |
-| `global/RULES.md` | Strict ordering and judgment rules: deletion-first, reversibility, dependency, and expert judgment |
+| `global/AGENTS.md` | Session-opening context for architecture, technology, review, operations, and communication |
+| `global/RULES.md` | Short core rules reattached near every turn: deletion, reversibility, cutovers, proof, failures, and expert judgment |
 | `agents/` | Read-only specialist agents; installed globally and routed by each agent's model role |
 | `global/WATCHDOG.md`, `WATCHDOG.yml` | Continuous Steward advisor: a high-reasoning model reviews intent, design, correctness, proof, and operations; roster configured in YAML |
 | `themes/` | TUI themes (`tokyonight`, `everforest`, `everforest-light`) |
