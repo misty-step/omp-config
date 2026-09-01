@@ -11,8 +11,8 @@ modelRoles:
   commit: "@smol"
 symbolPreset: nerd
 theme:
-  dark: light-gruvbox
-  light: light-gruvbox
+  dark: everforest
+  light: everforest-light
 statusLine:
   preset: custom
   separator: none
