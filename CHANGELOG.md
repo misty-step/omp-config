@@ -1,3 +1,10 @@
+## [0.0.19](https://github.com/misty-step/omp-config/compare/v0.0.18...v0.0.19) (2026-09-01)
+
+
+### Bug Fixes
+
+* **executive:** respect operational authority boundaries in step 9 and escalation ([fe4f464](https://github.com/misty-step/omp-config/commit/fe4f46498bffb91ea3a699b86806b5d088e0e76c))
+
 ## [0.0.18](https://github.com/misty-step/omp-config/compare/v0.0.17...v0.0.18) (2026-09-01)
 
 
