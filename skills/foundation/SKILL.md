@@ -12,18 +12,23 @@ checklist.
 
 ## Inspect
 
-Read the current build, test, run, CI, release, and operating paths. Identify
-the smallest observed gap that makes change unsafe or unnecessarily difficult.
-Treat an existing equivalent control as sufficient.
+Read the current build, test, run, CI, release, operating, and review paths.
+Identify the smallest observed gap that makes change unsafe or unnecessarily
+difficult. Repeated human or agent comments about the same locally decidable
+violation are evidence of a missing executable control. Treat an existing
+equivalent control as sufficient.
 
-Done when one gap, its consequence, and its current owner are source-grounded.
+Done when one gap, its consequence, supporting evidence, and current owner are
+source-grounded.
 
 ## Agree
 
 Propose the smallest control that closes the gap through the project's current
-tools and interfaces. State its cost, operator burden, and proof. Include
-migration or rollback only when the change affects persisted state or release
-behavior. Put material human choices through `/shape`.
+tools and interfaces. For a locally decidable invariant, prefer the existing
+lint host and use `/custom-linters` to design the rule. State its cost, operator
+burden, and proof. Include migration or rollback only when the change affects
+persisted state or release behavior. Put material human choices through
+`/shape`.
 
 Done when the operator accepts one bounded change.
 
