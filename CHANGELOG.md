@@ -1,3 +1,10 @@
+## [0.0.18](https://github.com/misty-step/omp-config/compare/v0.0.17...v0.0.18) (2026-09-01)
+
+
+### Features
+
+* **executive:** add tracker mode branches and separate gates from deploy commands ([9745cca](https://github.com/misty-step/omp-config/commit/9745ccaaa97e584cd32e1b102204a0bb57e5c25b))
+
 ## [0.0.17](https://github.com/misty-step/omp-config/compare/v0.0.16...v0.0.17) (2026-09-01)
 
 
