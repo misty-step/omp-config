@@ -50,8 +50,9 @@ tracker, Git, and the captain's log, so keep working rather than wrapping up ear
 </tracker>
 
 <credentials>
-Environment files: {{env_file_meta}}. Read metadata (`stat`) only.
-Configuration comes from manifests, configs, and environment metadata.
+Environment files and approved sources: {{env_file_meta}}. Report metadata and
+presence only. An authorized operation may copy named values between approved
+Misty Step sources and a service environment without printing them.
 </credentials>
 
 <recent-signals>
