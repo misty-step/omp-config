@@ -79,7 +79,7 @@ retry:
       - xai-oauth/grok-4.6:xhigh
       - anthropic/claude-fable-5-1:max
       - kimi-code/k3:max
-      - google-antigravity/gemini-3.8-flash:high
+      - google-antigravity/gemini-3.8-flash-high
       - openrouter/z-ai/glm-5.3-flash:max
       - openrouter/deepseek/deepseek-v4-flash-0731:max
       - openrouter/deepseek/deepseek-v4-pro-0813:max
@@ -87,7 +87,7 @@ retry:
       - xai-oauth/grok-4.6:xhigh
       - anthropic/claude-fable-5-1:max
       - kimi-code/k3:max
-      - google-antigravity/gemini-3.8-flash:high
+      - google-antigravity/gemini-3.8-flash-high
       - openrouter/deepseek/deepseek-v4-pro-0813:max
       - openrouter/z-ai/glm-5.3-flash:max
       - openrouter/deepseek/deepseek-v4-flash-0731:max
@@ -95,7 +95,7 @@ retry:
       - xai-oauth/grok-4.6:xhigh
       - anthropic/claude-fable-5-1:max
       - kimi-code/k3:max
-      - google-antigravity/gemini-3.8-flash:high
+      - google-antigravity/gemini-3.8-flash-high
       - openrouter/deepseek/deepseek-v4-pro-0813:max
       - openrouter/z-ai/glm-5.3-flash:max
       - openrouter/deepseek/deepseek-v4-flash-0731:max
@@ -103,7 +103,7 @@ retry:
       - xai-oauth/grok-4.6:xhigh
       - anthropic/claude-fable-5-1:max
       - kimi-code/k3:max
-      - google-antigravity/gemini-3.8-flash:high
+      - google-antigravity/gemini-3.8-flash-high
       - openrouter/deepseek/deepseek-v4-flash-0731:max
       - openrouter/z-ai/glm-5.3-flash:max
       - openrouter/deepseek/deepseek-v4-pro-0813:max
@@ -111,7 +111,7 @@ retry:
       - xai-oauth/grok-4.6:xhigh
       - anthropic/claude-fable-5-1:max
       - kimi-code/k3:max
-      - google-antigravity/gemini-3.8-flash:high
+      - google-antigravity/gemini-3.8-flash-high
       - openrouter/z-ai/glm-5.3-flash:max
       - openrouter/deepseek/deepseek-v4-flash-0731:max
       - openrouter/deepseek/deepseek-v4-pro-0813:max
@@ -119,7 +119,7 @@ retry:
       - xai-oauth/grok-4.6:xhigh
       - anthropic/claude-fable-5-1:max
       - kimi-code/k3:max
-      - google-antigravity/gemini-3.8-flash:high
+      - google-antigravity/gemini-3.8-flash-high
       - openrouter/z-ai/glm-5.3-flash:max
       - openrouter/google/gemini-3.8-flash:high
       - openrouter/xiaomi/mimo-v2.5:high
@@ -127,7 +127,7 @@ retry:
       - xai-oauth/grok-4.6:xhigh
       - anthropic/claude-fable-5-1:max
       - kimi-code/k3:max
-      - google-antigravity/gemini-3.8-flash:high
+      - google-antigravity/gemini-3.8-flash-high
       - openrouter/z-ai/glm-5.3-flash:max
       - openrouter/google/gemini-3.8-flash:high
       - openrouter/xiaomi/mimo-v2.5:high
@@ -135,21 +135,21 @@ retry:
       - xai-oauth/grok-4.6:low
       - anthropic/claude-sonnet-5:low
       - kimi-code/k3:low
-      - google-antigravity/gemini-3.8-flash:low
+      - google-antigravity/gemini-3.8-flash-high
       - openrouter/deepseek/deepseek-v4-flash-0731:max
       - openrouter/z-ai/glm-5.3-flash:max
     tiny:
       - xai-oauth/grok-4.6:low
       - anthropic/claude-sonnet-5:low
       - kimi-code/k3:low
-      - google-antigravity/gemini-3.8-flash:low
+      - google-antigravity/gemini-3.8-flash-high
       - openrouter/deepseek/deepseek-v4-flash-0731:max
       - openrouter/z-ai/glm-5.3-flash:max
     commit:
       - xai-oauth/grok-4.6:low
       - anthropic/claude-sonnet-5:low
       - kimi-code/k3:low
-      - google-antigravity/gemini-3.8-flash:low
+      - google-antigravity/gemini-3.8-flash-high
       - openrouter/deepseek/deepseek-v4-flash-0731:max
       - openrouter/z-ai/glm-5.3-flash:max
 task:
@@ -161,7 +161,7 @@ task:
       - xai-oauth/grok-4.6:xhigh
       - anthropic/claude-fable-5-1:max
       - kimi-code/k3:max
-      - google-antigravity/gemini-3.8-flash:high
+      - google-antigravity/gemini-3.8-flash-high
       - openrouter/z-ai/glm-5.3-flash:max
       - openrouter/deepseek/deepseek-v4-flash-0731:max
       - openrouter/deepseek/deepseek-v4-pro-0813:max
@@ -170,7 +170,7 @@ task:
       - xai-oauth/grok-4.6:xhigh
       - anthropic/claude-fable-5-1:max
       - kimi-code/k3:max
-      - google-antigravity/gemini-3.8-flash:high
+      - google-antigravity/gemini-3.8-flash-high
       - openrouter/z-ai/glm-5.3-flash:max
       - openrouter/google/gemini-3.8-flash:high
       - openrouter/xiaomi/mimo-v2.5:high
@@ -179,7 +179,7 @@ task:
       - xai-oauth/grok-4.6:xhigh
       - anthropic/claude-fable-5-1:max
       - kimi-code/k3:max
-      - google-antigravity/gemini-3.8-flash:high
+      - google-antigravity/gemini-3.8-flash-high
       - openrouter/deepseek/deepseek-v4-pro-0813:max
       - openrouter/z-ai/glm-5.3-flash:max
       - openrouter/deepseek/deepseek-v4-flash-0731:max
@@ -188,7 +188,7 @@ task:
       - xai-oauth/grok-4.6:xhigh
       - anthropic/claude-fable-5-1:max
       - kimi-code/k3:max
-      - google-antigravity/gemini-3.8-flash:high
+      - google-antigravity/gemini-3.8-flash-high
       - openrouter/deepseek/deepseek-v4-pro-0813:max
       - openrouter/z-ai/glm-5.3-flash:max
       - openrouter/deepseek/deepseek-v4-flash-0731:max

@@ -13,7 +13,7 @@ model:
   - "xai-oauth/grok-4.6:xhigh"
   - "anthropic/claude-fable-5-1:max"
   - "kimi-code/k3:max"
-  - "google-antigravity/gemini-3.8-flash:high"
+  - "google-antigravity/gemini-3.8-flash-high"
   - "openrouter/deepseek/deepseek-v4-pro-0813:max"
   - "openrouter/z-ai/glm-5.3-flash:max"
   - "openrouter/deepseek/deepseek-v4-flash-0731:max"
