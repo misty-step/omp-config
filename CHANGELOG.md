@@ -1,3 +1,10 @@
+## [0.0.25](https://github.com/misty-step/omp-config/compare/v0.0.24...v0.0.25) (2026-09-02)
+
+
+### Bug Fixes
+
+* **config:** update google-antigravity gemini-3.8-flash model slug ([06c1c17](https://github.com/misty-step/omp-config/commit/06c1c179d6f1e7b4dd1297ea3f271fd6ab0a82bd))
+
 ## [0.0.24](https://github.com/misty-step/omp-config/compare/v0.0.23...v0.0.24) (2026-09-02)
 
 
