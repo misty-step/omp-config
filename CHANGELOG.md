@@ -1,3 +1,10 @@
+## [0.0.23](https://github.com/misty-step/omp-config/compare/v0.0.22...v0.0.23) (2026-09-02)
+
+
+### Features
+
+* **sdlc:** establish pull request visual and native media standard ([85c5c25](https://github.com/misty-step/omp-config/commit/85c5c257b142fca6d94dd708660c76480afd9b61))
+
 ## [0.0.22](https://github.com/misty-step/omp-config/compare/v0.0.21...v0.0.22) (2026-09-02)
 
 
