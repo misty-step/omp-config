@@ -1,3 +1,10 @@
+## [0.0.26](https://github.com/misty-step/omp-config/compare/v0.0.25...v0.0.26) (2026-09-02)
+
+
+### Features
+
+* **skills:** give groom a default multi-lens investigation pass ([8139ca0](https://github.com/misty-step/omp-config/commit/8139ca013900a445ad41a5e2617ac9fe6cf14c16))
+
 ## [0.0.25](https://github.com/misty-step/omp-config/compare/v0.0.24...v0.0.25) (2026-09-02)
 
 
