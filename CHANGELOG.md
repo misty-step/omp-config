@@ -1,3 +1,10 @@
+## [0.0.22](https://github.com/misty-step/omp-config/compare/v0.0.21...v0.0.22) (2026-09-02)
+
+
+### Features
+
+* **config:** update Claude Fable to 5.1 ([4af2b35](https://github.com/misty-step/omp-config/commit/4af2b35d82c087a70986332557cd52c4e4e4ed94))
+
 ## [0.0.21](https://github.com/misty-step/omp-config/compare/v0.0.20...v0.0.21) (2026-09-02)
 
 
