@@ -1,3 +1,19 @@
+## [0.0.24](https://github.com/misty-step/omp-config/compare/v0.0.23...v0.0.24) (2026-09-02)
+
+
+### Bug Fixes
+
+* **config:** update google-antigravity gemini-3.8-flash model slug ([ff2165a](https://github.com/misty-step/omp-config/commit/ff2165a1d193753522c878527865d346a5d39a79))
+* **sdlc:** clarify native attachment capabilities and fallback boundaries ([8e67e39](https://github.com/misty-step/omp-config/commit/8e67e396900dcc2c215bc6ef84bd3c60232fcb58))
+* **skills:** require primary-source research in core-docs ([94b8895](https://github.com/misty-step/omp-config/commit/94b889506fbe7257f4b7f613b6218ea4c485bfbf))
+
+
+### Features
+
+* **config:** tune fallback chains to Pareto frontier with Muse Spark 1.3 and GLM-5.3 ([0cbfbe7](https://github.com/misty-step/omp-config/commit/0cbfbe75c692ea938e3c1d6279552faba37ee1da))
+* **config:** update Gemini Flash to 3.8 ([58d56dd](https://github.com/misty-step/omp-config/commit/58d56dd199c4ca551023db5cef26ae9c6cb8de0d))
+* **skills:** add core-docs skill and design note ([1151ae2](https://github.com/misty-step/omp-config/commit/1151ae2ea8369d3e05b5e97a384033883aeaf732))
+
 ## [0.0.23](https://github.com/misty-step/omp-config/compare/v0.0.22...v0.0.23) (2026-09-02)
 
 
