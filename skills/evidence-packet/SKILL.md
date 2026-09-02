@@ -19,13 +19,18 @@ Create media or a saved artifact only when it helps another person inspect the
 claim or the operator requests publication. Open it and remove secrets, customer
 data, and unrelated state before delivery.
 
-When a pull request's observable claim depends on media, publish a sanitized
-authenticated here.now Site (`skill://here-now`) for that exact head and link
-it from the PR. Record the head on the Site and in the PR. Do not republish to
-that slug. Use `anyone_with_link` so a GitHub reviewer needs no here.now
-account. Open the live URL without publisher credentials before linking.
-Workspace or restricted access is not reviewer-open for a GitHub PR. An
-anonymous expiring Site is not reviewer-open. If publish is unavailable, the
+When an observable claim depends on visual proof or recordings and GitHub is the
+review surface, attach sanitized media directly with
+`gh pr create --attach path/to/media.png#Alt`, `gh pr comment --attach`, or
+`gh issue comment --attach` (local Markdown references rewrite in place). Record
+the exact head revision beside the claim in the PR or comment.
+
+Publish a sanitized authenticated here.now Site (`skill://here-now`) for that
+exact head when the observable claim depends on an interactive web application,
+live HTML artifact, external review without GitHub repository access, or
+non-GitHub platforms. Record the head on the Site and in the PR/record. Use
+`anyone_with_link` so an external reviewer needs no account. Open the live URL
+without publisher credentials before linking. If publish is unavailable, the
 PR has an evidence gap until the operator publishes or waives.
 
 Return the proved claim and observation. Name any unproved claim and the exact

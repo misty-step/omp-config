@@ -35,7 +35,9 @@ use `/security-review` for changed trust boundaries. Treat green deterministic
 gates as authoritative for the patterns they own.
 
 Require each finding to name the exact location, trigger, failure mechanism,
-violated contract, evidence, and smallest coherent repair. Validate every
+violated contract, evidence, and smallest coherent repair. Use targeted diffs
+or pseudocode to show the repair. For UI regressions or visual failures, attach
+reproduction media directly with `gh pr comment --attach`. Validate every
 finding against the current source. Reject unsupported, pre-existing,
 taste-only, and out-of-scope findings. A Blocker must be caused or worsened by
 this change and make release unsafe.
