@@ -11,7 +11,7 @@ tools:
 model:
   - "openai-codex/gpt-5.6-sol:max"
   - "xai-oauth/grok-4.6:xhigh"
-  - "anthropic/claude-fable-5:max"
+  - "anthropic/claude-fable-5-1:max"
   - "kimi-code/k3:max"
   - "google-antigravity/gemini-3.7-flash:high"
   - "openrouter/deepseek/deepseek-v4-pro-0813:max"
