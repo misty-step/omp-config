@@ -1,3 +1,10 @@
+## [0.0.21](https://github.com/misty-step/omp-config/compare/v0.0.20...v0.0.21) (2026-09-02)
+
+
+### Bug Fixes
+
+* **forest:** scope credential authority ([9b9d619](https://github.com/misty-step/omp-config/commit/9b9d6191a69781189e77375c0fbf8a909bd982ec))
+
 ## [0.0.20](https://github.com/misty-step/omp-config/compare/v0.0.19...v0.0.20) (2026-09-02)
 
 
