@@ -57,21 +57,32 @@ Observability and production health:
 Tracker:
 
 - Detect tracker mode:
-  - **Powder mode:** when Powder is configured (`POWDER_AGENT` or `POWDER_URL` set,
-    or `powder list --repo <slug>` succeeds with repository jobs). Record:
-    `POWDER_AGENT=exec-<dir>`, takeable count, spec-less count, live leases;
-    derive: reacquire (`powder list --mine exec-<dir> --plain`), claim (`powder take <id> --agent exec-<dir>`),
-    renew (`powder renew <id> --agent exec-<dir>`), release (`POWDER_AGENT=exec-<dir> powder release <id>`),
-    done (`powder done <id> --proof <sha> --agent exec-<dir>`).
-  - **Forge-only mode:** when Powder is absent or unconfigured. Record:
+  - **Powder mode:** only when a Powder origin (`POWDER_URL` or
+    `POWDER_API_BASE_URL`) is configured and either `POWDER_AGENT` is set or
+    the organization/repository contract explicitly selects Powder. An origin
+    alone does not choose a tracker, and an agent name alone cannot reach one.
+    Probe with `powder list --repo <slug> --plain`, `--takeable`, `--waiting`;
+    count jobs with and without specs; note live leases and holders; derive:
+    reacquire (`powder list --mine exec-<dir> --plain`), claim
+    (`powder take <id> --agent exec-<dir>`), renew
+    (`powder renew <id> --agent exec-<dir>`), release
+    (`POWDER_AGENT=exec-<dir> powder release <id>`), done
+    (`powder done <id> --proof <sha> --agent exec-<dir>`).
+  - **Forge-only mode:** otherwise. Record:
     open issues and PRs via `gh issue list -R <slug>`, `gh pr list -R <slug>`;
     derive: reacquire (`gh issue list -R <slug> --assignee @me`), claim (assign issue `@me` or create topic branch),
     done (close issue with commit SHA / link in PR body `Fixes #<id>`).
 Credentials and environment:
 
-- `stat -c '%U %a' <env-files>` for owner and mode only. File contents stay
-  unread; non-secret configuration comes from manifests, configs, and environment
-  metadata.
+- First bind approved credential sources and ownership from the organization
+  and repository contracts. Default probes report only path, owner, mode,
+  variable names, and presence. For an operator-authorized service setup, read
+  only named organization-owned variables into process memory and copy them
+  without printing values. Never search another organization, dump a
+  credential file, or put a value in prompts, notes, commits, logs, or command
+  output. Reusing an approved authentication secret does not create a new
+  workload identity; new keys, identities, or spend remain human-owned until
+  explicitly authorized.
 
 Done when every binding in [`references/prompt-template.md`](references/prompt-template.md)
 has an observed value or an explicit "absent".

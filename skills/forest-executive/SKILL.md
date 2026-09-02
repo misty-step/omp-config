@@ -56,9 +56,15 @@ Tracker:
 - the Kernel's Powder identity from `forest.yaml`/README convention
   (`forest-<slug>`), so the executive's identity is distinct.
 
-Credentials: `stat -c '%U %a' ~/.config/iron-forest/<dir>.env` for owner and
-mode only. File contents stay unread; non-secret configuration comes from
-`forest selfcheck`, `forest.yaml`, and systemd metadata.
+Credentials: the environment file is `~/.config/iron-forest/<dir>.env`.
+Resolve its named variables from the organization-approved credential map
+before escalating. `OPENROUTER_API_KEY` is an instance completion credential.
+For Powder, `POWDER_AGENT=forest-<dir>` is the unique Kernel identity;
+`POWDER_API_KEY` authenticates transport and may be an approved organization
+secret unless the target Powder deployment explicitly requires per-instance
+keys. Never infer a dedicated Powder-key requirement from the unique-agent
+rule. Values may be copied into the protected file for an authorized
+installation but never printed.
 
 Done when every binding in [`references/prompt-template.md`](references/prompt-template.md)
 has an observed value or an explicit "absent".

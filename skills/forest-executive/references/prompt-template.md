@@ -48,8 +48,9 @@ file of your own. Keep working rather than wrapping up early.
 </tracker>
 
 <credentials>
-`~/.config/iron-forest/{{dir}}.env`: {{env_file_meta}}. Read metadata only.
-Configuration comes from `forest.yaml`, `forest selfcheck`, and systemd.
+`~/.config/iron-forest/{{dir}}.env`: {{env_file_meta}}. Resolve named values
+from approved Misty Step sources, copy them without output, and report only
+path, owner, mode, variable names, and presence.
 </credentials>
 
 <recent-signals>
@@ -75,11 +76,11 @@ The cycle below needs a Kernel that serves this repository. Build it first;
 each step has a check that proves it.
 
 1. In a sibling worktree `../{{dir}}-exec-onboard`, write `forest.yaml` (`repo: {{repo_slug}}`; `agents:` builder/verifier/fixer with `./forest poll <role>` and the README intervals; `checks:` exactly {{gates}}, in order) and `agents/{builder,verifier,fixer}/{agent.md,task.md}` plus `agents/_shared/skills/`, starting from the factory checkout's declarations and cutting anything that names Go or Iron Forest internals. Critic and Tester stay out (canary-only). Mirror `checks:` in CI. Open a PR, merge under your identity.
-2. Ask the operator for the one human-owned input: create `~/.config/iron-forest/{{dir}}.env` (mode 0600) with `OPENROUTER_API_KEY` for a dedicated instance key, `POWDER_URL`, `POWDER_API_KEY`, `POWDER_AGENT=forest-{{dir}}`. Escalate with the exact path and variable names, then continue grooming (Cycle step 3) until `stat -c '%a' ~/.config/iron-forest/{{dir}}.env` prints `600`.
+2. Resolve the protected service environment before escalating. Create `~/.config/iron-forest/{{dir}}.env` with mode 0600. Use an operator-authorized instance `OPENROUTER_API_KEY`, the approved `POWDER_URL` and `POWDER_API_KEY`, and the unique workload identity `POWDER_AGENT=forest-{{dir}}`. `POWDER_AGENT`, not the transport key, distinguishes Kernels unless this Powder deployment explicitly declares per-instance API keys. Read only named values from approved Misty Step sources, copy them without output, and ask the operator only for a missing value or authority.
 3. Bring the primary checkout to the merged revision: in `{{repo_path}}`, `git status --porcelain` prints nothing, then `git fetch origin && git merge --ff-only origin/{{primary_branch}}`; `test -f forest.yaml`. The installer validates this checkout, not the worktree.
 4. From `{{factory_checkout}}`: `mise exec -- go build -o {{repo_path}}/forest .`; `(cd {{repo_path}} && ./forest selfcheck)` exits 0; `deploy/install-service.sh {{dir}}`.
-5. Prove it: `systemctl --user is-active forest@{{dir}}` prints `active`; `(cd {{repo_path}} && ./forest status)` shows `repo: {{repo_slug}}` and `kernel: running`; make one ready Subject takeable and watch Builder's first Run through `./forest run logs <id>` and the next audit pass.
-6. Record the deployment (`identity`, `host`, `repo`, `revision` from `./forest version`) on a Powder job, then enter the cycle. From here on the managed operator effects apply: `./forest run cancel`, `./forest trigger reset`, and `{{factory_checkout}}/deploy/install-service.sh update {{dir}}` for adoption.
+5. Prove it: `systemctl --user is-active forest@{{dir}}` prints `active`; `(cd {{repo_path}} && ./forest status)` shows `repo: {{repo_slug}}` and `kernel: running`. Do not create filler for dispatch proof. When a genuine complete Subject becomes takeable, watch the first Builder Run through `./forest run logs <id>` and the following audit pass; an idle empty queue is healthy.
+6. Deployment facts remain in `./forest version`, the Ledger, Git, and systemd metadata. Attach them to the first real tracker item whose scope includes Kernel operation; do not create a bookkeeping-only job. Then enter the cycle. From here on the managed operator effects apply: `./forest run cancel`, `./forest trigger reset`, and `{{factory_checkout}}/deploy/install-service.sh update {{dir}}` for adoption.
 
 ## Cycle
 
@@ -120,7 +121,7 @@ evidence-ref payload, Ledger row, Run id with log line, or command output.
 - Declarations change only after the eval gate passes.
 - Critic and Tester drafts are promoted by grooming, never auto-promoted; those roles stay out of managed deployments until their rollout gate closes.
 - Kernel processes stop only through `forest run cancel` and the installer; systemd is touched only by the fence.
-- Credential files are metadata only; values never enter prompts, notes, commits, or logs.
+- Credential values never enter prompts, notes, commits, logs, or command output. Use only organization-approved sources and distinguish transport authentication from workload identity.
 
 ## Escalation
 
