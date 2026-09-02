@@ -1,3 +1,10 @@
+## [0.0.20](https://github.com/misty-step/omp-config/compare/v0.0.19...v0.0.20) (2026-09-02)
+
+
+### Bug Fixes
+
+* **skills:** separate credentials from workload identity ([216dfaf](https://github.com/misty-step/omp-config/commit/216dfafa7e3ae91ba395d2d703a0cd1dbb69fcc1))
+
 ## [0.0.19](https://github.com/misty-step/omp-config/compare/v0.0.18...v0.0.19) (2026-09-01)
 
 
