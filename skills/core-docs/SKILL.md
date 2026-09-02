@@ -1,6 +1,6 @@
 ---
 name: core-docs
-description: Audit, brainstorm, and author core documentation across fleet repositories.
+description: Audit, research, brainstorm, and author core documentation across fleet repositories.
 disable-model-invocation: true
 argument-hint: "[audit | overhaul] [path]"
 ---
@@ -38,6 +38,16 @@ Investigate what the code already proves. Identify gaps that code cannot explain
 - Which past architectural choices shaped the current design?
 
 Done when the codebase is understood and documentation gaps are identified.
+
+## Research
+
+Investigate each non-obvious claim against primary sources. Use `skill://research` for unfamiliar APIs, protocols, and domain terms.
+
+Read fleet exemplars, accepted ADRs, and authoritative domain sources. Record evidence for vision, domain language, and architectural refusals.
+
+Name every inference. Leave an explicit gap when a primary source is missing.
+
+Done when each material claim has a primary source or a named gap.
 
 ## Consult and Brainstorm
 

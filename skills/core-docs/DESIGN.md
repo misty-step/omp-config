@@ -108,7 +108,7 @@ The principal established core documentation rules:
    This rule binds across all fleet repositories.
 
 6. **Consultative workflow:**
-   The skill explores and investigates code first.
+   The skill explores the codebase, then researches primary sources.
    The agent brainstorms with the operator to acquire missing non-obvious context before writing.
 
 ## Composition architecture
@@ -164,9 +164,10 @@ The skill audits documents against explicit contracts:
 
 Rollout proceeds repository by repository:
 1. Explore the repository and audit existing core documents.
-2. Brainstorm with the operator to capture non-obvious context.
-3. Author or overhaul documents in an uncommitted working tree.
-4. Human reviews diffs. PRs open only after principal alignment.
+2. Research non-obvious claims against primary sources.
+3. Brainstorm with the operator to capture missing context.
+4. Author or overhaul documents in an uncommitted working tree.
+5. Human reviews diffs. PRs open only after principal alignment.
 
 ## Settled decisions
 
