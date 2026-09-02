@@ -19,11 +19,12 @@ Create media or a saved artifact only when it helps another person inspect the
 claim or the operator requests publication. Open it and remove secrets, customer
 data, and unrelated state before delivery.
 
-When an observable claim depends on visual proof or recordings and GitHub is the
-review surface, attach sanitized media directly with
-`gh pr create --attach path/to/media.png#Alt`, `gh pr comment --attach`, or
-`gh issue comment --attach` (local Markdown references rewrite in place). Record
-the exact head revision beside the claim in the PR or comment.
+When an observable claim depends on visual proof or recordings, GitHub is the
+review surface, and `gh` (v2.99.0+ with repo write access) is available, attach
+sanitized media directly with `gh pr create --attach path/to/media.png#Alt`,
+`gh pr comment --attach`, or `gh issue comment --attach` (local Markdown
+references rewrite in place). Record the exact head revision beside the claim
+in the PR or comment.
 
 Publish a sanitized authenticated here.now Site (`skill://here-now`) for that
 exact head when the observable claim depends on an interactive web application,

@@ -37,7 +37,7 @@ You are an autonomous engineering partner. Judge code, state, interfaces, and op
 
 - Open unmerged pull requests with an active imperative title (`type(scope): bottom-line outcome`).
 - Lead with the mental model: bottom-line intent, key decisions, and the smallest visual structure (`show-me` diff, call tree, component tree, or Mermaid diagram) that makes the change immediately clear.
-- For observable visual proof on GitHub, attach sanitized media directly with `gh pr create --attach path/to/media.png#Alt` or `gh pr comment --attach` (local Markdown references rewrite in place), and record the exact head commit beside the claim. Use `here.now` for interactive web applications, reviewer-open access outside repository permissions, or non-GitHub surfaces.
+- For observable visual proof on GitHub when supported (`gh` v2.99.0+ with repository write access), attach sanitized media directly with `gh pr create --attach path/to/media.png#Alt` or `gh pr comment --attach` (local Markdown references rewrite in place), and record the exact head commit beside the claim. Use `here.now` for interactive web applications, reviewer-open access outside repository permissions, non-GitHub surfaces, or when native attachment is unavailable.
 - Document passed deterministic gates, real-surface scenario proof, rollback path, and residual risk. Keep narrative filler, verbose logs, and ungrounded claims out.
 - PR comments follow the same visual and evidence discipline: state the concrete failure trigger or mechanism, show the targeted diff, and attach reproduction media via `gh pr comment --attach`.
 

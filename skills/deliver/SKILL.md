@@ -69,12 +69,13 @@ Lead with bottom-line intent, key decisions, and the smallest visual structure
 (`show-me` diff, call tree, component tree, or Mermaid diagram) when structure
 or flow changed.
 
-For observable claims that depend on media: when GitHub is the review surface,
-attach sanitized media directly with `gh pr create --attach path/to/media.png#Alt`
-(referencing local paths inline in the body); link reviewer-open here.now
-evidence for interactive web artifacts or external review. Record the exact final
-head beside any attached claim. Record passed deterministic gates, real-surface
-proof, rollback path, and residual risk. Reconcile current PR comments and
-record the exact final head.
+For observable claims that depend on media: when GitHub is the review surface
+and supported (`gh` v2.99.0+ with write access), attach sanitized media
+directly with `gh pr create --attach path/to/media.png#Alt` (referencing local
+paths inline in the body); link reviewer-open here.now evidence for interactive
+web artifacts, external review, or when native attachment is unavailable.
+Record the exact final head beside any attached claim. Record passed
+deterministic gates, real-surface proof, rollback path, and residual risk.
+Reconcile current PR comments and record the exact final head.
 
 Done when the operator can review and decide whether to invoke `/release`.
