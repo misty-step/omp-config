@@ -22,7 +22,8 @@ or returns nothing is a fact too.
 
 Repository:
 
-- forge slug and primary branch: `git remote get-url origin`, `git symbolic-ref refs/remotes/origin/HEAD`;
+- forge slug, organization, and primary branch: `git remote get-url origin`,
+  the slug's owner component, and `git symbolic-ref refs/remotes/origin/HEAD`;
 - toolchain and deterministic gates: `forest.yaml` `checks:` when present, else
   the repository's own manifests, hooks, and CI (`package.json`, `Makefile`,
   `.mise.toml`, `.githooks/*`, `.github/workflows/*`); keep only commands that
@@ -53,13 +54,21 @@ Tracker:
 - `powder list --repo <slug> --plain`, `--takeable`, `--waiting`; count jobs
   with and without specs; note live leases and their holders;
 - `gh issue list` and `gh pr list` for the slug; whether label `forest:ready` exists;
-- the Kernel's Powder identity from `forest.yaml`/README convention
-  (`forest-<slug>`), so the executive's identity is distinct.
+- the Kernel's canonical Powder identity: the exact full forge slug prefixed
+  with `forest-` (for example, `forest-misty-step/powder`). Do not derive it
+  from the checkout directory or rewrite slug characters.
 
 Credentials: the environment file is `~/.config/iron-forest/<dir>.env`.
-Resolve its named variables from the organization-approved credential map
-before escalating. `OPENROUTER_API_KEY` is an instance completion credential.
-For Powder, `POWDER_AGENT=forest-<dir>` is the unique Kernel identity;
+Authorize a credential source before reading any value. The Misty Step
+credential map is authorized only when the forge organization is exactly
+`misty-step` and the resolved target is beneath `~/Development/misty-step/`.
+For every other target, never read or copy Misty Step credentials. Use only an
+explicit organization credential source declared by context applicable to that
+target; if none exists, bind the source as absent and require operator
+authority. Bind this decision as `credential_source_instruction`.
+
+`OPENROUTER_API_KEY` is an instance completion credential. For Powder,
+`POWDER_AGENT` is the canonical slug-derived Kernel identity bound above;
 `POWDER_API_KEY` authenticates transport and may be an approved organization
 secret unless the target Powder deployment explicitly requires per-instance
 keys. Never infer a dedicated Powder-key requirement from the unique-agent

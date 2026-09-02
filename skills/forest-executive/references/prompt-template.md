@@ -48,9 +48,9 @@ file of your own. Keep working rather than wrapping up early.
 </tracker>
 
 <credentials>
-`~/.config/iron-forest/{{dir}}.env`: {{env_file_meta}}. Resolve named values
-from approved Misty Step sources, copy them without output, and report only
-path, owner, mode, variable names, and presence.
+`~/.config/iron-forest/{{dir}}.env`: {{env_file_meta}}.
+{{credential_source_instruction}} Copy authorized named values without output
+and report only path, owner, mode, variable names, and presence.
 </credentials>
 
 <recent-signals>
@@ -76,7 +76,7 @@ The cycle below needs a Kernel that serves this repository. Build it first;
 each step has a check that proves it.
 
 1. In a sibling worktree `../{{dir}}-exec-onboard`, write `forest.yaml` (`repo: {{repo_slug}}`; `agents:` builder/verifier/fixer with `./forest poll <role>` and the README intervals; `checks:` exactly {{gates}}, in order) and `agents/{builder,verifier,fixer}/{agent.md,task.md}` plus `agents/_shared/skills/`, starting from the factory checkout's declarations and cutting anything that names Go or Iron Forest internals. Critic and Tester stay out (canary-only). Mirror `checks:` in CI. Open a PR, merge under your identity.
-2. Resolve the protected service environment before escalating. Create `~/.config/iron-forest/{{dir}}.env` with mode 0600. Use an operator-authorized instance `OPENROUTER_API_KEY`, the approved `POWDER_URL` and `POWDER_API_KEY`, and the unique workload identity `POWDER_AGENT=forest-{{dir}}`. `POWDER_AGENT`, not the transport key, distinguishes Kernels unless this Powder deployment explicitly declares per-instance API keys. Read only named values from approved Misty Step sources, copy them without output, and ask the operator only for a missing value or authority.
+2. Resolve the protected service environment before escalating. Create `~/.config/iron-forest/{{dir}}.env` with mode 0600. Use an operator-authorized instance `OPENROUTER_API_KEY`, the approved `POWDER_URL` and `POWDER_API_KEY`, and the canonical workload identity `POWDER_AGENT={{kernel_powder_agent}}`. Require an existing `POWDER_AGENT` to equal that value; stop on a mismatch. `POWDER_AGENT`, not the transport key, distinguishes Kernels unless this Powder deployment explicitly declares per-instance API keys. {{credential_source_instruction}} Read and copy only those authorized named values without output; ask the operator only when the binding records no authorized source or a required value is missing.
 3. Bring the primary checkout to the merged revision: in `{{repo_path}}`, `git status --porcelain` prints nothing, then `git fetch origin && git merge --ff-only origin/{{primary_branch}}`; `test -f forest.yaml`. The installer validates this checkout, not the worktree.
 4. From `{{factory_checkout}}`: `mise exec -- go build -o {{repo_path}}/forest .`; `(cd {{repo_path}} && ./forest selfcheck)` exits 0; `deploy/install-service.sh {{dir}}`.
 5. Prove it: `systemctl --user is-active forest@{{dir}}` prints `active`; `(cd {{repo_path}} && ./forest status)` shows `repo: {{repo_slug}}` and `kernel: running`. Do not create filler for dispatch proof. When a genuine complete Subject becomes takeable, watch the first Builder Run through `./forest run logs <id>` and the following audit pass; an idle empty queue is healthy.
