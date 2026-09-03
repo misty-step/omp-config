@@ -129,13 +129,15 @@ if [ -s "$hook_src" ]; then
 fi
 rm -f "$agent_dir/extensions/evidence-packet.ts"
 
-if [ -d "$repo_dir/extensions/loc" ]; then
-  install -d -m 700 "$agent_dir/extensions/loc"
-  for ext_entry in "$repo_dir"/extensions/loc/*; do
+for ext_dir in "$repo_dir"/extensions/*; do
+  [ -d "$ext_dir" ] || continue
+  ext_name=${ext_dir##*/}
+  install -d -m 700 "$agent_dir/extensions/$ext_name"
+  for ext_entry in "$ext_dir"/*; do
     [ -f "$ext_entry" ] || continue
-    install -m 700 "$ext_entry" "$agent_dir/extensions/loc/${ext_entry##*/}"
+    install -m 700 "$ext_entry" "$agent_dir/extensions/$ext_name/${ext_entry##*/}"
   done
-fi
+done
 
 loc_hook="$repo_dir/extensions/loc/git-hook.sh"
 if [ -x "$loc_hook" ]; then
