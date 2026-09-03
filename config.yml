@@ -19,11 +19,12 @@ statusLine:
   transparent: true
   sessionAccent: true
   compactThinkingLevel: true
-  showHookStatus: true
+  showHookStatus: false
   leftSegments:
     - hostname
     - model
     - mode
+    - status
     - git
     - subagents
   rightSegments:
