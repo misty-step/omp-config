@@ -1,3 +1,12 @@
+## [0.0.27](https://github.com/misty-step/omp-config/compare/v0.0.26...v0.0.27) (2026-09-03)
+
+
+### Features
+
+* **config:** set default gemini 3.8 flash, switch muse spark to contributor, restore external skills verbatim, and establish provenance rule ([216d378](https://github.com/misty-step/omp-config/commit/216d37851a2d86b8526cc9f32563b496d4d22505))
+* **skills:** vendor show-me, wrangler, and find-bugs verbatim from upstream ([cc75b01](https://github.com/misty-step/omp-config/commit/cc75b013907f022f7934736223137bab9e633dd0))
+* **theme:** align default omp theme with tokyonight ([f4cef25](https://github.com/misty-step/omp-config/commit/f4cef25e6937a29a9f40c2bd4ddbf97fa403df24))
+
 ## [0.0.26](https://github.com/misty-step/omp-config/compare/v0.0.25...v0.0.26) (2026-09-02)
 
 
