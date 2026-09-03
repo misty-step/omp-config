@@ -14,7 +14,7 @@ We strictly delineate between externally sourced skills and homebrew skills:
 - When updating an external skill, re-fetch it directly from the upstream authority without local drift.
 
 ### 2. Homebrew Skills
-- Misty Step native skills (`custom-linters`, `dispatch`, `evidence-packet`, `exocortex`, `research`, `show-me`, etc.) are actively maintained to Misty Step standards: terse, causal, evidence-first, and zero filler.
+- Misty Step native skills (`custom-linters`, `dispatch`, `evidence-packet`, `research`, `show-me`, etc.) are actively maintained to Misty Step standards: terse, causal, evidence-first, and zero filler.
 - Reject micro-wrappers that merely invoke an existing subagent or alias a one-line command.
 - Keep skill boundaries sharp. If two homebrew skills overlap in purpose, consolidate them.
 

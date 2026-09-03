@@ -86,18 +86,13 @@ that run only on explicit request:
 `understand`.
 
 Model-invocable — unambiguous triggers, bounded cost, cheap wrong-fire:
-`ast-grep`, `custom-linters`, `dispatch`, `evidence-packet`, `exocortex`,
+`ast-grep`, `custom-linters`, `dispatch`, `evidence-packet`,
 `frontend-design`, `herdr`, `research`, `show-me`, `wrangler`.
-
-The `exocortex` skill is generated from `misty-step/exocortex`
-`skills/exocortex/SKILL.md`. Do not hand-edit `skills/exocortex/SKILL.md`.
-Regenerate with that repo's `scripts/install-skill.sh` and prove with
-`skills/exocortex/check-source.sh`.
 
 ### Provenance: External vs Homebrew
 
 - **External skills** (`frontend-design` from Anthropic, `show-me` from HumanLayer, `audit-choices` from `dzhng/skills`, `wrangler` from Cloudflare, `find-bugs` from Sentry, `herdr` from `herdr.dev`, `ast-grep` from `ast-grep`): **NEVER edit externally sourced skills**. Keep them verbatim as references to other engineering styles and approaches.
-- **Homebrew skills** (`custom-linters`, `dispatch`, `evidence-packet`, `exocortex`, `research`, etc.): Misty Step native, actively maintained and kept lean.
+- **Homebrew skills** (`custom-linters`, `dispatch`, `evidence-packet`, `research`, etc.): Misty Step native, actively maintained and kept lean.
 
 When evaluating an external skill, pull it completely or write a distinct homebrew skill. Do not pull a popular external skill and then rewrite it into local dialect.
 

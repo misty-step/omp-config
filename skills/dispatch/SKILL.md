@@ -17,7 +17,7 @@ Done when failure and success are observable.
 
 ## Establish current truth
 
-Search exocortex for prior decisions. Run `omp models refresh`, `omp models
+Run `omp models refresh`, `omp models
 --json`, and `omp usage --json --redact`. Read live `config.yml` and specialist
 agent frontmatter. Remove inaccessible or quota-blocked selectors.
 
