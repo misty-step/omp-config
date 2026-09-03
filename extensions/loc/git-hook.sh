@@ -7,10 +7,14 @@
 set -eu
 
 ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
-CACHE="$ROOT/.git/loc_cache"
-TMP="$ROOT/.git/loc_cache.tmp.$$"
-LOCK="$ROOT/.git/loc_cache.lock"
-LOG="$ROOT/.git/loc_cache.log"
+CACHE="$(git rev-parse --git-path loc_cache 2>/dev/null)" || CACHE=".git/loc_cache"
+case "$CACHE" in
+	/*) ;;
+	*) CACHE="$ROOT/$CACHE" ;;
+esac
+TMP="${CACHE}.tmp.$$"
+LOCK="${CACHE}.lock"
+LOG="${CACHE}.log"
 
 if [ "${LOC_CACHE_BACKGROUND:-}" != "1" ]; then
 	LOC_CACHE_BACKGROUND=1
@@ -33,6 +37,10 @@ trap cleanup EXIT INT TERM
 write_cache() {
 	script_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 	analyze_ts="$script_dir/analyze.ts"
+	agent_dir="${PI_CODING_AGENT_DIR:-$HOME/.omp/agent}"
+	if [ ! -f "$analyze_ts" ] && [ -f "$agent_dir/extensions/loc/analyze.ts" ]; then
+		analyze_ts="$agent_dir/extensions/loc/analyze.ts"
+	fi
 	if [ ! -f "$analyze_ts" ] && [ -f "$ROOT/extensions/loc/analyze.ts" ]; then
 		analyze_ts="$ROOT/extensions/loc/analyze.ts"
 	fi
@@ -60,7 +68,7 @@ const data = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
 process.stdout.write(`code=${data.code ?? 0}\nfiles=${data.files ?? 0}\ntotal=${data.total ?? 0}\nsource=${data.source ?? "builtin"}`);
 ' "$CACHE")"
 	fi
-	printf 'LOC_CODE=%s LOC_FILES=%s LOC_TOTAL=%s LOC_SOURCE=%s\n' "$code" "$files" "$total" "$source" >"$ROOT/.git/loc_cache.env"
+	printf 'LOC_CODE=%s LOC_FILES=%s LOC_TOTAL=%s LOC_SOURCE=%s\n' "$code" "$files" "$total" "$source" >"${CACHE}.env"
 }
 
 write_cache

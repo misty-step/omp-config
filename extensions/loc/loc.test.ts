@@ -2,8 +2,8 @@ import { afterEach, describe, expect, test } from "bun:test";
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { analyzeBuiltin } from "./analyze.ts";
-import registerLocExtension from "./index.ts";
+import { analyzeBuiltin, readLocCache, resolveLocCachePath } from "./analyze.ts";
+import registerLocExtension, { triggerAsyncRefresh } from "./index.ts";
 
 const roots: string[] = [];
 
@@ -102,5 +102,52 @@ describe("LOC analysis", () => {
 		await commands.get("loc")?.handler("", ctx);
 		expect(messages).toHaveLength(1);
 		expect(statuses.at(-1)).toContain("4 LOC");
+		expect(readLocCache(root)).not.toBeNull();
+	});
+
+	test("in-process async worker populates cache and updates status", async () => {
+		const root = fixture();
+		const statuses: Array<string | undefined> = [];
+		const ctx = {
+			cwd: root,
+			hasUI: true,
+			ui: {
+				setStatus(_key: string, value: string | undefined) {
+					statuses.push(value);
+				},
+				theme: {
+					sep: { dot: "·" },
+					fg(_role: string, text: string) {
+						return text;
+					},
+					bold(text: string) {
+						return text;
+					},
+					getLangIconStyled(language: string) {
+						return language;
+					},
+				},
+			},
+		};
+
+		expect(readLocCache(root)).toBeNull();
+		const promise = triggerAsyncRefresh(ctx as never);
+		expect(promise).toBeDefined();
+		await promise;
+
+		expect(readLocCache(root)).not.toBeNull();
+		expect(statuses.at(-1)).toContain("4 LOC");
+	});
+
+	test("resolveLocCachePath resolves to per-worktree gitdir in linked worktree", () => {
+		const root = fixture();
+		const wtDir = join(tmpdir(), `omp-loc-wt-${Date.now()}`);
+		git(root, "worktree", "add", "-b", "wt-branch", wtDir);
+		roots.push(wtDir);
+
+		const cachePath = resolveLocCachePath(wtDir);
+		expect(cachePath).not.toBeNull();
+		expect(cachePath).toContain("worktrees");
+		expect(cachePath?.endsWith("loc_cache")).toBe(true);
 	});
 });

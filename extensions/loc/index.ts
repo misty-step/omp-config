@@ -4,9 +4,12 @@ import {
 	formatLocReport,
 	formatTrendReport,
 	getCommitDeltas,
+	getHeadHash,
 	getTrendPoints,
+	gitRoot,
 	readLocCache,
 	topLanguages,
+	writeLocCache,
 	type LocStats,
 } from "./analyze.ts";
 
@@ -54,7 +57,40 @@ function sendText(pi: ExtensionAPI, text: string): void {
 async function resolveStats(ctx: ExtensionContext): Promise<LocStats> {
 	const cached = readLocCache(ctx.cwd);
 	if (cached) return cached;
-	return analyzeRepo(ctx.cwd);
+	const stats = await analyzeRepo(ctx.cwd);
+	writeLocCache(ctx.cwd, stats);
+	return stats;
+}
+
+const inFlightRefreshes = new Map<string, Promise<void>>();
+
+export function triggerAsyncRefresh(ctx: ExtensionContext): Promise<void> | undefined {
+	const root = gitRoot(ctx.cwd);
+	if (!root) return;
+	const headHash = getHeadHash(root);
+	if (!headHash) return;
+	const key = `${root}:${headHash}`;
+	const existing = inFlightRefreshes.get(key);
+	if (existing) return existing;
+
+	const promise = (async () => {
+		try {
+			const stats = await analyzeRepo(root);
+			if (stats.headHash === headHash) {
+				writeLocCache(root, stats);
+				if (ctx.hasUI && gitRoot(ctx.cwd) === root) {
+					ctx.ui.setStatus("loc", formatNativeStatusLine(stats, ctx.ui.theme));
+				}
+			}
+		} catch {
+			// Non-fatal background calculation failure
+		} finally {
+			inFlightRefreshes.delete(key);
+		}
+	})();
+
+	inFlightRefreshes.set(key, promise);
+	return promise;
 }
 
 function refreshStatus(ctx: ExtensionContext, stats?: LocStats): void {
@@ -62,6 +98,7 @@ function refreshStatus(ctx: ExtensionContext, stats?: LocStats): void {
 	const resolved = stats ?? readLocCache(ctx.cwd);
 	if (!resolved || resolved.files === 0) {
 		ctx.ui.setStatus("loc", undefined);
+		if (!stats) triggerAsyncRefresh(ctx);
 		return;
 	}
 	ctx.ui.setStatus("loc", formatNativeStatusLine(resolved, ctx.ui.theme));

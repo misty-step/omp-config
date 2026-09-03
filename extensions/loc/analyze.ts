@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { spawn, spawnSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
-import { basename, extname, join } from "node:path";
+import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { basename, dirname, extname, isAbsolute, join, resolve } from "node:path";
 
 export interface LanguageStats {
 	files: number;
@@ -81,9 +81,25 @@ function run(cmd: string, args: string[], cwd: string) {
 	return { ok: result.status === 0, stdout: result.stdout ?? "", stderr: result.stderr ?? "" };
 }
 
-function gitRoot(cwd: string): string | null {
+export function gitRoot(cwd: string): string | null {
 	const result = run("git", ["rev-parse", "--show-toplevel"], cwd);
 	return result.ok ? result.stdout.trim() || null : null;
+}
+
+export function getHeadHash(cwd: string): string | null {
+	const root = gitRoot(cwd);
+	if (!root) return null;
+	const resolved = run("git", ["rev-parse", "HEAD^{commit}"], root);
+	return resolved.ok ? resolved.stdout.trim() || null : null;
+}
+
+export function resolveLocCachePath(cwd: string): string | null {
+	const root = gitRoot(cwd);
+	if (!root) return null;
+	const res = run("git", ["rev-parse", "--git-path", "loc_cache"], root);
+	if (!res.ok || !res.stdout.trim()) return null;
+	const path = res.stdout.trim();
+	return isAbsolute(path) ? path : resolve(root, path);
 }
 
 interface TrackedObject {
@@ -314,14 +330,27 @@ export async function getTrendPoints(cwd: string, count = 6): Promise<TrendPoint
 	return points;
 }
 
+export function writeLocCache(cwd: string, stats: LocStats): void {
+	const cachePath = resolveLocCachePath(cwd);
+	if (!cachePath) return;
+	const payload = JSON.stringify({ ...stats, updatedAt: Math.floor(Date.now() / 1000) });
+	const tmpPath = `${cachePath}.tmp.${process.pid}`;
+	try {
+		mkdirSync(dirname(cachePath), { recursive: true });
+		writeFileSync(tmpPath, payload);
+		renameSync(tmpPath, cachePath);
+	} catch {
+		try { rmSync(tmpPath, { force: true }); } catch {}
+	}
+}
+
 export function readLocCache(cwd: string): (LocStats & { updatedAt?: number }) | null {
 	const root = gitRoot(cwd);
 	if (!root) return null;
-	const resolved = run("git", ["rev-parse", "HEAD^{commit}"], root);
-	const headHash = resolved.ok ? resolved.stdout.trim() : "";
+	const headHash = getHeadHash(root);
 	if (!headHash) return null;
-	const cachePath = join(root, ".git", "loc_cache");
-	if (!existsSync(cachePath)) return null;
+	const cachePath = resolveLocCachePath(cwd);
+	if (!cachePath || !existsSync(cachePath)) return null;
 	try {
 		const parsed = JSON.parse(readFileSync(cachePath, "utf8")) as LocStats & { updatedAt?: number };
 		return typeof parsed.code === "number" && parsed.headHash === headHash ? parsed : null;
