@@ -11,7 +11,7 @@ modelRoles:
   commit: "@smol"
 symbolPreset: nerd
 theme:
-  dark: everforest
+  dark: tokyonight
   light: everforest-light
 statusLine:
   preset: custom
