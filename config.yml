@@ -23,6 +23,7 @@ statusLine:
   leftSegments:
     - hostname
     - model
+    - mode
     - path
     - git
     - subagents
