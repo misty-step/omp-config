@@ -124,6 +124,4 @@ Bash(open path/to/show-me-{description}.html)
 
 Place each visual next to the short text it supports. Keep only the calls, files, props, states, and boundaries needed to answer the user's current question or the options to resolve the current discussion point.
 
-For pull requests, issues, and review comments, embed the visual model (diff, tree, Mermaid) directly in the Markdown body, and attach rendered images or recordings natively with `gh pr create --attach` / `gh pr comment --attach`.
-
 You may use one of these, you may use several, it is unlikely you will use all of them. Use your judgement and don't overwhelm the user.

@@ -80,15 +80,14 @@ Operator-invoked (`disable-model-invocation: true`) — human-directed flows
 that run only on explicit request:
 `agent-ergonomics`, `audit-choices`, `audit-observability`, `audit-simplifications`, `backlog`,
 `brief`, `capture`, `code-review`, `core-docs`, `deliver`,
-`diagnose`, `executive`, `extract-module`, `field-station`, `forest-executive`, `foundation`, `groom`,
+`diagnose`, `executive`, `extract-module`, `field-station`, `find-bugs`, `forest-executive`, `foundation`, `groom`,
 `install-anti-slop`, `now-next`, `polish`, `product-description`, `pulse`, `refactor`,
 `release`, `resilience`, `security-review`, `shape`, `tidy`, `torvalds-design-review`,
 `understand`.
 
 Model-invocable — unambiguous triggers, bounded cost, cheap wrong-fire:
 `ast-grep`, `custom-linters`, `dispatch`, `evidence-packet`, `exocortex`,
-`frontend-design`, `herdr`, `research`, `show-me`.
-
+`frontend-design`, `herdr`, `research`, `show-me`, `wrangler`.
 
 The `exocortex` skill is generated from `misty-step/exocortex`
 `skills/exocortex/SKILL.md`. Do not hand-edit `skills/exocortex/SKILL.md`.
@@ -97,8 +96,8 @@ Regenerate with that repo's `scripts/install-skill.sh` and prove with
 
 ### Provenance: External vs Homebrew
 
-- **External skills** (`frontend-design` from Anthropic, `audit-choices` from `dzhng/skills`, `herdr` from `herdr.dev`, `ast-grep` from `ast-grep`): **NEVER edit externally sourced skills**. Keep them verbatim as references to other engineering styles and approaches.
-- **Homebrew skills** (`custom-linters`, `dispatch`, `evidence-packet`, `exocortex`, `research`, `show-me`, etc.): Misty Step native, actively maintained and kept lean.
+- **External skills** (`frontend-design` from Anthropic, `show-me` from HumanLayer, `audit-choices` from `dzhng/skills`, `wrangler` from Cloudflare, `find-bugs` from Sentry, `herdr` from `herdr.dev`, `ast-grep` from `ast-grep`): **NEVER edit externally sourced skills**. Keep them verbatim as references to other engineering styles and approaches.
+- **Homebrew skills** (`custom-linters`, `dispatch`, `evidence-packet`, `exocortex`, `research`, etc.): Misty Step native, actively maintained and kept lean.
 
 When evaluating an external skill, pull it completely or write a distinct homebrew skill. Do not pull a popular external skill and then rewrite it into local dialect.
 
