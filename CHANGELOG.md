@@ -1,3 +1,14 @@
+## [0.0.28](https://github.com/misty-step/omp-config/compare/v0.0.27...v0.0.28) (2026-09-03)
+
+
+### Features
+
+* **loc:** add in-process async cache worker and worktree resolution ([06e082a](https://github.com/misty-step/omp-config/commit/06e082a1f663130fd635ca7f83d7c47917ff5058))
+* **statusbar:** replace built-in path with cwd extension ([7de6a75](https://github.com/misty-step/omp-config/commit/7de6a7508304fc61babf9966a591e395a271f479))
+* **statusbar:** surface cwd and loc on the main status segment ([87c40e6](https://github.com/misty-step/omp-config/commit/87c40e6abd5484306f561c532df81868817a0cfa))
+* **statusline:** restore mode segment for loop and goal visibility ([c110ed1](https://github.com/misty-step/omp-config/commit/c110ed1a0ebac41439a1f91b2bfee86a0707cfea))
+* **statusline:** streamline segments and update host icon to padded server glyph ([1871261](https://github.com/misty-step/omp-config/commit/1871261ca92964f7d18cf5f7bc636c3f81aa8881))
+
 ## [0.0.27](https://github.com/misty-step/omp-config/compare/v0.0.26...v0.0.27) (2026-09-03)
 
 
