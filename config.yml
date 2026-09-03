@@ -21,21 +21,19 @@ statusLine:
   compactThinkingLevel: true
   showHookStatus: true
   leftSegments:
+    - hostname
     - model
-    - mode
     - path
     - git
-    - pr
     - subagents
   rightSegments:
     - session_name
-    - cache_hit
     - context_pct
     - cost
   segmentOptions:
     path:
       abbreviate: true
-      maxLength: 36
+      maxLength: 24
       stripWorkPrefix: true
     git:
       showBranch: true

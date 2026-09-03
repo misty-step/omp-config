@@ -101,6 +101,9 @@
     "codeBg": "#efebd4"
   },
   "symbols": {
-    "preset": "nerd"
+    "preset": "nerd",
+    "overrides": {
+      "icon.host": " "
+    }
   }
 }
