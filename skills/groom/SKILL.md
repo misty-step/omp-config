@@ -1,68 +1,66 @@
 ---
 name: groom
-description: >
-  Investigate a named backlog scope through the default design lenses,
-  then reconcile the board with product direction and evidence.
+description: Reconcile a named backlog scope through only the evidence-bearing review lenses.
 disable-model-invocation: true
 argument-hint: "[project, repository, board scope, or item IDs]"
 ---
 
 # Groom
 
-Groom the operator's named scope. The default is a deep investigation from
-every default lens. Explicit conversational context may narrow that scope,
-including to one ticket or decision.
+Groom the Operator's named scope. Investigate only questions whose answers can
+change an item's disposition, priority, owner, or proof.
 
-## Default lenses
+## Ground
 
-Dispatch one subagent per required lens in a single batch. Each agent reads
-`skill://<name>` first and reports only on the named scope.
+Read the affected items and their direct blockers, duplicates, proofs, and
+owners. For Misty Step, run `powder skill`. Read source, decisions, pull
+requests, or the running product only when an item's disposition depends on the
+claim.
 
-Always, unless the operator names a smaller set:
+State the largest mismatch between the board and current evidence. Separate
+fact, inference, and Operator choice.
 
-- `agent-ergonomics`
-- `audit-observability`
-- `audit-simplifications`
-- `custom-linters`
-- `core-docs`
-- `extract-module`
-- `foundation`
+Done when the controlling items, relations, and unresolved decision are
+explicit.
 
-These use `scout` unless a more specific read-only agent exists.
+## Select lenses
 
-`torvalds-design-review` stays in the default set as a conditional bounded
-reviewer. Send one packet to `torvalds-reviewer` only when the named scope
-contains a load-bearing or hard-to-reverse design. Skip it when none is in
-scope.
+Select only independent lenses that can change the named decision. Typical
+lenses ask:
 
-The operator may add lenses. Drop a default lens only when the operator
-names a smaller set.
+- Can the acting agent understand, control, and observe the workflow?
+- Can an operator identify the failed release, impact, and recovery action?
+- Can the system delete a representation, owner, state, or coordination path?
+- Does a recurring decidable defect justify an executable control?
+- Is a non-obvious operating or domain fact missing from its owning document?
+- Does a proposed module boundary remove more coupling than it creates?
+- Is one missing build, test, release, or recovery control blocking safe change?
 
-Skip formatters, linters, and project-wide suites in the batch. Do not
-mutate the board or the repository during Understand.
+Dispatch one read-only subagent per selected lens in one batch. Use `scout`
+unless a more specific read-only agent exists. Give every task the same scope,
+accepted intent, evidence boundary, and output contract. Require exact evidence,
+the smallest coherent correction, and a clean result when no finding survives.
+Skip repository mutation, board mutation, formatters, linters, and project-wide
+test suites.
 
-## Understand
+Use `torvalds-reviewer` once only when the scope contains a load-bearing or
+hard-to-reverse design. No minimum lens or agent count applies.
 
-Use [`../backlog/SKILL.md`](../backlog/SKILL.md) to read the affected items
-and direct relations.
-
-Run the default lens batch. Synthesize findings into backlog, roadmap,
-and vision implications.
-
-State the largest mismatch between the board and current evidence. Ask one
-focused question when product intent remains open.
-
-Done when the operator can decide the named issue.
+Done when each selected lens has a decision-changing reason and no two lenses
+own the same question.
 
 ## Reconcile
 
-Challenge unsupported work, merge duplicate ownership, and prefer an existing
-interface or owner. Once the operator settles a choice, apply its reversible
-Powder mutations without another approval ceremony. Ask again only for added
-scope, cost, risk, or irreversible effect.
+Synthesize the supported findings into backlog, roadmap, and vision
+implications. Challenge unsupported work, merge duplicate ownership, and prefer
+an existing interface or owner.
+
+Ask one focused question when product intent remains open. Once the Operator
+settles it, apply the reversible Powder mutations without another approval
+round. Ask again only for added scope, cost, risk, or irreversible effect.
 
 Use current CLI help. Preserve live leases and never take work merely to groom
-it. Batch the accepted mutations, then read the changed items and their direct
+it. Batch accepted mutations, then read back the changed items and their direct
 relations once.
 
 Return changed, unchanged, and unresolved item IDs with reasons and the next

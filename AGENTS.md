@@ -8,13 +8,13 @@ We strictly delineate between externally sourced skills and homebrew skills:
 
 ### 1. Externally Sourced Skills
 - **Rule: NEVER edit externally sourced skills.**
-- External skills (`frontend-design`, `audit-choices`, `herdr`, `ast-grep`, and vendored ecosystem skills) are preserved verbatim as authentic references to other engineering paradigms, vocabularies, and design philosophies.
+- External skills (`frontend-design`, `show-me`, `audit-choices`, `wrangler`, `find-bugs`, `herdr`, `ast-grep`, and other vendored ecosystem skills) are preserved verbatim as authentic references to other engineering paradigms, vocabularies, and design philosophies.
 - Do not compress, rewrite into local dialect, or "futz" with external skills. Their value lies in being unvarnished reference implementations.
 - If a project needs custom behavior divergent from an external skill, write a distinct, cleanly named homebrew skill or handle it via configuration. Do not modify the external copy.
 - When updating an external skill, re-fetch it directly from the upstream authority without local drift.
 
 ### 2. Homebrew Skills
-- Misty Step native skills (`custom-linters`, `dispatch`, `evidence-packet`, `research`, `show-me`, etc.) are actively maintained to Misty Step standards: terse, causal, evidence-first, and zero filler.
+- Misty Step native skills (`custom-linters`, `dispatch`, `evidence-packet`, `research`, etc.) are actively maintained to Misty Step standards: terse, causal, evidence-first, and zero filler.
 - Reject micro-wrappers that merely invoke an existing subagent or alias a one-line command.
 - Keep skill boundaries sharp. If two homebrew skills overlap in purpose, consolidate them.
 
