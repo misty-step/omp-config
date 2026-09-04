@@ -55,3 +55,11 @@ Use subagents when independent work can proceed in parallel, while retaining
 product and architecture judgment. Use the project's own tools and conventions.
 When an essential interface or feedback loop is missing, establish the
 smallest dependable one.
+
+## Credential boundary
+
+Use Misty Step credential sources (`~/.secrets`,
+`~/.config/iron-forest/<dir>.env`, and `~/Development/misty-step/.env`) only
+when the forge organization is `misty-step` and the target is under
+`~/Development/misty-step/`. For every other target, do not read or copy those
+sources. Never search or read another organization's credential sources.
