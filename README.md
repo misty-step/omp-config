@@ -78,16 +78,16 @@ Two invocation classes:
 
 Operator-invoked (`disable-model-invocation: true`) — human-directed flows
 that run only on explicit request:
-`agent-ergonomics`, `audit-choices`, `audit-observability`, `audit-simplifications`, `backlog`,
-`brief`, `capture`, `code-review`, `core-docs`, `deliver`,
-`diagnose`, `executive`, `extract-module`, `field-station`, `find-bugs`, `forest-executive`, `foundation`, `groom`,
-`install-anti-slop`, `now-next`, `polish`, `product-description`, `pulse`, `refactor`,
-`release`, `resilience`, `security-review`, `shape`, `tidy`, `torvalds-design-review`,
-`understand`.
+`agent-ergonomics`, `audit-observability`, `audit-simplifications`, `backlog`,
+`brief`, `capture`, `code-review`, `core-docs`, `deliver`, `diagnose`,
+`executive`, `extract-module`, `field-station`, `forest-executive`, `foundation`,
+`groom`, `install-anti-slop`, `now-next`, `polish`, `product-description`,
+`pulse`, `refactor`, `release`, `resilience`, `security-review`, `shape`, `tidy`,
+`torvalds-design-review`, `understand`.
 
 Model-invocable — unambiguous triggers, bounded cost, cheap wrong-fire:
-`ast-grep`, `custom-linters`, `dispatch`, `evidence-packet`,
-`frontend-design`, `herdr`, `research`, `show-me`, `wrangler`.
+`ast-grep`, `audit-choices`, `custom-linters`, `dispatch`, `evidence-packet`,
+`find-bugs`, `frontend-design`, `herdr`, `research`, `show-me`, `wrangler`.
 
 ### Provenance: External vs Homebrew
 

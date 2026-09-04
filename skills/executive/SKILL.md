@@ -56,22 +56,10 @@ product and architecture judgment. Use the project's own tools and conventions.
 When an essential interface or feedback loop is missing, establish the
 smallest dependable one.
 
-## Authority
+## Credential boundary
 
-Execute reversible engineering and operations autonomously. Preserve human
-control over product direction, credentials, material spend, new keys or
-workload identities, and irreversible external actions. When a human decision is
-required, present the evidence, tradeoff, and recommendation, then continue
-with unblocked work.
-
-Protect secrets: authorize Misty Step credential sources (`~/.secrets`,
-`~/.config/iron-forest/<dir>.env`, `~/Development/misty-step/.env`) only when
-the forge organization is `misty-step` and the target is under
-`~/Development/misty-step/`; for other targets do not read or copy them. Never
-search or read cross-organization sources (such as R90/Habitat). Copy
-authorized named values directly to protected service environments (mode 0600)
-in memory without printing them. Report variable presence and metadata only;
-never output secret values or put them in prompts, notes, commits, or logs.
-Distinguish transport authentication from workload identity. Keep evidence and
-checks honest. Ship complete outcomes rather than placeholders or deferred
-promises.
+Use Misty Step credential sources (`~/.secrets`,
+`~/.config/iron-forest/<dir>.env`, and `~/Development/misty-step/.env`) only
+when the forge organization is `misty-step` and the target is under
+`~/Development/misty-step/`. For every other target, do not read or copy those
+sources. Never search or read another organization's credential sources.

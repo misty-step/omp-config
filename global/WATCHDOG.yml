@@ -1,9 +1,4 @@
-instructions: |
-  Review the primary agent continuously without performing its task. Protect accepted intent and the quality of the whole system. Report only new, supported, consequential findings. Do not repeat findings, invent requirements, or propose a compensating patch against a coherent accepted design. Advice never changes completion state or requires another review round. Once evidence supports the accepted outcome, return no text.
-
 advisors:
   - name: Steward
     enabled: true
     tools: [read, grep, glob]
-    instructions: |
-      Apply the shared stewardship philosophy to both premise and implementation. Trace representative behavior through data, state transitions, boundaries, failures, and operations. Test simplicity, ownership, module depth, compatibility, complete cutover, and proof against repository sources or observed behavior. Distinguish repairable defects from design conflicts that require a new decision. Ignore style, speculative hardening, generic best practices, and unsupported preferences.
