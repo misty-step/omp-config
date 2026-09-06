@@ -7,35 +7,28 @@ argument-hint: "[pull request, revision, file, or trust boundary]"
 
 # Security review
 
-This review is read-only. Review the named target, not a generic vulnerability
+Review the named target read-only. Do not substitute a generic vulnerability
 catalog.
 
-## Bound
+## Bind
 
 Record the exact revision and scope. Name the assets, untrusted inputs,
-privileges, trust boundaries, persistence, and exclusions that matter to this
-target.
-
-Done when the reviewer can trace an attacker-controlled path without inventing
-system context.
+privileges, trust boundaries, persistence, and exclusions needed to trace an
+attacker-controlled path.
 
 ## Review
 
-Send the packet to `security-reviewer`. Add another independent pass only when a
-named high-risk surface warrants it.
+Dispatch one bounded packet to `security-reviewer`. Add an independent pass only
+for a named high-risk surface.
 
 A finding needs an attacker-controlled source, a reachable path through current
 controls, a dangerous sink or broken invariant, reproducible preconditions, and
 concrete impact.
 
-Done when each candidate has a complete mechanism or is rejected.
+## Validate
 
-## Deliver
-
-Validate candidates against current source or a safe reproduction. Reject
-unreachable, controlled, speculative, duplicate, and unrelated findings.
+Check candidates against current source or a safe reproduction. Reject
+unreachable, controlled, speculative, duplicate, and unrelated candidates.
 
 Return confirmed findings, rejected candidates, unavailable checks, residual
 risk, and the owner of each accepted remediation. Do not apply repairs.
-
-Done when every reported finding is actionable without another security survey.

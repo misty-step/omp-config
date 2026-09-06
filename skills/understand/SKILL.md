@@ -7,42 +7,26 @@ argument-hint: "[topic, artifact, code, decision, or question]"
 
 # Understand
 
-Build the smallest mental model that lets the user answer their question; a
-summary is not an explanation. Keep the response explanatory. Change an
-artifact only when the user explicitly asks for a change.
+Build the smallest mental model that lets the user answer the question. A
+summary is not an explanation; change artifacts only when explicitly asked.
 
-## Ground the subject
+## Ground
 
-Resolve the subject, question, and useful boundary from the argument and active
-conversation. Ask one focused question only when an unresolved ambiguity would
-materially change the explanation. Inspect an artifact directly when one is in
-scope. Verify changeable or disputed factual claims against current primary
-sources. Separate observed facts, inferences, and open gaps.
+Resolve the subject, question, and boundary from the argument and conversation.
+Inspect in-scope artifacts directly. Verify changeable or disputed claims
+against current primary sources. Separate observed facts, inferences, and gaps.
+Ask one focused question only when ambiguity would materially change the model.
 
-Done when the subject, the question being answered, and the model's boundary are
-explicit.
+## Build
 
-## Build the model
+Start with the context and organizing idea. Follow the subject's real
+structure: causal flow, composition, sequence, constraints, or tradeoffs.
+Define terms at first use and include only needed prerequisites. Trace one
+concrete artifact or example end to end. Use analogies only when their limits
+are clear.
 
-Start with the context that makes the subject matter and the one idea that
-organizes it. Use the structure the subject actually has: causal flow,
-composition, sequence, constraints, or tradeoffs. Explain only the essential
-relationships. Define terms at first use. Use conversation cues to set depth;
-when there are none, include only the prerequisites needed for the question.
+## Test
 
-Trace the supplied artifact or one concrete example end to end. Use an analogy
-only when it preserves the relevant mechanism, and name where it stops matching
-reality.
-
-Done when the essential concepts have explicit roles and relationships, and
-those relationships explain the artifact or example.
-
-## Test the model
-
-Test the model with at most one useful boundary, failure case, changed
-assumption, or genuinely confusable alternative. Include it only when it
-materially sharpens the answer. End with the shortest restatement or nearby
-case that demonstrates the model.
-
-Done when the response answers the stated question at the smallest useful depth
-and every included example or boundary follows from the stated model.
+Include at most one boundary, failure case, changed assumption, or confusable
+alternative when it sharpens the answer. Return the model, evidence, and open
+gaps at the smallest useful depth.

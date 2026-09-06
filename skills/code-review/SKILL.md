@@ -11,58 +11,36 @@ Review one exact head. Keep redesign, taste, and unrelated cleanup out of scope.
 
 ## Bind
 
-Resolve the base and head. Collect the accepted intent, invariants, non-goals,
-diff, affected code, real-surface proof, and current pull-request comments.
-
-Run the fastest repository-owned deterministic gates first and treat their
-output as authoritative. Repair changed-caused failures and restart Bind on the
-new head. Return unrelated required-gate failures without spending a model
-review. Review only the exact green head.
-
-Done when a reviewer can judge the residual risk without inventing context or
-rediscovering deterministic failures.
+Resolve base and head. Collect accepted intent, invariants, non-goals, diff,
+affected code, real-surface proof, and current pull-request comments. Run the
+fastest repository-owned deterministic gates first. Repair changed-caused
+failures and restart on the new head; report unrelated gate failures without
+model review.
 
 ## Inspect
 
-Review only risk that the green gates cannot decide: accepted intent, domain
-behavior, state transitions, ownership boundaries, non-local interactions, and
-the concurrency, recovery, security, or operating consequences the change
-actually touches.
+Review only residual risk the green gates cannot decide: intent, domain behavior,
+state transitions, ownership boundaries, non-local effects, and touched
+concurrency, recovery, security, or operating consequences.
 
-Send the packet to `reviewer`. Use one bounded review for a routine executable
-change. Add a focused independent review only for a material high-risk surface;
-use `/security-review` for changed trust boundaries. Treat green deterministic
-gates as authoritative for the patterns they own.
+Dispatch one bounded review to `reviewer`; add an independent pass only for a
+material high-risk surface. Use `/security-review` for changed trust boundaries.
+Each finding needs exact location, trigger, mechanism, violated contract,
+evidence, and smallest repair. Reject unsupported, pre-existing, taste-only,
+and out-of-scope findings. A blocker must be caused or worsened by this change
+and make release unsafe.
 
-Require each finding to name the exact location, trigger, failure mechanism,
-violated contract, evidence, and smallest coherent repair. Use targeted diffs
-or pseudocode to show the repair. For UI regressions or visual failures, attach
-reproduction media directly with `gh pr comment --attach`. Validate every
-finding against the current source. Reject unsupported, pre-existing,
-taste-only, and out-of-scope findings. A Blocker must be caused or worsened by
-this change and make release unsafe.
-
-A recurring finding whose invariant is decidable from syntax, types, dependency
-graphs, configuration, or other local evidence is a control candidate. Report
-it once with the invariant, recurrence or consequence evidence, required
-analysis, forbidden and permitted examples, and owning repository command. It
-is a Blocker only when the current violation itself makes release unsafe.
-
-Done when every finding is confirmed, rejected, or classified as a control
-candidate.
+Classify a recurring invariant decidable from syntax, types, dependency graphs,
+configuration, or local evidence as a control candidate. Report recurrence,
+required analysis, forbidden and permitted examples, and the owning command.
+It is a blocker only when the current violation makes release unsafe.
 
 ## Close
 
-Repair confirmed Blockers. Rerun the deterministic gates and affected real
-scenario. If the head changes, review only the repair on the new head.
+Repair confirmed blockers, rerun affected gates and the real scenario, and
+review only the repair on a changed head. Record control candidates for
+`/custom-linters` or `/foundation`; delete the recurring review instruction
+after the control ships.
 
-Record accepted control candidates in the project's trusted work record and
-route their separate implementation through `/custom-linters` (or `/foundation`
-when the repository lacks a lint host).
-Once a control ships, its normal lint command owns the invariant; delete the
-corresponding recurring review instruction.
-
-Return the final head, confirmed Blockers, control candidates, non-blocking
-findings, rejected findings, checks, proof, and residual risk.
-
-Done when no Blocker or failed required gate remains.
+Return final head, blockers, control candidates, non-blocking and rejected
+findings, checks, proof, and residual risk.

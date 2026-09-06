@@ -1,30 +1,16 @@
-# omp-config Agent Guidelines
+# omp-config
 
-This repository is the source of truth for the OMP coding harness configuration across Misty Step environments. Changes made here deploy to `~/.omp/agent` via `./install`.
+Edit harness sources here. Run `./install` to deploy to `$(omp config path)`;
+keep live deployed files out of manual edits. The installer merges existing
+MCP authentication and replaces the deployed skills and agents.
 
-## Skill Provenance Policy
+## Skill provenance
 
-We strictly delineate between externally sourced skills and homebrew skills:
+External skills (`frontend-design`, `show-me`, `audit-choices`, `wrangler`,
+`find-bugs`, `herdr`, `ast-grep`, and other vendored packages) stay verbatim.
+Update from upstream or remove the whole package. Use a distinctly named
+homebrew skill when different behavior is needed.
 
-### 1. Externally Sourced Skills
-- **Rule: NEVER edit externally sourced skills.**
-- External skills (`frontend-design`, `show-me`, `audit-choices`, `wrangler`, `find-bugs`, `herdr`, `ast-grep`, and other vendored ecosystem skills) are preserved verbatim as authentic references to other engineering paradigms, vocabularies, and design philosophies.
-- Do not compress, rewrite into local dialect, or "futz" with external skills. Their value lies in being unvarnished reference implementations.
-- If a project needs custom behavior divergent from an external skill, write a distinct, cleanly named homebrew skill or handle it via configuration. Do not modify the external copy.
-- When updating an external skill, re-fetch it directly from the upstream authority without local drift.
-
-### 2. Homebrew Skills
-- Misty Step native skills (`custom-linters`, `dispatch`, `evidence-packet`, `research`, etc.) are actively maintained to Misty Step standards: terse, causal, evidence-first, and zero filler.
-- Reject micro-wrappers that merely invoke an existing subagent or alias a one-line command.
-- Keep skill boundaries sharp. If two homebrew skills overlap in purpose, consolidate them.
-
-### 3. Harness Iteration Discipline
-- We iterate constantly on our harness: evaluating, adding, consolidating, and pruning primitives.
-- Before introducing a new skill, check for conceptual overlap with existing tools and skills.
-- When deprecating or replacing a skill, perform a clean cutover: migrate callers, update documentation, and delete obsolete directories.
-
-## Workflow & Deployment
-
-1. Always edit configuration, models, themes, and skills inside this repository. Never edit the live deployed files in `~/.omp/agent/` directly.
-2. Run `./install` to validate sources, check syntax, merge MCP auth, and deploy changes atomically.
-3. Keep commits atomic and conventional (`feat`, `fix`, `refactor`).
+Homebrew skills should contribute useful knowledge or a distinct outcome.
+Consolidate overlapping skills and remove command wrappers. When replacing a
+skill, migrate callers and remove obsolete directories in the same change.

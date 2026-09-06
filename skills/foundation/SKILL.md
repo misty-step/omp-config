@@ -7,45 +7,30 @@ argument-hint: "[repo-path]"
 
 # Foundation
 
-Strengthen the existing project. Do not apply a standard stack or control
-checklist.
+Install one project-owned control for an observed gap. Do not impose a standard
+stack or checklist.
 
 ## Inspect
 
 Read the current build, test, run, CI, release, operating, and review paths.
-Identify the smallest observed gap that makes change unsafe or unnecessarily
-difficult. Repeated human or agent comments about the same locally decidable
-violation are evidence of a missing executable control. Treat an existing
-equivalent control as sufficient.
+Find the smallest gap that makes change unsafe or unnecessarily difficult.
+Repeated confirmed comments about one locally decidable violation justify an
+executable control; an equivalent existing control is enough.
 
-For delivery or resilience work, enforce the dependency order: green
-repository-owned CI, including its deterministic fast gates, before automated
-delivery; repository-owned deploy, artifact identity, health signals, and a
-previously proved recovery action relevant to the named invariant before
-production fault injection. Stop at the earliest missing prerequisite.
+For delivery or resilience, require green repository-owned CI before automated
+delivery. Require owned deploy, artifact identity, health signals, and a proved
+recovery action before production fault injection. Stop at the earliest missing
+prerequisite.
 
-Done when one gap, its consequence, supporting evidence, and current owner are
-source-grounded.
+## Choose and install
 
-## Agree
+Use the project's current tools and substrate. Prefer the existing lint host
+for local invariants and use `/custom-linters` for rule design. Include
+migration or rollback only when persisted state or release behavior changes.
+Route material human choices through `/shape`.
 
-Propose the smallest control that closes the gap through the project's current
-tools, deployment substrate, and interfaces. Change orchestration platforms only
-when workload or operating evidence requires it. For a locally decidable
-invariant, prefer the existing lint host and use `/custom-linters` to design the
-rule. State cost, operator burden, and proof. Include migration or rollback only
-when the change affects persisted state or release behavior. Put material human
-choices through `/shape`.
-
-Done when the operator accepts one bounded change.
-
-## Install
-
-Implement the accepted control. Show that it fails on one safe representative
-defect, then remove the probe and run the clean path. Exercise any changed
-developer or operator interface.
+Implement the accepted control. Show one safe representative defect going red,
+remove the probe, run the clean path, and exercise the changed developer or
+operator interface.
 
 Return the gap, control, checks, observed result, and remaining limitation.
-
-Done when the control catches the named defect without adding a parallel
-workflow.

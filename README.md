@@ -4,6 +4,10 @@ Omp harness configuration for Phaedrus / Misty Step. Source of truth for how
 agents run on this machine: model roles, global policy, skills, themes.
 `./install` deploys everything.
 
+Shared prompting follows the [GPT-6 Astra prompting guide](https://developers.openai.com/api/docs/guides/latest-model/gpt-6-astra.md#prompting-best-practices):
+complete intended work, ask focused questions, delegate useful independent work,
+write plainly, and stop verification when the relevant checks pass.
+
 ## Layout
 
 | Path | Purpose |
@@ -13,8 +17,7 @@ agents run on this machine: model roles, global policy, skills, themes.
 | `config.yml` | Model roles and fallback chains, theme/statusline/TUI display, providers (web search routed through exa), task/LSP settings |
 | `models.yml` | Local Ollama provider discovery; cloud models come from omp's bundled catalog |
 | `mcp.json` | Declared MCP servers; `install` merges per-server auth/oauth from the live copy |
-| `global/AGENTS.md` | Session-opening context for architecture, technology, review, operations, and communication |
-| `global/RULES.md` | Short core rules reattached near every turn: deletion, reversibility, cutovers, proof, failures, and expert judgment |
+| `global/AGENTS.md` | Astra-guided follow-through, communication, delegation, verification, and local operational boundaries |
 | `agents/` | Read-only specialist agents; installed globally and routed by each agent's model role |
 | `global/WATCHDOG.md`, `WATCHDOG.yml` | Continuous Steward advisor: a high-reasoning model reviews intent, design, correctness, proof, and operations; roster configured in YAML |
 | `themes/` | TUI themes (`tokyonight`, `everforest`, `everforest-light`) |
@@ -27,7 +30,7 @@ agents run on this machine: model roles, global policy, skills, themes.
 ## Install
 
 ```sh
-./install   # requires jq
+./install   # requires jq, bun, and omp
 ```
 
 Checks every allowlisted source exists and parses, deploys config files with
@@ -74,27 +77,19 @@ silently attaching to a replaced or rewritten grievance history.
 
 ## Skills
 
-Two invocation classes:
-
-Operator-invoked (`disable-model-invocation: true`) — human-directed flows
-that run only on explicit request:
-`agent-ergonomics`, `audit-observability`, `audit-simplifications`, `backlog`,
-`brief`, `capture`, `code-review`, `core-docs`, `deliver`, `diagnose`,
-`executive`, `extract-module`, `field-station`, `forest-executive`, `foundation`,
-`groom`, `install-anti-slop`, `now-next`, `polish`, `product-description`,
-`pulse`, `refactor`, `release`, `resilience`, `security-review`, `shape`, `tidy`,
-`torvalds-design-review`, `understand`.
-
-Model-invocable — unambiguous triggers, bounded cost, cheap wrong-fire:
-`ast-grep`, `audit-choices`, `custom-linters`, `dispatch`, `evidence-packet`,
-`find-bugs`, `frontend-design`, `herdr`, `research`, `show-me`, `wrangler`.
+Skill frontmatter declares whether a skill is operator-invoked
+(`disable-model-invocation: true`) or available to the model. The packages in
+`skills/` are the current inventory.
 
 ### Provenance: External vs Homebrew
 
-- **External skills** (`frontend-design` from Anthropic, `show-me` from HumanLayer, `audit-choices` from `dzhng/skills`, `wrangler` from Cloudflare, `find-bugs` from Sentry, `herdr` from `herdr.dev`, `ast-grep` from `ast-grep`): **NEVER edit externally sourced skills**. Keep them verbatim as references to other engineering styles and approaches.
+- **External skills** (`frontend-design` from Anthropic, `show-me` from HumanLayer, `audit-choices` and `eli5` from `dzhng/skills`, `wrangler` from Cloudflare, `find-bugs` from Sentry, `herdr` from `herdr.dev`, `ast-grep` from `ast-grep`): keep upstream contents verbatim.
 - **Homebrew skills** (`custom-linters`, `dispatch`, `evidence-packet`, `research`, etc.): Misty Step native, actively maintained and kept lean.
 
 When evaluating an external skill, pull it completely or write a distinct homebrew skill. Do not pull a popular external skill and then rewrite it into local dialect.
+
+`eli5` supplies the dependency referenced by `audit-choices`; its source is
+[`dzhng/skills` at `3631529b7305eec8dd08b3a827f4d8c16342a29a`](https://github.com/dzhng/skills/blob/3631529b7305eec8dd08b3a827f4d8c16342a29a/skills/engineering/eli5/SKILL.md).
 
 ## Canon relationship
 
@@ -113,5 +108,3 @@ surface needs.
 - **Landmark** — release pipeline: conventional commits become semantic
   versions, technical changelogs, synthesized user-facing notes, and
   machine-readable evidence.
-- **Estate** — private infrastructure map; consult before any infrastructure
-  claim.
