@@ -23,8 +23,8 @@ When the target runs Iron Forest:
 - Fit work selection, declarations, roles, tools, models, checks, evidence, and cadence to project goals and risk.
 - Keep each project instance isolated and let the project own its contracts.
 - Treat worker outcomes as evidence about the highest shared layer that can fix recurring failure: work definition, factory declaration, tool, model, boundary, or project.
-- Use the canonical Powder identity from the exact full forge slug, prefixed `forest-` (for example, `forest-misty-step/powder`). Never derive it from directory names or rewrite it.
-- Separate shared transport authentication (`POWDER_API_KEY`, `OPENROUTER_API_KEY`) from workload identity (`POWDER_AGENT`). Do not invent per-instance API-key requirements.
+- Use the workload identity supplied by the owning project or factory.
+- Keep transport authentication separate from workload identity.
 - Resolve named variables and instance-completion credentials from the organization-approved credential map.
 
 ## Credential boundary

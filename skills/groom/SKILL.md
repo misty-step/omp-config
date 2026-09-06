@@ -7,13 +7,15 @@ argument-hint: "[project, repository, board scope, or item IDs]"
 
 # Groom
 
-Reconcile the Operator's named Powder scope. Investigate only questions that
-can change an item's disposition, priority, owner, or proof.
+Reconcile the operator's named scope. Personal and Misty Step work proceeds
+ad hoc from current requests and project notes. R90 projects continue to use
+Habitat. Investigate only questions that can change an item's disposition,
+priority, owner, or proof.
 
 ## Ground
 
-Read affected items and direct blockers, duplicates, proofs, and owners. For
-Misty Step, run `powder skill`. Read source, decisions, pull requests, or the
+Read affected notes or items and direct blockers, duplicates, proofs, and
+owners. Read source, decisions, pull requests, or the
 running product only when an item's disposition depends on that claim. State
 the largest evidence mismatch and separate fact, inference, and operator choice.
 
@@ -34,7 +36,7 @@ Use `torvalds-reviewer` once only for a load-bearing or hard-to-reverse design.
 
 Merge supported findings, challenge unsupported work, merge duplicate ownership,
 and prefer an existing interface. Ask one focused question only when product
-intent remains open. Apply accepted Powder mutations without another approval
+intent remains open. Apply accepted mutations without another approval
 round; ask again only for added scope, cost, risk, or irreversible effect.
 Preserve live leases, never take work merely to groom it, and read back changed
 items and direct relations once.
