@@ -30,6 +30,10 @@ failure, or unresolved concern. Report what was observed and any remaining gap.
 
 # Local operations
 
+Personal and Misty Step work proceeds ad hoc from current operator requests;
+no backlog ticket is required. Preserve decisions and useful context in project
+notes. R90 projects continue to use Habitat under their repository guidance.
+
 Preserve unrelated work. Run repository commands as the current user; use
 sudo for host administration when needed. Keep Herdr focus with the user:
 use explicit or current pane IDs and `--no-focus` for background operations.

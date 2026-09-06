@@ -64,13 +64,13 @@ acknowledgement ledger defaults to
 omp-grievances status
 omp-grievances inbox --limit 20
 omp-grievances show 294
-omp-grievances ack 294 --outcome ticketed --ref POW-123
+omp-grievances ack 294 --outcome ticketed --ref HAB-123
 omp-grievances ack --through 250 --outcome historic --note "pre-ledger backlog"
 omp-grievances unack 294
 ```
 
 Outcomes are `ticketed`, `no-action`, and `historic`. `ticketed` requires an
-opaque external reference such as a Powder or Habitat item. The ledger stores
+opaque external reference such as a Habitat item. The ledger stores
 grievance IDs, outcomes, references, and notes; raw reports remain owned by
 `~/.omp/autoqa.db`. A salted source fingerprint prevents acknowledgements from
 silently attaching to a replaced or rewritten grievance history.
@@ -102,7 +102,8 @@ surface needs.
 
 ## Ecosystem
 
-- **Powder** — work ledger for all Misty Step work; skill managed in `misty-step/powder` and scoped to `~/Development/misty-step/` via workspace discovery.
+- Personal and Misty Step work proceeds from current operator requests, with
+  durable context in project notes. R90 projects continue to use Habitat.
 - **Iron Forest** — headless Builder/Verifier/Fixer factory. Mechanical
   enforcement belongs there and in CI, not in prose.
 - **Landmark** — release pipeline: conventional commits become semantic

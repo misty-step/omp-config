@@ -1,14 +1,19 @@
 ---
 name: capture
-description: Reconcile durable conversation findings with the project's trusted work record.
+description: Save durable findings to project notes or the project's required work tracker.
 disable-model-invocation: true
 argument-hint: "[optional project or scope]"
 ---
 
 # Capture
 
+Personal and Misty Step work proceeds ad hoc. Capture ideas and decisions as
+context in existing project notes; no ticket or backlog is required. R90 projects
+continue to use Habitat and its project-specific authority guidance. Resolve
+scope from the conversation and current project context.
+
 Persist only durable decisions, defects, risks, and work. Do not create a
-duplicate backlog item.
+duplicate note or tracker item.
 
 ## Distill
 

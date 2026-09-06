@@ -84,10 +84,10 @@ describe("omp-grievances", () => {
 			reviewed_through: null,
 		});
 
-		expect(json(invoke(files, "ack", "1", "2", "--outcome", "ticketed", "--ref", "POW-123", "--json"))).toEqual({
+		expect(json(invoke(files, "ack", "1", "2", "--outcome", "ticketed", "--ref", "HAB-123", "--json"))).toEqual({
 			acknowledged: [1, 2],
 			outcome: "ticketed",
-			reference: "POW-123",
+			reference: "HAB-123",
 		});
 
 		expect(json(invoke(files, "status", "--json"))).toMatchObject({
@@ -134,7 +134,7 @@ describe("omp-grievances", () => {
 		const files = fixture();
 		for (const args of [
 			["ack", "--through", "3", "--outcome", "no-action", "--json"],
-			["ack", "--through", "3", "--outcome", "ticketed", "--ref", "POW-123", "--json"],
+			["ack", "--through", "3", "--outcome", "ticketed", "--ref", "HAB-123", "--json"],
 		]) {
 			const result = invoke(files, ...args);
 			expect(result.exitCode).toBe(2);
