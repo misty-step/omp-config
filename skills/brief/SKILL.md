@@ -7,14 +7,11 @@ argument-hint: "[session, project, release, or decision]"
 
 # Brief
 
-Find the controlling conclusion. Support it with current primary records.
-Explain causes, stakes, constraints, and consequences. Mark gaps and conflicts.
+Lead with the controlling conclusion. Support it with current primary records;
+explain causes, stakes, constraints, and consequences; mark gaps and conflicts.
 
 Cut chronology, repeated evidence, status narration, weak adjectives, and
-mechanics that do not change the decision. Define one term for each concept.
-Use short active sentences and exact names.
+mechanics that do not change the decision. Define one term for each concept and
+use short active sentences.
 
-Lead with the conclusion. End with the decision, recommendation, and next
-authorized action.
-
-Done when the brief is complete without being comprehensive.
+End with the decision, recommendation, and next authorized action.

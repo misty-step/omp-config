@@ -1,3 +1,16 @@
+## Unreleased
+
+### Changed
+
+- Migrate all configured GPT-5.6 roles and fallback entries to GPT-6 Astra,
+  preserving their reasoning effort and Codex provider.
+- Replace the repeated global rules layer with concise Astra-guided execution,
+  communication, delegation, and verification instructions.
+- Consolidate eight overlapping skills into their owning workflows, rewrite
+  retained homebrew skills, and vendor the missing upstream ELI5 dependency.
+- Simplify watchdog and design-critic prompts; route the critic through `@slow`.
+- Remove the retired deployed `RULES.md` during installation.
+
 ## [0.0.28](https://github.com/misty-step/omp-config/compare/v0.0.27...v0.0.28) (2026-09-03)
 
 

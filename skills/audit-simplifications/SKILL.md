@@ -7,19 +7,14 @@ argument-hint: "[repo-path, subsystem, or workflow]"
 
 # Audit simplifications
 
-This audit is read-only. Search the named scope for complexity the system does
-not need.
+Review the named scope for complexity the system does not need. Prefer deletion
+of a requirement, representation, state, owner, coordination path, or
+pass-through layer.
 
-Prefer findings that delete a requirement, representation, state, owner,
-coordination path, or pass-through layer. Use current callers and runtime or
-operator behavior where they decide whether the complexity is necessary.
-
+Use current callers and runtime or operator behavior when they decide necessity.
 A finding needs exact symbols, current mechanism, evidence, smallest coherent
 change, expected deletion, migration risk, and proof. Reject naming, style,
 speculative rewrites, and changes that merely move complexity.
 
 Return only material findings, ordered by deleted whole-system work and risk.
-State a clean result when none survive validation.
-
-Done when every reported simplification can be evaluated without a whole-repo
-coverage ceremony.
+Return a clean result when no finding survives the evidence.

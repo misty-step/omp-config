@@ -7,31 +7,22 @@ argument-hint: "[optional project or scope]"
 
 # Capture
 
-A useful finding must survive the session without becoming duplicate backlog.
-Capture only durable decisions, defects, risks, and work.
+Persist only durable decisions, defects, risks, and work. Do not create a
+duplicate backlog item.
 
 ## Distill
 
 Read the active conversation and project policy. For each candidate, state the
-outcome, evidence, scope, consequence, open choice, owner, and proof. Omit
-transient status and unsupported ideas.
+outcome, evidence, scope, consequence, open choice, owner, and proof. Classify
+it as create, reconcile, or omit with a reason. Omit transient status and
+unsupported ideas.
 
-Done when every substantive candidate is marked create, reconcile, or omit with
-a reason.
+## Reconcile and write
 
-## Reconcile
+Search the trusted record by subject and outcome. Update the existing owner;
+create an item only when no owner exists. Link superseded and dependent work.
+Store the smallest complete record, preserve exact evidence and boundaries, and
+do not change product code.
 
-Search the trusted work record by subject and outcome. Update the item that
-already owns the result. Create a new item only when no owner exists. Link
-superseded and dependent work; do not copy the same requirement into several
-items.
-
-Done when each finding has one durable owner.
-
-## Write and verify
-
-Store the smallest complete record. Preserve exact evidence and accepted
-boundaries. Re-read every changed item through the record's normal interface.
-Return created, updated, linked, and omitted items. Do not change product code.
-
-Done when the stored record can guide future work without this conversation.
+Read changed items through the record's normal interface. Return created,
+updated, linked, and omitted items with reasons.

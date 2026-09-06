@@ -5,21 +5,18 @@ description: Verify unfamiliar APIs, errors, protocols, and dependencies against
 
 # Research
 
-Memory is not an interface contract. Verify the exact version in use before
-code depends on it.
+Frame one answerable implementation question. Verify the exact version in use
+before code depends on it.
 
-Frame one answerable question. Search current primary sources first: installed
-source or types, official documentation, source repositories, changelogs,
-standards, and papers. Use secondary sources only to find primary evidence.
-Confirm consequential behavior against the installed version.
+Search primary sources in this order: installed source or types, official
+documentation, source repositories, changelogs, standards, and papers. Use
+secondary sources only to locate primary evidence. Confirm consequential
+behavior against the installed version.
 
-For a dependency, prefer standard library, then a small maintained package,
+For dependencies, prefer the standard library, then a small maintained package,
 then owned code. Check license, maintenance, transitive weight, and version
 compatibility.
 
-Timebox the search. Return the chosen answer, direct sources, rejected answers,
-version limits, and open gaps. Choose the safest path that does not depend on an
-unresolved claim.
-
-Done when every implementation-critical claim is source-verified or explicitly
-excluded from the design.
+Return the chosen answer, direct sources, rejected alternatives, version limits,
+and open gaps. Exclude any implementation path that depends on an unresolved
+claim.

@@ -1,62 +1,61 @@
 ---
 name: shape
-description: Turn one rough idea into an accepted, buildable slice.
+description: Turn an evidenced problem or boundary proposal into one accepted, buildable slice.
 disable-model-invocation: true
 argument-hint: "[idea, ticket, or problem]"
 ---
 
 # Shape
 
-Shape prevents builders from inventing product or architecture decisions. It
-turns one evidenced problem into one accepted slice. It makes no production
-edits.
+Turn one evidenced problem into one independently useful slice. This is
+design-only; do not edit production artifacts.
 
 ## Ground
 
 Read the request, current system, binding decisions, and trusted work record.
-State the user or operator, observed problem, desired outcome, and reason to act.
-Separate facts from assumptions. Mark missing evidence as unknown.
+State the user or operator, observed problem, desired outcome, and reason to
+act. Separate facts, assumptions, and unknowns.
 
-Done when one evidence-backed problem statement remains.
+## Trace the boundary
+
+For a proposed extraction or control surface, trace exports, callers,
+dependencies, shared state, and release paths. Prefer deletion or an internal
+reorganization when it removes the same coupling without a new release path.
+Trace one representative outcome from the acting agent's seat: what it can
+know, control, and observe at each decision. Expose information, control,
+feedback, resource, and ownership gaps.
 
 ## Cut
 
-Challenge every requirement. Prefer deletion or the current interface. Keep the
-smallest independently useful slice with:
+Challenge every requirement. Keep the smallest slice with:
 
-- one outcome, one owner, and one data path;
-- explicit invariants and non-goals;
-- affected interfaces and failure behavior;
-- real-interface proof;
-- release and rollback boundaries when applicable.
+- one outcome, owner, authoritative data path, and coherent control surface;
+- explicit invariants, state transitions, non-goals, and failure behavior;
+- affected interfaces, callers, operations, and real-interface proof;
+- release and rollback boundaries when the change warrants them.
 
-Any persisted format, schema, meaning, or default change is high risk. It needs
-migration, readback, compatibility, and rollback proof. A required but absent
-migration blocks the slice.
-
-Done when unrelated cleanup and speculative flexibility are outside the slice.
+Persisted formats, schemas, meanings, and defaults require migration, readback,
+compatibility, and rollback evidence. An absent required migration blocks the
+slice. Delete duplicate representations, pass-through layers, hidden state,
+and speculative flexibility.
 
 ## Settle
 
-Resolve implementation facts from source. Ask the operator only about material
-human choices: outcome, scope, compatibility, spend, operating burden, or an
-irreversible action. Present concrete options, evidence, tradeoffs, and a
-recommendation in one concise question set.
+Resolve implementation facts from source. Ask only about material human choices:
+outcome, scope, compatibility, cost, operating burden, or irreversible action.
+Compare alternatives only when they change a material outcome, risk, or burden.
 
-Compare alternatives only when the choice is real. Include deletion, direct use
-of the current interface, and the smallest boring design. Request
-`/torvalds-design-review` only for a load-bearing or hard-to-reverse design.
-
-Done when no material choice remains open.
+For a load-bearing or hard-to-reverse design, dispatch one read-only review to
+`torvalds-reviewer` with this packet: problem, workload, target and revision,
+current design, binding constraints, accepted decisions, and primary evidence.
+Ask whether data ownership, representations, state transitions, boundaries, and
+caller burden solve the problem with less complexity than credible alternatives.
+Check factual claims against supplied sources. Return verdict, strength or flaw,
+evidence, migration risk, and the first reversible move.
 
 ## Lock
 
-Write the accepted spec with: problem and evidence; decision and rejected
-alternatives; data owners and invariants; interfaces and behavior; states and
-failures; compatibility or migration; acceptance scenarios; proof; release and
-rollback; non-goals; ordered slices.
-
-The operator must accept the spec. Store it in the project's trusted record.
-
-Done when a builder can implement without making a material product or
-architecture decision.
+Write the accepted spec to the trusted record: problem and evidence; decision
+and rejected alternatives; owners, invariants, interfaces, states, failures;
+compatibility or migration; acceptance scenarios and proof; release, rollback,
+non-goals, and ordered slices. Leave any unresolved material choice explicit.

@@ -7,91 +7,56 @@ argument-hint: "[system, failure, and environment]"
 
 # Resilience
 
-Prove recovery, not disruption. Use the system's owned deployment substrate and
-run one bounded experiment. Production fault injection is a human-owned choice.
+Prove recovery, not disruption, with one bounded experiment on the owned
+deployment substrate. Production fault injection is a human-owned action.
 
-## Gate
+## Preflight
 
-Read the accepted recovery invariant, target environment, target artifact's
-release checks, deployed identity, health signals, rollout controls, rollback or
-recovery procedure, current incidents, and operating owner.
+Read the accepted recovery invariant, target environment and artifact, release
+checks, deployed identity, health signals, rollout controls, recovery procedure,
+current incidents, and operating owner. Require green repository-owned gates,
+no active incident, a known artifact, observable health, and a previously
+proved recovery path. Start at the earliest missing prerequisite; use
+`/foundation` to install it. Kubernetes or another orchestrator is optional.
 
-Require the target artifact's owned release checks and repository-owned CI to be
-green. Require no active incidents for the target. Require an owned delivery path
-with a known artifact, observable health, and a previously proved recovery action.
-Start at the earliest missing prerequisite and return that control gap; use
-`/foundation` to install it before an experiment. Treat Kubernetes or another
-orchestrator as an implementation choice, never a prerequisite.
+## Experiment packet
 
-Done when the system can detect the named failure and restore a known healthy
-identity through an owned path.
+State one steady condition and one falsifiable hypothesis: after a named fault,
+the system detects it and recovers within a named bound. Specify the smallest
+fault, target, artifact, environment, duration, blast radius, observer,
+evidence, abort thresholds, recovery action, and incident owner.
 
-## Design
+Prefer local, staging, or canary environments. Production requires evidence that
+lower environments cannot prove the real path and explicit operator approval of
+the complete packet.
 
-State one measurable steady condition and one hypothesis: when a named fault
-occurs, the system detects it and recovers within a named bound. Define the
-smallest fault, exact target and artifact, environment, duration, maximum blast
-radius, observer, evidence sources, abort thresholds, recovery action, and
-incident owner.
+Keep authority narrow: CI diagnosis uses a normal branch and pull request;
+release control deploys only the named candidate and performs one ordinary
+rollback; experiment control injects only the accepted fault. Never weaken
+checks. A fix-forward is a separate delivery and release.
 
-Prefer a local, staging, or canary target that can falsify the hypothesis.
-Production requires evidence that a lower environment cannot prove the real
-recovery path and explicit Operator approval of the complete experiment packet.
+## Exercise
 
-Assign narrow agent authority:
+Rehearse against the cheapest representative environment. Confirm that the
+fault reaches the target, signals identify it, abort thresholds fire, recovery
+restores the known identity, and no active fault remains.
 
-- CI diagnosis may repair code only through a normal branch and pull request;
-- release control may deploy only the candidate artifact to the target
-  environment named in the approved experiment packet and perform one ordinary
-  repository-owned rollback;
-- experiment control may inject only the accepted fault and must recover at the
-  first abort threshold.
+Before a live run, recheck identity, steady condition, approval for production,
+incident state, observer, and recovery readiness. Inject one fault and stop when
+the steady condition returns, a threshold fires, blast radius is exceeded, or
+the bound expires.
 
-A fix-forward is a separate accepted delivery and release. Agents preserve
-failure evidence and never weaken checks to make a run green.
+If recovery succeeds within the bound, stop injection and verify injector
+inactivity, identity, health, state, and affected surfaces without invoking
+fallback recovery. Otherwise stop injection, verify no active fault, run the
+single accepted recovery action once, and verify restored identity, health, and
+state. Keep hypothesis outcome separate from safety recovery.
 
-Done when every action, signal, bound, owner, and recovery transition is explicit
-and the Operator has approved any production effect.
-
-## Rehearse
-
-Run the fault and recovery path against the cheapest representative environment.
-Confirm that injection reaches the intended target, signals identify the fault,
-abort thresholds fire, recovery restores the known identity, and the experiment
-leaves no active fault.
-
-Done when the mechanism and recovery path work without widening the accepted
-blast radius.
-
-## Run
-
-Immediately recheck artifact identity, steady condition, operator approval for
-production, clear incident state, observer availability, and recovery readiness.
-If any preflight check fails, stop immediately without injecting and report the
-blocker.
-
-Inject one accepted fault. Watch until the steady condition returns, an abort
-threshold fires, the maximum blast radius is exceeded, or the time bound
-expires.
-If the steady condition returns within the bound, mark the hypothesis proved,
-stop injection, verify the injector is inactive and leaves no active fault, and
-verify identity, health, state, and affected surfaces without invoking the
-fallback recovery action. On an abort, blast radius breach, or timeout, mark
-the hypothesis falsified, stop injection, verify the injector is inactive and
-leaves no active fault, run the single accepted recovery action once, and
-verify the restored identity, health, and state.
-
-If cleanup or recovery verification fails, stop all automated mutation
-immediately, preserve evidence, and escalate to the operating owner. Keep
-hypothesis outcome separate from safety recovery.
-Do not expand the fault, target, duration, or hypothesis during the run.
-
-Done when the hypothesis has one recorded outcome, no active fault remains, and
-the system is healthy on a known identity.
+On cleanup or recovery failure, stop automated mutation, preserve evidence, and
+escalate to the operating owner.
 
 ## Report
 
 Return the invariant, environment, artifact identity, fault, timeline, signals,
-hypothesis outcome, safety recovery action if used, final health, evidence, and
-the smallest confirmed follow-up. A repair enters the normal trusted work
-record; it does not continue inside the experiment.
+hypothesis outcome, recovery action, final health, evidence, and smallest
+confirmed follow-up.

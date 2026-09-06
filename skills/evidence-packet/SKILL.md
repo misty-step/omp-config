@@ -5,36 +5,22 @@ description: Prove an observable claim through one real scenario and result.
 
 # Evidence packet
 
-Connect one claim to the smallest real scenario that can disprove it.
+Connect one claim to the smallest real scenario that could disprove it.
 
-Before editing, record the claim, entry point, fixture, and expected observation.
+Record the claim, entry point, fixture, and expected observation before editing.
 Capture a baseline only for a fix, comparison, state change, or performance
 claim.
 
-After the change, repeat the scenario through the real interface. Record the
-actions, observed result, and enough source or runtime identity to avoid
-ambiguity. Read final state from its owner when the claim concerns persistence.
+Repeat the scenario through the real interface after the change. Record actions,
+observed result, and enough source or runtime identity to remove ambiguity. Read
+final state from its owner when persistence matters.
 
-Create media or a saved artifact only when it helps another person inspect the
-claim or the operator requests publication. Open it and remove secrets, customer
-data, and unrelated state before delivery.
+Create media or a saved artifact only when it helps inspection or publication.
+Open it before delivery and remove secrets, customer data, and unrelated state.
+When GitHub is the review surface and `gh` v2.99.0+ has write access, attach
+sanitized media with `gh pr create --attach`, `gh pr comment --attach`, or
+`gh issue comment --attach`, and record the exact head. If no supported review
+surface can publish required visual evidence, report that gap.
 
-When an observable claim depends on visual proof or recordings, GitHub is the
-review surface, and `gh` (v2.99.0+ with repo write access) is available, attach
-sanitized media directly with `gh pr create --attach path/to/media.png#Alt`,
-`gh pr comment --attach`, or `gh issue comment --attach` (local Markdown
-references rewrite in place). Record the exact head revision beside the claim
-in the PR or comment.
-
-Publish a sanitized authenticated here.now Site (`skill://here-now`) for that
-exact head when the observable claim depends on an interactive web application,
-live HTML artifact, external review without GitHub repository access, or
-non-GitHub platforms. Record the head on the Site and in the PR/record. Use
-`anyone_with_link` so an external reviewer needs no account. Open the live URL
-without publisher credentials before linking. If publish is unavailable, the
-PR has an evidence gap until the operator publishes or waives.
-
-Return the proved claim and observation. Name any unproved claim and the exact
+Return the proved claim and observation, plus any unproved claim and its exact
 evidence gap.
-
-Done when the claim is proved on the real surface or explicitly remains open.
