@@ -37,8 +37,7 @@ function formatNativeStatusLine(
 	const icon = top ? theme.getLangIconStyled(top[0]) : "";
 	const parts = [
 		statusIndent,
-		icon ? `${icon} ` : "",
-		top?.[0] ?? "",
+		icon,
 		` ${share}%`,
 		separator,
 		theme.bold(formatCompactLoc(stats.code)),

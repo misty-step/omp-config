@@ -4,26 +4,26 @@ Omp harness configuration for Phaedrus / Misty Step. Source of truth for how
 agents run on this machine: model roles, global policy, skills, themes.
 `./install` deploys everything.
 
-Shared prompting follows the [GPT-6 Astra prompting guide](https://developers.openai.com/api/docs/guides/latest-model/gpt-6-astra.md#prompting-best-practices):
-complete intended work, ask focused questions, delegate useful independent work,
-write plainly, and stop verification when the relevant checks pass.
+The harness favors engineering judgment, first-principles simplification, and
+visible proof over workflow recipes. Standing guidance explains our preferences;
+skills retain only useful domain knowledge or a distinct requested outcome.
 
 ## Layout
 
 | Path | Purpose |
 | --- | --- |
-| `install` | Deployment script. Validates sources, copies the allowlist into `$(omp config path)`, deploys agents and skills atomically, merges live MCP auth, and self-installs the pre-push hook |
+| `install` | Deployment script. Checks required sources, copies the allowlist into `$(omp config path)`, replaces deployed agents and skills, merges live MCP auth, and self-installs the pre-push hook |
 | `bin/omp-grievances.ts` | Manual grievance inbox CLI; reads OMP intake without mutation and stores private acknowledgements under XDG state |
 | `config.yml` | Model roles and fallback chains, theme/statusline/TUI display, providers (web search routed through exa), task/LSP settings |
 | `models.yml` | Local Ollama provider discovery; cloud models come from omp's bundled catalog |
 | `mcp.json` | Declared MCP servers; `install` merges per-server auth/oauth from the live copy |
-| `global/AGENTS.md` | Astra-guided follow-through, communication, delegation, verification, and local operational boundaries |
-| `agents/` | Read-only specialist agents; installed globally and routed by each agent's model role |
-| `global/WATCHDOG.md`, `WATCHDOG.yml` | Continuous Steward advisor: a high-reasoning model reviews intent, design, correctness, proof, and operations; roster configured in YAML |
+| `global/AGENTS.md` | Collaboration, task boundaries, communication, and inspectable verification evidence |
+| `global/RULES.md` | Engineering taste, simplification, stack and operational preferences |
+| `agents/executive.md` | Sustained operator-directed execution through the native `@task` model route |
+| `global/WATCHDOG.md`, `global/WATCHDOG.yml` | One read-only Steward advisor; independent design and evidence judgment without catch-up waits |
 | `themes/` | TUI themes (`tokyonight`, `everforest`, `everforest-light`) |
 | `skills/` | Skill packages, copied wholesale on install — see below |
 | `.githooks/pre-push` | Hook source installed into this repo's git dir by `./install` |
-| `.agents/skills/writing-for-agents/` | Agent-writing guidance served via `skill://writing-for-agents`; not deployed by `install` |
 | `extensions/loc/` | Session-resident LOC status and commands; deployed by `install` |
 | `CANON.md` | Concise, implementation-independent operating philosophy. Reference only — never deployed or auto-loaded |
 
@@ -33,10 +33,10 @@ write plainly, and stop verification when the relevant checks pass.
 ./install   # requires jq, bun, and omp
 ```
 
-Checks every allowlisted source exists and parses, deploys config files with
-mode 600, folds live MCP credentials into declared servers, swaps `skills/`
-atomically, and installs the git hook. Run after every change; sessions pick
-up deployed state on their next start.
+Checks every allowlisted source exists, validates declared JSON, deploys config
+files with mode 600, folds live MCP credentials into declared servers, replaces
+the staged skills and agents, and installs the git hook. Run after configuration
+changes; new sessions discover the deployed state.
 
 ## LOC extension
 
@@ -75,21 +75,52 @@ grievance IDs, outcomes, references, and notes; raw reports remain owned by
 `~/.omp/autoqa.db`. A salted source fingerprint prevents acknowledgements from
 silently attaching to a replaced or rewritten grievance history.
 
-## Skills
+## Skills and agents
 
-Skill frontmatter declares whether a skill is operator-invoked
-(`disable-model-invocation: true`) or available to the model. The packages in
-`skills/` are the current inventory.
+Three homebrew skills remain, all explicitly requested:
 
-### Provenance: External vs Homebrew
+| Command | Outcome |
+| --- | --- |
+| `/skill:foundation` | Reassess product purpose, backlog, architecture, and development and operational foundations; recommend a coherent direction without making changes |
+| `/skill:now-next` | Explain current reality, causes, work, health, evidence gaps, and worthwhile next directions |
+| `/skill:capture` | Save durable findings to project notes, or the required tracker, without duplicating or claiming work |
 
-- **External skills** (`frontend-design` from Anthropic, `show-me` from HumanLayer, `audit-choices` and `eli5` from `dzhng/skills`, `wrangler` from Cloudflare, `find-bugs` from Sentry, `herdr` from `herdr.dev`, `ast-grep` from `ast-grep`): keep upstream contents verbatim.
-- **Homebrew skills** (`custom-linters`, `dispatch`, `evidence-packet`, `research`, etc.): Misty Step native, actively maintained and kept lean.
+`disable-model-invocation: true` hides these descriptions from the automatic
+skill index. It does not prevent an explicit `skill://` read or grant authority
+to act. Read-only requests remain read-only.
 
-When evaluating an external skill, pull it completely or write a distinct homebrew skill. Do not pull a popular external skill and then rewrite it into local dialect.
+`foundation` is an investigation and design proposal, not an implementation
+pass. It distinguishes an ideal destination from a practical transition.
+Invoke `/skill:foundation` with any context or constraints the repository
+cannot supply; select the model separately. Backlog changes and implementation
+remain separately authorized work.
 
-`eli5` supplies the dependency referenced by `audit-choices`; its source is
-[`dzhng/skills` at `3631529b7305eec8dd08b3a827f4d8c16342a29a`](https://github.com/dzhng/skills/blob/3631529b7305eec8dd08b3a827f4d8c16342a29a/skills/engineering/eli5/SKILL.md).
+Five vendored packages remain unchanged: `ast-grep`, `frontend-design`, `herdr`,
+`show-me`, and `wrangler`. Update them from upstream or remove the whole package;
+use a distinctly named homebrew skill for different behavior. Omarchy's
+`omarchy` and `diagnose-crash` retain their own owners and discovery paths;
+this installer does not replace them.
+
+Ask OMP to use the `executive` agent for a supplied direction and stopping
+condition when sustained iteration is useful. It uses the existing `@task`
+route. OMP's loop or a separately configured scheduler owns cadence and lifetime;
+the agent does not install its own loop.
+
+## Interactive and recurring work
+
+The fast default model and native model roles/fallbacks remain in `config.yml`.
+Use `omp` for the default or `omp --model @slow` for a deliberate Astra session.
+Exa remains the configured web-search provider.
+
+PR review, security scanning, release automation, and recurring repository
+work belong to separately configured systems with their own triggers, scope,
+credentials, and evidence. There are no review or delivery skill entry points
+here. The bundled OMP reviewers remain available for explicitly requested work;
+this configuration installs no review service, cron job, or provider integration.
+
+`Steward` remains a read-only observer, not a release gate. Its native
+`advisor.syncBacklog: "off"` setting avoids waiting for catch-up while preserving
+background review and ordinary advice delivery.
 
 ## Canon relationship
 

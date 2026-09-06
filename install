@@ -13,6 +13,7 @@ for source in \
   models.yml \
   mcp.json \
   global/AGENTS.md \
+  global/RULES.md \
   global/WATCHDOG.md \
   global/WATCHDOG.yml \
   bin/omp-grievances.ts \
@@ -61,8 +62,7 @@ for theme_file in "$repo_dir"/themes/*.json; do
   [ -s "$theme_file" ] || continue
   install -m 600 "$theme_file" "$agent_dir/themes/${theme_file##*/}"
 done
-rm -f -- "$agent_dir/RULES.md"
-for file in AGENTS.md WATCHDOG.md WATCHDOG.yml; do
+for file in AGENTS.md RULES.md WATCHDOG.md WATCHDOG.yml; do
   install -m 600 "$repo_dir/global/$file" "$agent_dir/$file"
 done
 

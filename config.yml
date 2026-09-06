@@ -26,8 +26,8 @@ statusLine:
     - hostname
     - model
     - mode
-    - status
     - git
+    - status
     - subagents
   rightSegments:
     - session_name
@@ -67,7 +67,7 @@ tools:
   approvalMode: yolo
 advisor:
   enabled: true
-  syncBacklog: "3"
+  syncBacklog: "off"
 providers:
   tinyModel: lfm2-350m
   webSearchOrder:

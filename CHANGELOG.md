@@ -4,12 +4,27 @@
 
 - Migrate all configured GPT-5.6 roles and fallback entries to GPT-6 Astra,
   preserving their reasoning effort and Codex provider.
-- Replace the repeated global rules layer with concise Astra-guided execution,
-  communication, delegation, and verification instructions.
-- Consolidate eight overlapping skills into their owning workflows, rewrite
-  retained homebrew skills, and vendor the missing upstream ELI5 dependency.
-- Simplify watchdog and design-critic prompts; route the critic through `@slow`.
-- Remove the retired deployed `RULES.md` during installation.
+- Reimagine the interactive harness around concise collaboration guidance,
+  engineering taste in `RULES.md`, and independent watchdog judgment.
+- Consolidate 33 repository skills into three homebrew outcomes (`foundation`,
+  `now-next`, and `capture`) and five unchanged vendor packages. Remove the
+  review, delivery, release, routing, and other workflow entry points, plus the
+  vendored agent-writing package.
+- Replace the separate design critic and executive skill with a native
+  `executive` agent using `@task` for operator-directed sustained work.
+- Keep the fast default model, native role assignments and fallback chains,
+  and Exa search; remove advisor catch-up waits while retaining the read-only
+  Steward.
+- Restore deployment of nonempty `AGENTS.md`, `RULES.md`, and `WATCHDOG.md`.
+  Keep recurring review and delivery systems outside this configuration.
+- Reframe `foundation` as an explicitly invoked, read-only first-principles
+  assessment of product purpose, backlog, and technical foundations. Separate
+  the recommended destination and transition from authorization to implement.
+- Make verification proportional to concrete risk. Prose and instruction-only
+  edits normally need content review and relevant loading or deployment checks,
+  not model runs or synthetic applications.
+- Show Git before extension statuses and use only the language icon and
+  percentage in the LOC display, leaving more room for the current branch.
 
 ## [0.0.28](https://github.com/misty-step/omp-config/compare/v0.0.27...v0.0.28) (2026-09-03)
 
