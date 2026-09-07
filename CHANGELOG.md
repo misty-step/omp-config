@@ -1,3 +1,10 @@
+## [0.0.30](https://github.com/misty-step/omp-config/compare/v0.0.29...v0.0.30) (2026-09-07)
+
+
+### Features
+
+* scope integrations and clarify documentation ownership ([7d7276b](https://github.com/misty-step/omp-config/commit/7d7276b7e38830ae636e9626dd0cbd0ca0ee6a6d))
+
 ## [0.0.29](https://github.com/misty-step/omp-config/compare/v0.0.28...v0.0.29) (2026-09-07)
 
 
