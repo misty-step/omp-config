@@ -1,3 +1,10 @@
+## [0.0.29](https://github.com/misty-step/omp-config/compare/v0.0.28...v0.0.29) (2026-09-07)
+
+
+### Features
+
+* document privilege routing and deploy guidance safely ([1318755](https://github.com/misty-step/omp-config/commit/131875585a249a21b290519a7ccebf483eb8c9dc))
+
 ## Unreleased
 
 ### Changed
