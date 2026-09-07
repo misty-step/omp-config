@@ -196,7 +196,8 @@ add a hard-coded token-header workaround. Team creation is not exposed by the
 current server; use Linear's settings for that administration.
 
 Work conventions and project navigation live in the
-[Misty Step work tracking guide](https://linear.app/misty-step/document/misty-step-work-tracking-guide-d3a627ae6395)
+[Misty Step work tracking guide](https://linear.app/misty-step/document/misty-step-work-tracking-guide-d3a627ae6395),
+[Misty Step Issue Templates and Work Conventions](https://linear.app/misty-step/document/misty-step-issue-templates-and-work-conventions-d976aa9e94e8),
 and [omp-config project](https://linear.app/misty-step/project/omp-config-47a74679f980).
 Keep procedures and version-bound knowledge here; link them from work records.
 Check [current plan limits](https://linear.app/pricing) before changing a plan or

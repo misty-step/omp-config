@@ -60,6 +60,16 @@ and `~/development/moomooskycow`; do not enable it globally or in R90 checkouts.
 Parlor's skill is maintained by Parlor and imported only into consuming
 repositories. Do not install it as a global harness skill.
 
+
+Linear issues track operational state; repository code, tests, and versioned
+documentation remain canonical truth. Git branches for Linear issues follow
+`phaedrus/mis-<number>-<slug>`. Commit messages name their issue key when one
+exists: `type(scope): summary (MIS-xx)`. Pull requests link issues via `Refs MIS-xx`
+or `Relates to MIS-xx` when work is partial or pending deployment/verification; use
+`Fixes MIS-xx` only when the merge itself completely satisfies the issue's
+observable acceptance criteria. Agents executing an issue update a single
+top-level `### Agent Execution Scratchpad` comment on the issue for live progress
+rather than posting repeated status comments.
 Preserve unrelated work. Use the target organization's authorized resources;
 an agent's name or workload identity is not credential authority. Keep secrets
 and unrelated private information out of commands, transcripts, and artifacts.
