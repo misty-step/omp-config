@@ -7,17 +7,25 @@ const { values } = parseArgs({
 	options: {
 		"agent-dir": { type: "string" },
 		"development-root": { type: "string" },
+		"todoist-owner": { type: "string" },
 		check: { type: "boolean", default: false },
 	},
 	strict: true,
 });
+
 if (!values["agent-dir"] || !values["development-root"]) {
 	throw new Error("--agent-dir and --development-root are required");
 }
 const agentDir = resolve(values["agent-dir"]);
 const developmentRoot = resolve(values["development-root"]);
+const todoistOwner = resolve(
+	values["todoist-owner"] ??
+		process.env.OMP_TODOIST_OWNER ??
+		join(developmentRoot, "moomooskycow/daybook/.agents/skills/todoist-cli"),
+);
 const definition = JSON.parse(await readFile(new URL("../workspace-mcp.json", import.meta.url), "utf8"));
 const ownedServer = definition.mcpServers.linear;
+const retiredOwnedSkills = ["parlor", "ast-grep", "now-next"] as const;
 
 async function metadata(path: string) {
 	try {
@@ -90,10 +98,23 @@ for (const owner of ["misty-step", "moomooskycow"]) {
 	}
 }
 
-const retiredSkill = join(agentDir, "skills", "parlor");
-const removeGlobalParlor = Boolean(await metadata(retiredSkill));
+const retiredPresent: string[] = [];
+for (const name of retiredOwnedSkills) {
+	if (await metadata(join(agentDir, "skills", name))) retiredPresent.push(name);
+}
+const todoistLive = join(agentDir, "skills", "todoist-cli");
+const todoistPresent = Boolean(await metadata(todoistLive));
+let todoistOwnerReady = false;
+try {
+	const ownerSkill = await readFile(join(todoistOwner, "SKILL.md"), "utf8");
+	todoistOwnerReady = ownerSkill.trim().length > 0;
+} catch (error) {
+	if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+}
+const removeTodoist = todoistPresent && todoistOwnerReady && resolve(todoistLive) !== todoistOwner;
+const todoistPlan = removeTodoist ? "retire" : todoistPresent ? "retain until owner SKILL.md exists" : "absent";
 if (values.check) {
-	console.log(`Scoped MCP plan: ${scopeFiles.length} definition updates, ${imports.filter(item => item.create).length} project imports; global Parlor removal: ${removeGlobalParlor}`);
+	console.log(`Scoped MCP plan: ${scopeFiles.length} definition updates, ${imports.filter(item => item.create).length} project imports; retire ${retiredPresent.join(",") || "none"}; todoist ${todoistPlan}`);
 } else {
 	for (const file of scopeFiles) {
 		await mkdir(dirname(file.path), { recursive: true, mode: 0o700 });
@@ -114,6 +135,10 @@ if (values.check) {
 			await writeFile(item.excludePath, `${item.excludes}${item.excludes && !item.excludes.endsWith("\n") ? "\n" : ""}${exclusion}\n`);
 		}
 	}
-	if (removeGlobalParlor) await rm(retiredSkill, { recursive: true, force: true });
-	console.log(`Installed scoped MCP for ${imports.length} existing checkouts under misty-step/moomooskycow; no other development tree configured. Global Parlor skill absent.`);
+	for (const name of retiredPresent) {
+		await rm(join(agentDir, "skills", name), { recursive: true, force: true });
+	}
+	if (removeTodoist) await rm(todoistLive, { recursive: true, force: true });
+	console.log(`Installed scoped MCP for ${imports.length} existing checkouts under misty-step/moomooskycow; no other development tree configured. Retired owned skills: ${retiredPresent.join(",") || "none"}; todoist ${todoistPlan}.`);
 }
+
