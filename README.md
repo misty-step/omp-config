@@ -17,7 +17,7 @@ skills retain only useful domain knowledge or a distinct requested outcome.
 | `config.yml` | Model roles and fallback chains, theme/statusline/TUI display, providers (web search routed through exa), task/LSP settings |
 | `models.yml` | Local Ollama provider discovery; cloud models come from omp's bundled catalog |
 | `mcp.json` | Declared MCP servers; `install` merges per-server auth/oauth from the live copy |
-| `global/AGENTS.md` | Collaboration, task boundaries, communication, and inspectable verification evidence |
+| `global/AGENTS.md` | Collaboration, task boundaries, communication, privilege/approval routing, and inspectable verification evidence |
 | `global/RULES.md` | Engineering taste, simplification, stack and operational preferences |
 | `agents/executive.md` | Sustained operator-directed execution through the native `@task` model route |
 | `global/WATCHDOG.md`, `global/WATCHDOG.yml` | One read-only Steward advisor; independent design and evidence judgment without catch-up waits |
@@ -37,6 +37,57 @@ Checks every allowlisted source exists, validates declared JSON, deploys config
 files with mode 600, folds live MCP credentials into declared servers, replaces
 the staged skills and agents, and installs the git hook. Run after configuration
 changes; new sessions discover the deployed state.
+
+For an instruction-only change, deploy just the four `global/` guidance files:
+
+```sh
+OMP_INSTALL_GUIDANCE_ONLY=1 ./install
+```
+
+This leaves models, configuration, MCP credentials, skills, agents, themes,
+extensions, and hooks unchanged. It also avoids replacing live skills installed
+by another owner. The same environment flag can prefix `git push` when its
+pre-push hook should deploy guidance only; secret scans still run. The default
+full install behavior is unchanged. Invalid flag values fail without deploying.
+
+## Privilege and approval
+
+The standing routing policy lives in `global/AGENTS.md`. On a Linux workstation,
+use the channel where the operator can approve the actual operation:
+
+| Situation | Route |
+| --- | --- |
+| Operator can approve on the local desktop; agent has no accessible terminal | `pkexec` for the explicit executable and arguments |
+| Operator can authenticate in a real terminal, including an SSH terminal | Normal `sudo` in that terminal |
+| Job must run with nobody available to approve | `sudo -n` under an existing explicit host grant; otherwise retain the pending action |
+
+For example, `pkexec /usr/bin/id -u` is a harmless approval-path check; a
+successful invocation prints `0`. For real work, request the intended operation
+instead of repeatedly probing privileges. Announce why it needs root. In OMP,
+supervise an approval-waiting process with `hub`, then check its exit and the
+requested system state. Process creation alone is not completion.
+
+`pkexec` uses the registered authentication agent. Without one it can fall back
+to a text agent; `--disable-internal-agent` disables that fallback when no text
+prompt is usable. It does not make authentication unnecessary. Do not redirect
+an SSH user's request into a desktop dialog they cannot see. Its environment is
+sanitized, so use absolute paths and explicit inputs rather than relying on
+shell exports or launching graphical applications as root. See the
+[pkexec manual](https://www.freedesktop.org/software/polkit/docs/latest/pkexec.1.html).
+
+Being physically away is not the same as being unattended: an operator can
+approve through an SSH terminal. However, `sudo -v` in that terminal does not
+necessarily authorize an agent's separate PTY or background process. Do not
+copy passwords into chat, `sudo -S` payloads, environment variables, or files.
+
+Genuinely unattended administration needs an explicit OS policy, not another
+prompt wrapper. Account-wide `NOPASSWD` provides full administration to every
+process under that account, not only a trusted agent. A narrower policy needs
+root-owned helpers with constrained actions and arguments; allowlisting a
+general shell or arbitrary package installation is not narrow privilege.
+This repository documents routing, but does not install sudoers or polkit
+grants. Such a change needs a separate decision, syntax validation, an
+independent execution check, and a rollback path.
 
 ## LOC extension
 

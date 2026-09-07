@@ -2,6 +2,11 @@
 
 ### Changed
 
+- Document local `pkexec`, interactive SSH `sudo`, and unattended privilege
+  routing in always-loaded guidance; distinguish an approval channel from an
+  OS authorization grant.
+- Add `OMP_INSTALL_GUIDANCE_ONLY=1` deployment so instruction updates do not
+  replace live skills, credentials, configuration, or other unrelated state.
 - Migrate all configured GPT-5.6 roles and fallback entries to GPT-6 Astra,
   preserving their reasoning effort and Codex provider.
 - Reimagine the interactive harness around concise collaboration guidance,

@@ -5,6 +5,32 @@ umask 077
 repo_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 agent_dir=${PI_CODING_AGENT_DIR:-$(omp config path)}
 
+install_guidance() {
+  for file in AGENTS.md RULES.md WATCHDOG.md WATCHDOG.yml; do
+    [ -s "$repo_dir/global/$file" ] || {
+      printf 'Missing or empty source: global/%s\n' "$file" >&2
+      exit 1
+    }
+  done
+  install -d -m 700 "$agent_dir"
+  for file in AGENTS.md RULES.md WATCHDOG.md WATCHDOG.yml; do
+    install -m 600 "$repo_dir/global/$file" "$agent_dir/$file"
+  done
+}
+
+case ${OMP_INSTALL_GUIDANCE_ONLY:-0} in
+  0) ;;
+  1)
+    install_guidance
+    printf 'Installed global OMP guidance in %s; other deployed state unchanged\n' "$agent_dir"
+    exit 0
+    ;;
+  *)
+    printf 'OMP_INSTALL_GUIDANCE_ONLY must be 0 or 1\n' >&2
+    exit 1
+    ;;
+esac
+
 command -v jq >/dev/null 2>&1 || { echo "jq is required" >&2; exit 1; }
 command -v bun >/dev/null 2>&1 || { echo "bun is required" >&2; exit 1; }
 
@@ -62,9 +88,7 @@ for theme_file in "$repo_dir"/themes/*.json; do
   [ -s "$theme_file" ] || continue
   install -m 600 "$theme_file" "$agent_dir/themes/${theme_file##*/}"
 done
-for file in AGENTS.md RULES.md WATCHDOG.md WATCHDOG.yml; do
-  install -m 600 "$repo_dir/global/$file" "$agent_dir/$file"
-done
+install_guidance
 
 agents_temp=$(mktemp -d "$agent_dir/.agents.XXXXXX")
 trap 'rm -rf "$agents_temp"' 0 1 2 15

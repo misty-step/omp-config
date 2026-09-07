@@ -38,3 +38,24 @@ notes. R90 projects continue to use Habitat under their repository guidance.
 Preserve unrelated work. Use the target organization's authorized resources;
 an agent's name or workload identity is not credential authority. Keep secrets
 and unrelated private information out of commands, transcripts, and artifacts.
+
+# Privileged operations
+
+Do not treat a failed `sudo -n` as proof that authorized administration is
+impossible. Choose the approval channel the operator can actually reach:
+
+- On Linux, when the operator can approve on the local desktop and the agent
+  has no operator-accessible terminal, use `pkexec` with the intended executable
+  and explicit arguments. Announce the operation and wait for its result.
+- In an interactive terminal, including SSH, use `sudo` when the operator can
+  enter authentication there. A private agent PTY is not automatically an
+  operator-accessible prompt; another terminal's sudo cache may not apply.
+- For unattended work, use `sudo -n` only within the host's existing grants.
+  If approval is unavailable, preserve the pending action and continue
+  independent work. Do not leave an unreachable desktop prompt waiting.
+
+Prefer commands that already manage elevation; do not wrap them again. Keep
+passwords out of chat, tool arguments, environment variables, and stored files.
+Do not run the whole agent as root or expand sudo/polkit policy without an
+explicit decision. Tailscale access does not itself grant root or desktop
+control. Verify command completion and the requested state, not just launch.
