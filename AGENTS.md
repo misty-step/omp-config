@@ -10,7 +10,7 @@ without deleting foreign packages.
 
 External skills (`frontend-design`, `show-me`, `wrangler`, and `herdr`) stay
 verbatim. Wrangler is the Cloudflare package at
-`cloudflare/skills@d924cd8f59e75e08fd3dd52843bb2776de35c77e`. Update from
+`cloudflare/skills@d924cd8`. Update from
 upstream or remove the whole package. Use a distinctly named homebrew skill
 when different behavior is needed.
 

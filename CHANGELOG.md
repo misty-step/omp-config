@@ -28,7 +28,7 @@
   Preflight every selected input before writes. Stop implicit pre-push install;
   keep gitleaks and trufflehog. Retire global `RULES.md`, `ast-grep`, and
   `now-next`. Refresh Wrangler from Cloudflare skills
-  `d924cd8f59e75e08fd3dd52843bb2776de35c77e`. Retire global Todoist discovery
+  `d924cd8`. Retire global Todoist discovery
   only after the Daybook owner `SKILL.md` exists. Distill always-loaded
   philosophy into `global/AGENTS.md` and collapse the separate canon/RULES
   manuals.

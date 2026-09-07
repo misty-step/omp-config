@@ -250,7 +250,7 @@ remain separately authorized work.
 Four vendored packages remain unchanged except by whole-package refresh:
 `frontend-design`, `herdr`, `show-me`, and `wrangler`. Wrangler is refreshed
 from [cloudflare/skills](https://github.com/cloudflare/skills) at
-`d924cd8f59e75e08fd3dd52843bb2776de35c77e` with its Apache 2.0 license.
+`d924cd8` with its Apache 2.0 license.
 Update them from upstream or remove the whole package; use a distinctly named
 homebrew skill for different behavior. Omarchy's `omarchy` and
 `diagnose-crash` retain their own owners and discovery paths; this installer
