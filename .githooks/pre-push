@@ -27,5 +27,3 @@ trufflehog filesystem . --exclude-paths=.githooks/trufflehog-exclude.txt --no-ve
   printf 'trufflehog found a potential secret; inspect locally before pushing\n' >&2
   exit 1
 }
-
-exec ./install

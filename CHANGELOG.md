@@ -22,13 +22,25 @@
 ## Unreleased
 
 ### Changed
+- Make install ownership-aware: overlay source-owned config keys, preserve
+  undeclared runtime keys, clean-replace selected owned skills/agents, and leave
+  foreign packages in place. Add explicit `config` and `agents` components.
+  Preflight every selected input before writes. Stop implicit pre-push install;
+  keep gitleaks and trufflehog. Retire global `RULES.md`, `ast-grep`, and
+  `now-next`. Refresh Wrangler from Cloudflare skills
+  `d924cd8f59e75e08fd3dd52843bb2776de35c77e`. Retire global Todoist discovery
+  only after the Daybook owner `SKILL.md` exists. Distill always-loaded
+  philosophy into `global/AGENTS.md` and collapse the separate canon/RULES
+  manuals.
+
 
 - Document local `pkexec`, interactive SSH `sudo`, and unattended privilege
   routing in always-loaded guidance; distinguish an approval channel from an
   OS authorization grant.
-- Add selective deployment with `OMP_INSTALL_COMPONENTS` (`guidance`, `mcp`,
-  `scopes`, `skill:<name>`), replacing the unreleased guidance-only switch.
-  Preserve unrelated live packages while retaining full installation as default.
+- Add selective deployment with `OMP_INSTALL_COMPONENTS` (`guidance`, `config`,
+  `mcp`, `scopes`, `agents`, `skill:<name>`), replacing the unreleased
+  guidance-only switch. Ownership-aware `all` is the default.
+
 - Scope Linear to native local imports beneath the Misty Step and moomooskycow
   development roots; remove the global connector and preserve R90 exclusion.
 - Retire the global Parlor skill in favor of Parlor-owned, source-aligned imports

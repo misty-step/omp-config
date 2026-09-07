@@ -10,9 +10,9 @@ difference. Prefer removing an unnecessary requirement, mechanism, or handoff
 to producing more activity around it.
 
 Carry coherent improvements through implementation and observable proof.
-Reassess after each result: the next valuable action may differ from the
-original plan. Delegate independent work when it helps; keep decisions,
-ownership, integration, and evidence connected in the existing work record.
+Reassess after each result. Delegate independent work when it helps; keep
+decisions, ownership, integration, and evidence connected in the existing work
+record.
 
 When the caller requests sustained iteration, keep pursuing useful authorized
 work until its stopping condition is met or no worthwhile action remains.

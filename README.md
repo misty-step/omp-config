@@ -2,31 +2,30 @@
 
 Omp harness configuration for Phaedrus / Misty Step. Source of truth for how
 agents run on this machine: model roles, global policy, skills, themes.
-`./install` deploys everything.
+`./install` deploys owned components. Publishing checks do not install.
 
-The harness favors engineering judgment, first-principles simplification, and
-visible proof over workflow recipes. Standing guidance explains our preferences;
-skills retain only useful domain knowledge or a distinct requested outcome.
+Standing guidance lives in `global/AGENTS.md`. It is philosophy, authority,
+and evidence calibration—not a SYSTEM override, sticky RULES file, or second
+canon. Local repository conventions and explicit requests outrank it.
 
 ## Layout
 
 | Path | Purpose |
 | --- | --- |
-| `install` | Deployment script. Deploys all components or an explicit selection into `$(omp config path)`, merges live MCP auth, and preserves unselected components |
-| `bin/omp-grievances.ts` | Manual grievance inbox CLI; reads OMP intake without mutation and stores private acknowledgements under XDG state |
-| `config.yml` | Model roles and fallback chains, theme/statusline/TUI display, providers (web search routed through exa), task/LSP settings |
-| `models.yml` | Local Ollama provider discovery; cloud models come from omp's bundled catalog |
+| `install` | Ownership-aware deployment into `$(omp config path)` |
+| `bin/omp-merge-config.ts` | Overlay source-owned YAML keys onto live config |
+| `bin/omp-grievances.ts` | Manual grievance inbox CLI |
+| `config.yml` | Model roles, fallbacks, theme/TUI, providers, task/LSP settings |
+| `models.yml` | Local Ollama discovery; cloud models come from omp's bundled catalog |
 | `mcp.json` | Global MCP inventory; Linear is deliberately absent |
-| `workspace-mcp.json`, `bin/omp-install-scopes.ts` | Linear's approved directory scopes and native project-local imports; retires the global Parlor skill |
-| `global/AGENTS.md` | Collaboration, bounded judgment, PR evidence, Linear/Habitat routing, and privilege/approval boundaries |
-| `global/RULES.md` | Engineering taste, professional naming, operational preferences, and functional visual design |
-| `agents/executive.md` | Sustained operator-directed execution through the native `@task` model route |
-| `global/WATCHDOG.md`, `global/WATCHDOG.yml` | One read-only Steward advisor; independent design and evidence judgment without catch-up waits |
+| `workspace-mcp.json`, `bin/omp-install-scopes.ts` | Linear directory scopes, native project-local imports, owned skill retirement |
+| `global/AGENTS.md` | Collaboration, verification, Linear/Habitat routing, privilege boundaries |
+| `agents/executive.md` | Caller-bounded sustained execution through `@task` |
+| `global/WATCHDOG.md`, `global/WATCHDOG.yml` | One read-only Steward advisor |
 | `themes/` | TUI themes (`tokyonight`, `everforest`, `everforest-light`) |
-| `skills/` | Skill packages, copied wholesale on install — see below |
-| `.githooks/pre-push` | Hook source installed into this repo's git dir by `./install` |
-| `extensions/loc/` | Session-resident LOC status and commands; deployed by `install` |
-| `CANON.md` | Concise, implementation-independent operating philosophy. Reference only — never deployed or auto-loaded |
+| `skills/` | Owned skill packages, clean-replaced when selected |
+| `.githooks/pre-push` | Secret scanners only; installed into this repo's git dir by `./install` |
+| `extensions/loc/` | Session-resident LOC status and commands |
 
 ## Install
 
@@ -34,39 +33,46 @@ skills retain only useful domain knowledge or a distinct requested outcome.
 ./install   # requires jq, bun, and omp
 ```
 
-Checks every allowlisted source exists, validates declared JSON, deploys config
-files with mode 600, folds live MCP credentials into declared servers, replaces
-the staged skills and agents, and installs the git hook. Run after configuration
-changes; new sessions discover the deployed state.
-
-For a focused update, select only the components that changed:
+Preflight validates every selected input, then writes. Unset selection means
+`all`: owned config overlay, guidance, MCP, scopes, agents, skills, themes,
+extensions, this repo's git hook, and `omp-grievances`. It does not delete
+foreign skills or agents, and it does not import live secrets into this
+checkout.
 
 ```sh
 OMP_INSTALL_COMPONENTS=guidance ./install
+OMP_INSTALL_COMPONENTS=config ./install
+OMP_INSTALL_COMPONENTS=agents ./install
 OMP_INSTALL_COMPONENTS=mcp ./install
 OMP_INSTALL_COMPONENTS="guidance mcp scopes skill:capture" ./install
 ```
 
-Supported components are `guidance`, `mcp`, `scopes`, and
-`skill:<source-directory-name>`. Unset selection means `all`, which retains
-the full replacement behavior above and installs the approved directory scopes.
-`all` cannot be combined with another component. Empty, unknown, missing-skill,
-and invalid-name selections fail before deployment. The retired
-`OMP_INSTALL_GUIDANCE_ONLY` variable fails with migration instructions rather
-than silently triggering a full install.
+Supported components are `guidance`, `config`, `mcp`, `scopes`, `agents`, and
+`skill:<source-directory-name>`. `all` cannot be combined with another
+component. Empty, unknown, missing-skill, invalid-name, and invalid YAML
+selections fail before any writes. The retired `OMP_INSTALL_GUIDANCE_ONLY`
+variable fails with migration instructions rather than silently triggering a
+full install.
 
-Scoped deployment preserves unselected skills and other components. A selected
-skill package is replaced, not overlaid, so obsolete files cannot survive inside
-it. MCP deployment still uses the declared server inventory and preserves live
-`auth`/`oauth` metadata for those servers; it is not a merge of undeclared servers.
-OMP's managed OAuth tokens remain in its auth storage, never in this repository.
+Owned skill packages are replaced, not overlaid, so obsolete files cannot
+survive inside a selected package. Foreign packages in the live skills or
+agents directories are left in place. `guidance` copies AGENTS and WATCHDOG
+and deletes the retired live `RULES.md`. `config` overlays keys present in
+source `config.yml` / `models.yml` and preserves undeclared live keys such as
+runtime consent; it does not copy auth stores. MCP deployment still uses the
+declared server inventory and preserves live `auth`/`oauth` metadata for those
+servers only. OMP's managed OAuth tokens remain in its auth storage, never in
+this repository.
 
-The same `OMP_INSTALL_COMPONENTS` environment variable can prefix `git push`
-when its pre-push hook should deploy selectively; secret scans still run.
-Use scoped deployment when live skills have another owner, such as `todoist-cli`,
-rather than replacing their packages with a full install. The `scopes` component
-explicitly removes the retired global Parlor copy; its owner now imports it into
-consuming repositories instead.
+`scopes` installs Linear only under `~/development/misty-step` and
+`~/development/moomooskycow`, retires the owned global `parlor`, `ast-grep`,
+and `now-next` packages, and retires global `todoist-cli` only after
+`$OMP_DEVELOPMENT_ROOT/moomooskycow/daybook/.agents/skills/todoist-cli/SKILL.md`
+exists (override with `OMP_TODOIST_OWNER`). It does not mutate `~/.claude` or
+`~/.codex`; those live aliases are Main-owned. Redirecting
+`PI_CODING_AGENT_DIR` does not isolate hook, scope, or `~/.local/bin` writes.
+Use a disposable HOME, development root, and checkout copy for installer
+checks.
 
 ## Privilege and approval
 
@@ -153,8 +159,6 @@ scheduler, authorization to start work, or a second system-documentation store.
 `workspace-mcp.json` owns `https://mcp.linear.app/mcp`. `install` deploys it only
 under `~/development/misty-step/.omp/mcp.json` and
 `~/development/moomooskycow/.omp/mcp.json`; global `mcp.json` does not declare it.
-The existing Misty Step workspace/team is the initial destination. Resolve actual
-work records from Linear before writing; a separate Personal team remains deferred.
 
 OMP's native MCP discovery is cwd-local, not ancestor-inherited. The `scopes`
 installer adds a relative `.omp/.mcp.json` import in each existing direct-child
@@ -205,11 +209,11 @@ inviting collaborators. No paid plan or GitHub integration is enabled here.
 
 ## Review explanations and ASCII assets
 
-Maintained engineering and visual preferences live in `global/AGENTS.md` and
-`global/RULES.md`. Vision documents are optional context, not a mandatory first
-read or a higher authority than current requests. The unchanged `show-me` skill
-provides diagrams and code-shape explanations; choose evidence for the actual
-change rather than requiring a fixed artifact packet.
+Maintained engineering and visual preferences live in `global/AGENTS.md`. Vision
+documents are optional context, not a mandatory first read or a higher authority
+than current requests. The unchanged `show-me` skill provides diagrams and
+code-shape explanations; choose evidence for the actual change rather than
+requiring a fixed artifact packet.
 
 ASCII support is currently **aesthetic guidance and browser-based asset authoring**,
 not a dedicated conversion tool, skill, or automatic asset pipeline.
@@ -226,12 +230,11 @@ font licenses. The external `frontend-design` and `show-me` packages stay verbat
 
 ## Skills and agents
 
-Three homebrew skills remain, all explicitly requested:
+Two homebrew skills remain, both explicitly requested:
 
 | Command | Outcome |
 | --- | --- |
 | `/skill:foundation` | Reassess product purpose, backlog, architecture, and development and operational foundations; recommend a coherent direction without making changes |
-| `/skill:now-next` | Explain current reality, causes, work, health, evidence gaps, and worthwhile next directions |
 | `/skill:capture` | Save durable findings to project notes, or the required tracker, without duplicating or claiming work |
 
 `disable-model-invocation: true` hides these descriptions from the automatic
@@ -244,11 +247,14 @@ Invoke `/skill:foundation` with any context or constraints the repository
 cannot supply; select the model separately. Backlog changes and implementation
 remain separately authorized work.
 
-Five vendored packages remain unchanged: `ast-grep`, `frontend-design`, `herdr`,
-`show-me`, and `wrangler`. Update them from upstream or remove the whole package;
-use a distinctly named homebrew skill for different behavior. Omarchy's
-`omarchy` and `diagnose-crash` retain their own owners and discovery paths;
-this installer does not replace them.
+Four vendored packages remain unchanged except by whole-package refresh:
+`frontend-design`, `herdr`, `show-me`, and `wrangler`. Wrangler is refreshed
+from [cloudflare/skills](https://github.com/cloudflare/skills) at
+`d924cd8f59e75e08fd3dd52843bb2776de35c77e` with its Apache 2.0 license.
+Update them from upstream or remove the whole package; use a distinctly named
+homebrew skill for different behavior. Omarchy's `omarchy` and
+`diagnose-crash` retain their own owners and discovery paths; this installer
+does not replace them. Todoist is owned by Daybook and is not shipped here.
 
 ### Repository-local Parlor
 
@@ -279,7 +285,8 @@ the agent does not install its own loop.
 
 The fast default model and native model roles/fallbacks remain in `config.yml`.
 Use `omp` for the default or `omp --model @slow` for a deliberate Astra session.
-Exa remains the configured web-search provider.
+Exa remains the configured web-search provider. Approval mode and title-model
+names are unchanged.
 
 Security scanning, release automation, and recurring repository work belong to
 separately configured systems with their own triggers, scope, credentials, and
@@ -290,7 +297,8 @@ provider integration, not a scheduler or an autonomous delivery service.
 
 `Steward` remains a read-only observer, not a release gate. Its native
 `advisor.syncBacklog: "off"` setting avoids waiting for catch-up while preserving
-background review and ordinary advice delivery.
+background review and ordinary advice delivery. Print-mode can still drain a
+final review. Subagents are unadvised unless they opt in.
 
 ### Evaluations are work records
 
@@ -306,14 +314,39 @@ replacement for source authority. UI source belongs to its owning library and
 consumers, not to the harness. Neither evaluation enables a provider, ingests
 private data, installs dependencies, or reskins products.
 
-## Canon relationship
+## Isolated installer checks
 
-`CANON.md` states the implementation-independent operating philosophy.
-Configuration, standing policy, and skills are concrete mechanisms that should
-express it without turning the canon into an inventory of the current harness.
-Implementation details and routing live in this README and the configuration.
-Never paste the canon wholesale into agent context; distill only the judgment a
-surface needs.
+Run these once after integration against a disposable HOME, agent directory,
+development root, and checkout copy. Do not point `PI_CODING_AGENT_DIR` at the
+live agent tree. Compare path hashes before and after each case.
+
+1. **Foreign package preservation.** Seed `$agent/skills/foreign-cli/SKILL.md`
+   and `$agent/agents/foreign.md`. `./install` must keep both and replace only
+   owned packages.
+2. **Runtime config preservation.** Seed `$agent/config.yml` with source keys
+   plus `dev.autoqaConsent: granted`. `OMP_INSTALL_COMPONENTS=config ./install`
+   must keep that key, apply source-owned keys, and leave auth stores untouched.
+3. **MCP auth vs inventory.** Seed a live `mcp.json` with matching `auth` on
+   `openrouter` and an extra undeclared server. MCP install must keep matching
+   `auth`/`oauth` for declared servers and drop the extra server. Do not print
+   secrets.
+4. **Invalid preflight writes nothing.** Record hashes, then try a missing
+   guidance file, `OMP_INSTALL_COMPONENTS=skill:not-a-skill`, invalid live YAML,
+   and a conflicting `.omp/.mcp.json`. Each must fail before creating or
+   changing destinations.
+5. **Scope boundaries.** Under a fake `OMP_DEVELOPMENT_ROOT`, only
+   `misty-step` and `moomooskycow` receive Linear definitions and relative
+   `.mcp.json` imports. An `r90` tree stays untouched. Symlinked `.omp`
+   directories and conflicting fallback files are refused with no writes.
+6. **Owned retirement.** Live `RULES.md`, `skills/ast-grep`, and
+   `skills/now-next` disappear on `guidance`/`scopes`/`all`. `wrangler`
+   matches this source package. Global `todoist-cli` remains while
+   `OMP_TODOIST_OWNER` lacks `SKILL.md`, and is removed only after that
+   owner file exists. Do not delete `~/.claude` or `~/.codex` copies from
+   this installer.
+
+Rollback is component-scoped: restore prior owned bytes and modes. Do not use a
+historical full-directory skills replacement as rollback.
 
 ## Ecosystem
 
