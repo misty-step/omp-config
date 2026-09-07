@@ -18,26 +18,129 @@ install_guidance() {
   done
 }
 
-case ${OMP_INSTALL_GUIDANCE_ONLY:-0} in
-  0) ;;
-  1)
-    install_guidance
-    printf 'Installed global OMP guidance in %s; other deployed state unchanged\n' "$agent_dir"
-    exit 0
-    ;;
-  *)
-    printf 'OMP_INSTALL_GUIDANCE_ONLY must be 0 or 1\n' >&2
-    exit 1
-    ;;
-esac
+validate_mcp() {
+  command -v jq >/dev/null 2>&1 || { echo "jq is required" >&2; exit 1; }
+  [ -s "$repo_dir/mcp.json" ] || { echo "Missing or empty source: mcp.json" >&2; exit 1; }
+  jq empty "$repo_dir/mcp.json" >/dev/null
+  if [ -f "$agent_dir/mcp.json" ]; then
+    jq empty "$agent_dir/mcp.json" >/dev/null
+  fi
+}
 
-command -v jq >/dev/null 2>&1 || { echo "jq is required" >&2; exit 1; }
+install_mcp() {
+  install -d -m 700 "$agent_dir"
+  mcp_target="$agent_dir/mcp.json"
+  if [ -f "$mcp_target" ]; then
+    temp=$(mktemp "$agent_dir/.mcp.json.XXXXXX")
+    trap 'rm -f "$temp"' 0 1 2 15
+    jq -s '
+      .[0] as $policy
+      | .[1] as $live
+      | $policy
+      | .mcpServers = (
+          $policy.mcpServers
+          | with_entries(
+              . as $server
+              | .value += (
+                  ($live.mcpServers[$server.key] // {})
+                  | {auth, oauth}
+                  | with_entries(select(.value != null))
+                )
+            )
+        )
+    ' "$repo_dir/mcp.json" "$mcp_target" > "$temp"
+    chmod 600 "$temp"
+    mv "$temp" "$mcp_target"
+    trap - 0 1 2 15
+  else
+    install -m 600 "$repo_dir/mcp.json" "$mcp_target"
+  fi
+}
+
+install_scopes() {
+  bun "$repo_dir/bin/omp-install-scopes.ts" \
+    --agent-dir "$agent_dir" \
+    --development-root "${OMP_DEVELOPMENT_ROOT:-$HOME/development}"
+}
+
+install_skill() {
+  skill=$1
+  install -d -m 700 "$agent_dir/skills"
+  skill_temp=$(mktemp -d "$agent_dir/.skill.XXXXXX")
+  trap 'rm -rf "$skill_temp"' 0 1 2 15
+  cp -R "$repo_dir/skills/$skill"/. "$skill_temp"/
+  chmod -R u=rwX,go= "$skill_temp"
+  rm -rf -- "$agent_dir/skills/$skill"
+  mv "$skill_temp" "$agent_dir/skills/$skill"
+  trap - 0 1 2 15
+}
+
+if [ "${OMP_INSTALL_GUIDANCE_ONLY+x}" = x ]; then
+  printf 'OMP_INSTALL_GUIDANCE_ONLY was replaced; use OMP_INSTALL_COMPONENTS=guidance\n' >&2
+  exit 1
+fi
+
+# Split the explicit component list without expanding filesystem patterns.
+set -f
+set -- ${OMP_INSTALL_COMPONENTS-all}
+set +f
+[ "$#" -gt 0 ] || { echo "OMP_INSTALL_COMPONENTS must not be empty" >&2; exit 1; }
+
+# Reject the entire selection before deploying anything.
+for component do
+  case $component in
+    all)
+      [ "$#" -eq 1 ] || { echo "all must be the only component" >&2; exit 1; }
+      ;;
+    guidance) ;;
+    mcp) validate_mcp ;;
+    scopes)
+      command -v bun >/dev/null 2>&1 || { echo "bun is required" >&2; exit 1; }
+      bun "$repo_dir/bin/omp-install-scopes.ts" \
+        --agent-dir "$agent_dir" \
+        --development-root "${OMP_DEVELOPMENT_ROOT:-$HOME/development}" --check
+      ;;
+    skill:*)
+      selected_skill=${component#skill:}
+      case $selected_skill in
+        ''|*[!a-zA-Z0-9_-]*)
+          printf 'Invalid skill name: %s\n' "$selected_skill" >&2
+          exit 1
+          ;;
+      esac
+      [ -s "$repo_dir/skills/$selected_skill/SKILL.md" ] || {
+        printf 'Missing or empty skill entrypoint: skills/%s/SKILL.md\n' "$selected_skill" >&2
+        exit 1
+      }
+      ;;
+    *)
+      printf 'Unknown install component: %s\n' "$component" >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [ "$1" != all ]; then
+  for component do
+    case $component in
+      guidance) install_guidance ;;
+      mcp) install_mcp ;;
+      scopes) install_scopes ;;
+      skill:*) install_skill "${component#skill:}" ;;
+    esac
+  done
+  printf 'Installed OMP components (%s) in %s; other deployed state unchanged\n' "$*" "$agent_dir"
+  exit 0
+fi
+
 command -v bun >/dev/null 2>&1 || { echo "bun is required" >&2; exit 1; }
 
 for source in \
   config.yml \
   models.yml \
   mcp.json \
+  workspace-mcp.json \
+  bin/omp-install-scopes.ts \
   global/AGENTS.md \
   global/RULES.md \
   global/WATCHDOG.md \
@@ -68,15 +171,14 @@ for agent_file in "$repo_dir"/agents/*.md; do
   }
 done
 
-
-jq empty "$repo_dir/mcp.json" >/dev/null
+validate_mcp
+bun "$repo_dir/bin/omp-install-scopes.ts" \
+  --agent-dir "$agent_dir" \
+  --development-root "${OMP_DEVELOPMENT_ROOT:-$HOME/development}" --check
 for theme_file in "$repo_dir"/themes/*.json; do
   [ -s "$theme_file" ] || continue
   jq empty "$theme_file" >/dev/null
 done
-if [ -f "$agent_dir/mcp.json" ]; then
-  jq empty "$agent_dir/mcp.json" >/dev/null
-fi
 
 install -d -m 700 "$agent_dir"
 for file in config.yml models.yml; do
@@ -102,32 +204,8 @@ trap - 0 1 2 15
 
 rm -rf -- "$agent_dir/references/review"
 
-mcp_target="$agent_dir/mcp.json"
-if [ -f "$mcp_target" ]; then
-  temp=$(mktemp "$agent_dir/.mcp.json.XXXXXX")
-  trap 'rm -f "$temp"' 0 1 2 15
-  jq -s '
-    .[0] as $policy
-    | .[1] as $live
-    | $policy
-    | .mcpServers = (
-        $policy.mcpServers
-        | with_entries(
-            . as $server
-            | .value += (
-                ($live.mcpServers[$server.key] // {})
-                | {auth, oauth}
-                | with_entries(select(.value != null))
-              )
-          )
-      )
-  ' "$repo_dir/mcp.json" "$mcp_target" > "$temp"
-  chmod 600 "$temp"
-  mv "$temp" "$mcp_target"
-  trap - 0 1 2 15
-else
-  install -m 600 "$repo_dir/mcp.json" "$mcp_target"
-fi
+install_mcp
+install_scopes
 
 skills_temp=$(mktemp -d "$agent_dir/.skills.XXXXXX")
 trap 'rm -rf "$skills_temp"' 0 1 2 15

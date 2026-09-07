@@ -12,8 +12,23 @@
 - Document local `pkexec`, interactive SSH `sudo`, and unattended privilege
   routing in always-loaded guidance; distinguish an approval channel from an
   OS authorization grant.
-- Add `OMP_INSTALL_GUIDANCE_ONLY=1` deployment so instruction updates do not
-  replace live skills, credentials, configuration, or other unrelated state.
+- Add selective deployment with `OMP_INSTALL_COMPONENTS` (`guidance`, `mcp`,
+  `scopes`, `skill:<name>`), replacing the unreleased guidance-only switch.
+  Preserve unrelated live packages while retaining full installation as default.
+- Scope Linear to native local imports beneath the Misty Step and moomooskycow
+  development roots; remove the global connector and preserve R90 exclusion.
+- Retire the global Parlor skill in favor of Parlor-owned, source-aligned imports
+  in consuming repositories. Keep OAuth credentials outside this repository.
+- Add bounded UX/AX judgment, precise professional naming, reviewer-oriented
+  explanations, and U.S. Graphics-inspired functional visual direction without
+  changing vendored skills or requiring narrated video and TDD ceremony.
+- Document the solo Linear experiment and a separately authorized Deepsec pilot;
+  do not enable recurring scans, paid plans, or historical work migration.
+- Separate version-bound knowledge, work coordination, and per-run evidence;
+  make vision documents optional context instead of product locks.
+- Document observed in-session Linear authentication recovery, remove the
+  duplicated Deepsec proposal manual, and clarify that ASCII support currently
+  provides aesthetic guidance and browser authoring rather than a conversion API.
 - Migrate all configured GPT-5.6 roles and fallback entries to GPT-6 Astra,
   preserving their reasoning effort and Codex provider.
 - Reimagine the interactive harness around concise collaboration guidance,

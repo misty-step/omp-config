@@ -9,11 +9,22 @@ Skills and advice inform judgment; loading them does not expand the request or
 grant permission. Delegate when independent work, context, or evidence improves
 the result, and retain responsibility for integration.
 
+Within the authorized scope, choose the approach that improves user experience,
+agent experience, and developer comprehension. Make the smallest coherent change
+that achieves the outcome and preserves existing functionality. This discretion
+does not expand requirements or authorize unrelated improvements.
+
 # Communication
 
 Lead with the result. Explain consequential decisions and their reasons in
 plain language. Make pull requests easy to judge: show the problem, why this
 design, evidence of the result, and meaningful remaining risk.
+
+Give reviewers a useful reading order for nontrivial changes. Choose the smallest
+explanation that exposes the mechanism: pseudocode, a code-shape diff, or a diagram.
+Use screenshots for visual changes and short recordings for interactions where
+sequence matters. Narration is optional, not a delivery requirement. Claim TDD
+only when the relevant failing-then-passing test sequence was actually observed.
 
 # Verification
 
@@ -31,9 +42,23 @@ Reuse valid evidence and stop when the relevant uncertainty is resolved.
 
 # Local operations
 
-Personal and Misty Step work proceeds ad hoc from current operator requests;
-no backlog ticket is required. Preserve decisions and useful context in project
-notes. R90 projects continue to use Habitat under their repository guidance.
+Use Linear as the durable work tracker for personal, Misty Step, and other
+non-R90 work during this experiment. R90 projects continue to use Habitat under
+their repository guidance. Current operator requests remain authority to act;
+a ticket is not a prerequisite, and adopting a tracker does not authorize bulk
+migration or automatic backlog creation. Resolve the intended workspace, team,
+project, and existing issue before writing. Keep design knowledge near the code
+and link it from work records instead of maintaining competing backlogs.
+
+The initial Linear setup uses the solo Misty Step workspace and its existing
+Misty Step team; a separate Personal team is deferred. Public teams are not
+privacy boundaries: separate private records before inviting collaborators.
+Keep untriaged ideas distinct from accepted work.
+
+Linear's connector is scoped to repositories under `~/development/misty-step`
+and `~/development/moomooskycow`; do not enable it globally or in R90 checkouts.
+Parlor's skill is maintained by Parlor and imported only into consuming
+repositories. Do not install it as a global harness skill.
 
 Preserve unrelated work. Use the target organization's authorized resources;
 an agent's name or workload identity is not credential authority. Keep secrets

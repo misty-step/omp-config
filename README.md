@@ -12,13 +12,14 @@ skills retain only useful domain knowledge or a distinct requested outcome.
 
 | Path | Purpose |
 | --- | --- |
-| `install` | Deployment script. Checks required sources, copies the allowlist into `$(omp config path)`, replaces deployed agents and skills, merges live MCP auth, and self-installs the pre-push hook |
+| `install` | Deployment script. Deploys all components or an explicit selection into `$(omp config path)`, merges live MCP auth, and preserves unselected components |
 | `bin/omp-grievances.ts` | Manual grievance inbox CLI; reads OMP intake without mutation and stores private acknowledgements under XDG state |
 | `config.yml` | Model roles and fallback chains, theme/statusline/TUI display, providers (web search routed through exa), task/LSP settings |
 | `models.yml` | Local Ollama provider discovery; cloud models come from omp's bundled catalog |
-| `mcp.json` | Declared MCP servers; `install` merges per-server auth/oauth from the live copy |
-| `global/AGENTS.md` | Collaboration, task boundaries, communication, privilege/approval routing, and inspectable verification evidence |
-| `global/RULES.md` | Engineering taste, simplification, stack and operational preferences |
+| `mcp.json` | Global MCP inventory; Linear is deliberately absent |
+| `workspace-mcp.json`, `bin/omp-install-scopes.ts` | Linear's approved directory scopes and native project-local imports; retires the global Parlor skill |
+| `global/AGENTS.md` | Collaboration, bounded judgment, PR evidence, Linear/Habitat routing, and privilege/approval boundaries |
+| `global/RULES.md` | Engineering taste, professional naming, operational preferences, and functional visual design |
 | `agents/executive.md` | Sustained operator-directed execution through the native `@task` model route |
 | `global/WATCHDOG.md`, `global/WATCHDOG.yml` | One read-only Steward advisor; independent design and evidence judgment without catch-up waits |
 | `themes/` | TUI themes (`tokyonight`, `everforest`, `everforest-light`) |
@@ -38,17 +39,34 @@ files with mode 600, folds live MCP credentials into declared servers, replaces
 the staged skills and agents, and installs the git hook. Run after configuration
 changes; new sessions discover the deployed state.
 
-For an instruction-only change, deploy just the four `global/` guidance files:
+For a focused update, select only the components that changed:
 
 ```sh
-OMP_INSTALL_GUIDANCE_ONLY=1 ./install
+OMP_INSTALL_COMPONENTS=guidance ./install
+OMP_INSTALL_COMPONENTS=mcp ./install
+OMP_INSTALL_COMPONENTS="guidance mcp scopes skill:capture" ./install
 ```
 
-This leaves models, configuration, MCP credentials, skills, agents, themes,
-extensions, and hooks unchanged. It also avoids replacing live skills installed
-by another owner. The same environment flag can prefix `git push` when its
-pre-push hook should deploy guidance only; secret scans still run. The default
-full install behavior is unchanged. Invalid flag values fail without deploying.
+Supported components are `guidance`, `mcp`, `scopes`, and
+`skill:<source-directory-name>`. Unset selection means `all`, which retains
+the full replacement behavior above and installs the approved directory scopes.
+`all` cannot be combined with another component. Empty, unknown, missing-skill,
+and invalid-name selections fail before deployment. The retired
+`OMP_INSTALL_GUIDANCE_ONLY` variable fails with migration instructions rather
+than silently triggering a full install.
+
+Scoped deployment preserves unselected skills and other components. A selected
+skill package is replaced, not overlaid, so obsolete files cannot survive inside
+it. MCP deployment still uses the declared server inventory and preserves live
+`auth`/`oauth` metadata for those servers; it is not a merge of undeclared servers.
+OMP's managed OAuth tokens remain in its auth storage, never in this repository.
+
+The same `OMP_INSTALL_COMPONENTS` environment variable can prefix `git push`
+when its pre-push hook should deploy selectively; secret scans still run.
+Use scoped deployment when live skills have another owner, such as `todoist-cli`,
+rather than replacing their packages with a full install. The `scopes` component
+explicitly removes the retired global Parlor copy; its owner now imports it into
+consuming repositories instead.
 
 ## Privilege and approval
 
@@ -121,10 +139,89 @@ omp-grievances unack 294
 ```
 
 Outcomes are `ticketed`, `no-action`, and `historic`. `ticketed` requires an
-opaque external reference such as a Habitat item. The ledger stores
+opaque external reference such as a Linear or Habitat item. The ledger stores
 grievance IDs, outcomes, references, and notes; raw reports remain owned by
 `~/.omp/autoqa.db`. A salted source fingerprint prevents acknowledgements from
 silently attaching to a replaced or rewritten grievance history.
+
+## Linear
+
+Use the [official Linear MCP server](https://linear.app/docs/mcp) for access and
+the existing `/skill:capture` for capture judgment. The connector is not a
+scheduler, authorization to start work, or a second system-documentation store.
+
+`workspace-mcp.json` owns `https://mcp.linear.app/mcp`. `install` deploys it only
+under `~/development/misty-step/.omp/mcp.json` and
+`~/development/moomooskycow/.omp/mcp.json`; global `mcp.json` does not declare it.
+The existing Misty Step workspace/team is the initial destination. Resolve actual
+work records from Linear before writing; a separate Personal team remains deferred.
+
+OMP's native MCP discovery is cwd-local, not ancestor-inherited. The `scopes`
+installer adds a relative `.omp/.mcp.json` import in each existing direct-child
+Git checkout under those two roots. It leaves a primary `.omp/mcp.json` untouched,
+refuses conflicting fallback files or symlinked configuration directories, and
+adds its local import to Git's `info/exclude`. R90 and other development trees
+receive no definition or import. Re-run `OMP_INSTALL_COMPONENTS=scopes ./install`
+after adding a checkout. Launch OMP from the repository root; an arbitrary nested
+working directory does not inherit its MCP definition. `OMP_DEVELOPMENT_ROOT`
+exists for alternate local layouts and isolated installer checks.
+
+After deployment, run these **inside OMP**, not in the shell:
+
+```text
+/mcp reload
+/mcp test linear
+```
+
+New sessions discover the local definition. Already-running sessions retain their
+loaded tools until reloaded or restarted. Authorize only from an approved scope:
+
+```text
+/mcp reauth linear
+```
+
+Select the intended workspace. OAuth credentials remain in OMP's managed auth
+storage, not in this repo. Directory scoping prevents normal connector discovery;
+it is not a credential sandbox against another process under the same account.
+Use separate OMP profiles when credential isolation is required.
+
+### Authentication recovery
+
+`/mcp reload` rediscovers configuration; `/mcp reconnect linear` reconnects an
+existing binding. If an existing session reports `HTTP 401 invalid_token` after
+authorization completed in another OMP process, use `/mcp reauth linear` in the
+failing session. That recovery was observed during setup; the underlying runtime
+cause is unconfirmed. Do not repeat a reported failure merely to confirm it or
+add a hard-coded token-header workaround. Team creation is not exposed by the
+current server; use Linear's settings for that administration.
+
+Work conventions and project navigation live in the
+[Misty Step work tracking guide](https://linear.app/misty-step/document/misty-step-work-tracking-guide-d3a627ae6395)
+and [omp-config project](https://linear.app/misty-step/project/omp-config-47a74679f980).
+Keep procedures and version-bound knowledge here; link them from work records.
+Check [current plan limits](https://linear.app/pricing) before changing a plan or
+inviting collaborators. No paid plan or GitHub integration is enabled here.
+
+## Review explanations and ASCII assets
+
+Maintained engineering and visual preferences live in `global/AGENTS.md` and
+`global/RULES.md`. Vision documents are optional context, not a mandatory first
+read or a higher authority than current requests. The unchanged `show-me` skill
+provides diagrams and code-shape explanations; choose evidence for the actual
+change rather than requiring a fixed artifact packet.
+
+ASCII support is currently **aesthetic guidance and browser-based asset authoring**,
+not a dedicated conversion tool, skill, or automatic asset pipeline.
+[ASCII Magic](https://www.ascii-magic.com/app) is an optional editor. From the
+supplied product context, start with Characters or Block Characters for technical
+imagery, or Dither with Atkinson/Bayer for limited-palette artwork. Tune in the
+browser, export an asset, and keep the selected source rights, recipe and output
+with the consuming project's assets. Its recipe link/code can preserve settings;
+there is no documented public automation API, and video exports are silent.
+
+Keep controls and essential text accessible. Referencing
+[U.S. Graphics](https://usgraphics.com/) or Berkeley Mono does not grant asset or
+font licenses. The external `frontend-design` and `show-me` packages stay verbatim.
 
 ## Skills and agents
 
@@ -152,6 +249,26 @@ use a distinctly named homebrew skill for different behavior. Omarchy's
 `omarchy` and `diagnose-crash` retain their own owners and discovery paths;
 this installer does not replace them.
 
+### Repository-local Parlor
+
+Parlor owns its skill in `parlor/skills/parlor/SKILL.md` and its import command
+in `parlor/scripts/import-skill.mjs`. It is not part of this harness's global
+skill inventory. From the Parlor checkout:
+
+```sh
+node scripts/import-skill.mjs --target ../poppycock
+node scripts/import-skill.mjs --target ../linejam --guidance-only
+```
+
+Both destinations are `.agents/skills/parlor` in the consuming repository.
+Poppycock's reference follows its pinned installed source; Linejam's import is
+explicitly guidance-only, not a framework installation or selected migration.
+The importer records provenance, leaves identical imports unchanged, and refuses
+to overwrite differing copies. Follow the owner procedure when refreshing;
+do not maintain another skill copy in omp-config or install it globally.
+
+### Sustained execution
+
 Ask OMP to use the `executive` agent for a supplied direction and stopping
 condition when sustained iteration is useful. It uses the existing `@task`
 route. OMP's loop or a separately configured scheduler owns cadence and lifetime;
@@ -163,15 +280,30 @@ The fast default model and native model roles/fallbacks remain in `config.yml`.
 Use `omp` for the default or `omp --model @slow` for a deliberate Astra session.
 Exa remains the configured web-search provider.
 
-PR review, security scanning, release automation, and recurring repository
-work belong to separately configured systems with their own triggers, scope,
-credentials, and evidence. There are no review or delivery skill entry points
-here. The bundled OMP reviewers remain available for explicitly requested work;
-this configuration installs no review service, cron job, or provider integration.
+Security scanning, release automation, and recurring repository work belong to
+separately configured systems with their own triggers, scope, credentials, and
+evidence. PR explanation and evidence remain part of ordinary interactive work;
+there are no review or delivery skill entry points here. The bundled OMP
+reviewers remain available for explicitly requested work. Linear is an interactive
+provider integration, not a scheduler or an autonomous delivery service.
 
 `Steward` remains a read-only observer, not a release gate. Its native
 `advisor.syncBacklog: "off"` setting avoids waiting for catch-up while preserving
 background review and ordinary advice delivery.
+
+### Evaluations are work records
+
+The bounded Deepsec pilot and its unresolved repository, credential, cost, and
+scheduling decisions are tracked in
+[MIS-5](https://linear.app/misty-step/issue/MIS-5/evaluate-scheduled-deepsec-security-reviews).
+No scan or timer is installed here. A selected service's maintained configuration
+and procedure must live with that service, not grow into a proposal manual here.
+
+Memory and shared-component evaluations likewise belong in Linear until a
+specific implementation is selected. Memory may be derived retrieval, never a
+replacement for source authority. UI source belongs to its owning library and
+consumers, not to the harness. Neither evaluation enables a provider, ingests
+private data, installs dependencies, or reskins products.
 
 ## Canon relationship
 
@@ -184,8 +316,8 @@ surface needs.
 
 ## Ecosystem
 
-- Personal and Misty Step work proceeds from current operator requests, with
-  durable context in project notes. R90 projects continue to use Habitat.
+- Non-R90 work uses Linear for durable tracking and project notes for design
+  knowledge. Current operator requests remain authority; R90 stays in Habitat.
 - **Iron Forest** — headless Builder/Verifier/Fixer factory. Mechanical
   enforcement belongs there and in CI, not in prose.
 - **Landmark** — release pipeline: conventional commits become semantic

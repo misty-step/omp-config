@@ -11,10 +11,19 @@ Save durable conversation findings in the project's existing notes or required
 work tracker, within the requested scope and without claiming work or changing
 the product.
 
-Personal and Misty Step work proceeds ad hoc. Capture ideas and decisions as
-context in existing project notes; no ticket or backlog is required. R90 projects
+Use Linear for durable personal, Misty Step, and other non-R90 work. R90 projects
 continue to use Habitat and its project-specific authority guidance. Resolve
-scope from the conversation and current project context.
+the intended workspace, team, project, and existing issue from the conversation
+and current project context before writing. Keep design knowledge in existing
+project notes and link it from the work record, rather than duplicating a backlog.
+A capture request does not authorize bulk migration of historical work.
+
+Choose the destination by ownership, not file extension. Put reusable system
+knowledge in the owning repo; put priorities, blockers, and episode-specific
+conclusions in the work record. Link source-versioned procedures instead of
+copying a manual into Linear. Keep raw or sensitive evidence in approved retained
+storage, with a sanitized summary and revision-bound link. Do not treat fixtures,
+published product assets, or native runtime ledgers as disposable attachments.
 
 Distill decisions, defects, risks, and worthwhile ideas into outcomes and why
 they matter. Preserve evidence, boundaries, dependencies, and open choices;
