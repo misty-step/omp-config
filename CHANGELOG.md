@@ -1,3 +1,10 @@
+## [0.0.31](https://github.com/misty-step/omp-config/compare/v0.0.30...v0.0.31) (2026-09-07)
+
+
+### Bug Fixes
+
+* **hooks:** exclude .git from trufflehog filesystem scan ([39d0a5f](https://github.com/misty-step/omp-config/commit/39d0a5f193d61eb15afd4b7c877ac5e613f2f099))
+
 ## [0.0.30](https://github.com/misty-step/omp-config/compare/v0.0.29...v0.0.30) (2026-09-07)
 
 
