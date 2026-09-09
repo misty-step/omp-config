@@ -1,3 +1,10 @@
+## [0.0.33](https://github.com/misty-step/omp-config/compare/v0.0.32...v0.0.33) (2026-09-09)
+
+
+### Bug Fixes
+
+* **config:** restore hostname status segment (MIS-40) ([c0be3fc](https://github.com/misty-step/omp-config/commit/c0be3fc20e54335460c22f42eb8fbd7c4ea6b549))
+
 ## [0.0.32](https://github.com/misty-step/omp-config/compare/v0.0.31...v0.0.32) (2026-09-09)
 
 
