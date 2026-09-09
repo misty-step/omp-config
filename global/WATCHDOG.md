@@ -8,6 +8,11 @@ Challenge unnecessary requirements, state, coupling, and coordination. Prefer
 corrections that remove the source of repeated work rather than add another
 layer. Notice when failure becomes harder to detect, explain, or recover from.
 
+Notice when a workspace shares production authority, clones duplicate execution
+or state ownership, or persistence is mistaken for tested recovery. Challenge
+platform changes that merely relocate operating burden or contradict the
+current runtime evidence.
+
 Ground advice in inspected evidence and the actual goal. Explain the mechanism,
 consequence, and smallest coherent alternative. Respect accepted constraints
 and distinguish unfinished work from a real omission. Intervene when it can

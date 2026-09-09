@@ -22,6 +22,16 @@
 ## Unreleased
 
 ### Changed
+- Vendor the official `using-exe-dev` skill unchanged from
+  `boldsoftware/exe.dev` at `9af0789cf2417fc16cab7684cc401967a17060d0`
+  (skill blob `5c3018342ee964c0c5384772e42e30256e10def8`). Keep local
+  workspace, hosting, and recovery policy in `AGENTS.md`, `WATCHDOG.md`,
+  and `foundation`. Prefer approved persistent workspaces and useful
+  private previews without a fleet migration.
+- Replace Antigravity Gemini 3.8 Flash with Codex GPT-6 Astra low as the
+  default and as the third fallback after Grok/Opus. Keep OpenRouter Gemini
+  3.8 Flash high only on designer and vision chains.
+
 - Make install ownership-aware: overlay source-owned config keys, preserve
   undeclared runtime keys, clean-replace selected owned skills/agents, and leave
   foreign packages in place. Add explicit `config` and `agents` components.

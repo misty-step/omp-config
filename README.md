@@ -247,14 +247,33 @@ Invoke `/skill:foundation` with any context or constraints the repository
 cannot supply; select the model separately. Backlog changes and implementation
 remain separately authorized work.
 
-Four vendored packages remain unchanged except by whole-package refresh:
-`frontend-design`, `herdr`, `show-me`, and `wrangler`. Wrangler is refreshed
-from [cloudflare/skills](https://github.com/cloudflare/skills) at
-`d924cd8` with its Apache 2.0 license.
+Five vendored packages remain unchanged except by whole-package refresh:
+`frontend-design`, `herdr`, `show-me`, `wrangler`, and `using-exe-dev`.
+Wrangler is refreshed from [cloudflare/skills](https://github.com/cloudflare/skills)
+at `d924cd8` with its Apache 2.0 license. `using-exe-dev` is the
+[official skill](https://exe.dev/docs/agent-skill.md), vendored unchanged from
+[`boldsoftware/exe.dev` at `9af0789cf2417fc16cab7684cc401967a17060d0`](https://github.com/boldsoftware/exe.dev/blob/9af0789cf2417fc16cab7684cc401967a17060d0/skill/SKILL.md)
+(skill blob `5c3018342ee964c0c5384772e42e30256e10def8`).
 Update them from upstream or remove the whole package; use a distinctly named
 homebrew skill for different behavior. Omarchy's `omarchy` and
 `diagnose-crash` retain their own owners and discovery paths; this installer
 does not replace them. Todoist is owned by Daybook and is not shipped here.
+
+### Persistent workspaces and exe.dev
+
+`using-exe-dev` is advertised automatically for exe.dev and `*.exe.xyz` work.
+Refresh the whole upstream skill package and update this provenance together.
+Local workspace, authorization, hosting, and recovery policy lives in
+`global/AGENTS.md`. `foundation` examines the practical transition and
+`WATCHDOG.md` challenges missed ownership or recovery risks. No extra SYSTEM
+prompt, scheduler, or automatic migration is installed.
+
+Before first SSH access, verify the
+[published host key](https://exe.dev/docs/faq/host-key.md). Read current
+[origin routing](https://exe.dev/docs/cnames.md),
+[VM authentication](https://exe.dev/docs/https-tokens-for-vms.md), and
+[integration](https://exe.dev/docs/integrations.md) contracts for the selected
+deployment rather than assuming Cloudflare proxying or credential isolation.
 
 ### Repository-local Parlor
 
@@ -283,10 +302,16 @@ the agent does not install its own loop.
 
 ## Interactive and recurring work
 
-The fast default model and native model roles/fallbacks remain in `config.yml`.
-Use `omp` for the default or `omp --model @slow` for a deliberate Astra session.
+The default model and native model roles/fallbacks remain in `config.yml`.
+Use `omp` for GPT-6 Astra low or `omp --model @slow` for GPT-6 Astra max.
 Exa remains the configured web-search provider. Approval mode and title-model
 names are unchanged.
+
+Use model IDs from `omp models openai-codex`; the unavailable `gpt-5.6-astra`
+identifier is absent from the current catalog. An unresolved default can trigger
+discovery and selection of another available provider. After changing roles, run
+`OMP_INSTALL_COMPONENTS=config ./install` and start a fresh session; existing
+sessions retain their selected model.
 
 Security scanning, release automation, and recurring repository work belong to
 separately configured systems with their own triggers, scope, credentials, and

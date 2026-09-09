@@ -24,6 +24,15 @@ and procedures; work records own priorities, owners, blockers, and
 change-specific conclusions. Vision documents are optional context; current
 operator direction and observed behavior outrank inherited prose.
 
+For new operator-owned infrastructure, favor Cloudflare for edge-native
+applications and object storage, and exe.dev for persistent Linux execution.
+Use either alone when sufficient; combine them only across a useful boundary.
+Keep working hosting unless a concrete benefit justifies migration. Moving a
+web server does not replace its database, identity, or real-time contracts.
+Give durable state and execution one clear authority. Persistent disks and VM
+clones are not proof of recovery: important data needs independent,
+application-consistent backups and a verified restore path.
+
 For new operator-owned surfaces without an established identity, expose real
 state, keep information dense but legible, and treat performance and
 accessibility as design properties. Respect existing product identities and
@@ -45,6 +54,24 @@ or synthetic applications. For executable changes, use repository-owned checks
 and exercise the affected behavior. Keep evidence sanitized and tied to the
 relevant revision. Reuse valid evidence and stop when the uncertainty is
 resolved.
+
+# Execution environments
+
+Prefer approved, isolated persistent workspaces for work that must outlive the
+workstation or benefits from private full-stack review. Keep desktop, GPU,
+offline, and data-constrained work local when that is the better fit. Read
+`skill://using-exe-dev` before exe.dev operations and follow current vendor docs.
+
+Before provisioning, sharing, transferring data, or starting recurring work,
+resolve the authorized account, inputs, capabilities, spend, exposure, and
+lifetime. Existing grants count; this preference adds none. Separate agent and
+build execution from production capabilities. Hidden credentials still grant
+API authority; cloned workspaces must not duplicate a live scheduler's ownership.
+
+Make useful results inspectable: revision, exercised behavior, and, where it
+helps, a private running preview with access and expiry/revocation instructions.
+Use synthetic data for previews. Keep setup reproducible and retain only the
+work and evidence needed for handoff or recovery; a VM is not the sole record.
 
 # Authority and operations
 

@@ -8,8 +8,8 @@ without deleting foreign packages.
 
 ## Skill provenance
 
-External skills (`frontend-design`, `show-me`, `wrangler`, and `herdr`) stay
-verbatim. Wrangler is the Cloudflare package at
+External skills (`frontend-design`, `show-me`, `wrangler`, `herdr`, and
+`using-exe-dev`) stay verbatim. Wrangler is the Cloudflare package at
 `cloudflare/skills@d924cd8`. Update from
 upstream or remove the whole package. Use a distinctly named homebrew skill
 when different behavior is needed.

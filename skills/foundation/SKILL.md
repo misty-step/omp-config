@@ -54,14 +54,22 @@ is sufficient justification.
 Sunk effort is not a reason to preserve a bad design. Migration effort,
 data safety, compatibility, and operational risk are real costs.
 
+Separate a change of host from a change of database, identity, real-time, or
+job-execution contract. Compare local, edge-native, and persistent Linux
+execution where relevant; a hybrid must remove more work than its boundary adds.
+Inspect current deployment evidence before treating old hosting declarations
+as runtime authority or a separate local implementation as a completed cutover.
+
 ## Include the ability to change and operate it
 
 Assess the foundations beyond source structure:
 
 - Can a developer run the meaningful application end to end locally and
   in an isolated development environment, with realistic data and clear
-  external-service boundaries? Do containers or other tooling actually
-  make that reproducible, inspectable, and easy to reset?
+  external-service boundaries? Can an agent leave a private, synthetic-data
+  preview that another device can inspect, then rebuild or safely retire that
+  workspace? Do containers or other tools make this easier rather than add
+  another execution interface to maintain?
 - Can important user journeys be exercised and inspected, rather than
   inferred from passing unit tests? Are tests and linters catching
   consequential failures and precise recurring invariants?
