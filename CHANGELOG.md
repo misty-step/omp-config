@@ -1,3 +1,10 @@
+## [0.0.32](https://github.com/misty-step/omp-config/compare/v0.0.31...v0.0.32) (2026-09-09)
+
+
+### Features
+
+* **harness:** vendor exe.dev skill and Astra default (MIS-40) ([fa8f7a4](https://github.com/misty-step/omp-config/commit/fa8f7a468ad310b9fe199866db1bdad3134e0569))
+
 ## [0.0.31](https://github.com/misty-step/omp-config/compare/v0.0.30...v0.0.31) (2026-09-07)
 
 
