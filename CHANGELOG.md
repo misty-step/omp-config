@@ -38,6 +38,8 @@
 - Replace Antigravity Gemini 3.8 Flash with Codex GPT-6 Astra low as the
   default and as the third fallback after Grok/Opus. Keep OpenRouter Gemini
   3.8 Flash high only on designer and vision chains.
+- Restore the hostname status-line segment dropped during the Astra replay.
+
 
 - Make install ownership-aware: overlay source-owned config keys, preserve
   undeclared runtime keys, clean-replace selected owned skills/agents, and leave
