@@ -1,3 +1,10 @@
+## [0.0.35](https://github.com/misty-step/omp-config/compare/v0.0.34...v0.0.35) (2026-09-10)
+
+
+### Features
+
+* **config:** prefer Flash default and consolidate fallback chains ([bfeaa19](https://github.com/misty-step/omp-config/commit/bfeaa1980bb71d3ed3777bccfa4e0a353b512c47))
+
 ## [0.0.34](https://github.com/misty-step/omp-config/compare/v0.0.33...v0.0.34) (2026-09-10)
 
 
