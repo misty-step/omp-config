@@ -399,16 +399,18 @@ default-and-role policy, not a prompt classifier or automatic mid-session switch
 | Fresh `omp`, `@default` | `google-antigravity/gemini-3.8-flash:high` |
 | Ordinary `task` workers, `@task` | `google-antigravity/gemini-3.8-flash:high` |
 | `@smol`, `@tiny`, `@commit`; bundled `scout` and `sonic` | `google-antigravity/gemini-3.8-flash:high` |
-| `@slow`, `@plan`; nested `executive` agents | `openai-codex/gpt-6-astra:max` |
+| `@slow`, `@plan`; nested `executive` agents | `openai-codex/gpt-6-astra:high` |
+| `@extreme` (rare unconstrained reasoning) | `openai-codex/gpt-6-astra:max` |
 | `@advisor`, `reviewer` | `openai-codex/gpt-6-astra:high` |
-| `security-reviewer` | `openai-codex/gpt-6-astra:max` |
-| `@designer` | `openai-codex/gpt-6-astra:max` |
+| `security-reviewer` | `openai-codex/gpt-6-astra:high` |
+| `@designer` | `openai-codex/gpt-6-astra:high` |
 | `@vision` | `google-antigravity/gemini-3.8-flash:high` |
 
 Keep Astra for ambiguous architecture, difficult debugging, security review,
-and high-consequence decisions. Designer uses Astra max for design judgment,
-while vision uses Flash high for visual inspection; a configured role does not
-create an agent. Native OMP
+and high-consequence decisions. `@slow` and `@plan` default to `:high`, while
+`@extreme` is reserved for `:max` reasoning in rare cases. Designer uses Astra
+high for design judgment, while vision uses Flash high for visual inspection;
+a configured role does not create an agent. Native OMP
 bundles `task`, `scout`, `sonic`, `reviewer`, and `security-reviewer`, not
 `designer`. This repo supplies `executive`, whose `@plan` selection is independent
 of ordinary `@task`. Main still uses the session model even when the executive
@@ -418,7 +420,8 @@ For a new session:
 
 ```sh
 omp                         # ordinary work: Flash high
-omp --model @slow           # heavy reasoning: Astra max
+omp --model @slow           # heavy reasoning: Astra high
+omp --model @extreme        # rare unconstrained reasoning: Astra max
 omp --model @smol           # explicitly choose Flash high
 ```
 
@@ -440,7 +443,7 @@ change the task mapping in that case, rather than using a reviewer/executive as
 a differently priced implementation worker. Do not add delegation just to save
 tokens.
 
-All 12 retry chains keep their existing non-Google recovery entries in order
+All 13 retry chains keep their existing non-Google recovery entries in order
 and end with exactly one `openrouter/deepseek/deepseek-v4.1-flash:max`. Astra-backed
 chains additionally try Flash high after Grok/Opus and before Astra low;
 Flash-primary chains do not repeat their primary. Fallbacks recover provider

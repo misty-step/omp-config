@@ -1,12 +1,13 @@
 modelRoles:
   default: google-antigravity/gemini-3.8-flash:high
-  slow: openai-codex/gpt-6-astra:max
-  plan: openai-codex/gpt-6-astra:max
+  slow: openai-codex/gpt-6-astra:high
+  extreme: openai-codex/gpt-6-astra:max
+  plan: openai-codex/gpt-6-astra:high
   advisor: openai-codex/gpt-6-astra:high
   task: google-antigravity/gemini-3.8-flash:high
-  designer: openai-codex/gpt-6-astra:max
+  designer: openai-codex/gpt-6-astra:high
   reviewer: openai-codex/gpt-6-astra:high
-  security-reviewer: openai-codex/gpt-6-astra:max
+  security-reviewer: openai-codex/gpt-6-astra:high
   vision: google-antigravity/gemini-3.8-flash:high
   smol: google-antigravity/gemini-3.8-flash:high
   tiny: google-antigravity/gemini-3.8-flash:high
@@ -79,6 +80,12 @@ retry:
       - anthropic/claude-opus-5:max
       - openrouter/deepseek/deepseek-v4.1-flash:max
     slow:
+      - xai-oauth/grok-4.6:xhigh
+      - anthropic/claude-opus-5:max
+      - google-antigravity/gemini-3.8-flash:high
+      - openai-codex/gpt-6-astra:low
+      - openrouter/deepseek/deepseek-v4.1-flash:max
+    extreme:
       - xai-oauth/grok-4.6:xhigh
       - anthropic/claude-opus-5:max
       - google-antigravity/gemini-3.8-flash:high
