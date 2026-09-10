@@ -20,7 +20,7 @@ canon. Local repository conventions and explicit requests outrank it.
 | `mcp.json` | Global MCP inventory; Linear is deliberately absent |
 | `workspace-mcp.json`, `bin/omp-install-scopes.ts` | Linear directory scopes, native project-local imports, owned skill retirement |
 | `global/AGENTS.md` | Collaboration, verification, Linear/Habitat routing, privilege boundaries |
-| `agents/executive.md` | Recursive scope-owning subagents through `@task` |
+| `agents/executive.md` | Recursive scope-owning subagents through Astra-backed `@plan` |
 | `global/WATCHDOG.md`, `global/WATCHDOG.yml` | One read-only Steward advisor |
 | `themes/` | TUI themes (`tokyonight`, `everforest`, `everforest-light`) |
 | `skills/` | Owned skill packages, clean-replaced when selected |
@@ -388,16 +388,84 @@ after an extension-load failure, so installation alone does not prove enforcemen
 
 ## Interactive and recurring work
 
-The default model and native model roles/fallbacks remain in `config.yml`.
-Use `omp` for GPT-6 Astra low or `omp --model @slow` for GPT-6 Astra max.
-Exa remains the configured web-search provider. Approval mode and title-model
-names are unchanged.
+### Model routing
 
-Use model IDs from `omp models openai-codex`; the unavailable `gpt-5.6-astra`
-identifier is absent from the current catalog. An unresolved default can trigger
-discovery and selection of another available provider. After changing roles, run
-`OMP_INSTALL_COMPONENTS=config ./install` and start a fresh session; existing
-sessions retain their selected model.
+Use Flash for ordinary work and Astra when deeper reasoning earns its cost.
+The native roles and retry fallback chains live in `config.yml`; this is a
+default-and-role policy, not a prompt classifier or automatic mid-session switch.
+
+| Entry point or role | Primary selection |
+| --- | --- |
+| Fresh `omp`, `@default` | `google-antigravity/gemini-3.8-flash:high` |
+| Ordinary `task` workers, `@task` | `google-antigravity/gemini-3.8-flash:high` |
+| `@smol`, `@tiny`, `@commit`; bundled `scout` and `sonic` | `google-antigravity/gemini-3.8-flash:high` |
+| `@slow`, `@plan`; nested `executive` agents | `openai-codex/gpt-6-astra:max` |
+| `@advisor`, `reviewer` | `openai-codex/gpt-6-astra:high` |
+| `security-reviewer` | `openai-codex/gpt-6-astra:max` |
+| `@designer` | `openai-codex/gpt-6-astra:max` |
+| `@vision` | `google-antigravity/gemini-3.8-flash:high` |
+
+Keep Astra for ambiguous architecture, difficult debugging, security review,
+and high-consequence decisions. Designer uses Astra max for design judgment,
+while vision uses Flash high for visual inspection; a configured role does not
+create an agent. Native OMP
+bundles `task`, `scout`, `sonic`, `reviewer`, and `security-reviewer`, not
+`designer`. This repo supplies `executive`, whose `@plan` selection is independent
+of ordinary `@task`. Main still uses the session model even when the executive
+extension makes it a scope owner.
+
+For a new session:
+
+```sh
+omp                         # ordinary work: Flash high
+omp --model @slow           # heavy reasoning: Astra max
+omp --model @smol           # explicitly choose Flash high
+```
+
+An already-open or resumed session retains its selected model; installing a
+new default does not switch it. Inside OMP, `Ctrl+P` cycles the configured
+`smol`, `default`, and `slow` roles. `Alt+P` opens the temporary session-model
+picker; select the concrete Flash or Astra model without rewriting the default.
+`/model` (or `Alt+M`) opens model/role configuration instead. These are the native
+default keybindings; local bindings can override them. Explicit CLI selections,
+project config, and one-run `--config` overlays can override the global default.
+
+Task dispatch selects an **agent**, not a per-item model. Native precedence is
+`task.agentModelOverrides` → agent frontmatter → parent/default fallback.
+Explicit `scout`/`sonic` overrides use `@smol`; its `:high` suffix takes precedence
+over their bundled `medium` thinking defaults. New task/eval dispatches reload
+persisted routing settings, but changing Main's model alone does not remap
+workers. Keep workers on Flash unless their own reasoning needs Astra; deliberately
+change the task mapping in that case, rather than using a reviewer/executive as
+a differently priced implementation worker. Do not add delegation just to save
+tokens.
+
+All 12 retry chains keep their existing non-Google recovery entries in order
+and end with exactly one `openrouter/deepseek/deepseek-v4.1-flash:max`. Astra-backed
+chains additionally try Flash high after Grok/Opus and before Astra low;
+Flash-primary chains do not repeat their primary. Fallbacks recover provider
+failures, not difficult prompts, and still require available credentials.
+Exa search, approval mode, and the local title-model setting are unchanged.
+
+Use `omp models find google-antigravity/gemini-3.8-flash --json` to inspect the
+exact catalog entry and supported thinking levels. After routing changes, deploy
+the changed owned components and inspect the effective settings:
+
+```sh
+OMP_INSTALL_COMPONENTS="config agents guidance" ./install
+omp config get modelRoles --json
+omp config get task.agentModelOverrides --json
+omp config get retry.fallbackChains --json
+```
+
+The installer does not touch auth stores. Catalog/config resolution and
+fresh-session loading need no model turn; they do not establish provider
+reliability or relative quality on real work.
+
+Store concrete selectors in each `modelRoles` value. In installed OMP 18.1.16,
+the chained value `plan: "@slow"` failed native resolution and fell through to
+Grok; direct values keep `@plan`, `@tiny`, and `@commit` invocation aliases
+reliable without depending on nested role expansion.
 
 Security scanning, release automation, and recurring repository work belong to
 separately configured systems with their own triggers, scope, credentials, and

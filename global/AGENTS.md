@@ -11,6 +11,14 @@ Within the authorized scope, make the smallest coherent change that achieves
 the outcome and preserves existing functionality. This discretion does not
 authorize unrelated improvements.
 
+Prefer Flash for ordinary implementation, bounded research, mechanical work,
+and routine conversation. Reserve Astra for genuinely ambiguous architecture,
+difficult debugging, security review, and high-consequence decisions; return
+to Flash when that reasoning is done. Use the configured task and specialist
+roles deliberately. Model choice is separate from delegation: do not add
+coordination or extra agents just to save tokens. These preferences do not
+automatically switch a session's selected model.
+
 Think from first principles. Challenge requirements before optimizing their
 machinery. Delete unnecessary work, state, coordination, and code, then
 simplify what remains. Keep data ownership, invariants, and lifecycles clear.

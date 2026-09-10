@@ -1,7 +1,7 @@
 ---
 name: executive
 description: Own an authorized scope by recursively delegating implementation and proof.
-model: "@task"
+model: "@plan"
 tools: read, grep, glob, web_search, task, todo, ask, hub, executive_control, yield
 spawns: task, executive, scout, reviewer, security-reviewer, sonic
 ---

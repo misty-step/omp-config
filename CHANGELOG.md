@@ -58,6 +58,18 @@
   and provide an explicit launch-time hands-on opt-out.
 
 ### Changed
+- Prefer Antigravity Gemini 3.8 Flash high for fresh sessions, ordinary task
+  workers, smol/tiny/commit/vision roles, and explicit scout/sonic routing. Retain
+  Astra for slow/plan/advisor/review and design judgment (`@designer` max); pin
+  nested executives to `@plan`. Document manual selection, live-session limits,
+  and native agent precedence without adding a classifier or automatic switching.
+- Flatten plan/tiny/commit role values to concrete selectors: installed OMP
+  18.1.16 failed to resolve `plan: "@slow"` and selected a fallback instead.
+  Keep `@plan`, `@tiny`, and `@commit` as native invocation aliases.
+- Consolidate all 12 OpenRouter fallback tails to DeepSeek V4.1 Flash max, with
+  one entry per chain. Preserve the order and reasoning effort of every
+  non-Google fallback; add Flash high to Astra-backed recovery chains without
+  repeating Flash in its own primary chains.
 - Add selective `executive` deployment and recursion depth 3 without overlaying
   unrelated pending configuration. Use native YAML serialization to preserve
   live string values that resemble numbers.
@@ -74,9 +86,6 @@
   workspace, hosting, and recovery policy in `AGENTS.md`, `WATCHDOG.md`,
   and `foundation`. Prefer approved persistent workspaces and useful
   private previews without a fleet migration.
-- Replace Antigravity Gemini 3.8 Flash with Codex GPT-6 Astra low as the
-  default and as the third fallback after Grok/Opus. Keep OpenRouter Gemini
-  3.8 Flash high only on designer and vision chains.
 - Remove the hostname status-line segment as requested.
 
 
@@ -122,7 +131,7 @@
   review, delivery, release, routing, and other workflow entry points, plus the
   vendored agent-writing package.
 - Replace the separate design critic and executive skill with a native
-  `executive` agent using `@task` for operator-directed sustained work.
+  `executive` agent using `@plan` for operator-directed sustained work.
 - Keep the fast default model, native role assignments and fallback chains,
   and Exa search; remove advisor catch-up waits while retaining the read-only
   Steward.
