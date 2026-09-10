@@ -30,7 +30,9 @@ of them, but do not silently discard real commitments.
 Assess whether the backlog advances the right outcome. Identify work
 that should disappear, be reframed, or wait, as well as missing work
 that genuinely prevents progress. Missing product evidence is an
-uncertainty to resolve, not permission to invent user needs.
+uncertainty to resolve, not permission to invent user needs. For a live
+product, that evidence includes whether promised journeys actually happen,
+not only whether the process is healthy.
 
 ## Find the simplest complete system
 
@@ -86,8 +88,14 @@ Assess the foundations beyond source structure:
   Are builds, artifacts, environments, deployment, and recovery
   reproducible and appropriate to the project's stakes?
 - Can an operator tell whether users are being served, diagnose failure,
-  and recover? Do logs, metrics, traces, monitoring, and alerts support
-  those decisions without unnecessary machinery or noise?
+  and recover? Do logs, metrics, traces, error reporting, uptime checks,
+  and alerts support those decisions without unnecessary machinery or noise?
+- Can we tell whether the product's promised journeys actually happen?
+  Error reporting and uptime do not answer that. For session or party games,
+  that usually means rooms form, play starts, and sessions complete. Prefer
+  first-party events or existing system records over a second platform.
+  Keep payloads free of player content and durable identifiers unless the
+  product requires them. A private or local-only tool may need none of this.
 - Do documentation and backlog preserve current intent, ownership,
   constraints, and consequential decisions without competing sources
   of truth?

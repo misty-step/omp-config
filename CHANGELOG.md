@@ -45,6 +45,8 @@
   maintain affected verification knowledge with ordinary executable changes.
   Keep authoring, read-only assessment, and separately authorized recurring
   execution distinct; do not start a repository rollout or provision services.
+- Ask foundation assessments to separate failure/uptime observability from
+  privacy-safe evidence that promised user journeys actually happen.
 
 - Vendor the official `using-exe-dev` skill unchanged from
   `boldsoftware/exe.dev` at `9af0789cf2417fc16cab7684cc401967a17060d0`
