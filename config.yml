@@ -23,7 +23,6 @@ statusLine:
   compactThinkingLevel: true
   showHookStatus: false
   leftSegments:
-    - hostname
     - model
     - mode
     - git
