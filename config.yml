@@ -1,17 +1,17 @@
 modelRoles:
-  default: google-antigravity/gemini-3.8-flash:high
+  default: openai-codex/gpt-6-astra:high
   slow: openai-codex/gpt-6-astra:high
   extreme: openai-codex/gpt-6-astra:max
   plan: openai-codex/gpt-6-astra:high
   advisor: openai-codex/gpt-6-astra:high
-  task: google-antigravity/gemini-3.8-flash:high
-  designer: openai-codex/gpt-6-astra:high
+  task: openai-codex/gpt-6-astra:high
   reviewer: openai-codex/gpt-6-astra:high
   security-reviewer: openai-codex/gpt-6-astra:high
   vision: google-antigravity/gemini-3.8-flash:high
   smol: google-antigravity/gemini-3.8-flash:high
   tiny: google-antigravity/gemini-3.8-flash:high
   commit: google-antigravity/gemini-3.8-flash:high
+cycleOrder: [smol, default, extreme]
 symbolPreset: nerd
 theme:
   dark: tokyonight
@@ -75,40 +75,6 @@ providers:
 retry:
   fallbackChains:
     default:
-      - openai-codex/gpt-6-astra:high
-      - xai-oauth/grok-4.6:xhigh
-      - anthropic/claude-opus-5:max
-      - openrouter/deepseek/deepseek-v4.1-flash:max
-    slow:
-      - xai-oauth/grok-4.6:xhigh
-      - anthropic/claude-opus-5:max
-      - google-antigravity/gemini-3.8-flash:high
-      - openai-codex/gpt-6-astra:low
-      - openrouter/deepseek/deepseek-v4.1-flash:max
-    extreme:
-      - xai-oauth/grok-4.6:xhigh
-      - anthropic/claude-opus-5:max
-      - google-antigravity/gemini-3.8-flash:high
-      - openai-codex/gpt-6-astra:low
-      - openrouter/deepseek/deepseek-v4.1-flash:max
-    plan:
-      - xai-oauth/grok-4.6:xhigh
-      - anthropic/claude-opus-5:max
-      - google-antigravity/gemini-3.8-flash:high
-      - openai-codex/gpt-6-astra:low
-      - openrouter/deepseek/deepseek-v4.1-flash:max
-    advisor:
-      - xai-oauth/grok-4.6:xhigh
-      - anthropic/claude-opus-5:max
-      - google-antigravity/gemini-3.8-flash:high
-      - openai-codex/gpt-6-astra:low
-      - openrouter/deepseek/deepseek-v4.1-flash:max
-    task:
-      - xai-oauth/grok-4.6:xhigh
-      - anthropic/claude-opus-5:max
-      - openai-codex/gpt-6-astra:low
-      - openrouter/deepseek/deepseek-v4.1-flash:max
-    designer:
       - xai-oauth/grok-4.6:xhigh
       - anthropic/claude-opus-5:max
       - google-antigravity/gemini-3.8-flash:high
@@ -117,18 +83,6 @@ retry:
     vision:
       - xai-oauth/grok-4.6:xhigh
       - anthropic/claude-opus-5:max
-      - openai-codex/gpt-6-astra:low
-      - openrouter/deepseek/deepseek-v4.1-flash:max
-    reviewer:
-      - xai-oauth/grok-4.6:xhigh
-      - anthropic/claude-opus-5:max
-      - google-antigravity/gemini-3.8-flash:high
-      - openai-codex/gpt-6-astra:low
-      - openrouter/deepseek/deepseek-v4.1-flash:max
-    security-reviewer:
-      - xai-oauth/grok-4.6:xhigh
-      - anthropic/claude-opus-5:max
-      - google-antigravity/gemini-3.8-flash:high
       - openai-codex/gpt-6-astra:low
       - openrouter/deepseek/deepseek-v4.1-flash:max
     smol:
@@ -158,7 +112,6 @@ task:
     task: "@task"
     scout: "@smol"
     sonic: "@smol"
-    designer: "@designer"
     reviewer: "@reviewer"
     security-reviewer: "@security-reviewer"
 isolation:

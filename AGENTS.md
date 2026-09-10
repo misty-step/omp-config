@@ -2,9 +2,10 @@
 
 Edit harness sources here. Run `./install` to deploy owned components to
 `$(omp config path)`; keep live deployed files out of manual edits. The
-installer overlays source-owned config keys, merges matching MCP
-authentication, and clean-replaces selected owned skill and agent packages
-without deleting foreign packages.
+installer overlays source-owned config keys and removes retired owned keys
+without deleting foreign config entries, merges matching MCP authentication,
+and clean-replaces selected owned skill and agent packages without deleting
+foreign packages.
 
 ## Skill provenance
 

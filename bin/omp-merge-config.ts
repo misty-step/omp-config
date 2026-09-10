@@ -64,6 +64,39 @@ function overlay(source: Yaml, live: Yaml): Yaml {
 	return source;
 }
 
+function pruneRetiredKeys(source: Yaml, merged: Yaml): void {
+	// Retire only these owned leaves; other live-only config remains foreign.
+	const paths = [
+		["modelRoles", "designer"],
+		["task", "agentModelOverrides", "designer"],
+		["retry", "fallbackChains", "slow"],
+		["retry", "fallbackChains", "extreme"],
+		["retry", "fallbackChains", "plan"],
+		["retry", "fallbackChains", "advisor"],
+		["retry", "fallbackChains", "task"],
+		["retry", "fallbackChains", "designer"],
+		["retry", "fallbackChains", "reviewer"],
+		["retry", "fallbackChains", "security-reviewer"],
+	];
+	for (const path of paths) {
+		let sourceParent: Yaml | undefined = source;
+		let mergedParent: Yaml | undefined = merged;
+		for (let index = 0; index < path.length - 1; index++) {
+			const key = path[index];
+			sourceParent = sourceParent && typeof sourceParent === "object" && !Array.isArray(sourceParent)
+				? sourceParent[key] : undefined;
+			mergedParent = mergedParent && typeof mergedParent === "object" && !Array.isArray(mergedParent)
+				? mergedParent[key] : undefined;
+		}
+		const leaf = path[path.length - 1];
+		if (sourceParent && typeof sourceParent === "object" && !Array.isArray(sourceParent) &&
+			Object.hasOwn(sourceParent, leaf)) continue;
+		if (mergedParent && typeof mergedParent === "object" && !Array.isArray(mergedParent)) {
+			delete mergedParent[leaf];
+		}
+	}
+}
+
 
 const sourceText = await readFile(sourcePath, "utf8");
 if (!sourceText.trim()) throw new Error(`Missing or empty source: ${sourcePath}`);
@@ -92,9 +125,14 @@ if (values.key && live && Object.hasOwn(live, "task")) {
 if (values.check) process.exit(0);
 
 await mkdir(dirname(destPath), { recursive: true, mode: 0o700 });
-const body = live === null && !values.key
-	? sourceText.endsWith("\n") ? sourceText : `${sourceText}\n`
-	: `${Bun.YAML.stringify(overlay(selected, live ?? {}))}\n`;
+let body: string;
+if (live === null && !values.key) {
+	body = sourceText.endsWith("\n") ? sourceText : `${sourceText}\n`;
+} else {
+	const merged = overlay(selected, live ?? {});
+	if (!values.key) pruneRetiredKeys(source, merged);
+	body = `${Bun.YAML.stringify(merged)}\n`;
+}
 const temporary = `${destPath}.${process.pid}.tmp`;
 try {
 	await writeFile(temporary, body, { mode: 0o600, flag: "wx" });
