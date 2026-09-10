@@ -1,3 +1,10 @@
+## [0.0.36](https://github.com/misty-step/omp-config/compare/v0.0.35...v0.0.36) (2026-09-10)
+
+
+### Features
+
+* **config:** default Astra roles to high and introduce extreme alias ([6376169](https://github.com/misty-step/omp-config/commit/6376169aaf8d7fee74d77209f01eecff0405d9bf))
+
 ## [0.0.35](https://github.com/misty-step/omp-config/compare/v0.0.34...v0.0.35) (2026-09-10)
 
 
