@@ -20,12 +20,13 @@ canon. Local repository conventions and explicit requests outrank it.
 | `mcp.json` | Global MCP inventory; Linear is deliberately absent |
 | `workspace-mcp.json`, `bin/omp-install-scopes.ts` | Linear directory scopes, native project-local imports, owned skill retirement |
 | `global/AGENTS.md` | Collaboration, verification, Linear/Habitat routing, privilege boundaries |
-| `agents/executive.md` | Caller-bounded sustained execution through `@task` |
+| `agents/executive.md` | Recursive scope-owning subagents through `@task` |
 | `global/WATCHDOG.md`, `global/WATCHDOG.yml` | One read-only Steward advisor |
 | `themes/` | TUI themes (`tokyonight`, `everforest`, `everforest-light`) |
 | `skills/` | Owned skill packages, clean-replaced when selected |
 | `.githooks/pre-push` | Secret scanners only; installed into this repo's git dir by `./install` |
 | `extensions/loc/` | Session-resident LOC status and commands |
+| `extensions/executive/` | Main/executive role boundary, native admission, briefs, and scoped cancellation |
 
 ## Install
 
@@ -43,12 +44,13 @@ checkout.
 OMP_INSTALL_COMPONENTS=guidance ./install
 OMP_INSTALL_COMPONENTS=config ./install
 OMP_INSTALL_COMPONENTS=agents ./install
+OMP_INSTALL_COMPONENTS=executive ./install
 OMP_INSTALL_COMPONENTS=mcp ./install
 OMP_INSTALL_COMPONENTS="guidance mcp scopes skill:capture" ./install
 ```
 
-Supported components are `guidance`, `config`, `mcp`, `scopes`, `agents`, and
-`skill:<source-directory-name>`. `all` cannot be combined with another
+Supported components are `guidance`, `config`, `mcp`, `scopes`, `agents`,
+`executive`, and `skill:<source-directory-name>`. `all` cannot be combined with another
 component. Empty, unknown, missing-skill, invalid-name, and invalid YAML
 selections fail before any writes. The retired `OMP_INSTALL_GUIDANCE_ONLY`
 variable fails with migration instructions rather than silently triggering a
@@ -63,6 +65,13 @@ runtime consent; it does not copy auth stores. MCP deployment still uses the
 declared server inventory and preserves live `auth`/`oauth` metadata for those
 servers only. OMP's managed OAuth tokens remain in its auth storage, never in
 this repository.
+
+`executive` clean-replaces only `extensions/executive`, installs
+`agents/executive.md`, and merges the canonical `task.maxRecursionDepth` leaf.
+It preserves other live configuration values and does not deploy unrelated
+pending guidance, model, MCP, or skill changes. Configuration preservation is
+semantic, not preservation of YAML comments or formatting. Package preflight
+checks syntax and local imports; native loading must still be confirmed.
 
 `scopes` installs Linear only under `~/development/misty-step` and
 `~/development/moomooskycow`, retires the owned global `parlor`, `ast-grep`,
@@ -329,12 +338,53 @@ The importer records provenance, leaves identical imports unchanged, and refuses
 to overwrite differing copies. Follow the owner procedure when refreshing;
 do not maintain another skill copy in omp-config or install it globally.
 
-### Sustained execution
+### Recursive executives
 
-Ask OMP to use the `executive` agent for a supplied direction and stopping
-condition when sustained iteration is useful. It uses the existing `@task`
-route. OMP's loop or a separately configured scheduler owns cadence and lifetime;
-the agent does not install its own loop.
+Ordinary `omp` sessions make Main the root executive. Main and nested
+`executive` agents own outcomes, decomposition, decisions, and acceptance;
+they delegate implementation, integration, executable verification, and
+authorized operations to workers. Read-only answers need no worker. A single
+implementation slice can use one worker; another executive is useful only
+when it owns a distinct scope needing further decomposition.
+
+The extension restricts Main/executive tools to inspection and coordination.
+Direct editing, shell/eval execution, arbitrary devices, and process-control
+operations through `hub` are rejected. Workers keep their normal capabilities.
+Native `task` and `hub` remain the execution and lifecycle authority: no
+external loop, Herdr executor, or second scheduler is installed.
+
+The deployed recursion depth is **3**, allowing
+`Main → executive → executive → worker`. Process-local admission permits
+**4 active worker turns and 4 live executive scopes**, excluding Main.
+Waiting executives use no worker permit. Excess admission is rejected rather
+than queued; these limits are not dollar budgets or cross-process limits.
+
+Use the `executive_control` tool to:
+
+- `status`: inspect readiness, the current brief, native descendants, jobs,
+  and cancellation state. Require `ready: true` and `policy: enforced`
+  before relying on the policy.
+- `plan`: save this node's current remaining-scope brief in its native session.
+  Persistent sessions flush the brief even before their first model response.
+- `cancel`: close one owned descendant subtree, or all owned descendants.
+  Require `settled: true`; a turn abort alone is not whole-scope cancellation.
+  Failed cleanup retains admission barriers and supports status inspection
+  and cancellation retry.
+
+Native activity and successful tool calls are not acceptance evidence.
+Executives judge worker deliverables and stop when the authorized outcome is
+met; they do not invent work to keep a loop alive.
+
+Start a fresh session after deployment; running sessions are not retrofitted.
+For an explicit hands-on Main session, opt out before launching:
+
+```sh
+OMP_EXECUTIVE_POLICY=off omp
+```
+
+This is a trusted-extension role boundary, not an OS security sandbox.
+Workers and other trusted extensions retain their authority. OMP can continue
+after an extension-load failure, so installation alone does not prove enforcement.
 
 ## Interactive and recurring work
 
@@ -408,6 +458,24 @@ live agent tree. Compare path hashes before and after each case.
 
 Rollback is component-scoped: restore prior owned bytes and modes. Do not use a
 historical full-directory skills replacement as rollback.
+
+### Focused executive checks
+
+```sh
+sh -n install
+bun test bin/omp-merge-config.test.ts bin/install-executive.test.ts
+```
+
+These checks use temporary destinations and cover selected-leaf preservation,
+foreign packages, and preflight failures. They do not prove native SDK behavior.
+For runtime changes, use one bounded native OMP run in a disposable workspace:
+confirm Main/executive readiness and forbidden-tool rejection, a depth-3 worker
+result, failure/reassignment, and settled ancestor cancellation with the worker
+process actually gone. Save a brief and switch away/back to check restoration.
+Use native lifecycle observations and actual file/process results, not an
+agent's success claim. After deployment, confirm automatic extension discovery
+in a fresh session; this loading check needs no model turn. Prose-only changes
+do not require repeating the runtime exercise.
 
 ## Ecosystem
 

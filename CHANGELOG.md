@@ -39,8 +39,15 @@
 - Add the explicitly invoked `verification-infrastructure` skill to create or
   repair repository-owned runnable verification and its agent-facing knowledge,
   preserving existing interfaces and requiring meaningful runtime evidence.
+- Make Main and recursive executive agents delegation-only scope owners, with
+  native tool enforcement, bounded worker/executive admission, durable briefs,
+  and owned-subtree cancellation. Keep implementation workers fully capable
+  and provide an explicit launch-time hands-on opt-out.
 
 ### Changed
+- Add selective `executive` deployment and recursion depth 3 without overlaying
+  unrelated pending configuration. Use native YAML serialization to preserve
+  live string values that resemble numbers.
 - Make fresh-agent verification capability an early foundation assessment and
   maintain affected verification knowledge with ordinary executable changes.
   Keep authoring, read-only assessment, and separately authorized recurring

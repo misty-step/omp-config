@@ -163,6 +163,7 @@ retry:
       - openrouter/deepseek/deepseek-v4-flash-0731:max
       - openrouter/z-ai/glm-5.3-flash:max
 task:
+  maxRecursionDepth: 3
   showResolvedModelBadge: true
   enableLsp: true
   isolation:
