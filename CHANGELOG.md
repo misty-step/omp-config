@@ -1,3 +1,16 @@
+## [0.0.34](https://github.com/misty-step/omp-config/compare/v0.0.33...v0.0.34) (2026-09-10)
+
+
+### Bug Fixes
+
+* **config:** remove hostname status segment ([53e10e4](https://github.com/misty-step/omp-config/commit/53e10e4b1afc9ae88fd9fac3949718a272483ada))
+
+
+### Features
+
+* **executive:** enforce recursive delegation and scoped deployment ([5c9be02](https://github.com/misty-step/omp-config/commit/5c9be02d239c40187384b30953540672f1ab00dd))
+* **verification:** add repository-owned verification authoring ([6a7430b](https://github.com/misty-step/omp-config/commit/6a7430bd37cd5d024d12ba483f20c46d07bbb316))
+
 ## [0.0.33](https://github.com/misty-step/omp-config/compare/v0.0.32...v0.0.33) (2026-09-09)
 
 
