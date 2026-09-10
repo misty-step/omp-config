@@ -1,3 +1,10 @@
+## [0.0.37](https://github.com/misty-step/omp-config/compare/v0.0.36...v0.0.37) (2026-09-10)
+
+
+### Features
+
+* **config:** restore Astra-first routing and prune retired owned keys ([5343a1b](https://github.com/misty-step/omp-config/commit/5343a1b8e4366df2a073deaec2ee8bd07ad70a74))
+
 ## [0.0.36](https://github.com/misty-step/omp-config/compare/v0.0.35...v0.0.36) (2026-09-10)
 
 
