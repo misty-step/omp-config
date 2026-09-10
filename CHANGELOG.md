@@ -35,7 +35,17 @@
 
 ## Unreleased
 
+### Added
+- Add the explicitly invoked `verification-infrastructure` skill to create or
+  repair repository-owned runnable verification and its agent-facing knowledge,
+  preserving existing interfaces and requiring meaningful runtime evidence.
+
 ### Changed
+- Make fresh-agent verification capability an early foundation assessment and
+  maintain affected verification knowledge with ordinary executable changes.
+  Keep authoring, read-only assessment, and separately authorized recurring
+  execution distinct; do not start a repository rollout or provision services.
+
 - Vendor the official `using-exe-dev` skill unchanged from
   `boldsoftware/exe.dev` at `9af0789cf2417fc16cab7684cc401967a17060d0`
   (skill blob `5c3018342ee964c0c5384772e42e30256e10def8`). Keep local

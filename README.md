@@ -230,11 +230,12 @@ font licenses. The external `frontend-design` and `show-me` packages stay verbat
 
 ## Skills and agents
 
-Two homebrew skills remain, both explicitly requested:
+Three homebrew skills are explicitly invoked:
 
 | Command | Outcome |
 | --- | --- |
 | `/skill:foundation` | Reassess product purpose, backlog, architecture, and development and operational foundations; recommend a coherent direction without making changes |
+| `/skill:verification-infrastructure` | Create or repair repository-owned runnable verification and its discoverable skill, preserving existing interfaces |
 | `/skill:capture` | Save durable findings to project notes, or the required tracker, without duplicating or claiming work |
 
 `disable-model-invocation: true` hides these descriptions from the automatic
@@ -258,6 +259,41 @@ Update them from upstream or remove the whole package; use a distinctly named
 homebrew skill for different behavior. Omarchy's `omarchy` and
 `diagnose-crash` retain their own owners and discovery paths; this installer
 does not replace them. Todoist is owned by Daybook and is not shipped here.
+
+### Repository verification
+
+From the product checkout, invoke:
+
+```text
+/skill:verification-infrastructure
+```
+
+The [authoring skill](skills/verification-infrastructure/SKILL.md) discovers
+existing setup, fixtures, smoke commands, CI, and specialized skills before
+creating anything. It establishes or repairs a capability; it does not require
+a new CLI, a particular browser vendor, or a uniform receipt schema. Keep a
+sufficient existing skill rather than generating a competing one.
+
+`foundation` assesses whether a fresh agent can exercise the core outcome,
+distinguish success from failure, and clean up. It recommends missing capability
+without implementing it. Ordinary executable work uses the product's skill and
+updates affected procedures and checks in the same change. Use the authoring
+skill again for a substantial repair, not for every feature edit.
+
+Repository onboarding and a wider adoption pass need an explicit scope.
+Recurring drift checks belong to an authorized execution system, not a timer
+installed by this skill. Explicit-resource workers need their own skill-loading
+integration; installing a global package does not override disabled discovery.
+This harness change does not provision workspaces, start repository rollouts,
+or activate factory work.
+
+To deploy only this capability and its guidance:
+
+```sh
+OMP_INSTALL_COMPONENTS="guidance skill:foundation skill:verification-infrastructure" ./install
+```
+
+Start a fresh OMP session after installation to discover the new slash command.
 
 ### Persistent workspaces and exe.dev
 

@@ -24,6 +24,11 @@ and procedures; work records own priorities, owners, blockers, and
 change-specific conclusions. Vision documents are optional context; current
 operator direction and observed behavior outrank inherited prose.
 
+For ambiguous work, establish the intended outcome and constraints, separating
+observations from hypotheses. Use small executable experiments to resolve
+consequential design uncertainty; compare alternatives when the result can
+change the decision, not as a ritual.
+
 For new operator-owned infrastructure, favor Cloudflare for edge-native
 applications and object storage, and exe.dev for persistent Linux execution.
 Use either alone when sufficient; combine them only across a useful boundary.
@@ -54,6 +59,19 @@ or synthetic applications. For executable changes, use repository-owned checks
 and exercise the affected behavior. Keep evidence sanitized and tied to the
 relevant revision. Reuse valid evidence and stop when the uncertainty is
 resolved.
+
+Use the repository's verification skill and runnable procedures for executable
+work. Changes to setup, identities, navigation, behavior, or cleanup update the
+affected verification knowledge and checks in the same change. Keep that
+knowledge with the product, and distinguish observed postconditions from an
+agent's self-report or a tool's successful invocation.
+
+When a repository lacks a usable verification capability, identify the smallest
+gap and what remains unverified. Substantial creation or repair belongs to an
+explicitly commissioned `verification-infrastructure` pass; `foundation`
+diagnoses the need without implementing it. Do not manufacture a second
+framework, block unrelated work over a missing skill filename, or call an
+unsupported outcome verified.
 
 # Execution environments
 

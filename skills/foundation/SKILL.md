@@ -62,17 +62,26 @@ as runtime authority or a separate local implementation as a completed cutover.
 
 ## Include the ability to change and operate it
 
+Early in the assessment, identify whether meaningful verification of the core
+outcome is possible. An absent or unreliable path is a foundational constraint
+on development, not a reason to impose identical tooling on every repository.
+Recommend the smallest missing capability; an explicitly commissioned
+`verification-infrastructure` pass can create or repair it. This assessment
+remains read-only.
+
 Assess the foundations beyond source structure:
 
-- Can a developer run the meaningful application end to end locally and
-  in an isolated development environment, with realistic data and clear
-  external-service boundaries? Can an agent leave a private, synthetic-data
-  preview that another device can inspect, then rebuild or safely retire that
-  workspace? Do containers or other tools make this easier rather than add
-  another execution interface to maintain?
-- Can important user journeys be exercised and inspected, rather than
-  inferred from passing unit tests? Are tests and linters catching
-  consequential failures and precise recurring invariants?
+- Can a fresh agent discover and use repository-owned skills and runnable
+  procedures to exercise important user journeys or consumer contracts,
+  distinguish success from plausible failure, and clean up? A skill file,
+  successful tool invocation, or historical receipt is not sufficient proof.
+- Are prerequisites, representative data, isolated identities, and external
+  service boundaries reproducible in an authorized development environment?
+  Can an agent leave a private, synthetic-data preview that another device can
+  inspect, then rebuild or safely retire the workspace? Do containers or other
+  tools make this easier rather than add another interface to maintain?
+- Do tests and linters catch consequential failures and precise recurring
+  invariants, with live exercise where the claimed behavior requires it?
 - Do local development and CI use coherent, repository-owned interfaces?
   Are builds, artifacts, environments, deployment, and recovery
   reproducible and appropriate to the project's stakes?
