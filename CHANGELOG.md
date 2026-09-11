@@ -1,3 +1,10 @@
+## [0.0.38](https://github.com/misty-step/omp-config/compare/v0.0.37...v0.0.38) (2026-09-11)
+
+
+### Features
+
+* **config:** subscription-first fallbacks at catalog-max effort ([523f46d](https://github.com/misty-step/omp-config/commit/523f46dd865a99a9f03406292fa018fc42b4b990))
+
 ## [0.0.37](https://github.com/misty-step/omp-config/compare/v0.0.36...v0.0.37) (2026-09-10)
 
 
