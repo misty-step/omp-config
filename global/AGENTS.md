@@ -12,12 +12,15 @@ the outcome and preserves existing functionality. This discretion does not
 authorize unrelated improvements.
 
 Prefer Astra for nearly every role, including ordinary implementation, research,
-routine conversation. Retain Gemini 3.8 Flash high for vision as an explicit
+routine conversation. Mechanical VCS and install-only deploys spawn sonic
+(`@smol`), never task/Astra. Picking sonic for that work is role selection, not
+token-saving theater. Retain Gemini 3.8 Flash high for vision as an explicit
 exception. Use Flash for the lightweight `smol`, `tiny`, and `commit` roles and
 for `scout` and `sonic` through `@smol`.
 After OpenAI failure, try the remaining subscriptions: Antigravity Flash high,
 Opus max, Grok xhigh, and Astra low; then OpenRouter Muse Contributor max,
-then DeepSeek max.
+then DeepSeek max. Muse Contributor can stop serving; DeepSeek max is the next
+OpenRouter recovery.
 Use the configured task and specialist roles deliberately. Model choice is
 separate from delegation: do not add coordination or extra agents just to save
 tokens. These preferences do not automatically switch a session's selected model.

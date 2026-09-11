@@ -441,7 +441,9 @@ Explicit `scout`/`sonic` overrides use `@smol`; its `:high` suffix takes precede
 over their bundled `medium` thinking defaults. New task/eval dispatches reload
 persisted routing settings, but changing Main's model alone does not remap
 workers. Ordinary workers use Astra high; Flash is reserved for `vision`, `smol`,
-`tiny`, `commit`, and `scout`/`sonic` through `@smol`. Choose agents for their roles, not
+`tiny`, `commit`, and `scout`/`sonic` through `@smol`. Git commit, rebase, push,
+and similar mechanical ship steps must use bundled `sonic` (`@smol`). Omitting
+`agent` selects `@task`/Astra. Choose agents for their roles, not
 as differently priced implementation workers. Do not add delegation just to save
 tokens.
 
@@ -464,10 +466,10 @@ Antigravity, Anthropic, xAI, then Astra low on Codex; Flash-primary chains use
 xAI, Anthropic, then Astra low on Codex. OpenRouter is pay-per-token, so it comes
 after the subscription routes.
 
-Muse Spark 1.3 Contributor is the preferred OpenRouter recovery. It uses the same
-1.3 checkpoint at $0.10/$0.20 per million input/output tokens; the training-data
-trade is accepted. DeepSeek max remains the final recovery. Fugu stays out of
-automatic fallback chains.
+Muse Spark 1.3 Contributor is the preferred OpenRouter hop, but it can stop
+serving. It uses the same 1.3 checkpoint at $0.10/$0.20 per million
+input/output tokens; the training-data trade is accepted. DeepSeek v4.1 Flash
+max is the recovery. Fugu stays out of automatic fallback chains.
 Exa search, approval mode, and the local title-model setting are unchanged.
 
 Use `omp models find openai-codex/gpt-6-astra --json` to inspect the

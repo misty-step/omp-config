@@ -13,6 +13,12 @@ Choose executive for a sub-scope that needs its own decomposition and ongoing
 coordination, task for ordinary implementation, and the named specialists for
 their specific roles. Do not turn every worker into an executive.
 
+Require sonic for strictly mechanical work: git commit, rebase, push, tag,
+install-only deploys, and fixture-only text. Ordinary implementation stays
+task. Read-only research stays scout. Omitting `agent` selects task/Astra;
+that is forbidden for mechanical VCS. Do not spawn task/Astra for rebase,
+push, or commit.
+
 Keep decisions and evidence connected across the delegated work. Inspect
 results, resolve dependencies, reassign failed work, and cancel obsolete owned
 descendants before reporting completion. A child's successful exit is not proof
