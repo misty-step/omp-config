@@ -118,11 +118,11 @@ test("full config retirement removes only absent owned leaves and preserves fore
 		},
 		retry: {
 			fallbackChains: {
-				default: ["xai-oauth/grok-4.6:xhigh", "anthropic/claude-opus-5:max", flash, "openai-codex/gpt-6-astra:low", "openrouter/deepseek/deepseek-v4.1-flash:max"],
-				vision: ["xai-oauth/grok-4.6:xhigh", "anthropic/claude-opus-5:max", "openai-codex/gpt-6-astra:low", "openrouter/deepseek/deepseek-v4.1-flash:max"],
-				smol: ["xai-oauth/grok-4.6:low", "anthropic/claude-sonnet-5:low", "openai-codex/gpt-6-astra:low", "openrouter/deepseek/deepseek-v4.1-flash:max"],
-				tiny: ["xai-oauth/grok-4.6:low", "anthropic/claude-sonnet-5:low", "openai-codex/gpt-6-astra:low", "openrouter/deepseek/deepseek-v4.1-flash:max"],
-				commit: ["xai-oauth/grok-4.6:low", "anthropic/claude-sonnet-5:low", "openai-codex/gpt-6-astra:low", "openrouter/deepseek/deepseek-v4.1-flash:max"],
+				default: [flash, "anthropic/claude-opus-5:max", "xai-oauth/grok-4.6:xhigh", "openai-codex/gpt-6-astra:low", "openrouter/meta/muse-spark-1.3-contributor:max", "openrouter/deepseek/deepseek-v4.1-flash:max"],
+				vision: ["xai-oauth/grok-4.6:xhigh", "anthropic/claude-opus-5:max", "openai-codex/gpt-6-astra:low", "openrouter/meta/muse-spark-1.3-contributor:max", "openrouter/deepseek/deepseek-v4.1-flash:max"],
+				smol: ["xai-oauth/grok-4.6:xhigh", "anthropic/claude-sonnet-5:low", "openai-codex/gpt-6-astra:low", "openrouter/meta/muse-spark-1.3-contributor:max", "openrouter/deepseek/deepseek-v4.1-flash:max"],
+				tiny: ["xai-oauth/grok-4.6:xhigh", "anthropic/claude-sonnet-5:low", "openai-codex/gpt-6-astra:low", "openrouter/meta/muse-spark-1.3-contributor:max", "openrouter/deepseek/deepseek-v4.1-flash:max"],
+				commit: ["xai-oauth/grok-4.6:xhigh", "anthropic/claude-sonnet-5:low", "openai-codex/gpt-6-astra:low", "openrouter/meta/muse-spark-1.3-contributor:max", "openrouter/deepseek/deepseek-v4.1-flash:max"],
 			},
 		},
 		task: {

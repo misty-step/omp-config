@@ -15,6 +15,9 @@ Prefer Astra for nearly every role, including ordinary implementation, research,
 routine conversation. Retain Gemini 3.8 Flash high for vision as an explicit
 exception. Use Flash for the lightweight `smol`, `tiny`, and `commit` roles and
 for `scout` and `sonic` through `@smol`.
+After OpenAI failure, try the remaining subscriptions: Antigravity Flash high,
+Opus max, Grok xhigh, and Astra low; then OpenRouter Muse Contributor max,
+then DeepSeek max.
 Use the configured task and specialist roles deliberately. Model choice is
 separate from delegation: do not add coordination or extra agents just to save
 tokens. These preferences do not automatically switch a session's selected model.

@@ -447,13 +447,27 @@ tokens.
 
 The five explicit retry chains are `default`, `vision`, `smol`, `tiny`, and
 `commit`; each ends with exactly one `openrouter/deepseek/deepseek-v4.1-flash:max`.
-Other Astra roles inherit the `default` chain: Grok xhigh, Opus max, Flash high,
-then Astra low before that final recovery. Vision tries Grok xhigh, Opus max,
-then Astra low before DeepSeek. The `smol`, `tiny`, and `commit` chains each try
-Grok low, Sonnet low, then Astra low before DeepSeek. They remain explicit because
-native fallback inheritance uses `default`, not `smol`. Flash-primary chains do
-not repeat their primary. Fallbacks recover provider failures, not difficult
-prompts, and still require available credentials.
+Gemini, Grok, Muse, and DeepSeek always use catalog-maximum reasoning effort:
+Flash high, Grok xhigh, Muse max, and DeepSeek max.
+Other Astra roles inherit the `default` chain: Antigravity Flash high, Opus max,
+Grok xhigh, Astra low, Muse Spark 1.3 Contributor max, then DeepSeek max.
+Vision tries Grok xhigh, Opus max, Astra low, Muse Contributor max, then
+DeepSeek max. The `smol`, `tiny`, and `commit` chains each try Grok xhigh,
+Sonnet low, Astra low, Muse Contributor max, then DeepSeek max.
+They remain explicit because native fallback inheritance uses `default`,
+not `smol`. Flash-primary chains do not repeat Antigravity Flash.
+
+Fallbacks recover provider failures, with guardrails and usage limits being common
+causes, rather than difficult prompts, and still require available credentials.
+Try the remaining subscriptions before OpenRouter: the default chain uses
+Antigravity, Anthropic, xAI, then Astra low on Codex; Flash-primary chains use
+xAI, Anthropic, then Astra low on Codex. OpenRouter is pay-per-token, so it comes
+after the subscription routes.
+
+Muse Spark 1.3 Contributor is the preferred OpenRouter recovery. It uses the same
+1.3 checkpoint at $0.10/$0.20 per million input/output tokens; the training-data
+trade is accepted. DeepSeek max remains the final recovery. Fugu stays out of
+automatic fallback chains.
 Exa search, approval mode, and the local title-model setting are unchanged.
 
 Use `omp models find openai-codex/gpt-6-astra --json` to inspect the
