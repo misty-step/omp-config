@@ -1,3 +1,6 @@
+> **Moved to [misty-step/harness](https://github.com/misty-step/harness/tree/main/omp-config).**
+> This repository is a read-only historical archive. Clone [harness](https://github.com/misty-step/harness) for current source, setup, issues and releases.
+
 # omp-config
 
 Omp harness configuration for Phaedrus / Misty Step. Source of truth for how
